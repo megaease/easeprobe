@@ -1,0 +1,40 @@
+http:
+  - name: MegaEase Website
+    url: https://megaease.cn
+    method: GET
+    headers:
+      X-head-one: xxxxxx
+      X-head-two: yyyyyy
+      X-head-THREE: zzzzzzX-
+    content_encoding: text/json
+    body: '{ "FirstName": "Mega", "LastName" : "Ease", "UserName" : "megaease", "Email" : "megaease@example.com"}'
+
+    username: username
+    password: password
+
+    #ca: /path/to/file.ca
+    #cert: /path/to/file.crt
+    #key: /path/to/file.key
+
+  - name: CoolShell Website
+    url: https://coolshell.cn
+    method: GET
+
+tcp:
+  - name: SSH service
+    host: ssh.coolshell.cn:22
+    timeout : 10s
+  - name: HTTP service
+    host: megaease.cn:80
+
+
+notify:
+  log:
+    - file : "/tmp/easeprobe.log"
+  slack:
+    - url : "test_url_01"
+    - url : "test_url_02"
+  email:
+    - host : exmail.qq.com:443
+      username : service@megaease.com
+      password : asdfasdf
