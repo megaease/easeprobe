@@ -10,6 +10,7 @@ type NotifyConfig struct {
 	Host string `yaml:"host"`
 	User string `yaml:"username"`
 	Pass string `yaml:"password"`
+	Recv string `yaml:"receivers"`
 }
 
 // Kind return the type of Notify

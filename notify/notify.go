@@ -10,7 +10,7 @@ import (
 //Config is the notify configuration
 type Config struct {
 	Log   []log.NotifyConfig   `yaml:"log"`
-	Email []email.NotifyConfig `yaml:"email"`
+	Email email.NotifyConfig `yaml:"email"`
 	Slack []slack.NotifyConfig `yaml:"slack"`
 }
 
