@@ -120,9 +120,9 @@ func main() {
 	for i := 0; i < len(conf.Notify.Log); i++ {
 		notifies = append(notifies, conf.Notify.Log[i])
 	}
-	
+
 	notifies = append(notifies, conf.Notify.Email)
-	
+
 	for i := 0; i < len(conf.Notify.Slack); i++ {
 		notifies = append(notifies, conf.Notify.Slack[i])
 	}
