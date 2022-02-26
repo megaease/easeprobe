@@ -10,13 +10,13 @@ import (
 //Config is the notify configuration
 type Config struct {
 	Log   []log.NotifyConfig   `yaml:"log"`
-	Email email.NotifyConfig `yaml:"email"`
+	Email email.NotifyConfig   `yaml:"email"`
 	Slack []slack.NotifyConfig `yaml:"slack"`
 }
 
 // Notify is the configuration of the Notify
 type Notify interface {
 	Kind() string
-	Config() error 
+	Config() error
 	Notify(probe.Result)
 }

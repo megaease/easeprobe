@@ -35,7 +35,7 @@ notify:
     - url : "test_url_01"
     - url : "test_url_02"
   email:
-    host : exmail.qq.com:443
-    username : noreply@megaease.com
-    password : asdfasdf
-    receivers: "service@megaease.com;chenhao@megaease.com"
+    server : smtp.exmail.qq.com:465
+    username: noreply@megaease.com
+    password : 644D4u43n
+    to: "service@megaease.com;chenhao@megaease.com"
