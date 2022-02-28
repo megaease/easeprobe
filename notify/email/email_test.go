@@ -11,7 +11,7 @@ func TestSendMail(t *testing.T) {
 		Server: "smtp.exmail.qq.com:465",
 		User:   "noreply@megaease.com",
 		Pass:   "644D4u43n",
-		To:     "service@megaease.com;chenhao@megaease.com",
+		To:     "service@megaease.com;chenhao@megaease.com,haoel@163.com",
 	}
 
 	subject := "Test"
