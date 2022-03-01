@@ -32,10 +32,9 @@ notify:
   log:
     - file : "/tmp/easeprobe.log"
   slack:
-    - url : "test_url_01"
-    - url : "test_url_02"
+    - webhook : "https://hooks.slack.com/services/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"
   email:
-    server : smtp.exmail.qq.com:465
-    username: noreply@megaease.com
-    password : 644D4u43n
-    to: "service@megaease.com;chenhao@megaease.com"
+    - server : smtp.exmail.qq.com:465
+      username: noreply@megaease.com
+      password : 644D4u43n
+      to: "service@megaease.com;chenhao@megaease.com"
