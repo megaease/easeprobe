@@ -88,8 +88,8 @@ func (conf NotifyConfig) SendMail(subject string, message string) error {
 		return err
 	}
 
-	// support "," and ";" 
-	split := func (r rune) bool {
+	// support "," and ";"
+	split := func(r rune) bool {
 		return r == ';' || r == ','
 	}
 	for _, addr := range strings.FieldsFunc(conf.To, split) {

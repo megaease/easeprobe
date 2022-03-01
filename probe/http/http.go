@@ -38,7 +38,8 @@ type HTTP struct {
 	Timeout      time.Duration `yaml:"timeout,omitempty"`
 	TimeInterval time.Duration `yaml:"interval,omitempty"`
 
-	client *http.Client `yaml:"-"`
+	client *http.Client  `yaml:"-"`
+	result *probe.Result `yaml:"-"`
 }
 
 func checkHTTPMethod(m string) bool {
@@ -106,6 +107,12 @@ func (h *HTTP) Config() error {
 		}
 
 	}
+
+	h.result = probe.NewResult()
+	h.result.Name = h.Name
+	h.result.Endpoint = h.URL
+	h.result.PreStatus = probe.StatusInit
+
 	return nil
 }
 
@@ -124,31 +131,28 @@ func (h *HTTP) Probe() probe.Result {
 	}
 
 	now := time.Now()
-	result := probe.Result{
-		Name:          h.Name,
-		Endpoint:      h.URL,
-		StartTime:     now.Unix(),
-		RoundTripTime: probe.ConfigDuration{},
-		Status:        "",
-		Message:       "",
-	}
+	h.result.StartTime = now.UnixMicro()
 
 	resp, err := h.client.Do(req)
-	result.RoundTripTime.Duration = time.Since(now)
+	h.result.RoundTripTime.Duration = time.Since(now)
+
+	status := probe.StatusUp
 	if err != nil {
 		log.Errorf("error making get request: %v", err)
-		result.Status = probe.StatusUnknown.String()
-		return result
+		status = probe.StatusDown
 	}
 
 	if resp.StatusCode >= 500 {
-		result.Status = probe.StatusDown.String()
-	} else {
-		result.Status = probe.StatusUp.String()
+		status = probe.StatusDown
 	}
+
+	if h.result.PreStatus != probe.StatusInit {
+		h.result.PreStatus = h.result.Status
+	}
+	h.result.Status = status
 
 	// Read the response body
 	defer resp.Body.Close()
 
-	return result
+	return *h.result
 }
