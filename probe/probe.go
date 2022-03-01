@@ -101,8 +101,19 @@ func NewResult() *Result {
 	}
 }
 
+// String convert the object to JSON
 func (r *Result) String() string {
 	j, err := json.Marshal(&r)
+	if err != nil {
+		log.Printf("error: %v\n", err)
+		return ""
+	}
+	return string(j)
+}
+
+// StringIndent convert the object to indent JSON
+func (r *Result) StringIndent() string {
+	j, err := json.MarshalIndent(&r, "", "    ")
 	if err != nil {
 		log.Printf("error: %v\n", err)
 		return ""
