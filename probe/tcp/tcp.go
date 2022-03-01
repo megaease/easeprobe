@@ -19,6 +19,8 @@ type TCP struct {
 	//Control Option
 	Timeout      time.Duration `yaml:"timeout,omitempty"`
 	TimeInterval time.Duration `yaml:"interval,omitempty"`
+
+	result *probe.Result `yaml:"-"`
 }
 
 // Kind return the HTTP kind
@@ -42,6 +44,11 @@ func (t *TCP) Config() error {
 		t.TimeInterval = time.Second * 60
 	}
 
+	t.result = probe.NewResult()
+	t.result.Endpoint = t.Host
+	t.result.Name = t.Name
+	t.result.PreStatus = probe.StatusInit
+
 	return nil
 }
 
@@ -49,24 +56,22 @@ func (t *TCP) Config() error {
 func (t *TCP) Probe() probe.Result {
 
 	now := time.Now()
-	result := probe.Result{
-		Name:          t.Name,
-		Endpoint:      t.Host,
-		StartTime:     now.Unix(),
-		RoundTripTime: probe.ConfigDuration{},
-		Status:        "",
-		Message:       "",
-	}
+	t.result.StartTime = now.UnixMilli()
 
 	conn, err := net.DialTimeout("tcp", t.Host, t.Timeout)
-	result.RoundTripTime.Duration = time.Since(now)
+	t.result.RoundTripTime.Duration = time.Since(now)
+	status := probe.StatusUp
 	if err != nil {
 		log.Errorf("error: %v\n", err)
-		result.Status = probe.StatusDown.String()
-		return result
+		status = probe.StatusDown
 	}
 	conn.Close()
-	result.Status = probe.StatusUp.String()
+	status = probe.StatusUp
 
-	return result
+	if t.result.PreStatus != probe.StatusInit {
+		t.result.PreStatus = t.result.Status
+	}
+	t.result.Status = status
+
+	return *t.result
 }

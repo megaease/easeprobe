@@ -49,6 +49,8 @@ func readConf(conf *string) (Conf, error) {
 	return c, err
 }
 
+// 1) all of probers send the result to notify channel
+// 2)
 func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 
 	notifyChan := make(chan probe.Result)
@@ -84,6 +86,10 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 		case <-done:
 			return
 		case result := <-notifyChan:
+			// if the status has no change, no need notify
+			if result.PreStatus == result.Status {
+				continue
+			}
 			for _, n := range notifies {
 				go n.Notify(result)
 			}
