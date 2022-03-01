@@ -19,6 +19,7 @@ const (
 	StatusInit
 )
 
+// String convert the Status to string
 func (s Status) String() string {
 	switch s {
 	case StatusUp:
@@ -33,6 +34,32 @@ func (s Status) String() string {
 	return "unknown"
 }
 
+//Status convert the string to Status
+func (s *Status) Status(status string) Status {
+	switch status {
+	case "up":
+		return StatusUp
+	case "down":
+		return StatusDown
+	case "unknown":
+		return StatusUnknown
+	case "init":
+		return StatusInit
+	}
+	return StatusUnknown
+}
+
+// UnmarshalJSON is Unmarshal the status
+func (s *Status) UnmarshalJSON(b []byte) (err error) {
+	*s = s.Status(string(b))
+	return nil
+}
+
+// MarshalJSON is marshal the status
+func (s *Status) MarshalJSON() (b []byte, err error) {
+	return []byte(fmt.Sprintf(`"%s"`, s.String())), nil
+}
+
 //ConfigDuration is the struct used for custom the time formation
 type ConfigDuration struct {
 	time.Duration
@@ -45,19 +72,20 @@ func (d *ConfigDuration) UnmarshalJSON(b []byte) (err error) {
 }
 
 // MarshalJSON is marshal the time
-func (d ConfigDuration) MarshalJSON() (b []byte, err error) {
-	return []byte(fmt.Sprintf(`"%s"`, d.String())), nil
+func (d *ConfigDuration) MarshalJSON() (b []byte, err error) {
+	return []byte(fmt.Sprintf(`"%s"`, d.Round(time.Millisecond))), nil
 }
 
 // Result is the status of health check
 type Result struct {
-	Name          string         `json:"name,omitempty"`
-	Endpoint      string         `json:"endpoint,omitempty"`
-	StartTime     int64          `json:"timestamp,omitempty"`
-	RoundTripTime ConfigDuration `json:"rtt,omitempty"`
-	Status        Status         `json:"status,omitempty"`
-	PreStatus     Status         `json:"prestatus,omitempty"`
-	Message       string         `json:"message,omitempty"`
+	Name           string         `json:"name"`
+	Endpoint       string         `json:"endpoint"`
+	StartTime      time.Time      `json:"time"`
+	StartTimestamp int64          `json:"timestamp"`
+	RoundTripTime  ConfigDuration `json:"rtt"`
+	Status         Status         `json:"status"`
+	PreStatus      Status         `json:"prestatus"`
+	Message        string         `json:"message"`
 }
 
 // NewResult return a Result object
@@ -65,15 +93,15 @@ func NewResult() *Result {
 	return &Result{
 		Name:          "",
 		Endpoint:      "",
-		StartTime:     0,
+		StartTime:     time.Now(),
 		RoundTripTime: ConfigDuration{0},
-		Status:        0,
+		Status:        StatusInit,
 		PreStatus:     StatusInit,
 		Message:       "",
 	}
 }
 
-func (r Result) String() string {
+func (r *Result) String() string {
 	j, err := json.Marshal(&r)
 	if err != nil {
 		log.Printf("error: %v\n", err)

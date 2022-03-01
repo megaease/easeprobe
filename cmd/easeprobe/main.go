@@ -124,13 +124,16 @@ func main() {
 		probers = append(probers, &conf.TCP[i])
 	}
 
+	// Notification
 	var notifies []notify.Notify
 
 	for i := 0; i < len(conf.Notify.Log); i++ {
 		notifies = append(notifies, conf.Notify.Log[i])
 	}
 
-	notifies = append(notifies, conf.Notify.Email)
+	for i := 0; i < len(conf.Notify.Email); i++ {
+		notifies = append(notifies, conf.Notify.Email[i])
+	}
 
 	for i := 0; i < len(conf.Notify.Slack); i++ {
 		notifies = append(notifies, conf.Notify.Slack[i])

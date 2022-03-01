@@ -32,5 +32,5 @@ func (conf NotifyConfig) Config() error {
 // Notify write the message into the file
 func (conf NotifyConfig) Notify(result probe.Result) {
 	logrus.Infoln("LogFile got the notifcation...")
-	log.Println(result)
+	log.Println(result.String())
 }

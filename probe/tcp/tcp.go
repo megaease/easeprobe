@@ -56,7 +56,8 @@ func (t *TCP) Config() error {
 func (t *TCP) Probe() probe.Result {
 
 	now := time.Now()
-	t.result.StartTime = now.UnixMilli()
+	t.result.StartTime = now
+	t.result.StartTimestamp = now.UnixMilli()
 
 	conn, err := net.DialTimeout("tcp", t.Host, t.Timeout)
 	t.result.RoundTripTime.Duration = time.Since(now)
@@ -66,11 +67,8 @@ func (t *TCP) Probe() probe.Result {
 		status = probe.StatusDown
 	}
 	conn.Close()
-	status = probe.StatusUp
 
-	if t.result.PreStatus != probe.StatusInit {
-		t.result.PreStatus = t.result.Status
-	}
+	t.result.PreStatus = t.result.Status
 	t.result.Status = status
 
 	return *t.result
