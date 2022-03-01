@@ -58,7 +58,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 	probeFn := func(p probe.Prober) {
 		for {
 			res := p.Probe()
-			log.Infof("%s: %s\n", p.Kind(), res)
+			log.Infof("%s: %s\n", p.Kind(), res.String())
 			notifyChan <- res
 			time.Sleep(p.Interval())
 		}
@@ -67,7 +67,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 	for _, p := range probers {
 		err := p.Config()
 		if err != nil {
-			log.Printf("error: %v\n", err)
+			log.Errorf("error: %v\n", err)
 			continue
 		}
 		go probeFn(p)
@@ -76,7 +76,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 	for _, n := range notifies {
 		err := n.Config()
 		if err != nil {
-			log.Printf("error: %v\n", err)
+			log.Errorf("error: %v\n", err)
 			continue
 		}
 	}
@@ -88,8 +88,10 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 		case result := <-notifyChan:
 			// if the status has no change, no need notify
 			if result.PreStatus == result.Status {
+				log.Debugf("Status no change [%s] == [%s]\n", result.PreStatus, result.Status)
 				continue
 			}
+			log.Infof("Status changed [%s] ==> [%s]\n", result.PreStatus, result.Status)
 			for _, n := range notifies {
 				go n.Notify(result)
 			}
@@ -111,6 +113,7 @@ func main() {
 		os.Exit(-1)
 	}
 
+	// Probers
 	var probers []probe.Prober
 
 	for i := 0; i < len(conf.HTTP); i++ {
