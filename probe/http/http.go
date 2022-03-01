@@ -131,7 +131,8 @@ func (h *HTTP) Probe() probe.Result {
 	}
 
 	now := time.Now()
-	h.result.StartTime = now.UnixMicro()
+	h.result.StartTime = now
+	h.result.StartTimestamp = now.UnixMilli()
 
 	resp, err := h.client.Do(req)
 	h.result.RoundTripTime.Duration = time.Since(now)
@@ -146,9 +147,7 @@ func (h *HTTP) Probe() probe.Result {
 		status = probe.StatusDown
 	}
 
-	if h.result.PreStatus != probe.StatusInit {
-		h.result.PreStatus = h.result.Status
-	}
+	h.result.PreStatus = h.result.Status
 	h.result.Status = status
 
 	// Read the response body
