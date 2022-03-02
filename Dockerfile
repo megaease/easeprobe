@@ -1,6 +1,7 @@
-FROM golang:1.17 as builder
+FROM golang:1.17-alpine as builder
 WORKDIR /go/src/github.com/megaease/easeprobe/
-RUN make
+COPY ./ /go/src/github.com/megaease/easeprobe/
+RUN apk --no-cache add make git && make clean && make
 
 FROM alpine:latest
 WORKDIR /opt/

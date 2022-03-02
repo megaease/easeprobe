@@ -4,13 +4,12 @@ Simple, Standalone, health check tools, written in Go.
 
 ## Build
 
-Go 1.17+
+Compiler `Go 1.17+`
 
 Using `make` to make the binary file. the target is under `build/bin` directory
 
 ```
 make
-
 ```
 
 ## Test
