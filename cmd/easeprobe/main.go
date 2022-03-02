@@ -107,6 +107,11 @@ func main() {
 	yamlFile := flag.String("f", "config.yaml", "configuration file")
 	flag.Parse()
 
+	if _, err := os.Stat(*yamlFile); err != nil {
+		log.Fatalf("Configuration file is not found! - %s", *yamlFile)
+		os.Exit(-1)
+	}
+
 	conf, err := readConf(yamlFile)
 	if err != nil {
 		log.Fatal("Fatal: Cannot read the YAML configuration file!")
