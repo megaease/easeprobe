@@ -2,7 +2,6 @@ package slack
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"time"
@@ -30,23 +29,17 @@ func (conf NotifyConfig) Config() error {
 func (conf NotifyConfig) Notify(result probe.Result) {
 	log.Infoln("Slack got the notification...")
 	webhookURL := "https://hooks.slack.com/services/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"
-	err := SendSlackNotification(webhookURL, result.JSONIndent())
+	err := SendSlackNotification(webhookURL, result.SlackBlockJSON())
 	if err != nil {
-		log.Errorln("error %v\n", err)
+		log.Errorf("error %v\n", err)
 	}
-}
-
-// RequestBody is the body request Slack
-type RequestBody struct {
-	Text string `json:"text"`
 }
 
 // SendSlackNotification will post to an 'Incoming Webhook' url setup in Slack Apps. It accepts
 // some text and the slack channel is saved within Slack.
 func SendSlackNotification(webhookURL string, msg string) error {
 
-	slackBody, _ := json.Marshal(RequestBody{Text: msg})
-	req, err := http.NewRequest(http.MethodPost, webhookURL, bytes.NewBuffer(slackBody))
+	req, err := http.NewRequest(http.MethodPost, webhookURL, bytes.NewBuffer([]byte(msg)))
 	if err != nil {
 		return err
 	}
@@ -62,7 +55,7 @@ func SendSlackNotification(webhookURL string, msg string) error {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(resp.Body)
 	if buf.String() != "ok" {
-		return errors.New("Non-ok response returned from Slack")
+		return errors.New("Non-ok response returned from Slack " + buf.String())
 	}
 	return nil
 }
