@@ -33,8 +33,8 @@ func (conf NotifyConfig) Config() error {
 func (conf NotifyConfig) Notify(result probe.Result) {
 	log.Infoln("Email got the notification...")
 
-	mesage := fmt.Sprintf("%s", result.JSONIndent())
-	if err := conf.SendMail("EaseProbe Notification", mesage); err != nil {
+	mesage := fmt.Sprintf("%s", result.HTML())
+	if err := conf.SendMail(result.Title(), mesage); err != nil {
 		log.Errorln(err)
 	}
 }

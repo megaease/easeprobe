@@ -129,4 +129,75 @@ func (r *Result) JSONIndent() string {
 	return string(j)
 }
 
+// Title return the title for notification 
+func (r *Result) Title() string {
+	t := "[EaseProbe] - \"%s\" Recovery"
+	if r.PreStatus == StatusInit {
+		t = "[EaseProbe] - Monitoring \"%s\" "
+	}
+	if r.Status != StatusUp {
+		t = "[EaseProbe] - \"%s\" Failure"
+	}
+	return fmt.Sprintf(t, r.Name )
+}
+// HTML convert the object to HTML
+func (r *Result) HTML() string {
+	html := `
+		<html>
+		<head>
+			<style>
+			 .head {
+				background: #2980b9;
+				font-weight: 900;
+    			color: #ffffff;
+				padding: 6px 12px;
+				text-align: right;
+			 }
+			 .data {
+				background: #f6f6f6;
+				padding: 6px 12px;
+				color: #3b3b3b;
+			 }
+			</style>
+		</head>
+		<body style="font-family: Montserrat, sans-serif;">
+			<h1 style="font-weight: normal; letter-spacing: -1px;color: #3b3b3b;">%s</h1>
+			<table style="font-size: 16px; line-height: 20px;">
+				<tr>
+					<td class="head"><b> Service  Name </b></td>
+					<td class="data">%s</td>
+				</tr>
+				<tr>
+					<td class="head"><b> Endpoint </b></td>
+					<td class="data">%s</td>
+				</tr>
+				<tr>
+					<td class="head"><b> Status </b></td>
+					<td class="data">%s - %s</td>
+				</tr>
+				<tr>
+					<td class="head"><b> Probe Time </b></td>
+					<td class="data">%s</td>
+				</tr>
+				<tr>
+					<td class="head"><b> Round Trip Time </b></td>
+					<td class="data">%s</td>
+				</tr>
+				<tr>
+					<td class="head"><b> Message </b></td>
+					<td class="data">%s</td>
+				</tr>
+			</table>
+		</body>
+		</html>`
+	
+	status := "✅"
 
+	if r.Status != StatusUp {
+		status = "❌"
+	}
+	title := r.Title()
+	rtt := r.RoundTripTime.Round(time.Millisecond)
+
+	return fmt.Sprintf(html, title, r.Name, r.Endpoint, status, r.Status.String(), r.StartTime, rtt, r.Message)
+}
