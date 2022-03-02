@@ -28,7 +28,7 @@ func (conf NotifyConfig) Config() error {
 
 // Notify write the message into the file
 func (conf NotifyConfig) Notify(result probe.Result) {
-	log.Infoln("Slack got the notifcation...")
+	log.Infoln("Slack got the notification...")
 	webhookURL := "https://hooks.slack.com/services/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"
 	err := SendSlackNotification(webhookURL, result.StringIndent())
 	if err != nil {
@@ -41,7 +41,7 @@ type RequestBody struct {
 	Text string `json:"text"`
 }
 
-// SendSlackNotification will post to an 'Incoming Webook' url setup in Slack Apps. It accepts
+// SendSlackNotification will post to an 'Incoming Webhook' url setup in Slack Apps. It accepts
 // some text and the slack channel is saved within Slack.
 func SendSlackNotification(webhookURL string, msg string) error {
 
