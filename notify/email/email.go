@@ -31,7 +31,7 @@ func (conf NotifyConfig) Config() error {
 
 // Notify write the message into the file
 func (conf NotifyConfig) Notify(result probe.Result) {
-	log.Infoln("Email got the notifcation...")
+	log.Infoln("Email got the notification...")
 
 	mesage := fmt.Sprintf("%s", result.StringIndent())
 	if err := conf.SendMail("EaseProbe Notification", mesage); err != nil {

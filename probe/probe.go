@@ -8,6 +8,14 @@ import (
 	"time"
 )
 
+// Prober Interface
+type Prober interface {
+	Kind() string
+	Config() error
+	Probe() Result
+	Interval() time.Duration
+}
+
 // Status is the status of Probe
 type Status int
 
@@ -121,10 +129,4 @@ func (r *Result) StringIndent() string {
 	return string(j)
 }
 
-// Prober Interface
-type Prober interface {
-	Kind() string
-	Config() error
-	Probe() Result
-	Interval() time.Duration
-}
+
