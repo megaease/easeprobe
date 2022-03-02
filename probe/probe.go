@@ -109,8 +109,8 @@ func NewResult() *Result {
 	}
 }
 
-// String convert the object to JSON
-func (r *Result) String() string {
+// JSON convert the object to JSON
+func (r *Result) JSON() string {
 	j, err := json.Marshal(&r)
 	if err != nil {
 		log.Printf("error: %v\n", err)
@@ -119,8 +119,8 @@ func (r *Result) String() string {
 	return string(j)
 }
 
-// StringIndent convert the object to indent JSON
-func (r *Result) StringIndent() string {
+// JSONIndent convert the object to indent JSON
+func (r *Result) JSONIndent() string {
 	j, err := json.MarshalIndent(&r, "", "    ")
 	if err != nil {
 		log.Printf("error: %v\n", err)

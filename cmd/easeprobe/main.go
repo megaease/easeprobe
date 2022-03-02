@@ -58,7 +58,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 	probeFn := func(p probe.Prober) {
 		for {
 			res := p.Probe()
-			log.Infof("%s: %s\n", p.Kind(), res.String())
+			log.Infof("%s: %s\n", p.Kind(), res.JSON())
 			notifyChan <- res
 			time.Sleep(p.Interval())
 		}
