@@ -16,25 +16,25 @@ http:
     #cert: /path/to/file.crt
     #key: /path/to/file.key
 
-  - name: CoolShell Website
-    url: https://coolshell.cn
-    method: GET
+  # - name: CoolShell Website
+  #   url: https://coolshell.cn
+  #   method: GET
 
 tcp:
-  - name: SSH service
-    host: ssh.coolshell.cn:22
-    timeout : 10s
+  # - name: SSH service
+  #   host: ssh.coolshell.cn:22
+  #   timeout : 10s
   - name: HTTP service
     host: megaease.cn:80
 
 
 notify:
-  log:
-    - file : "/tmp/easeprobe.log"
+  # log:
+  #   - file : "/tmp/easeprobe.log"
   slack:
     - webhook : "https://hooks.slack.com/services/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"
-  email:
-    - server : smtp.exmail.qq.com:465
-      username: noreply@megaease.com
-      password : 644D4u43n
-      to: "service@megaease.com;chenhao@megaease.com"
+  # email:
+  #   - server : smtp.exmail.qq.com:465
+  #     username: noreply@megaease.com
+  #     password : 644D4u43n
+  #     to: "service@megaease.com;chenhao@megaease.com"

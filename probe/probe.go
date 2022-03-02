@@ -57,6 +57,21 @@ func (s *Status) Status(status string) Status {
 	return StatusUnknown
 }
 
+// Emoji convert the status to emoji
+func (s Status) Emoji() string {
+	switch s {
+	case StatusUp:
+		return "✅"
+	case StatusDown:
+		return "❌"
+	case StatusUnknown:
+		return "⛔️"
+	case StatusInit:
+		return "🔎"
+	}
+	return "⛔️"
+}
+
 // UnmarshalJSON is Unmarshal the status
 func (s *Status) UnmarshalJSON(b []byte) (err error) {
 	*s = s.Status(string(b))
@@ -129,17 +144,18 @@ func (r *Result) JSONIndent() string {
 	return string(j)
 }
 
-// Title return the title for notification 
+// Title return the title for notification
 func (r *Result) Title() string {
-	t := "[EaseProbe] - \"%s\" Recovery"
+	t := "%s Recovery"
 	if r.PreStatus == StatusInit {
-		t = "[EaseProbe] - Monitoring \"%s\" "
+		t = "Monitoring %s"
 	}
 	if r.Status != StatusUp {
-		t = "[EaseProbe] - \"%s\" Failure"
+		t = "%s Failure"
 	}
-	return fmt.Sprintf(t, r.Name )
+	return fmt.Sprintf(t, r.Name)
 }
+
 // HTML convert the object to HTML
 func (r *Result) HTML() string {
 	html := `
@@ -190,14 +206,46 @@ func (r *Result) HTML() string {
 			</table>
 		</body>
 		</html>`
-	
-	status := "✅"
 
-	if r.Status != StatusUp {
-		status = "❌"
-	}
 	title := r.Title()
 	rtt := r.RoundTripTime.Round(time.Millisecond)
 
-	return fmt.Sprintf(html, title, r.Name, r.Endpoint, status, r.Status.String(), r.StartTime, rtt, r.Message)
+	return fmt.Sprintf(html, title, r.Name, r.Endpoint, r.Status.Emoji(), r.Status.String(), r.StartTime, rtt, r.Message)
+}
+
+// SlackBlockJSON convert the object to Slack notification
+// Go to https://app.slack.com/block-kit-builder to build the notification block
+func (r *Result) SlackBlockJSON() string {
+
+	json := `
+	{
+		"blocks": [
+			{
+				"type": "section",
+				"text": {
+					"type": "mrkdwn",
+					"text": "%s"
+				}
+			},
+			{
+				"type": "context",
+				"elements": [
+					{
+						"type": "image",
+						"image_url": "https://megaease.cn/favicon.png",
+						"alt_text": "MegaEase EaseProbe"
+					},
+					{
+						"type": "mrkdwn",
+						"text": "EaseProbe %s"
+					}
+				]
+			}
+		]
+	}
+	`
+	rtt := r.RoundTripTime.Round(time.Millisecond)
+	body := fmt.Sprintf("*%s*\\n>%s %s - ⏱ %s", r.Title(), r.Status.Emoji(), r.Endpoint, rtt)
+	context := fmt.Sprintf("<!date^%d^probed at {date_num} {time_secs} | probed at %s>", r.StartTime.Unix(), r.StartTime)
+	return fmt.Sprintf(json, body, context)
 }
