@@ -30,7 +30,7 @@ func (conf NotifyConfig) Config() error {
 func (conf NotifyConfig) Notify(result probe.Result) {
 	log.Infoln("Slack got the notification...")
 	webhookURL := "https://hooks.slack.com/services/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"
-	err := SendSlackNotification(webhookURL, result.StringIndent())
+	err := SendSlackNotification(webhookURL, result.JSONIndent())
 	if err != nil {
 		log.Errorln("error %v\n", err)
 	}
