@@ -34,5 +34,8 @@ build: all
 test:
 	go test -race -count=1 ./...
 
+docker:
+	sudo docker build -t megaease/easeprobe -f ${MKFILE_DIR}/Dockerfile
+
 clean:
 	@rm -rf ${MKFILE_DIR}/build
