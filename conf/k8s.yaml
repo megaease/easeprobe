@@ -1,28 +1,24 @@
 http:
   - name: MegaEase Website (China)
     url: https://megaease.cn
-    method: GET
   - name: MegaEase Website (Global)
     url: https://megaease.com
-    method: GET
   - name: MegaEase Cloud (China)
     url: https://dev.megaease.cn/megacloud/app/
-    method: GET
   - name: Prometheus (AWS China)
     url: http://prometheus:9090/grap
-    method: GET
   - name: ElasticSearch-0 (AWS China)
     url:  http://elasticsearch-0.elasticsearch:9200
-    method: GET
   - name: ElasticSearch-1 (AWS China)
     url:  http://elasticsearch-1.elasticsearch:9200
-    method: GET
   - name: ElasticSearch-2 (AWS China)
     url:  http://elasticsearch-2.elasticsearch:9200
-    method: GET
   - name: Eureka (AWS China)
-    url: http://eureka.default:8761 
-    method: GET
+    url: http://eureka.default:8761
+  - name: EaseService-Alert (AWS China)
+    url: http://easeservice-alert.default:38022/actuator/health
+  - name: EaseStash (AWS China)
+    url: http://easestash.default:19080
 
 tcp:
   - name: Redis (AWS China)
