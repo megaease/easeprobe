@@ -1,0 +1,41 @@
+http:
+  - name: MegaEase Website (China)
+    url: https://megaease.cn
+    method: GET
+  - name: MegaEase Website (Global)
+    url: https://megaease.com
+    method: GET
+  - name: MegaEase Cloud (China)
+    url: https://dev.megaease.cn/megacloud/app/
+    method: GET
+  - name: Prometheus (AWS China)
+    url: http://prometheus:9090/grap
+    method: GET
+  - name: ElasticSearch-0 (AWS China)
+    url:  http://elasticsearch-0.elasticsearch:9200
+    method: GET
+  - name: ElasticSearch-1 (AWS China)
+    url:  http://elasticsearch-1.elasticsearch:9200
+    method: GET
+  - name: ElasticSearch-2 (AWS China)
+    url:  http://elasticsearch-2.elasticsearch:9200
+    method: GET    
+
+tcp:
+  - name: Kafka-0 (AWS China)
+    host: kafka-0.kafka-hs:9093
+  - name: Kafka-1 (AWS China)
+    host: kafka-1.kafka-hs:9093
+  - name: Kafka-2 (AWS China)
+    host: kafka-2.kafka-hs:9093
+
+notify:
+  log:
+    - file: "/tmp/easeprobe.log"
+  slack:
+    - webhook: "https://hooks.slack.com/services/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"
+  email:
+    - server: smtp.exmail.qq.com:465
+      username: noreply@megaease.com
+      password: 644D4u43n
+      to: "service@megaease.com;chenhao@megaease.com"
