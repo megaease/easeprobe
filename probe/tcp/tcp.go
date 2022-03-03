@@ -65,11 +65,13 @@ func (t *TCP) Probe() probe.Result {
 	if err != nil {
 		log.Errorf("error: %v\n", err)
 		status = probe.StatusDown
+	}else{
+		conn.Close()
 	}
-	conn.Close()
-
 	t.result.PreStatus = t.result.Status
 	t.result.Status = status
+
+	t.result.DoStat(t.TimeInterval)
 
 	return *t.result
 }

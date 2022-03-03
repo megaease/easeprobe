@@ -141,17 +141,18 @@ func (h *HTTP) Probe() probe.Result {
 	if err != nil {
 		log.Errorf("error making get request: %v", err)
 		status = probe.StatusDown
-	}
-
-	if resp.StatusCode >= 500 {
-		status = probe.StatusDown
+	}else{
+		// Read the response body
+		defer resp.Body.Close()
+		if resp.StatusCode >= 500 {
+			status = probe.StatusDown
+		}
 	}
 
 	h.result.PreStatus = h.result.Status
 	h.result.Status = status
 
-	// Read the response body
-	defer resp.Body.Close()
+	h.result.DoStat(h.TimeInterval)
 
 	return *h.result
 }
