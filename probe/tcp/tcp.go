@@ -1,6 +1,7 @@
 package tcp
 
 import (
+	"fmt"
 	"net"
 	"time"
 
@@ -33,6 +34,11 @@ func (t *TCP) Interval() time.Duration {
 	return t.TimeInterval
 }
 
+// Result get the probe result
+func (t *TCP) Result() *probe.Result {
+	return t.result
+}
+
 // Config HTTP Config Object
 func (t *TCP) Config() error {
 
@@ -63,9 +69,11 @@ func (t *TCP) Probe() probe.Result {
 	t.result.RoundTripTime.Duration = time.Since(now)
 	status := probe.StatusUp
 	if err != nil {
+		t.result.Message = fmt.Sprintf("Error: %v", err)
 		log.Errorf("error: %v\n", err)
 		status = probe.StatusDown
-	}else{
+	} else {
+		t.result.Message = "TCP Connection Established Successfully!"
 		conn.Close()
 	}
 	t.result.PreStatus = t.result.Status

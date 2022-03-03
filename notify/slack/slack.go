@@ -25,21 +25,30 @@ func (conf NotifyConfig) Config() error {
 	return nil
 }
 
-// Notify write the message into the file
+// Notify write the message into the slack
 func (conf NotifyConfig) Notify(result probe.Result) {
 	log.Infoln("Slack got the notification...")
-	webhookURL := "https://hooks.slack.com/services/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"
-	err := SendSlackNotification(webhookURL, result.SlackBlockJSON())
+	json := result.SlackBlockJSON()
+	err := conf.SendSlackNotification(json)
 	if err != nil {
-		log.Errorf("error %v\n", err)
+		log.Errorf("error %v\n%s", err, json)
+	}
+}
+
+// NotifyStat write the all probe stat message to slack
+func (conf NotifyConfig) NotifyStat(probers []probe.Prober) {
+	log.Infoln("Slack  Sending the Statstics...")
+	json := probe.StatSlackBlockJSON(probers)
+	err := conf.SendSlackNotification(json)
+	if err != nil {
+		log.Errorf("error %v\n%s", err, json)
 	}
 }
 
 // SendSlackNotification will post to an 'Incoming Webhook' url setup in Slack Apps. It accepts
 // some text and the slack channel is saved within Slack.
-func SendSlackNotification(webhookURL string, msg string) error {
-
-	req, err := http.NewRequest(http.MethodPost, webhookURL, bytes.NewBuffer([]byte(msg)))
+func (conf NotifyConfig) SendSlackNotification(msg string) error {
+	req, err := http.NewRequest(http.MethodPost, conf.WebhookURL, bytes.NewBuffer([]byte(msg)))
 	if err != nil {
 		return err
 	}

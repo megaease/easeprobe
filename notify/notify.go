@@ -19,4 +19,5 @@ type Notify interface {
 	Kind() string
 	Config() error
 	Notify(probe.Result)
+	NotifyStat([]probe.Prober)
 }
