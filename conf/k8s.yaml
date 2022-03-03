@@ -19,9 +19,14 @@ http:
     method: GET
   - name: ElasticSearch-2 (AWS China)
     url:  http://elasticsearch-2.elasticsearch:9200
-    method: GET    
+    method: GET
+  - name: Eureka (AWS China)
+    url: http://eureka.default:8761 
+    method: GET
 
 tcp:
+  - name: Redis (AWS China)
+    host: redis.default:6379
   - name: Kafka-0 (AWS China)
     host: kafka-0.kafka-hs:9093
   - name: Kafka-1 (AWS China)
