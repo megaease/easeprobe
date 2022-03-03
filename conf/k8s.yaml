@@ -30,12 +30,10 @@ tcp:
     host: kafka-2.kafka-hs:9093
 
 notify:
-  log:
-    - file: "/tmp/easeprobe.log"
   slack:
     - webhook: "https://hooks.slack.com/services/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"
   email:
     - server: smtp.exmail.qq.com:465
       username: noreply@megaease.com
       password: 644D4u43n
-      to: "service@megaease.com;chenhao@megaease.com"
+      to: "dev@megaease.com"
