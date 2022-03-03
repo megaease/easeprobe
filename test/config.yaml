@@ -21,8 +21,8 @@ http:
     method: GET
 
 tcp:
-  - name: MegaEase SSH (China)
-    host: ssh.megaease.cn:22
+  - name: MegaEase Error (China)
+    host: error.megaease.cn:22
     timeout: 10s
   - name: MegaEase HTTP Service (China)
     host: megaease.cn:80
