@@ -29,7 +29,7 @@ func (conf NotifyConfig) Config() error {
 	return nil
 }
 
-// Notify write the message into the file
+// Notify send the result message to the email
 func (conf NotifyConfig) Notify(result probe.Result) {
 	log.Infoln("Email got the notification...")
 
@@ -37,6 +37,16 @@ func (conf NotifyConfig) Notify(result probe.Result) {
 	if err := conf.SendMail(result.Title(), mesage); err != nil {
 		log.Errorln(err)
 	}
+}
+
+// NotifyStat send the stat message into the email
+func (conf NotifyConfig) NotifyStat(probers []probe.Prober) {
+	log.Infoln("Email  Sending the Statstics...")
+
+	// mesage := fmt.Sprintf("%s", result.HTML())
+	// if err := conf.SendMail(result.Title(), mesage); err != nil {
+	// 	log.Errorln(err)
+	// }
 }
 
 // SendMail sends the email

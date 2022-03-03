@@ -10,8 +10,9 @@ import (
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/http"
 	"github.com/megaease/easeprobe/probe/tcp"
-	log "github.com/sirupsen/logrus"
 
+	"github.com/go-co-op/gocron"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
@@ -50,7 +51,7 @@ func readConf(conf *string) (Conf, error) {
 }
 
 // 1) all of probers send the result to notify channel
-// 2)
+// 2) go through all of notification to notify the result.
 func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 
 	notifyChan := make(chan probe.Result)
@@ -58,7 +59,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 	probeFn := func(p probe.Prober) {
 		for {
 			res := p.Probe()
-			log.Infof("%s: %s\n", p.Kind(), res.JSON())
+			log.Debugf("%s: %s\n", p.Kind(), res.JSON())
 			notifyChan <- res
 			time.Sleep(p.Interval())
 		}
@@ -80,6 +81,15 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 			continue
 		}
 	}
+
+	statFn := func() {
+		for _, n := range notifies {
+			go n.NotifyStat(probers)
+		}
+	}
+	cron := gocron.NewScheduler(time.UTC)
+	cron.Every(1).Day().At("00:00").Do(statFn)
+	cron.StartAsync()
 
 	for {
 		select {

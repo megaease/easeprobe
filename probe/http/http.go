@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -61,6 +62,11 @@ func (h *HTTP) Kind() string {
 // Interval get the interval
 func (h *HTTP) Interval() time.Duration {
 	return h.TimeInterval
+}
+
+// Result get the probe result
+func (h *HTTP) Result() *probe.Result {
+	return h.result
 }
 
 // Config HTTP Config Object
@@ -139,14 +145,17 @@ func (h *HTTP) Probe() probe.Result {
 
 	status := probe.StatusUp
 	if err != nil {
+		h.result.Message = fmt.Sprintf("Error: %v", err)
 		log.Errorf("error making get request: %v", err)
 		status = probe.StatusDown
-	}else{
+	} else {
 		// Read the response body
 		defer resp.Body.Close()
 		if resp.StatusCode >= 500 {
+			h.result.Message = fmt.Sprintf("Error: HTTP Status Code is %d", resp.StatusCode)
 			status = probe.StatusDown
 		}
+		h.result.Message = fmt.Sprintf("Success: HTTP Status Code is %d", resp.StatusCode)
 	}
 
 	h.result.PreStatus = h.result.Status
