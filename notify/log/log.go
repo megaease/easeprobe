@@ -38,5 +38,7 @@ func (conf NotifyConfig) Notify(result probe.Result) {
 // NotifyStat write the stat message into the file
 func (conf NotifyConfig) NotifyStat(probers []probe.Prober) {
 	logrus.Infoln("LogFile Sending the Statstics...")
-	//log.Println(result.JSON())
+	for _, p := range probers {
+		log.Println(p.Result())
+	}
 }

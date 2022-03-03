@@ -8,6 +8,16 @@ import (
 	"time"
 )
 
+// Format is the format of text
+type Format int
+
+// The format types
+const (
+	Makerdown Format = iota
+	HTML
+	Text
+)
+
 // Status is the status of Probe
 type Status int
 
@@ -188,59 +198,37 @@ func (r *Result) Title() string {
 
 // HTML convert the object to HTML
 func (r *Result) HTML() string {
-	html := `
-		<html>
-		<head>
-			<style>
-			 .head {
-				background: #2980b9;
-				font-weight: 900;
-    			color: #ffffff;
-				padding: 6px 12px;
-				text-align: right;
-			 }
-			 .data {
-				background: #f6f6f6;
-				padding: 6px 12px;
-				color: #3b3b3b;
-			 }
-			</style>
-		</head>
-		<body style="font-family: Montserrat, sans-serif;">
-			<h1 style="font-weight: normal; letter-spacing: -1px;color: #3b3b3b;">%s</h1>
+	html := HTMLHeader(r.Title()) + `
 			<table style="font-size: 16px; line-height: 20px;">
 				<tr>
-					<td class="head"><b> Service  Name </b></td>
+					<td class="head right"><b> Service  Name </b></td>
 					<td class="data">%s</td>
 				</tr>
 				<tr>
-					<td class="head"><b> Endpoint </b></td>
+					<td class="head right"><b> Endpoint </b></td>
 					<td class="data">%s</td>
 				</tr>
 				<tr>
-					<td class="head"><b> Status </b></td>
-					<td class="data">%s - %s</td>
+					<td class="head right"><b> Status </b></td>
+					<td class="data">%s %s</td>
 				</tr>
 				<tr>
-					<td class="head"><b> Probe Time </b></td>
+					<td class="head right"><b> Probe Time </b></td>
 					<td class="data">%s</td>
 				</tr>
 				<tr>
-					<td class="head"><b> Round Trip Time </b></td>
+					<td class="head right"><b> Round Trip Time </b></td>
 					<td class="data">%s</td>
 				</tr>
 				<tr>
-					<td class="head"><b> Message </b></td>
+					<td class="head right"><b> Message </b></td>
 					<td class="data">%s</td>
 				</tr>
 			</table>
-		</body>
-		</html>`
+		` + HTMLFooter()
 
-	title := r.Title()
 	rtt := r.RoundTripTime.Round(time.Millisecond)
-
-	return fmt.Sprintf(html, title, r.Name, r.Endpoint, r.Status.Emoji(), r.Status.String(), r.StartTime, rtt, r.Message)
+	return fmt.Sprintf(html, r.Name, r.Endpoint, r.Status.Emoji(), r.Status.String(), r.StartTime, rtt, r.Message)
 }
 
 // SlackBlockJSON convert the object to Slack notification
@@ -276,14 +264,54 @@ func (r *Result) SlackBlockJSON() string {
 	`
 	rtt := r.RoundTripTime.Round(time.Millisecond)
 	body := fmt.Sprintf("*%s*\\n>%s %s - ⏱ %s\n>%s", r.Title(), r.Status.Emoji(), r.Endpoint, rtt, JSONEscape(r.Message))
-	context := fmt.Sprintf("<!date^%d^probed at {date_num} {time_secs} | probed at %s>",
-		r.StartTime.Unix(), r.StartTime.UTC().Format(time.UnixDate))
+	context := SlackTimeFormation(r.StartTime, " probed at ")
 	return fmt.Sprintf(json, body, context)
+}
+
+// StatText return the Text format string to stat
+func (r *Result) StatText() string {
+	text := "Name: %s - %s, Availability: Up - %s, Down - %s, SLA: %.2f%%, Probe-Times: Total: %d ( %s ), Last-Probe:%s - %s, Message:%s"
+	return fmt.Sprintf(text, r.Name, r.Endpoint,
+		r.Stat.UpTime.Round(time.Second), r.Stat.DownTime.Round(time.Second), r.SLA(),
+		r.Stat.Total, StatStatusText(r.Stat, Text),
+		time.Now().UTC().Format(time.UnixDate), r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
 }
 
 // StatHTMLSection return the HTML format string to stat
 func (r *Result) StatHTMLSection() string {
-	return ""
+
+	html := `
+	<tr>
+		<td class="head" colspan="3"><b>%s</b> - %s<td>
+	</tr>
+	<tr>
+		<td class="data"><b>Availability</b><br><b>Uptime: </b>%s,  <b>Downtime: </b>%s  </td>
+		<td class="data"><b>SLA<b><br>%.2f%%</td>
+		<td class="data"><b>Probe-Times</b><br><b>Total</b>: %d ( %s )</td>
+	</tr>
+	<tr>
+		<td  class="data" colspan="3"><b>Last Probe</b>%s - %s<br>%s<td>
+	</tr>
+	`
+	return fmt.Sprintf(html, r.Name, r.Endpoint,
+		r.Stat.UpTime.Round(time.Second), r.Stat.DownTime.Round(time.Second),
+		r.SLA(),
+		r.Stat.Total, StatStatusText(r.Stat, HTML),
+		time.Now().UTC().Format(time.UnixDate), r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
+}
+
+// StatHTML return a full stat report
+func StatHTML(probers []Prober) string {
+	html := HTMLHeader("Overall SLA Report")
+
+	html += `<table style="font-size: 16px; line-height: 20px;">`
+	for _, p := range probers {
+		html += p.Result().StatHTMLSection()
+	}
+	html += `</table>`
+
+	html += HTMLFooter()
+	return html
 }
 
 // StatSlackBlockSectionJSON return the slack json format string to stat
@@ -302,36 +330,30 @@ func (r *Result) StatSlackBlockSectionJSON() string {
 			"fields": [
 				{
 					"type": "mrkdwn",
+					"text": "*Availability*\n>` + " *Up*:  `%s`  *Down* `%s`  -  *SLA*: `%.2f %%`" + `"
+				},
+				{
+					"type": "mrkdwn",
+					"text": "*Probe Times*\n>*Total* : %d ( %s )"
+				},
+				{
+					"type": "mrkdwn",
 					"text": "*Lastest Probe Status & Time*\n>%s | %s"
 				},
 				{
 					"type": "mrkdwn",
 					"text": "*Latest Probe Message*\n>%s"
-				},
-				{
-					"type": "mrkdwn",
-					"text": "*Availability*\n>✅ *%s*  ❌ *%s*   -   *SLA*: ` + "`%.2f %%`" + `"
-				},
-				{
-					"type": "mrkdwn",
-					"text": "*Probe Times*\n>*Total* : %d ( %s )"
 				}
+				
 			]
 		}`
 
-	status := ""
-	for k, v := range r.Stat.Status {
-		status += fmt.Sprintf("*%s* : %d \t", k.String(), v)
-	}
-
-	t := fmt.Sprintf("<!date^%d^{date_num} {time_secs} |  %s>",
-		r.StartTime.Unix(), r.StartTime.UTC().Format(time.UnixDate))
+	t := SlackTimeFormation(r.StartTime, "")
 
 	return fmt.Sprintf(json, r.Name, r.Endpoint,
-		t, r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message),
-		r.Stat.UpTime.Round(time.Second), r.Stat.DownTime.Round(time.Second),
-		(r.Stat.UpTime.Seconds()/(r.Stat.UpTime.Seconds()+r.Stat.DownTime.Seconds()))*100,
-		r.Stat.Total, strings.TrimSpace(status))
+		r.Stat.UpTime.Round(time.Second), r.Stat.DownTime.Round(time.Second), r.SLA(),
+		r.Stat.Total, StatStatusText(r.Stat, Makerdown),
+		t, r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
 }
 
 // StatSlackBlockJSON generate all probes stat message to slack block string
@@ -369,8 +391,8 @@ func StatSlackBlockJSON(probers []Prober) string {
 				}
 			]
 		}`
-		time := fmt.Sprintf("<!date^%d^report at {date_num} {time_secs} | report at %s>",
-			time.Now().Unix(), time.Now().UTC().Format(time.UnixDate))
+
+		time := SlackTimeFormation(time.Now(), " reported at ")
 		json += fmt.Sprintf(context, time)
 	}
 
@@ -387,4 +409,83 @@ func JSONEscape(str string) string {
 	}
 	s := string(b)
 	return s[1 : len(s)-1]
+}
+
+// SLA calculate the SLA
+func (r *Result) SLA() float64 {
+	uptime := r.Stat.UpTime.Seconds()
+	downtime := r.Stat.DownTime.Seconds()
+	if uptime+downtime <= 0 {
+		if r.Status == StatusUp {
+			return 100
+		}
+		return 0
+	}
+	return uptime / (uptime + downtime) * 100
+}
+
+// StatStatusText return the string of status statices
+func StatStatusText(s Stat, t Format) string {
+	status := ""
+	format := "%s : %d \t"
+	switch t {
+	case Makerdown:
+		format = "*%s* : %d \t"
+	case HTML:
+		format = "<b>%s</b> : %d \t"
+	}
+	for k, v := range s.Status {
+		status += fmt.Sprintf(format, k.String(), v)
+	}
+	return strings.TrimSpace(status)
+}
+
+//SlackTimeFormation return the slack time formation
+func SlackTimeFormation(t time.Time, act string) string {
+	return fmt.Sprintf("<!date^%d^%s{date_num} {time_secs}|%s %s>",
+		t.Unix(), act, act, t.UTC().Format(time.UnixDate))
+}
+
+// HTMLHeader return the HTML head
+func HTMLHeader(title string) string {
+	return `
+	<html>
+	<head>
+		<style>
+		 .head {
+			background: #2980b9;
+			font-weight: 900;
+			color: #fff;
+			padding: 6px 12px;
+		 }
+		 .head a:link, .head a:visited {
+			color: #ff9;
+			text-decoration: none;
+		  }
+		  
+		  .head a:hover, .head a:active {
+			text-decoration: underline;
+		  }
+		 .data {
+			background: #f6f6f6;
+			padding: 6px 12px;
+			color: #3b3b3b;
+		 }
+		 .right{
+			text-align: right;
+		 }
+		 .center{
+			text-align: center;
+		 }
+		</style>
+	</head>
+	<body style="font-family: Montserrat, sans-serif;">
+		<h1 style="font-weight: normal; letter-spacing: -1px;color: #3b3b3b;">` + title + `</h1>`
+}
+
+// HTMLFooter return the HTML footer
+func HTMLFooter() string {
+	return `
+	</body>
+	</html>`
 }

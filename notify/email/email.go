@@ -43,10 +43,10 @@ func (conf NotifyConfig) Notify(result probe.Result) {
 func (conf NotifyConfig) NotifyStat(probers []probe.Prober) {
 	log.Infoln("Email  Sending the Statstics...")
 
-	// mesage := fmt.Sprintf("%s", result.HTML())
-	// if err := conf.SendMail(result.Title(), mesage); err != nil {
-	// 	log.Errorln(err)
-	// }
+	mesage := probe.StatHTML(probers)
+	if err := conf.SendMail("Overall SLA Report", mesage); err != nil {
+		log.Errorln(err)
+	}
 }
 
 // SendMail sends the email

@@ -89,6 +89,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 	}
 	cron := gocron.NewScheduler(time.UTC)
 	cron.Every(1).Day().At("00:00").Do(statFn)
+	//cron.Every(5).Minute().Do(statFn)
 	cron.StartAsync()
 
 	for {
@@ -104,6 +105,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 			log.Infof("Status changed [%s] ==> [%s]\n", result.PreStatus, result.Status)
 			for _, n := range notifies {
 				go n.Notify(result)
+				//log.Println(n)
 			}
 		}
 	}
