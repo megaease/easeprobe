@@ -38,3 +38,7 @@ notify:
       username: noreply@megaease.com
       password: 644D4u43n
       to: "dev@megaease.com"
+
+settings:
+  interval: 1m
+  loglevel: "info"

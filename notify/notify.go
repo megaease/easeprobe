@@ -20,4 +20,7 @@ type Notify interface {
 	Config() error
 	Notify(probe.Result)
 	NotifyStat([]probe.Prober)
+
+	DryNotify(probe.Result)
+	DryNotifyStat([]probe.Prober)
 }

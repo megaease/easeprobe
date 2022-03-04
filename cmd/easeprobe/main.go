@@ -15,7 +15,10 @@ import (
 
 // 1) all of probers send the result to notify channel
 // 2) go through all of notification to notify the result.
+// 3) send the SLA report
 func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
+
+	dryNotify := conf.Get().Settings.DryNotify
 
 	notifyChan := make(chan probe.Result)
 
@@ -47,12 +50,20 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 
 	statFn := func() {
 		for _, n := range notifies {
-			go n.NotifyStat(probers)
+			if dryNotify {
+				n.DryNotifyStat(probers)
+			} else {
+				go n.NotifyStat(probers)
+			}
 		}
 	}
 	cron := gocron.NewScheduler(time.UTC)
-	cron.Every(1).Day().At("00:00").Do(statFn)
-	//cron.Every(5).Minute().Do(statFn)
+	if dryNotify {
+		cron.Every(1).Minute().Do(statFn)
+	} else {
+		cron.Every(1).Day().At("00:00").Do(statFn)
+	}
+
 	cron.StartAsync()
 
 	for {
@@ -62,13 +73,20 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 		case result := <-notifyChan:
 			// if the status has no change, no need notify
 			if result.PreStatus == result.Status {
-				log.Debugf("Status no change [%s] == [%s]\n", result.PreStatus, result.Status)
+				log.Debugf("Status no change [%s] == [%s]\n, no notification", result.PreStatus, result.Status)
+				continue
+			}
+			if result.PreStatus == probe.StatusInit && result.Status == probe.StatusUp {
+				log.Debugf("Initial Status [%s] == [%s]\n, no notification", result.PreStatus, result.Status)
 				continue
 			}
 			log.Infof("Status changed [%s] ==> [%s]\n", result.PreStatus, result.Status)
 			for _, n := range notifies {
-				go n.Notify(result)
-				//log.Println(n)
+				if dryNotify {
+					n.DryNotify(result)
+				} else {
+					go n.Notify(result)
+				}
 			}
 		}
 	}
@@ -77,7 +95,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 
 func main() {
 
-	dryrun := flag.Bool("d", false, "dry run mode")
+	dryNotify := flag.Bool("d", false, "dry notification mode")
 	yamlFile := flag.String("f", "config.yaml", "configuration file")
 	flag.Parse()
 
@@ -86,16 +104,20 @@ func main() {
 		os.Exit(-1)
 	}
 
-	conf, err := conf.NewConf(yamlFile)
+	conf, err := conf.New(yamlFile)
 	if err != nil {
 		log.Fatal("Fatal: Cannot read the YAML configuration file!")
 		os.Exit(-1)
 	}
 	defer conf.CloseLogFile()
 
-	// if dry run mode is specificed in command line, overwrite the configuration
-	if *dryrun {
-		conf.Settings.Dryrun = *dryrun
+	// if dry notification mode is specificed in command line, overwrite the configuration
+	if *dryNotify {
+		conf.Settings.DryNotify = *dryNotify
+	}
+
+	if conf.Settings.DryNotify {
+		log.Infoln("Dry Notification Mode...")
 	}
 
 	// Probers

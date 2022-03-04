@@ -40,6 +40,6 @@ notify:
 
 settings:
   interval: 2m
-  logfile: "test.log"
+  #logfile: "test.log"
   loglevel: "debug"
-  dryrun : true
+  drynotify : true
