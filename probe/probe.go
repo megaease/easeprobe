@@ -322,38 +322,26 @@ func (r *Result) StatSlackBlockSectionJSON() string {
 			"type": "section",
 			"text": {
 				"type": "mrkdwn",
-				"text": "*%s* - %s"
+				"text": "*%s* - %s` +
+		`\n>*Availability*\n>\t` + " *Up*:  `%s`  *Down* `%s`  -  *SLA*: `%.2f %%`" +
+		`\n>*Probe Times*\n>\t*Total* : %d ( %s )` +
+		`\n>*Lastest Probe*\n>\t%s | %s` +
+		`\n>\t%s"` +
+		`
 			}
-		},
-		{
-			"type": "section",
-			"fields": [
-				{
-					"type": "mrkdwn",
-					"text": "*Availability*\n>` + " *Up*:  `%s`  *Down* `%s`  -  *SLA*: `%.2f %%`" + `"
-				},
-				{
-					"type": "mrkdwn",
-					"text": "*Probe Times*\n>*Total* : %d ( %s )"
-				},
-				{
-					"type": "mrkdwn",
-					"text": "*Lastest Probe Status & Time*\n>%s | %s"
-				},
-				{
-					"type": "mrkdwn",
-					"text": "*Latest Probe Message*\n>%s"
-				}
-				
-			]
 		}`
 
 	t := SlackTimeFormation(r.StartTime, "")
 
+	message := JSONEscape(r.Message)
+	if r.Status != StatusUp {
+		message = "`" + message + "`"
+	}
+
 	return fmt.Sprintf(json, r.Name, r.Endpoint,
 		r.Stat.UpTime.Round(time.Second), r.Stat.DownTime.Round(time.Second), r.SLA(),
 		r.Stat.Total, StatStatusText(r.Stat, Makerdown),
-		t, r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
+		t, r.Status.Emoji()+" "+r.Status.String(), message)
 }
 
 // StatSlackBlockJSON generate all probes stat message to slack block string
