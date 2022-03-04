@@ -17,7 +17,7 @@ make
 Running the following command for locally test
 
 ```
-go run ./cmd/easeprobe/main.go -f conf/test.yaml 
+go run ./cmd/easeprobe/main.go -f etc/test.yaml 
 ```
 
 ## Configuration

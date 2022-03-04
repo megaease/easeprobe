@@ -37,3 +37,9 @@ notify:
       username: noreply@megaease.com
       password: 644D4u43n
       to: "service@megaease.com;chenhao@megaease.com"
+
+settings:
+  interval: 2m
+  logfile: "test.log"
+  loglevel: "debug"
+  dryrun : true
