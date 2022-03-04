@@ -14,7 +14,7 @@ make
 
 ## Test
 
-Running the following command for locally test
+Running the following command for local test
 
 ```
 go run ./cmd/easeprobe/main.go -f etc/test.yaml 
@@ -48,8 +48,8 @@ http:
     method: GET
 
 tcp:
-  - name: MegaEase SSH (China)
-    host: ssh.megaease.cn:22
+  - name: MegaEase Error (China)
+    host: error.megaease.cn:22
     timeout: 10s
   - name: MegaEase HTTP Service (China)
     host: megaease.cn:80
@@ -64,5 +64,11 @@ notify:
       username: noreply@megaease.com
       password: 644D4u43n
       to: "service@megaease.com;chenhao@megaease.com"
+
+settings:
+  interval: 2m
+  #logfile: "test.log"
+  loglevel: "debug"
+  drynotify : true
 
 ```
