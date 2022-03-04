@@ -12,6 +12,13 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+var config *Conf
+
+// Get return the global configuration
+func Get() *Conf {
+	return config
+}
+
 // LogLevel is the log level
 type LogLevel struct {
 	Level log.Level
@@ -45,7 +52,7 @@ type Settings struct {
 	DefaultInvterval time.Duration `yaml:"interval"`
 	LogFile          string        `yaml:"logfile"`
 	LogLevel         LogLevel      `yaml:"loglevel"`
-	Dryrun           bool          `yaml:"dryrun"`
+	DryNotify        bool          `yaml:"drynotify"`
 
 	logfile *os.File `yaml:"-"`
 }
@@ -58,8 +65,8 @@ type Conf struct {
 	Settings Settings      `yaml:"settings"`
 }
 
-// NewConf read the configuration from yaml
-func NewConf(conf *string) (Conf, error) {
+// New read the configuration from yaml
+func New(conf *string) (Conf, error) {
 	c := Conf{
 		HTTP:   []http.HTTP{},
 		TCP:    []tcp.TCP{},
@@ -68,7 +75,7 @@ func NewConf(conf *string) (Conf, error) {
 			DefaultInvterval: time.Second * 60,
 			LogFile:          "",
 			LogLevel:         LogLevel{log.InfoLevel},
-			Dryrun:           false,
+			DryNotify:        false,
 			logfile:          nil,
 		},
 	}
@@ -85,6 +92,8 @@ func NewConf(conf *string) (Conf, error) {
 	}
 
 	c.initLog()
+
+	config = &c
 
 	log.Infoln("Load the configuration file successfully!")
 	log.Debugf("%v\n", c)

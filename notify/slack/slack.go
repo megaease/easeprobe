@@ -16,39 +16,49 @@ type NotifyConfig struct {
 }
 
 // Kind return the type of Notify
-func (conf NotifyConfig) Kind() string {
+func (c NotifyConfig) Kind() string {
 	return "slack"
 }
 
 // Config configures the log files
-func (conf NotifyConfig) Config() error {
+func (c NotifyConfig) Config() error {
 	return nil
 }
 
 // Notify write the message into the slack
-func (conf NotifyConfig) Notify(result probe.Result) {
+func (c NotifyConfig) Notify(result probe.Result) {
 	log.Infoln("Slack got the notification...")
 	json := result.SlackBlockJSON()
-	err := conf.SendSlackNotification(json)
+	err := c.SendSlackNotification(json)
 	if err != nil {
 		log.Errorf("error %v\n%s", err, json)
 	}
 }
 
 // NotifyStat write the all probe stat message to slack
-func (conf NotifyConfig) NotifyStat(probers []probe.Prober) {
+func (c NotifyConfig) NotifyStat(probers []probe.Prober) {
 	log.Infoln("Slack  Sending the Statstics...")
 	json := probe.StatSlackBlockJSON(probers)
-	err := conf.SendSlackNotification(json)
+	err := c.SendSlackNotification(json)
 	if err != nil {
 		log.Errorf("error %v\n%s", err, json)
 	}
 }
 
+// DryNotify just log the notification message
+func (c NotifyConfig) DryNotify(result probe.Result) {
+	log.Infoln(result.SlackBlockJSON())
+}
+
+// DryNotifyStat just log the notification message
+func (c NotifyConfig) DryNotifyStat(probers []probe.Prober) {
+	log.Infoln(probe.StatSlackBlockJSON(probers))
+}
+
 // SendSlackNotification will post to an 'Incoming Webhook' url setup in Slack Apps. It accepts
 // some text and the slack channel is saved within Slack.
-func (conf NotifyConfig) SendSlackNotification(msg string) error {
-	req, err := http.NewRequest(http.MethodPost, conf.WebhookURL, bytes.NewBuffer([]byte(msg)))
+func (c NotifyConfig) SendSlackNotification(msg string) error {
+	req, err := http.NewRequest(http.MethodPost, c.WebhookURL, bytes.NewBuffer([]byte(msg)))
 	if err != nil {
 		return err
 	}

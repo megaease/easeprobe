@@ -20,47 +20,59 @@ type NotifyConfig struct {
 }
 
 // Kind return the type of Notify
-func (conf NotifyConfig) Kind() string {
+func (c NotifyConfig) Kind() string {
 	return "email"
 }
 
 // Config configures the log files
-func (conf NotifyConfig) Config() error {
+func (c NotifyConfig) Config() error {
 	return nil
 }
 
 // Notify send the result message to the email
-func (conf NotifyConfig) Notify(result probe.Result) {
+func (c NotifyConfig) Notify(result probe.Result) {
 	log.Infoln("Email got the notification...")
 
-	mesage := fmt.Sprintf("%s", result.HTML())
-	if err := conf.SendMail(result.Title(), mesage); err != nil {
+	message := fmt.Sprintf("%s", result.HTML())
+
+	if err := c.SendMail(result.Title(), message); err != nil {
 		log.Errorln(err)
 	}
 }
 
 // NotifyStat send the stat message into the email
-func (conf NotifyConfig) NotifyStat(probers []probe.Prober) {
+func (c NotifyConfig) NotifyStat(probers []probe.Prober) {
 	log.Infoln("Email  Sending the Statstics...")
 
-	mesage := probe.StatHTML(probers)
-	if err := conf.SendMail("Overall SLA Report", mesage); err != nil {
+	message := probe.StatHTML(probers)
+
+	if err := c.SendMail("Overall SLA Report", message); err != nil {
 		log.Errorln(err)
 	}
 }
 
-// SendMail sends the email
-func (conf NotifyConfig) SendMail(subject string, message string) error {
+// DryNotify just log the notification message
+func (c NotifyConfig) DryNotify(result probe.Result) {
+	log.Infoln(result.HTML())
+}
 
-	host, _, err := net.SplitHostPort(conf.Server)
+// DryNotifyStat just log the notification message
+func (c NotifyConfig) DryNotifyStat(probers []probe.Prober) {
+	log.Infoln(probe.StatHTML(probers))
+}
+
+// SendMail sends the email
+func (c NotifyConfig) SendMail(subject string, message string) error {
+
+	host, _, err := net.SplitHostPort(c.Server)
 	if err != nil {
 		return err
 	}
 
-	email := "Notification" + "<" + conf.User + ">"
+	email := "Notification" + "<" + c.User + ">"
 	header := make(map[string]string)
 	header["From"] = email
-	header["To"] = conf.To
+	header["To"] = c.To
 	header["Subject"] = subject
 	header["Content-Type"] = "text/html; charset=UTF-8"
 
@@ -70,23 +82,23 @@ func (conf NotifyConfig) SendMail(subject string, message string) error {
 	}
 	body += "\r\n" + message
 
-	auth := smtp.PlainAuth("", conf.User, conf.Pass, host)
+	auth := smtp.PlainAuth("", c.User, c.Pass, host)
 
-	conn, err := tls.Dial("tcp", conf.Server, nil)
+	conn, err := tls.Dial("tcp", c.Server, nil)
 	if err != nil {
 		return err
 	}
 
-	c, err := smtp.NewClient(conn, host)
+	client, err := smtp.NewClient(conn, host)
 	if err != nil {
 		return err
 	}
-	defer c.Close()
+	defer client.Close()
 
 	// Auth
 	if auth != nil {
-		if ok, _ := c.Extension("AUTH"); ok {
-			if err = c.Auth(auth); err != nil {
+		if ok, _ := client.Extension("AUTH"); ok {
+			if err = client.Auth(auth); err != nil {
 				log.Errorln(err)
 				return err
 			}
@@ -94,7 +106,7 @@ func (conf NotifyConfig) SendMail(subject string, message string) error {
 	}
 
 	// To && From
-	if err = c.Mail(conf.User); err != nil {
+	if err = client.Mail(c.User); err != nil {
 		return err
 	}
 
@@ -102,15 +114,15 @@ func (conf NotifyConfig) SendMail(subject string, message string) error {
 	split := func(r rune) bool {
 		return r == ';' || r == ','
 	}
-	for _, addr := range strings.FieldsFunc(conf.To, split) {
+	for _, addr := range strings.FieldsFunc(c.To, split) {
 
-		if err = c.Rcpt(addr); err != nil {
+		if err = client.Rcpt(addr); err != nil {
 			return err
 		}
 	}
 
 	// Data
-	w, err := c.Data()
+	w, err := client.Data()
 	if err != nil {
 		return err
 	}
@@ -125,5 +137,5 @@ func (conf NotifyConfig) SendMail(subject string, message string) error {
 		return err
 	}
 
-	return c.Quit()
+	return client.Quit()
 }
