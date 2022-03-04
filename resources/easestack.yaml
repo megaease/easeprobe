@@ -1,0 +1,27 @@
+name: easeprobe
+cluster_name: easestack
+namespace: default
+health_check_retry_times: 20
+health_check_interval: 10
+pulse_event_interval: 10
+components:
+- name: easeprobe
+  image: 172.20.2.189:5001/megaease/easeprobe
+  image_version: latest
+  type: Stateless
+  instance_count: 1
+  liveness_probe_command: []
+  readiness_probe_command: []
+  resource_require:
+    cpu: 200m
+    memory: 256Mi
+  configurations:
+  - key: config
+    use_as_file: /opt/config.yaml
+    local_file_name: /home/ubuntu/kube_spec/easeprobe/config.yaml
+    is_sub_path: true
+  resource_limit:
+    cpu: 1200m
+    memory: 2048Mi
+  enable: true
+  container_extensions: {}
