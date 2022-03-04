@@ -48,7 +48,12 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 		}
 	}
 
+	first := true
 	statFn := func() {
+		if first {
+			first = false
+			return
+		}
 		for _, n := range notifies {
 			if dryNotify {
 				n.DryNotifyStat(probers)
@@ -73,11 +78,11 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 		case result := <-notifyChan:
 			// if the status has no change, no need notify
 			if result.PreStatus == result.Status {
-				log.Debugf("Status no change [%s] == [%s]\n, no notification", result.PreStatus, result.Status)
+				log.Debugf("Status no change [%s] == [%s]\n, no notification.\n", result.PreStatus, result.Status)
 				continue
 			}
 			if result.PreStatus == probe.StatusInit && result.Status == probe.StatusUp {
-				log.Debugf("Initial Status [%s] == [%s]\n, no notification", result.PreStatus, result.Status)
+				log.Debugf("Initial Status [%s] == [%s], no notification.\n", result.PreStatus, result.Status)
 				continue
 			}
 			log.Infof("Status changed [%s] ==> [%s]\n", result.PreStatus, result.Status)
