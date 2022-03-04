@@ -2,53 +2,16 @@ package main
 
 import (
 	"flag"
-	"io/ioutil"
 	"os"
 	"time"
 
+	"github.com/megaease/easeprobe/conf"
 	"github.com/megaease/easeprobe/notify"
 	"github.com/megaease/easeprobe/probe"
-	"github.com/megaease/easeprobe/probe/http"
-	"github.com/megaease/easeprobe/probe/tcp"
 
 	"github.com/go-co-op/gocron"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
 )
-
-// Conf is Probe configuration
-type Conf struct {
-	HTTP   []http.HTTP   `yaml:"http"`
-	TCP    []tcp.TCP     `yaml:"tcp"`
-	Notify notify.Config `yaml:"notify"`
-}
-
-func initLog() {
-	log.SetFormatter(&log.TextFormatter{FullTimestamp: true})
-	log.SetOutput(os.Stdout)
-	log.SetLevel(log.DebugLevel)
-}
-
-func readConf(conf *string) (Conf, error) {
-
-	c := Conf{}
-
-	y, err := ioutil.ReadFile(*conf)
-	if err != nil {
-		log.Errorf("error: %v ", err)
-		return c, err
-	}
-
-	err = yaml.Unmarshal(y, &c)
-	if err != nil {
-		log.Errorf("error: %v\n", err)
-		return c, err
-	}
-	log.Infoln("Load the configuration file successfully!")
-	log.Debugf("%v\n", c)
-
-	return c, err
-}
 
 // 1) all of probers send the result to notify channel
 // 2) go through all of notification to notify the result.
@@ -114,8 +77,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 
 func main() {
 
-	initLog()
-
+	dryrun := flag.Bool("d", false, "dry run mode")
 	yamlFile := flag.String("f", "config.yaml", "configuration file")
 	flag.Parse()
 
@@ -124,10 +86,16 @@ func main() {
 		os.Exit(-1)
 	}
 
-	conf, err := readConf(yamlFile)
+	conf, err := conf.NewConf(yamlFile)
 	if err != nil {
 		log.Fatal("Fatal: Cannot read the YAML configuration file!")
 		os.Exit(-1)
+	}
+	defer conf.CloseLogFile()
+
+	// if dry run mode is specificed in command line, overwrite the configuration
+	if *dryrun {
+		conf.Settings.Dryrun = *dryrun
 	}
 
 	// Probers
