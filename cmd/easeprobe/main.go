@@ -48,12 +48,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 		}
 	}
 
-	first := true
 	statFn := func() {
-		if first {
-			first = false
-			return
-		}
 		for _, n := range notifies {
 			if dryNotify {
 				n.DryNotifyStat(probers)
