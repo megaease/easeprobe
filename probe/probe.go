@@ -126,6 +126,7 @@ type Result struct {
 	StartTime      time.Time      `json:"time"`
 	StartTimestamp int64          `json:"timestamp"`
 	RoundTripTime  ConfigDuration `json:"rtt"`
+	TimeFormat     string         `json:"-"`
 	Status         Status         `json:"status"`
 	PreStatus      Status         `json:"prestatus"`
 	Message        string         `json:"message"`
@@ -228,7 +229,8 @@ func (r *Result) HTML() string {
 		` + HTMLFooter()
 
 	rtt := r.RoundTripTime.Round(time.Millisecond)
-	return fmt.Sprintf(html, r.Name, r.Endpoint, r.Status.Emoji(), r.Status.String(), r.StartTime, rtt, r.Message)
+	return fmt.Sprintf(html, r.Name, r.Endpoint, r.Status.Emoji(), r.Status.String(),
+		r.StartTime.Format(r.TimeFormat), rtt, r.Message)
 }
 
 // SlackBlockJSON convert the object to Slack notification
@@ -263,8 +265,9 @@ func (r *Result) SlackBlockJSON() string {
 	}
 	`
 	rtt := r.RoundTripTime.Round(time.Millisecond)
-	body := fmt.Sprintf("*%s*\\n>%s %s - ⏱ %s\n>%s", r.Title(), r.Status.Emoji(), r.Endpoint, rtt, JSONEscape(r.Message))
-	context := SlackTimeFormation(r.StartTime, " probed at ")
+	body := fmt.Sprintf("*%s*\\n>%s %s - ⏱ %s\n>%s", 
+		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, JSONEscape(r.Message))
+	context := SlackTimeFormation(r.StartTime, " probed at ", r.TimeFormat)
 	return fmt.Sprintf(json, body, context)
 }
 
@@ -274,7 +277,8 @@ func (r *Result) StatText() string {
 	return fmt.Sprintf(text, r.Name, r.Endpoint,
 		r.Stat.UpTime.Round(time.Second), r.Stat.DownTime.Round(time.Second), r.SLA(),
 		r.Stat.Total, StatStatusText(r.Stat, Text),
-		time.Now().UTC().Format(time.UnixDate), r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
+		time.Now().UTC().Format(r.TimeFormat),
+		r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
 }
 
 // StatHTMLSection return the HTML format string to stat
@@ -290,14 +294,15 @@ func (r *Result) StatHTMLSection() string {
 		<td class="data"><b>Probe-Times</b><br><b>Total</b>: %d ( %s )</td>
 	</tr>
 	<tr>
-		<td  class="data" colspan="3"><b>Last Probe</b>%s - %s<br>%s<td>
+		<td  class="data" colspan="3"><b>Last Probe</b>: %s - %s<br>%s<td>
 	</tr>
 	`
 	return fmt.Sprintf(html, r.Name, r.Endpoint,
 		r.Stat.UpTime.Round(time.Second), r.Stat.DownTime.Round(time.Second),
 		r.SLA(),
 		r.Stat.Total, StatStatusText(r.Stat, HTML),
-		time.Now().UTC().Format(time.UnixDate), r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
+		time.Now().UTC().Format(r.TimeFormat),
+		r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
 }
 
 // StatHTML return a full stat report
@@ -331,7 +336,7 @@ func (r *Result) StatSlackBlockSectionJSON() string {
 			}
 		}`
 
-	t := SlackTimeFormation(r.StartTime, "")
+	t := SlackTimeFormation(r.StartTime, "", r.TimeFormat)
 
 	message := JSONEscape(r.Message)
 	if r.Status != StatusUp {
@@ -380,7 +385,7 @@ func StatSlackBlockJSON(probers []Prober) string {
 			]
 		}`
 
-		time := SlackTimeFormation(time.Now(), " reported at ")
+		time := SlackTimeFormation(time.Now(), " reported at ", probers[len(probers)-1].Result().TimeFormat)
 		json += fmt.Sprintf(context, time)
 	}
 
@@ -428,10 +433,10 @@ func StatStatusText(s Stat, t Format) string {
 	return strings.TrimSpace(status)
 }
 
-//SlackTimeFormation return the slack time formation
-func SlackTimeFormation(t time.Time, act string) string {
-	return fmt.Sprintf("<!date^%d^%s{date_num} {time_secs}|%s %s>",
-		t.Unix(), act, act, t.UTC().Format(time.UnixDate))
+// SlackTimeFormation return the slack time formation
+func SlackTimeFormation(t time.Time, act string, format string) string {
+	return fmt.Sprintf("<!date^%d^%s{date_num} {time_secs}|%s%s>",
+		t.Unix(), act, act, t.UTC().Format(format))
 }
 
 // HTMLHeader return the HTML head

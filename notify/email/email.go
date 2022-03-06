@@ -31,24 +31,23 @@ func (c NotifyConfig) Config() error {
 
 // Notify send the result message to the email
 func (c NotifyConfig) Notify(result probe.Result) {
-	log.Infoln("Email got the notification...")
-
 	message := fmt.Sprintf("%s", result.HTML())
 
 	if err := c.SendMail(result.Title(), message); err != nil {
 		log.Errorln(err)
 	}
+	log.Infof("Sent the email notification for %s (%s)!\n", result.Name, result.Endpoint)
 }
 
 // NotifyStat send the stat message into the email
 func (c NotifyConfig) NotifyStat(probers []probe.Prober) {
-	log.Infoln("Email  Sending the Statstics...")
-
 	message := probe.StatHTML(probers)
 
 	if err := c.SendMail("Overall SLA Report", message); err != nil {
 		log.Errorln(err)
 	}
+	log.Infoln("Sent the Statstics to Email Successfully!")
+
 }
 
 // DryNotify just log the notification message

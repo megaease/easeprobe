@@ -37,6 +37,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 			log.Errorf("error: %v\n", err)
 			continue
 		}
+		p.Result().TimeFormat = conf.Get().Settings.TimeFormat
 		go probeFn(p)
 	}
 
@@ -48,6 +49,8 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 		}
 	}
 
+	cron := gocron.NewScheduler(time.UTC)
+
 	statFn := func() {
 		for _, n := range notifies {
 			if dryNotify {
@@ -56,8 +59,10 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 				go n.NotifyStat(probers)
 			}
 		}
+		_, t := cron.NextRun()
+		log.Infof("Next Time to send the SLA Report - %s\n", t.Format("2006-01-02 15:04:05 UTC"))
 	}
-	cron := gocron.NewScheduler(time.UTC)
+
 	if dryNotify {
 		cron.Every(1).Minute().Do(statFn)
 	} else {
@@ -73,14 +78,17 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 		case result := <-notifyChan:
 			// if the status has no change, no need notify
 			if result.PreStatus == result.Status {
-				log.Debugf("Status no change [%s] == [%s]\n, no notification.\n", result.PreStatus, result.Status)
+				log.Debugf("%s (%s) - Status no change [%s] == [%s]\n, no notification.\n",
+					result.Name, result.Endpoint, result.PreStatus, result.Status)
 				continue
 			}
 			if result.PreStatus == probe.StatusInit && result.Status == probe.StatusUp {
-				log.Debugf("Initial Status [%s] == [%s], no notification.\n", result.PreStatus, result.Status)
+				log.Debugf("%s (%s) - Initial Status [%s] == [%s], no notification.\n",
+					result.Name, result.Endpoint, result.PreStatus, result.Status)
 				continue
 			}
-			log.Infof("Status changed [%s] ==> [%s]\n", result.PreStatus, result.Status)
+			log.Infof("%s (%s) - Status changed [%s] ==> [%s]\n",
+				result.Name, result.Endpoint, result.PreStatus, result.Status)
 			for _, n := range notifies {
 				if dryNotify {
 					n.DryNotify(result)
@@ -106,7 +114,7 @@ func main() {
 
 	conf, err := conf.New(yamlFile)
 	if err != nil {
-		log.Fatal("Fatal: Cannot read the YAML configuration file!")
+		log.Fatalln("Fatal: Cannot read the YAML configuration file!")
 		os.Exit(-1)
 	}
 	defer conf.CloseLogFile()

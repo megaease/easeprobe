@@ -31,8 +31,8 @@ func (c NotifyConfig) Config() error {
 
 // Notify write the message into the file
 func (c NotifyConfig) Notify(result probe.Result) {
-	logrus.Infoln("LogFile got the notification...")
 	log.Println(result.JSON())
+	logrus.Infof("Logged the notification for %s (%s)!\n", result.Name, result.Endpoint)
 }
 
 // NotifyStat write the stat message into the file
@@ -41,6 +41,7 @@ func (c NotifyConfig) NotifyStat(probers []probe.Prober) {
 	for _, p := range probers {
 		log.Println(p.Result())
 	}
+	logrus.Infoln("Logged the Statstics into %s!", c.File)
 }
 
 // DryNotify just log the notification message

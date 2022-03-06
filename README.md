@@ -6,7 +6,7 @@ Simple, Standalone, health check tools, written in Go.
 
 Compiler `Go 1.17+`
 
-Using `make` to make the binary file. the target is under `build/bin` directory
+Use `make` to make the binary file. the target is under the `build/bin` directory
 
 ```
 make
