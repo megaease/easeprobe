@@ -6,7 +6,7 @@ http:
   - name: MegaEase Cloud (China)
     url: https://dev.megaease.cn/megacloud/app/
   - name: Prometheus (AWS China)
-    url: http://prometheus:9090/grap
+    url: http://prometheus:9090/graph
   - name: ElasticSearch-0 (AWS China)
     url:  http://elasticsearch-0.elasticsearch:9200
   - name: ElasticSearch-1 (AWS China)
