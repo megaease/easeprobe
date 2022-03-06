@@ -27,22 +27,22 @@ func (c NotifyConfig) Config() error {
 
 // Notify write the message into the slack
 func (c NotifyConfig) Notify(result probe.Result) {
-	log.Infoln("Slack got the notification...")
 	json := result.SlackBlockJSON()
 	err := c.SendSlackNotification(json)
 	if err != nil {
 		log.Errorf("error %v\n%s", err, json)
 	}
+	log.Infof("Sent the Slack notification for %s (%s)!\n", result.Name, result.Endpoint)
 }
 
 // NotifyStat write the all probe stat message to slack
 func (c NotifyConfig) NotifyStat(probers []probe.Prober) {
-	log.Infoln("Slack  Sending the Statstics...")
 	json := probe.StatSlackBlockJSON(probers)
 	err := c.SendSlackNotification(json)
 	if err != nil {
 		log.Errorf("error %v\n%s", err, json)
 	}
+	log.Infoln("Sent the Statstics to Slack Successfully!")
 }
 
 // DryNotify just log the notification message

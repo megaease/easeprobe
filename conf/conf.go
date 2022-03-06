@@ -53,6 +53,7 @@ type Settings struct {
 	LogFile          string        `yaml:"logfile"`
 	LogLevel         LogLevel      `yaml:"loglevel"`
 	DryNotify        bool          `yaml:"drynotify"`
+	TimeFormat       string        `yaml:"timeformat"`
 
 	logfile *os.File `yaml:"-"`
 }
@@ -76,6 +77,7 @@ func New(conf *string) (Conf, error) {
 			LogFile:          "",
 			LogLevel:         LogLevel{log.InfoLevel},
 			DryNotify:        false,
+			TimeFormat:       "2006-01-02 15:04:05 UTC",
 			logfile:          nil,
 		},
 	}
@@ -109,8 +111,8 @@ func (conf *Conf) initLog() {
 		// open a file
 		f, err := os.OpenFile(conf.Settings.LogFile, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0660)
 		if err != nil {
-			log.Errorf("Error when opening log file: %v", err)
-			log.Info("Using Standard Output as the log output...")
+			log.Warnf("Error when opening log file: %v", err)
+			log.Infoln("Using Standard Output as the log output...")
 			log.SetOutput(os.Stdout)
 		} else {
 			conf.Settings.logfile = f
