@@ -38,6 +38,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 			continue
 		}
 		p.Result().TimeFormat = conf.Get().Settings.TimeFormat
+		log.Infof("Ready to monitor(%s): %s - %s\n", p.Kind(), p.Result().Name, p.Result().Endpoint)
 		go probeFn(p)
 	}
 
@@ -47,6 +48,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 			log.Errorf("error: %v\n", err)
 			continue
 		}
+		log.Infof("Successfully setup the notify channel: %s\n", n.Kind())
 	}
 
 	cron := gocron.NewScheduler(time.UTC)
@@ -60,13 +62,14 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 			}
 		}
 		_, t := cron.NextRun()
-		log.Infof("Next Time to send the SLA Report - %s\n", t.Format("2006-01-02 15:04:05 UTC"))
+		log.Infof("Next Time to send the SLA Report - %s\n", t.Format(conf.Get().Settings.TimeFormat))
 	}
 
 	if dryNotify {
 		cron.Every(1).Minute().Do(statFn)
 	} else {
 		cron.Every(1).Day().At("00:00").Do(statFn)
+		log.Infoln("Preparing to send the daily SLA report at 00:00 UTC time...")
 	}
 
 	cron.StartAsync()
