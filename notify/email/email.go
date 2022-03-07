@@ -36,7 +36,7 @@ func (c NotifyConfig) Notify(result probe.Result) {
 	if err := c.SendMail(result.Title(), message); err != nil {
 		log.Errorln(err)
 	}
-	log.Infof("Sent the email notification for %s (%s)!\n", result.Name, result.Endpoint)
+	log.Infof("Sent the email notification for %s (%s)!", result.Name, result.Endpoint)
 }
 
 // NotifyStat send the stat message into the email

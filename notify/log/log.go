@@ -22,7 +22,7 @@ func (c NotifyConfig) Kind() string {
 func (c NotifyConfig) Config() error {
 	file, err := os.OpenFile(c.File, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
-		logrus.Errorf("error: %s\n", err)
+		logrus.Errorf("error: %s", err)
 		return err
 	}
 	log.SetOutput(file)
@@ -32,7 +32,7 @@ func (c NotifyConfig) Config() error {
 // Notify write the message into the file
 func (c NotifyConfig) Notify(result probe.Result) {
 	log.Println(result.JSON())
-	logrus.Infof("Logged the notification for %s (%s)!\n", result.Name, result.Endpoint)
+	logrus.Infof("Logged the notification for %s (%s)!", result.Name, result.Endpoint)
 }
 
 // NotifyStat write the stat message into the file

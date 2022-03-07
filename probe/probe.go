@@ -3,9 +3,10 @@ package probe
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // Format is the format of text
@@ -169,7 +170,7 @@ func (r *Result) DoStat(d time.Duration) {
 func (r *Result) JSON() string {
 	j, err := json.Marshal(&r)
 	if err != nil {
-		log.Printf("error: %v\n", err)
+		log.Errorf("error: %v", err)
 		return ""
 	}
 	return string(j)
@@ -179,7 +180,7 @@ func (r *Result) JSON() string {
 func (r *Result) JSONIndent() string {
 	j, err := json.MarshalIndent(&r, "", "    ")
 	if err != nil {
-		log.Printf("error: %v\n", err)
+		log.Errorf("error: %v", err)
 		return ""
 	}
 	return string(j)

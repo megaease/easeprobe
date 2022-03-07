@@ -90,7 +90,7 @@ func (h *HTTP) Config() error {
 	if len(h.CA) > 0 {
 		cert, err := ioutil.ReadFile("./certs/ca.crt")
 		if err != nil {
-			log.Errorf("could not open certificate file: %v\n", err)
+			log.Errorf("could not open certificate file: %v", err)
 			return err
 		}
 		caCertPool := x509.NewCertPool()
@@ -99,7 +99,7 @@ func (h *HTTP) Config() error {
 		log.Info("Load key pairs - ", h.Cert, h.Key)
 		certificate, err := tls.LoadX509KeyPair(h.Cert, h.Key)
 		if err != nil {
-			log.Errorf("could not load certificate: %v\n", err)
+			log.Errorf("could not load certificate: %v", err)
 			return err
 		}
 		h.client = &http.Client{

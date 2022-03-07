@@ -70,7 +70,7 @@ func (t *TCP) Probe() probe.Result {
 	status := probe.StatusUp
 	if err != nil {
 		t.result.Message = fmt.Sprintf("Error: %v", err)
-		log.Errorf("error: %v\n", err)
+		log.Errorf("error: %v", err)
 		status = probe.StatusDown
 	} else {
 		t.result.Message = "TCP Connection Established Successfully!"
