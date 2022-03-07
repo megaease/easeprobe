@@ -1,0 +1,9 @@
+tasks:
+  - name: update_configuration
+    type: ConfigUpdateTask
+    configs:
+      - component: easeprobe
+        items:
+          - file: ./etc/megacloud.cn.k8s.yaml
+            map_to_file: /opt/config.yaml
+            is_sub_path: "true"
