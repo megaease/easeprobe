@@ -8,11 +8,11 @@ http:
   - name: Prometheus (AWS China)
     url: http://prometheus:9090/graph
   - name: ElasticSearch-0 (AWS China)
-    url:  http://elasticsearch-0.elasticsearch:9200
+    url: http://elasticsearch-0.elasticsearch:9200
   - name: ElasticSearch-1 (AWS China)
-    url:  http://elasticsearch-1.elasticsearch:9200
+    url: http://elasticsearch-1.elasticsearch:9200
   - name: ElasticSearch-2 (AWS China)
-    url:  http://elasticsearch-2.elasticsearch:9200
+    url: http://elasticsearch-2.elasticsearch:9200
   - name: Eureka (AWS China)
     url: http://eureka.default:8761
   - name: EaseService-Alert (AWS China)
@@ -33,6 +33,8 @@ tcp:
 notify:
   slack:
     - webhook: "https://hooks.slack.com/services/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"
+  discord:
+    - webhook: "https://discord.com/api/webhooks/950321965955186728/JyNx-l-2cp85MbjH5pmeFDfSaOB3-d97F29yhhrcNoE8G15sYmQzbjPBnypJLqppWxM7"
   email:
     - server: smtp.exmail.qq.com:465
       username: noreply@megaease.com

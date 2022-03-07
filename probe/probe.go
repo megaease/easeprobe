@@ -424,7 +424,7 @@ func StatStatusText(s Stat, t Format) string {
 	format := "%s : %d \t"
 	switch t {
 	case Makerdown:
-		format = "*%s* : %d \t"
+		format = "**%s** : `%d` \t"
 	case HTML:
 		format = "<b>%s</b> : %d \t"
 	}

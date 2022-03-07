@@ -35,7 +35,7 @@ notify:
     - webhook: "https://hooks.slack.com/services/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"
       dry : true
   discord:
-    - webhook :"https://discord.com/api/webhooks/950321965955186728/JyNx-l-2cp85MbjH5pmeFDfSaOB3-d97F29yhhrcNoE8G15sYmQzbjPBnypJLqppWxM7"
+    - webhook: "https://discord.com/api/webhooks/950321965955186728/JyNx-l-2cp85MbjH5pmeFDfSaOB3-d97F29yhhrcNoE8G15sYmQzbjPBnypJLqppWxM7"
   email:
     - server: smtp.exmail.qq.com:465
       username: noreply@megaease.com

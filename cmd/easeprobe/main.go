@@ -58,6 +58,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 			if dryNotify {
 				n.DryNotifyStat(probers)
 			} else {
+				log.Debugf("%s notifying the SLA...", n.Kind())
 				go n.NotifyStat(probers)
 			}
 		}
@@ -67,6 +68,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 
 	if dryNotify {
 		cron.Every(1).Minute().Do(statFn)
+		log.Infoln("Preparing to send the  SLA report in every minute...")
 	} else {
 		cron.Every(1).Day().At("00:00").Do(statFn)
 		log.Infoln("Preparing to send the daily SLA report at 00:00 UTC time...")
@@ -81,7 +83,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 		case result := <-notifyChan:
 			// if the status has no change, no need notify
 			if result.PreStatus == result.Status {
-				log.Debugf("%s (%s) - Status no change [%s] == [%s]\n, no notification.",
+				log.Debugf("%s (%s) - Status no change [%s] == [%s], no notification.",
 					result.Name, result.Endpoint, result.PreStatus, result.Status)
 				continue
 			}
@@ -155,6 +157,10 @@ func main() {
 
 	for i := 0; i < len(conf.Notify.Slack); i++ {
 		notifies = append(notifies, conf.Notify.Slack[i])
+	}
+
+	for i := 0; i < len(conf.Notify.Discord); i++ {
+		notifies = append(notifies, conf.Notify.Discord[i])
 	}
 
 	done := make(chan bool)

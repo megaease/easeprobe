@@ -83,6 +83,7 @@ func (c NotifyConfig) SendSlackNotification(msg string) error {
 		return err
 	}
 
+	defer resp.Body.Close()
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(resp.Body)
 	if buf.String() != "ok" {
