@@ -17,6 +17,7 @@ type NotifyConfig struct {
 	User   string `yaml:"username"`
 	Pass   string `yaml:"password"`
 	To     string `yaml:"to"`
+	Dry    bool   `yaml:"dry"`
 }
 
 // Kind return the type of Notify
@@ -26,11 +27,18 @@ func (c NotifyConfig) Kind() string {
 
 // Config configures the log files
 func (c NotifyConfig) Config() error {
+	if c.Dry {
+		log.Infof("Notification %s is running on Dry mode!", c.Kind())
+	}
 	return nil
 }
 
 // Notify send the result message to the email
 func (c NotifyConfig) Notify(result probe.Result) {
+	if c.Dry {
+		c.DryNotify(result)
+		return
+	}
 	message := fmt.Sprintf("%s", result.HTML())
 
 	if err := c.SendMail(result.Title(), message); err != nil {
@@ -41,6 +49,10 @@ func (c NotifyConfig) Notify(result probe.Result) {
 
 // NotifyStat send the stat message into the email
 func (c NotifyConfig) NotifyStat(probers []probe.Prober) {
+	if c.Dry {
+		c.DryNotifyStat(probers)
+		return
+	}
 	message := probe.StatHTML(probers)
 
 	if err := c.SendMail("Overall SLA Report", message); err != nil {

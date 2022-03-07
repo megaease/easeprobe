@@ -13,6 +13,7 @@ import (
 // NotifyConfig is the slack notification configuration
 type NotifyConfig struct {
 	WebhookURL string `yaml:"webhook"`
+	Dry        bool   `yaml:"dry"`
 }
 
 // Kind return the type of Notify
@@ -22,11 +23,18 @@ func (c NotifyConfig) Kind() string {
 
 // Config configures the log files
 func (c NotifyConfig) Config() error {
+	if c.Dry {
+		log.Infof("Notification %s is running on Dry mode!", c.Kind())
+	}
 	return nil
 }
 
 // Notify write the message into the slack
 func (c NotifyConfig) Notify(result probe.Result) {
+	if c.Dry {
+		c.DryNotify(result)
+		return
+	}
 	json := result.SlackBlockJSON()
 	err := c.SendSlackNotification(json)
 	if err != nil {
@@ -37,6 +45,10 @@ func (c NotifyConfig) Notify(result probe.Result) {
 
 // NotifyStat write the all probe stat message to slack
 func (c NotifyConfig) NotifyStat(probers []probe.Prober) {
+	if c.Dry {
+		c.DryNotifyStat(probers)
+		return
+	}
 	json := probe.StatSlackBlockJSON(probers)
 	err := c.SendSlackNotification(json)
 	if err != nil {

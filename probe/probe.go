@@ -266,7 +266,7 @@ func (r *Result) SlackBlockJSON() string {
 	}
 	`
 	rtt := r.RoundTripTime.Round(time.Millisecond)
-	body := fmt.Sprintf("*%s*\\n>%s %s - ⏱ %s\n>%s", 
+	body := fmt.Sprintf("*%s*\\n>%s %s - ⏱ %s\n>%s",
 		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, JSONEscape(r.Message))
 	context := SlackTimeFormation(r.StartTime, " probed at ", r.TimeFormat)
 	return fmt.Sprintf(json, body, context)
