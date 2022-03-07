@@ -89,7 +89,7 @@ func New(conf *string) (Conf, error) {
 
 	err = yaml.Unmarshal(y, &c)
 	if err != nil {
-		log.Errorf("error: %v\n", err)
+		log.Errorf("error: %v", err)
 		return c, err
 	}
 
@@ -98,7 +98,7 @@ func New(conf *string) (Conf, error) {
 	config = &c
 
 	log.Infoln("Load the configuration file successfully!")
-	log.Debugf("%v\n", c)
+	log.Debugf("%v", c)
 	return c, err
 }
 

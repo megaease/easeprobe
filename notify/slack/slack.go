@@ -32,7 +32,7 @@ func (c NotifyConfig) Notify(result probe.Result) {
 	if err != nil {
 		log.Errorf("error %v\n%s", err, json)
 	}
-	log.Infof("Sent the Slack notification for %s (%s)!\n", result.Name, result.Endpoint)
+	log.Infof("Sent the Slack notification for %s (%s)!", result.Name, result.Endpoint)
 }
 
 // NotifyStat write the all probe stat message to slack

@@ -25,7 +25,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 	probeFn := func(p probe.Prober) {
 		for {
 			res := p.Probe()
-			log.Debugf("%s: %s\n", p.Kind(), res.JSON())
+			log.Debugf("%s: %s", p.Kind(), res.JSON())
 			notifyChan <- res
 			time.Sleep(p.Interval())
 		}
@@ -34,21 +34,21 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 	for _, p := range probers {
 		err := p.Config()
 		if err != nil {
-			log.Errorf("error: %v\n", err)
+			log.Errorf("error: %v", err)
 			continue
 		}
 		p.Result().TimeFormat = conf.Get().Settings.TimeFormat
-		log.Infof("Ready to monitor(%s): %s - %s\n", p.Kind(), p.Result().Name, p.Result().Endpoint)
+		log.Infof("Ready to monitor(%s): %s - %s", p.Kind(), p.Result().Name, p.Result().Endpoint)
 		go probeFn(p)
 	}
 
 	for _, n := range notifies {
 		err := n.Config()
 		if err != nil {
-			log.Errorf("error: %v\n", err)
+			log.Errorf("error: %v", err)
 			continue
 		}
-		log.Infof("Successfully setup the notify channel: %s\n", n.Kind())
+		log.Infof("Successfully setup the notify channel: %s", n.Kind())
 	}
 
 	cron := gocron.NewScheduler(time.UTC)
@@ -62,7 +62,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 			}
 		}
 		_, t := cron.NextRun()
-		log.Infof("Next Time to send the SLA Report - %s\n", t.Format(conf.Get().Settings.TimeFormat))
+		log.Infof("Next Time to send the SLA Report - %s", t.Format(conf.Get().Settings.TimeFormat))
 	}
 
 	if dryNotify {
@@ -81,16 +81,16 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 		case result := <-notifyChan:
 			// if the status has no change, no need notify
 			if result.PreStatus == result.Status {
-				log.Debugf("%s (%s) - Status no change [%s] == [%s]\n, no notification.\n",
+				log.Debugf("%s (%s) - Status no change [%s] == [%s]\n, no notification.",
 					result.Name, result.Endpoint, result.PreStatus, result.Status)
 				continue
 			}
 			if result.PreStatus == probe.StatusInit && result.Status == probe.StatusUp {
-				log.Debugf("%s (%s) - Initial Status [%s] == [%s], no notification.\n",
+				log.Debugf("%s (%s) - Initial Status [%s] == [%s], no notification.",
 					result.Name, result.Endpoint, result.PreStatus, result.Status)
 				continue
 			}
-			log.Infof("%s (%s) - Status changed [%s] ==> [%s]\n",
+			log.Infof("%s (%s) - Status changed [%s] ==> [%s]",
 				result.Name, result.Endpoint, result.PreStatus, result.Status)
 			for _, n := range notifies {
 				if dryNotify {
