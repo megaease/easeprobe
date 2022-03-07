@@ -1,6 +1,7 @@
 package notify
 
 import (
+	"github.com/megaease/easeprobe/notify/discord"
 	"github.com/megaease/easeprobe/notify/email"
 	"github.com/megaease/easeprobe/notify/log"
 	"github.com/megaease/easeprobe/notify/slack"
@@ -9,9 +10,10 @@ import (
 
 //Config is the notify configuration
 type Config struct {
-	Log   []log.NotifyConfig   `yaml:"log"`
-	Email []email.NotifyConfig `yaml:"email"`
-	Slack []slack.NotifyConfig `yaml:"slack"`
+	Log     []log.NotifyConfig     `yaml:"log"`
+	Email   []email.NotifyConfig   `yaml:"email"`
+	Slack   []slack.NotifyConfig   `yaml:"slack"`
+	Discord []discord.NotifyConfig `yaml:"discord"`
 }
 
 // Notify is the configuration of the Notify
