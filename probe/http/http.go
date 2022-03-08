@@ -136,13 +136,15 @@ func (h *HTTP) Probe() probe.Result {
 		req.Header.Set(k, v)
 	}
 
+	// client close the connection
+	req.Close = true
+
 	now := time.Now()
 	h.result.StartTime = now
 	h.result.StartTimestamp = now.UnixMilli()
 
 	resp, err := h.client.Do(req)
 	h.result.RoundTripTime.Duration = time.Since(now)
-
 	status := probe.StatusUp
 	if err != nil {
 		h.result.Message = fmt.Sprintf("Error: %v", err)
@@ -151,6 +153,10 @@ func (h *HTTP) Probe() probe.Result {
 	} else {
 		// Read the response body
 		defer resp.Body.Close()
+		response, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Debugf("%s", string(response))
+		}
 		if resp.StatusCode >= 500 {
 			h.result.Message = fmt.Sprintf("Error: HTTP Status Code is %d", resp.StatusCode)
 			status = probe.StatusDown
