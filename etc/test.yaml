@@ -20,6 +20,32 @@ http:
     url: https://megaease.com
     method: GET
 
+  - name: Microsoft
+    url: https://www.microsoft.com
+  - name: Github
+    url: https://github.com 
+  - name: USA Today
+    url: https://www.usatoday.com/
+  - name: Los Angeles Times
+    url: https://www.latimes.com/
+  - name: NBC
+    url: https://www.nbc.com/
+  - name: 国务院公报 - Department of State Bulletin
+    url: http://www.findarticles.com/
+  - name: 华盛顿明星报 - Washington Star
+    url: http://www.washingtonstar.com/
+  - name: 美国新闻与世界报道 - U.S. News &World Report 
+    url: http://www.usnews.com
+
+  - name: Douban
+    url: https://douban.com
+  - name: Sina
+    url: https://www.sina.com.cn
+  - name: Sohu
+    url: https://www.sohu.com
+  - name: 163
+    url: https://www.163.com 
+
 tcp:
   - name: MegaEase Error (China)
     host: error.megaease.cn:22
