@@ -20,6 +20,31 @@ http:
   - name: EaseStash (AWS China)
     url: http://easestash.default:19080
 
+  - name: EaseService-Gateway (AWS China)
+    url: http://easeservice-gateway:38010/actuator/health
+  - name: EaseService-Registry (AWS China)
+    url: http://easeservice-mgmt-registry.default:38011/actuator/health
+  - name: EaseService-Governance (AWS China)
+    url: http://easeservice-mgmt-governance:38012/actuator/health
+  - name: EaseService-Control (AWS China)
+    url: http://easeservice-mgmt-control:38013/actuator/health
+  - name: EaseService-Mesh (AWS China)
+    url: http://easeservice-mgmt-mesh:38013/actuator/health
+  - name: EaseService-Notification (AWS China)
+    url: http://easeservice-mgmt-notification:38013/actuator/health 
+  - name: EaseGateway-UI-Server (AWS China)
+    url: http://easegateway-ui-server:37080/actuator/health
+  - name: EaseService-Monitor (AWS China)
+    url: http://easeservice-mgmt-monitor:38014/actuator/health
+  - name: EaseService-API-Management (AWS China)
+    url: http://easeservice-mgmt-apimgmt:38015/actuator/health
+  - name: EaseService-Stack (AWS China)
+    url: http://easeservice-mgmt-stack:38040/actuator/health
+
+
+  - name: EaseSErvice-Ansible (AWS China)
+    url:  http://easeservice-ansible:37070/actuator/health
+
 tcp:
   - name: Redis (AWS China)
     host: redis.default:6379
