@@ -53,6 +53,7 @@ type Settings struct {
 	LogFile          string        `yaml:"logfile"`
 	LogLevel         LogLevel      `yaml:"loglevel"`
 	DryNotify        bool          `yaml:"drynotify"`
+	Debug            bool          `yaml:"debug"`
 	TimeFormat       string        `yaml:"timeformat"`
 
 	logfile *os.File `yaml:"-"`

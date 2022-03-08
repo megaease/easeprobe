@@ -73,6 +73,7 @@ settings:
   interval: 2m
   #logfile: "test.log"
   loglevel: "debug"
+  debug: true
   #drynotify : true
   # Date format
   # Date

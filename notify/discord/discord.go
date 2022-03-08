@@ -185,7 +185,7 @@ func (c NotifyConfig) NewField(result probe.Result) Fields {
 	return Fields{
 		Name:   fmt.Sprintf("%s", result.Name),
 		Value:  desc,
-		Inline: true,
+		Inline: false,
 	}
 }
 
@@ -206,6 +206,9 @@ func (c NotifyConfig) NewEmbeds(probers []probe.Prober) Discord {
 		idx := len(discord.Embeds) - 1
 		discord.Embeds[idx].Fields = append(discord.Embeds[idx].Fields, c.NewField(*p.Result()))
 		cnt++
+		if cnt > 250 {
+			break
+		}
 	}
 
 	return discord
