@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/megaease/easeprobe/probe"
@@ -169,7 +170,7 @@ func (c NotifyConfig) NewEmbed(result probe.Result) Embed {
 }
 
 // NewField new a Field object from a result
-func (c NotifyConfig) NewField(result probe.Result) Fields {
+func (c NotifyConfig) NewField(result probe.Result, inline bool) Fields {
 	message := "%s\n" +
 		"**Availability**\n>\t" + " **Up**:  `%s`  **Down** `%s`  -  **SLA**: `%.2f %%`" +
 		"\n**Probe Times**\n>\t**Total** : `%d` ( %s )" +
@@ -182,10 +183,17 @@ func (c NotifyConfig) NewField(result probe.Result) Fields {
 		result.StartTime.UTC().Format(result.TimeFormat), result.Status.Emoji()+" "+result.Status.String(),
 		result.Message)
 
+	line := ""
+	if !inline {
+		len := (45 - len(result.Name)) / 2
+		if len > 0 {
+			line = strings.Repeat("-", len)
+		}
+	}
 	return Fields{
-		Name:   fmt.Sprintf("%s", result.Name),
+		Name:   fmt.Sprintf("%s %s %s", line, result.Name, line),
 		Value:  desc,
-		Inline: false,
+		Inline: inline,
 	}
 }
 
@@ -204,7 +212,7 @@ func (c NotifyConfig) NewEmbeds(probers []probe.Prober) Discord {
 			discord.Embeds = append(discord.Embeds, c.NewEmbed(*p.Result()))
 		}
 		idx := len(discord.Embeds) - 1
-		discord.Embeds[idx].Fields = append(discord.Embeds[idx].Fields, c.NewField(*p.Result()))
+		discord.Embeds[idx].Fields = append(discord.Embeds[idx].Fields, c.NewField(*p.Result(), true))
 		cnt++
 		if cnt > 250 {
 			break
