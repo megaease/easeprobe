@@ -70,7 +70,8 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 		cron.Every(1).Minute().Do(statFn)
 		log.Infoln("Preparing to send the  SLA report in every minute...")
 	} else {
-		cron.Every(1).Day().At("00:00").Do(statFn)
+		cron.Every(1).Minute().Do(statFn)
+		//cron.Every(1).Day().At("00:00").Do(statFn)
 		log.Infoln("Preparing to send the daily SLA report at 00:00 UTC time...")
 	}
 

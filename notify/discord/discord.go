@@ -15,6 +15,16 @@ import (
 // - Documents: https://birdie0.github.io/discord-webhooks-guide/index.html
 // - Using https://discohook.org/ to preview
 
+// Limitation - https://discordjs.guide/popular-topics/embeds.html#embed-limits
+// Embed titles are limited to 256 characters
+// Embed descriptions are limited to 4096 characters
+// There can be up to 25 fields
+// A field's name is limited to 256 characters and its value to 1024 characters
+// The footer text is limited to 2048 characters
+// The author name is limited to 256 characters
+// The sum of all characters from all embed structures in a message must not exceed 6000 characters
+// 10 embeds can be sent per message
+
 // Thumbnail use thumbnail in the embed. You can set only url of the thumbnail.
 // There is no way to set width/height of the picture.
 type Thumbnail struct {
@@ -43,8 +53,8 @@ type Footer struct {
 // - icon_url - sets avatar. Requires name value.
 type Author struct {
 	Name    string `json:"name"`
-	URL     string `json:"url`
-	IconURL string `json:icon_url`
+	URL     string `json:"url"`
+	IconURL string `json:"icon_url"`
 }
 
 // Embed is custom embeds for message sent by webhook.
@@ -145,31 +155,38 @@ func (c NotifyConfig) Notify(result probe.Result) {
 
 // NewEmbed new a embed object from a result
 func (c NotifyConfig) NewEmbed(result probe.Result) Embed {
-
-	message := "**Availability**\n>\t" + " **Up**:  `%s`  **Down** `%s`  -  **SLA**: `%.2f %%`" +
-		"\n**Probe Times**\n>\t**Total** : `%d` ( %s )" +
-		"\n**Lastest Probe**\n>\t%s | %s" +
-		"\n>\t`%s ` "
-
-	desc := fmt.Sprintf(message,
-		result.Stat.UpTime.Round(time.Second), result.Stat.DownTime.Round(time.Second), result.SLA(),
-		result.Stat.Total, probe.StatStatusText(result.Stat, probe.Makerdown),
-		result.StartTime.UTC().Format(result.TimeFormat), result.Status.Emoji()+" "+result.Status.String(),
-		result.Message)
-
-	embed := Embed{
+	return Embed{
 		Author:      Author{},
-		Title:       fmt.Sprintf("%s - %s", result.Name, result.Endpoint),
+		Title:       "",
 		URL:         "",
 		Color:       239, // #0000ef - blue
-		Description: desc,
+		Description: "",
 		Timestamp:   "",
 		Thumbnail:   Thumbnail{},
 		Fields:      []Fields{},
 		Footer:      Footer{},
 	}
+}
 
-	return embed
+// NewField new a Field object from a result
+func (c NotifyConfig) NewField(result probe.Result) Fields {
+	message := "%s\n" +
+		"**Availability**\n>\t" + " **Up**:  `%s`  **Down** `%s`  -  **SLA**: `%.2f %%`" +
+		"\n**Probe Times**\n>\t**Total** : `%d` ( %s )" +
+		"\n**Lastest Probe**\n>\t%s | %s" +
+		"\n>\t`%s ` \n\n"
+
+	desc := fmt.Sprintf(message, result.Endpoint,
+		result.Stat.UpTime.Round(time.Second), result.Stat.DownTime.Round(time.Second), result.SLA(),
+		result.Stat.Total, probe.StatStatusText(result.Stat, probe.Makerdown),
+		result.StartTime.UTC().Format(result.TimeFormat), result.Status.Emoji()+" "+result.Status.String(),
+		result.Message)
+
+	return Fields{
+		Name:   fmt.Sprintf("%s", result.Name),
+		Value:  desc,
+		Inline: true,
+	}
 }
 
 // NewEmbeds return a discord with multiple Embed
@@ -180,8 +197,15 @@ func (c NotifyConfig) NewEmbeds(probers []probe.Prober) Discord {
 		Content:   "**Overall SLA Report**",
 		Embeds:    []Embed{},
 	}
+	const max = 25
+	cnt := 0
 	for _, p := range probers {
-		discord.Embeds = append(discord.Embeds, c.NewEmbed(*p.Result()))
+		if cnt%max == 0 {
+			discord.Embeds = append(discord.Embeds, c.NewEmbed(*p.Result()))
+		}
+		idx := len(discord.Embeds) - 1
+		discord.Embeds[idx].Fields = append(discord.Embeds[idx].Fields, c.NewField(*p.Result()))
+		cnt++
 	}
 
 	return discord
