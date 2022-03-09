@@ -198,28 +198,43 @@ func (c NotifyConfig) NewField(result probe.Result, inline bool) Fields {
 }
 
 // NewEmbeds return a discord with multiple Embed
-func (c NotifyConfig) NewEmbeds(probers []probe.Prober) Discord {
-	discord := Discord{
-		Username:  "Easeprobe",
-		AvatarURL: "https://megaease.cn/favicon.png",
-		Content:   "**Overall SLA Report**",
-		Embeds:    []Embed{},
-	}
-	const max = 25
-	cnt := 0
-	for _, p := range probers {
-		if cnt%max == 0 {
-			discord.Embeds = append(discord.Embeds, c.NewEmbed(*p.Result()))
-		}
-		idx := len(discord.Embeds) - 1
-		discord.Embeds[idx].Fields = append(discord.Embeds[idx].Fields, c.NewField(*p.Result(), true))
-		cnt++
-		if cnt > 250 {
-			break
-		}
+func (c NotifyConfig) NewEmbeds(probers []probe.Prober) []Discord {
+	var discords []Discord
+
+	//every page has 12 probe result
+	const pageCnt = 12
+	total := len(probers)
+	//calculate how many page we need
+	pages := total / pageCnt
+	if total % pageCnt > 0 {
+		pages++
 	}
 
-	return discord
+	for p := 0; p < pages; p++ {
+		discord := Discord{
+			Username:  "Easeprobe",
+			AvatarURL: "https://megaease.cn/favicon.png",
+			Content:   fmt.Sprintf("**Overall SLA Report (%d/%d)**", p+1, pages),
+			Embeds:    []Embed{},
+		}
+
+		discord.Embeds = append(discord.Embeds, Embed{})
+
+		//calculate the current page start and end position
+		start := p * pageCnt
+		end := (p+1)*pageCnt
+		if len(probers) < end {
+			end = len(probers)
+		}
+		for i := start; i < end; i++ {
+			//discord.Embeds = append(discord.Embeds, c.NewEmbed(*probers[i].Result()))
+			discord.Embeds[0].Fields = append(discord.Embeds[0].Fields,
+				c.NewField(*probers[i].Result(), true))
+		}
+		discords = append(discords, discord)
+	}
+
+	return discords
 }
 
 // NotifyStat write the all probe stat message to slack
@@ -228,19 +243,23 @@ func (c NotifyConfig) NotifyStat(probers []probe.Prober) {
 		c.DryNotifyStat(probers)
 		return
 	}
-	discord := c.NewEmbeds(probers)
-	err := c.SendDiscordNotification(discord)
-	if err != nil {
-		log.Errorf("%v", err)
-		json, err := json.Marshal(discord)
+	discords := c.NewEmbeds(probers)
+	total := len(discords)
+	for idx, discord := range discords {
+		err := c.SendDiscordNotification(discord)
 		if err != nil {
-			log.Errorf("Notify[%s] - %v", c.Kind(), discord)
-		} else {
-			log.Errorf("Notify[%s] - %s", c, c.Kind(), string(json))
+			log.Errorf("%v", err)
+			json, err := json.Marshal(discord)
+			if err != nil {
+				log.Errorf("Notify[%s] - %v", c.Kind(), discord)
+			} else {
+				log.Errorf("Notify[%s] - %s", c.Kind(), string(json))
+			}
+			return
 		}
-		return
+
+		log.Infof("Sent the [%d/%d] Statstics to Slack Successfully!", idx+1, total)
 	}
-	log.Infoln("Sent the Statstics to Slack Successfully!")
 }
 
 // DryNotify just log the notification message

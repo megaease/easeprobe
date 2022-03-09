@@ -31,7 +31,7 @@ http:
   - name: EaseService-Mesh (AWS China)
     url: http://easeservice-mgmt-mesh:38013/actuator/health
   - name: EaseService-Notification (AWS China)
-    url: http://easeservice-mgmt-notification:38013/actuator/health 
+    url: http://easeservice-mgmt-notification:38013/actuator/health
   - name: EaseGateway-UI-Server (AWS China)
     url: http://easegateway-ui-server:37080/actuator/health
   - name: EaseService-Monitor (AWS China)
@@ -41,9 +41,8 @@ http:
   - name: EaseService-Stack (AWS China)
     url: http://easeservice-mgmt-stack:38040/actuator/health
 
-
-  - name: EaseSErvice-Ansible (AWS China)
-    url:  http://easeservice-ansible:37070/actuator/health
+  - name: EaseService-Ansible (AWS China)
+    url: http://easeservice-ansible:37070/actuator/health
 
 tcp:
   - name: Redis (AWS China)
