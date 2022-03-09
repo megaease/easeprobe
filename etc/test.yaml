@@ -22,8 +22,22 @@ http:
 
   - name: Microsoft
     url: https://www.microsoft.com
+  - name: Amazon
+    url: https://www.amazon.com
+
   - name: Github
     url: https://github.com 
+  - name: StackOverflow
+    url: https://www.stackoverflow.com
+  - name: Python
+    url: https://www.python.org
+  - name: PHP
+    url: https://www.php.net
+  - name: Internet Engineering Task Force (IETF) 
+    url: https://www.ietf.org/
+  - name: Node.js
+    url: https://nodejs.org/en/
+
   - name: USA Today
     url: https://www.usatoday.com/
   - name: Los Angeles Times
@@ -45,6 +59,10 @@ http:
     url: https://www.sohu.com
   - name: 163
     url: https://www.163.com 
+  - name: CSDN
+    url: https://www.csdn.net
+  - name: Taobao
+    url: https://www.taobao.com
 
 tcp:
   - name: MegaEase Error (China)
@@ -59,9 +77,10 @@ notify:
       dry: true
   slack:
     - webhook: "https://hooks.slack.com/services/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"
-      dry : true
+      dry: false
   discord:
     - webhook: "https://discord.com/api/webhooks/950321965955186728/JyNx-l-2cp85MbjH5pmeFDfSaOB3-d97F29yhhrcNoE8G15sYmQzbjPBnypJLqppWxM7"
+      dry: true
   email:
     - server: smtp.exmail.qq.com:465
       username: noreply@megaease.com

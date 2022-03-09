@@ -206,7 +206,7 @@ func (c NotifyConfig) NewEmbeds(probers []probe.Prober) []Discord {
 	total := len(probers)
 	//calculate how many page we need
 	pages := total / pageCnt
-	if total % pageCnt > 0 {
+	if total%pageCnt > 0 {
 		pages++
 	}
 
@@ -222,7 +222,7 @@ func (c NotifyConfig) NewEmbeds(probers []probe.Prober) []Discord {
 
 		//calculate the current page start and end position
 		start := p * pageCnt
-		end := (p+1)*pageCnt
+		end := (p + 1) * pageCnt
 		if len(probers) < end {
 			end = len(probers)
 		}

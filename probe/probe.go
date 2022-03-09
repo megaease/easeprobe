@@ -324,18 +324,14 @@ func StatHTML(probers []Prober) string {
 func (r *Result) StatSlackBlockSectionJSON() string {
 
 	json := `
-		{
-			"type": "section",
-			"text": {
+			{
 				"type": "mrkdwn",
 				"text": "*%s* - %s` +
 		`\n>*Availability*\n>\t` + " *Up*:  `%s`  *Down* `%s`  -  *SLA*: `%.2f %%`" +
 		`\n>*Probe Times*\n>\t*Total* : %d ( %s )` +
 		`\n>*Lastest Probe*\n>\t%s | %s` +
-		`\n>\t%s"` +
-		`
-			}
-		}`
+		`\n>\t%s"` + `
+			}`
 
 	t := SlackTimeFormation(r.StartTime, "", r.TimeFormat)
 
@@ -361,34 +357,53 @@ func StatSlackBlockJSON(probers []Prober) string {
 				"emoji": true
 			}
 		}`
-	for i := 0; i < len(probers)-1; i++ {
-		json += "," + probers[i].Result().StatSlackBlockSectionJSON()
-		json += `,
-		{
-			"type": "divider"
-		}`
-	}
-	if len(probers) > 0 {
-		json += "," + probers[len(probers)-1].Result().StatSlackBlockSectionJSON()
-		context := `,
-		{
-			"type": "context",
-			"elements": [
-				{
-					"type": "image",
-					"image_url": "https://megaease.cn/favicon.png",
-					"alt_text": "MegaEase EaseProbe"
-				},
-				{
-					"type": "mrkdwn",
-					"text": "EaseProbe %s"
-				}
-			]
-		}`
 
-		time := SlackTimeFormation(time.Now(), " reported at ", probers[len(probers)-1].Result().TimeFormat)
-		json += fmt.Sprintf(context, time)
+	sectionHead := `
+		{
+		"type": "section",
+		"fields": [`
+	sectionFoot := `
+				]
+		}`
+	total := len(probers)
+	pageCnt := 10
+	pages := total / pageCnt
+	if total%pageCnt > 0 {
+		pages++
 	}
+
+	for p := 0; p < pages; p++ {
+		start := p * pageCnt
+		end := (p + 1) * pageCnt
+		if len(probers) < end {
+			end = len(probers)
+		}
+		json += "," + sectionHead
+		for i := start; i < end-1; i++ {
+			json += probers[i].Result().StatSlackBlockSectionJSON() + ","
+		}
+		json += probers[end-1].Result().StatSlackBlockSectionJSON()
+		json += sectionFoot
+	}
+
+	context := `,
+	{
+		"type": "context",
+		"elements": [
+			{
+				"type": "image",
+				"image_url": "https://megaease.cn/favicon.png",
+				"alt_text": "MegaEase EaseProbe"
+			},
+			{
+				"type": "mrkdwn",
+				"text": "EaseProbe %s"
+			}
+		]
+	}`
+
+	time := SlackTimeFormation(time.Now(), " reported at ", probers[len(probers)-1].Result().TimeFormat)
+	json += fmt.Sprintf(context, time)
 
 	json += `]}`
 
