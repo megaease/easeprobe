@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
 	log "github.com/sirupsen/logrus"
 )
@@ -82,25 +83,44 @@ type Discord struct {
 
 // NotifyConfig is the slack notification configuration
 type NotifyConfig struct {
-	WebhookURL string `yaml:"webhook"`
-	Dry        bool   `yaml:"dry"`
+	WebhookURL string       `yaml:"webhook"`
+	Dry        bool         `yaml:"dry"`
+	Retry      global.Retry `yaml:"retry"`
 }
 
 // Kind return the type of Notify
-func (c NotifyConfig) Kind() string {
+func (c *NotifyConfig) Kind() string {
 	return "discord"
 }
 
 // Config configures the log files
-func (c NotifyConfig) Config() error {
+func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
+
 	if c.Dry {
 		log.Infof("Notification %s is running on Dry mode!", c.Kind())
 	}
+
+	if c.Retry.Interval <= 0 {
+		c.Retry.Interval = global.DefaultRetryInterval
+		if gConf.Retry.Interval > 0 {
+			c.Retry.Interval = gConf.Retry.Interval
+		}
+	}
+
+	if c.Retry.Times <= 0 {
+		c.Retry.Times = global.DefaultRetryTimes
+		if gConf.Retry.Times >= 0 {
+			c.Retry.Times = gConf.Retry.Times
+		}
+	}
+
+	log.Infof("[%s] configuration: %+v", c.Kind(), c)
+
 	return nil
 }
 
 // NewDiscord new a discord object from a result
-func (c NotifyConfig) NewDiscord(result probe.Result) Discord {
+func (c *NotifyConfig) NewDiscord(result probe.Result) Discord {
 	discord := Discord{
 		Username:  "Easeprobe",
 		AvatarURL: "https://megaease.cn/favicon.png",
@@ -133,29 +153,36 @@ func (c NotifyConfig) NewDiscord(result probe.Result) Discord {
 }
 
 // Notify write the message into the slack
-func (c NotifyConfig) Notify(result probe.Result) {
+func (c *NotifyConfig) Notify(result probe.Result) {
 	if c.Dry {
 		c.DryNotify(result)
 		return
 	}
 
 	discord := c.NewDiscord(result)
-	err := c.SendDiscordNotification(discord)
-	if err != nil {
-		log.Errorf("%v", err)
+	for i := 0; i < c.Retry.Times; i++ {
+		senderr := c.SendDiscordNotification(discord)
+		if senderr == nil {
+			log.Infof("Successfully sent the Discord notification for %s (%s)!", result.Name, result.Endpoint)
+			return
+		}
+
 		json, err := json.Marshal(discord)
 		if err != nil {
-			log.Errorf("Notify[%s] - %v", c.Kind(), discord)
+			log.Debugf("[%s] - %v", c.Kind(), discord)
 		} else {
-			log.Errorf("Notify[%s] - %s", c.Kind(), string(json))
+			log.Debugf("[%s] - %s", c.Kind(), string(json))
 		}
-		return
+
+		log.Warnf("[%s] Retred to send notification %d/%d -  %v", c.Kind(), i+1, c.Retry.Times, senderr)
+		time.Sleep(c.Retry.Interval)
 	}
-	log.Infof("Sent the Discord notification for %s (%s)!", result.Name, result.Endpoint)
+	log.Errorf("[%s] Failed to sent the notification after %d retries!", c.Kind(), c.Retry.Times)
+
 }
 
 // NewEmbed new a embed object from a result
-func (c NotifyConfig) NewEmbed(result probe.Result) Embed {
+func (c *NotifyConfig) NewEmbed(result probe.Result) Embed {
 	return Embed{
 		Author:      Author{},
 		Title:       "",
@@ -170,7 +197,7 @@ func (c NotifyConfig) NewEmbed(result probe.Result) Embed {
 }
 
 // NewField new a Field object from a result
-func (c NotifyConfig) NewField(result probe.Result, inline bool) Fields {
+func (c *NotifyConfig) NewField(result probe.Result, inline bool) Fields {
 	message := "%s\n" +
 		"**Availability**\n>\t" + " **Up**:  `%s`  **Down** `%s`  -  **SLA**: `%.2f %%`" +
 		"\n**Probe Times**\n>\t**Total** : `%d` ( %s )" +
@@ -198,7 +225,7 @@ func (c NotifyConfig) NewField(result probe.Result, inline bool) Fields {
 }
 
 // NewEmbeds return a discord with multiple Embed
-func (c NotifyConfig) NewEmbeds(probers []probe.Prober) []Discord {
+func (c *NotifyConfig) NewEmbeds(probers []probe.Prober) []Discord {
 	var discords []Discord
 
 	//every page has 12 probe result
@@ -238,7 +265,7 @@ func (c NotifyConfig) NewEmbeds(probers []probe.Prober) []Discord {
 }
 
 // NotifyStat write the all probe stat message to slack
-func (c NotifyConfig) NotifyStat(probers []probe.Prober) {
+func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
 	if c.Dry {
 		c.DryNotifyStat(probers)
 		return
@@ -246,24 +273,31 @@ func (c NotifyConfig) NotifyStat(probers []probe.Prober) {
 	discords := c.NewEmbeds(probers)
 	total := len(discords)
 	for idx, discord := range discords {
-		err := c.SendDiscordNotification(discord)
-		if err != nil {
-			log.Errorf("%v", err)
+		i := 0
+		for i = 0; i < c.Retry.Times; i++ {
+			senderr := c.SendDiscordNotification(discord)
+			if senderr == nil {
+				log.Infof("Sent the [%d/%d] Statstics to Slack Successfully!", idx+1, total)
+				break
+			}
+
 			json, err := json.Marshal(discord)
 			if err != nil {
-				log.Errorf("Notify[%s] - %v", c.Kind(), discord)
+				log.Debugf("Notify[%s] - %v", c.Kind(), discord)
 			} else {
-				log.Errorf("Notify[%s] - %s", c.Kind(), string(json))
+				log.Debugf("Notify[%s] - %s", c.Kind(), string(json))
 			}
-			return
+			log.Warnf("[%s] Retried to send SLA notification %d/%d - %v", c.Kind(), i+1, c.Retry.Times, senderr)
+			time.Sleep(c.Retry.Interval)
 		}
-
-		log.Infof("Sent the [%d/%d] Statstics to Slack Successfully!", idx+1, total)
+		if i > c.Retry.Times {
+			log.Errorf("Failed to sent the Discord SLA notification after %d retries!", c.Retry.Times)
+		}
 	}
 }
 
 // DryNotify just log the notification message
-func (c NotifyConfig) DryNotify(result probe.Result) {
+func (c *NotifyConfig) DryNotify(result probe.Result) {
 	discord := c.NewDiscord(result)
 	json, err := json.Marshal(discord)
 	if err != nil {
@@ -274,7 +308,7 @@ func (c NotifyConfig) DryNotify(result probe.Result) {
 }
 
 // DryNotifyStat just log the notification message
-func (c NotifyConfig) DryNotifyStat(probers []probe.Prober) {
+func (c *NotifyConfig) DryNotifyStat(probers []probe.Prober) {
 	discord := c.NewEmbeds(probers)
 	json, err := json.Marshal(discord)
 	if err != nil {
@@ -285,7 +319,7 @@ func (c NotifyConfig) DryNotifyStat(probers []probe.Prober) {
 }
 
 // SendDiscordNotification will post to an 'Incoming Webhook' url setup in Discrod Apps.
-func (c NotifyConfig) SendDiscordNotification(discord Discord) error {
+func (c *NotifyConfig) SendDiscordNotification(discord Discord) error {
 	json, err := json.Marshal(discord)
 	if err != nil {
 		return err

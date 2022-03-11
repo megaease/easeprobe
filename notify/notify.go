@@ -1,6 +1,7 @@
 package notify
 
 import (
+	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify/discord"
 	"github.com/megaease/easeprobe/notify/email"
 	"github.com/megaease/easeprobe/notify/log"
@@ -19,7 +20,7 @@ type Config struct {
 // Notify is the configuration of the Notify
 type Notify interface {
 	Kind() string
-	Config() error
+	Config(global.NotifySettings) error
 	Notify(probe.Result)
 	NotifyStat([]probe.Prober)
 

@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
 	log "github.com/sirupsen/logrus"
 )
@@ -70,14 +71,20 @@ func (h *HTTP) Result() *probe.Result {
 }
 
 // Config HTTP Config Object
-func (h *HTTP) Config() error {
+func (h *HTTP) Config(gConf global.ProbeSettings) error {
 
 	if h.Timeout <= 0 {
-		h.Timeout = time.Second * 30
+		h.Timeout = global.DefaultTimeOut
+		if gConf.Timeout > 0 {
+			h.Timeout = gConf.Timeout
+		}
 	}
 
 	if h.TimeInterval <= 0 {
-		h.TimeInterval = time.Second * 60
+		h.TimeInterval = global.DefaultProbeInterval
+		if gConf.Interval > 0 {
+			h.TimeInterval = gConf.Interval
+		}
 	}
 
 	h.client = &http.Client{
@@ -118,7 +125,9 @@ func (h *HTTP) Config() error {
 	h.result.Name = h.Name
 	h.result.Endpoint = h.URL
 	h.result.PreStatus = probe.StatusInit
+	h.result.TimeFormat = gConf.TimeFormat
 
+	log.Debugf("%s configuration: %+v, %+v", h.Kind(), h, h.Result())
 	return nil
 }
 

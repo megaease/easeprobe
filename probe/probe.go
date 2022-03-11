@@ -6,8 +6,18 @@ import (
 	"strings"
 	"time"
 
+	"github.com/megaease/easeprobe/global"
 	log "github.com/sirupsen/logrus"
 )
+
+// Prober Interface
+type Prober interface {
+	Kind() string
+	Config(global.ProbeSettings) error
+	Probe() Result
+	Interval() time.Duration
+	Result() *Result
+}
 
 // Format is the format of text
 type Format int
@@ -100,15 +110,6 @@ func (d *ConfigDuration) UnmarshalJSON(b []byte) (err error) {
 // MarshalJSON is marshal the time
 func (d *ConfigDuration) MarshalJSON() (b []byte, err error) {
 	return []byte(fmt.Sprintf(`"%s"`, d.Round(time.Millisecond))), nil
-}
-
-// Prober Interface
-type Prober interface {
-	Kind() string
-	Config() error
-	Probe() Result
-	Interval() time.Duration
-	Result() *Result
 }
 
 // Stat is the statistics of probe result

@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify"
 	"github.com/megaease/easeprobe/probe/http"
 	"github.com/megaease/easeprobe/probe/tcp"
@@ -48,21 +49,16 @@ func (l *LogLevel) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
-// Retry is the settings of retry f
-type Retry struct {
-	Times    int           `yaml:"times"`
-	Interval time.Duration `yaml:"interval"`
-}
-
 // Notify is the settings of notification
 type Notify struct {
-	Retry Retry `yaml:"retry"`
-	Dry   bool  `yaml:"dry"`
+	Retry global.Retry `yaml:"retry"`
+	Dry   bool         `yaml:"dry"`
 }
 
 // Probe is the settings of prober
 type Probe struct {
-	Interval time.Duration `yaml:"interval`
+	Interval time.Duration `yaml:"interval"`
+	Timeout  time.Duration `yaml:"timeout"`
 }
 
 // Settings is the EaseProbe configuration
@@ -71,7 +67,7 @@ type Settings struct {
 	LogLevel   LogLevel `yaml:"loglevel"`
 	Debug      bool     `yaml:"debug"`
 	TimeFormat string   `yaml:"timeformat"`
-	Probe      Probe    `yaml:"probe`
+	Probe      Probe    `yaml:"probe"`
 	Notify     Notify   `yaml:"notify"`
 	logfile    *os.File `yaml:"-"`
 }
@@ -95,17 +91,17 @@ func New(conf *string) (Conf, error) {
 			LogLevel:   LogLevel{log.InfoLevel},
 			Debug:      false,
 			TimeFormat: "2006-01-02 15:04:05 UTC",
-			Probe:      Probe{
+			Probe: Probe{
 				Interval: time.Second * 60,
 			},
-			Notify:     Notify{
-				Retry: Retry{
+			Notify: Notify{
+				Retry: global.Retry{
 					Times:    3,
 					Interval: time.Second * 5,
 				},
-				Dry:   false,
+				Dry: false,
 			},
-			logfile:    nil,
+			logfile: nil,
 		},
 	}
 	y, err := ioutil.ReadFile(*conf)
@@ -126,14 +122,13 @@ func New(conf *string) (Conf, error) {
 
 	log.Infoln("Load the configuration file successfully!")
 	if log.GetLevel() >= log.DebugLevel {
-		s, err := json.MarshalIndent(c,"", "  ")
-		if err !=nil {
+		s, err := json.MarshalIndent(c, "", "  ")
+		if err != nil {
 			log.Debugf("%+v", c)
-		}else {
+		} else {
 			log.Debugf("%s", string(s))
 		}
 	}
-	os.Exit(1)
 	return c, err
 }
 

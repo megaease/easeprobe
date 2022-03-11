@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/megaease/easeprobe/conf"
+	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify"
 	"github.com/megaease/easeprobe/probe"
 
@@ -30,20 +31,28 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 			time.Sleep(p.Interval())
 		}
 	}
-
+	gProbeConf := global.ProbeSettings{
+		TimeFormat: conf.Get().Settings.TimeFormat,
+		Interval:   conf.Get().Settings.Probe.Interval,
+		Timeout:    conf.Get().Settings.Probe.Timeout,
+	}
+	log.Debugf("Global Probe Configuration: %+v", gProbeConf)
 	for _, p := range probers {
-		err := p.Config()
+		err := p.Config(gProbeConf)
 		if err != nil {
 			log.Errorf("error: %v", err)
 			continue
 		}
-		p.Result().TimeFormat = conf.Get().Settings.TimeFormat
 		log.Infof("Ready to monitor(%s): %s - %s", p.Kind(), p.Result().Name, p.Result().Endpoint)
 		go probeFn(p)
 	}
 
+	gNotifyConf := global.NotifySettings{
+		TimeFormat: conf.Get().Settings.TimeFormat,
+		Retry:      conf.Get().Settings.Notify.Retry,
+	}
 	for _, n := range notifies {
-		err := n.Config()
+		err := n.Config(gNotifyConf)
 		if err != nil {
 			log.Errorf("error: %v", err)
 			continue
@@ -58,7 +67,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 			if dryNotify {
 				n.DryNotifyStat(probers)
 			} else {
-				log.Debugf("%s notifying the SLA...", n.Kind())
+				log.Debugf("[%s] notifying the SLA...", n.Kind())
 				go n.NotifyStat(probers)
 			}
 		}
@@ -148,19 +157,19 @@ func main() {
 	var notifies []notify.Notify
 
 	for i := 0; i < len(conf.Notify.Log); i++ {
-		notifies = append(notifies, conf.Notify.Log[i])
+		notifies = append(notifies, &conf.Notify.Log[i])
 	}
 
 	for i := 0; i < len(conf.Notify.Email); i++ {
-		notifies = append(notifies, conf.Notify.Email[i])
+		notifies = append(notifies, &conf.Notify.Email[i])
 	}
 
 	for i := 0; i < len(conf.Notify.Slack); i++ {
-		notifies = append(notifies, conf.Notify.Slack[i])
+		notifies = append(notifies, &conf.Notify.Slack[i])
 	}
 
 	for i := 0; i < len(conf.Notify.Discord); i++ {
-		notifies = append(notifies, conf.Notify.Discord[i])
+		notifies = append(notifies, &conf.Notify.Discord[i])
 	}
 
 	done := make(chan bool)
