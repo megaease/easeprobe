@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/sirupsen/logrus"
 )
@@ -15,12 +16,12 @@ type NotifyConfig struct {
 }
 
 // Kind return the type of Notify
-func (c NotifyConfig) Kind() string {
+func (c *NotifyConfig) Kind() string {
 	return "log"
 }
 
 // Config configures the log files
-func (c NotifyConfig) Config() error {
+func (c *NotifyConfig) Config(global global.NotifySettings) error {
 	if c.Dry {
 		logrus.Infof("Notification %s is running on Dry mode!", c.Kind())
 		log.SetOutput(os.Stdout)
@@ -36,7 +37,7 @@ func (c NotifyConfig) Config() error {
 }
 
 // Notify write the message into the file
-func (c NotifyConfig) Notify(result probe.Result) {
+func (c *NotifyConfig) Notify(result probe.Result) {
 	if c.Dry {
 		c.DryNotify(result)
 		return
@@ -46,7 +47,7 @@ func (c NotifyConfig) Notify(result probe.Result) {
 }
 
 // NotifyStat write the stat message into the file
-func (c NotifyConfig) NotifyStat(probers []probe.Prober) {
+func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
 	if c.Dry {
 		c.DryNotifyStat(probers)
 		return
@@ -59,11 +60,11 @@ func (c NotifyConfig) NotifyStat(probers []probe.Prober) {
 }
 
 // DryNotify just log the notification message
-func (c NotifyConfig) DryNotify(result probe.Result) {
-	logrus.Infoln(result.HTML())
+func (c *NotifyConfig) DryNotify(result probe.Result) {
+	logrus.Infof("[%s] - %s", c.Kind(), result.HTML())
 }
 
 // DryNotifyStat just log the notification message
-func (c NotifyConfig) DryNotifyStat(probers []probe.Prober) {
-	logrus.Infoln(probe.StatHTML(probers))
+func (c *NotifyConfig) DryNotifyStat(probers []probe.Prober) {
+	logrus.Infof("[%s] - %s", c.Kind(), probe.StatHTML(probers))
 }

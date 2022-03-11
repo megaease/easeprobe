@@ -5,6 +5,7 @@ import (
 	"net"
 	"time"
 
+	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
 	log "github.com/sirupsen/logrus"
 )
@@ -40,21 +41,29 @@ func (t *TCP) Result() *probe.Result {
 }
 
 // Config HTTP Config Object
-func (t *TCP) Config() error {
+func (t *TCP) Config(gConf global.ProbeSettings) error {
 
 	if t.Timeout <= 0 {
-		t.Timeout = time.Second * 30
+		t.Timeout = global.DefaultTimeOut
+		if gConf.Timeout > 0 {
+			t.Timeout = gConf.Timeout
+		}
 	}
 
 	if t.TimeInterval <= 0 {
-		t.TimeInterval = time.Second * 60
+		t.TimeInterval = global.DefaultProbeInterval
+		if gConf.Interval > 0 {
+			t.TimeInterval = gConf.Interval
+		}
 	}
 
 	t.result = probe.NewResult()
 	t.result.Endpoint = t.Host
 	t.result.Name = t.Name
 	t.result.PreStatus = probe.StatusInit
+	t.result.TimeFormat = gConf.TimeFormat
 
+	log.Debugf("%s configuration: %+v, %+v", t.Kind(), t, t.Result())
 	return nil
 }
 
