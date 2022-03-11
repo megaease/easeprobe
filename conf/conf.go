@@ -1,6 +1,7 @@
 package conf
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"os"
 	"time"
@@ -47,16 +48,32 @@ func (l *LogLevel) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
+// Retry is the settings of retry f
+type Retry struct {
+	Times    int           `yaml:"times"`
+	Interval time.Duration `yaml:"interval"`
+}
+
+// Notify is the settings of notification
+type Notify struct {
+	Retry Retry `yaml:"retry"`
+	Dry   bool  `yaml:"dry"`
+}
+
+// Probe is the settings of prober
+type Probe struct {
+	Interval time.Duration `yaml:"interval`
+}
+
 // Settings is the EaseProbe configuration
 type Settings struct {
-	DefaultInvterval time.Duration `yaml:"interval"`
-	LogFile          string        `yaml:"logfile"`
-	LogLevel         LogLevel      `yaml:"loglevel"`
-	DryNotify        bool          `yaml:"drynotify"`
-	Debug            bool          `yaml:"debug"`
-	TimeFormat       string        `yaml:"timeformat"`
-
-	logfile *os.File `yaml:"-"`
+	LogFile    string   `yaml:"logfile"`
+	LogLevel   LogLevel `yaml:"loglevel"`
+	Debug      bool     `yaml:"debug"`
+	TimeFormat string   `yaml:"timeformat"`
+	Probe      Probe    `yaml:"probe`
+	Notify     Notify   `yaml:"notify"`
+	logfile    *os.File `yaml:"-"`
 }
 
 // Conf is Probe configuration
@@ -74,12 +91,21 @@ func New(conf *string) (Conf, error) {
 		TCP:    []tcp.TCP{},
 		Notify: notify.Config{},
 		Settings: Settings{
-			DefaultInvterval: time.Second * 60,
-			LogFile:          "",
-			LogLevel:         LogLevel{log.InfoLevel},
-			DryNotify:        false,
-			TimeFormat:       "2006-01-02 15:04:05 UTC",
-			logfile:          nil,
+			LogFile:    "",
+			LogLevel:   LogLevel{log.InfoLevel},
+			Debug:      false,
+			TimeFormat: "2006-01-02 15:04:05 UTC",
+			Probe:      Probe{
+				Interval: time.Second * 60,
+			},
+			Notify:     Notify{
+				Retry: Retry{
+					Times:    3,
+					Interval: time.Second * 5,
+				},
+				Dry:   false,
+			},
+			logfile:    nil,
 		},
 	}
 	y, err := ioutil.ReadFile(*conf)
@@ -99,7 +125,15 @@ func New(conf *string) (Conf, error) {
 	config = &c
 
 	log.Infoln("Load the configuration file successfully!")
-	log.Debugf("%v", c)
+	if log.GetLevel() >= log.DebugLevel {
+		s, err := json.MarshalIndent(c,"", "  ")
+		if err !=nil {
+			log.Debugf("%+v", c)
+		}else {
+			log.Debugf("%s", string(s))
+		}
+	}
+	os.Exit(1)
 	return c, err
 }
 
