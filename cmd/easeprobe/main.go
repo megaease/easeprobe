@@ -18,7 +18,7 @@ import (
 // 3) send the SLA report
 func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 
-	dryNotify := conf.Get().Settings.DryNotify
+	dryNotify := conf.Get().Settings.Notify.Dry
 
 	notifyChan := make(chan probe.Result)
 
@@ -126,10 +126,10 @@ func main() {
 
 	// if dry notification mode is specificed in command line, overwrite the configuration
 	if *dryNotify {
-		conf.Settings.DryNotify = *dryNotify
+		conf.Settings.Notify.Dry = *dryNotify
 	}
 
-	if conf.Settings.DryNotify {
+	if conf.Settings.Notify.Dry {
 		log.Infoln("Dry Notification Mode...")
 	}
 

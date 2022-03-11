@@ -77,10 +77,10 @@ notify:
       dry: true
   slack:
     - webhook: "https://hooks.slack.com/services/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"
-      dry: false
+      dry: true
   discord:
     - webhook: "https://discord.com/api/webhooks/950321965955186728/JyNx-l-2cp85MbjH5pmeFDfSaOB3-d97F29yhhrcNoE8G15sYmQzbjPBnypJLqppWxM7"
-      dry: true
+      dry: false
   email:
     - server: smtp.exmail.qq.com:465
       username: noreply@megaease.com
@@ -89,11 +89,9 @@ notify:
       dry : true
 
 settings:
-  interval: 2m
   #logfile: "test.log"
   loglevel: "debug"
   debug: true
-  #drynotify : true
   # Date format
   # Date
   #  - January 2, 2006
@@ -114,4 +112,12 @@ settings:
   #   - Mon, 02 Jan 2006 15:04:05 MST     (RFC 1123)
   #   - Mon, 02 Jan 2006 15:04:05 -0700   (with numeric zone)
   timeformat: "2006-01-02 15:04:05 UTC"
+  notify:
+    dry: true
+    retry:
+      times: 5
+      interval: 10s
+  probe:
+    interval: 2m
+    
 
