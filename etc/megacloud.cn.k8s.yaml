@@ -1,8 +1,8 @@
 http:
-  - name: MegaEase Website (China)
-    url: https://megaease.cn
-  - name: MegaEase Website (Global)
-    url: https://megaease.com
+  # - name: MegaEase Website (China)
+  #   url: https://megaease.cn
+  # - name: MegaEase Website (Global)
+  #   url: https://megaease.com
   - name: MegaEase Cloud (China)
     url: https://dev.megaease.cn/megacloud/app/
   - name: Prometheus (AWS China)
