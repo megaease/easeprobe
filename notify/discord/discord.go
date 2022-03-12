@@ -277,17 +277,17 @@ func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
 		for i = 0; i < c.Retry.Times; i++ {
 			senderr := c.SendDiscordNotification(discord)
 			if senderr == nil {
-				log.Infof("Sent the [%d/%d] Statstics to Slack Successfully!", idx+1, total)
+				log.Infof("[%s] Sent the [%d/%d] SLA to Discord Successfully!", c.Kind(), idx+1, total)
 				break
 			}
 
 			json, err := json.Marshal(discord)
 			if err != nil {
-				log.Debugf("Notify[%s] - %v", c.Kind(), discord)
+				log.Debugf("[%s] - %v", c.Kind(), discord)
 			} else {
-				log.Debugf("Notify[%s] - %s", c.Kind(), string(json))
+				log.Debugf("[%s] - %s", c.Kind(), string(json))
 			}
-			log.Warnf("[%s] Retried to send SLA notification %d/%d - %v", c.Kind(), i+1, c.Retry.Times, senderr)
+			log.Warnf("[%s] Retried to send [%d/%d] SLA notification %d/%d - %v", c.Kind(), idx+1, total, i+1, c.Retry.Times, senderr)
 			time.Sleep(c.Retry.Interval)
 		}
 		if i > c.Retry.Times {
