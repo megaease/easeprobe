@@ -241,6 +241,8 @@ func (r *Result) SlackBlockJSON() string {
 
 	json := `
 	{
+		"channel": "Alert",
+		"text": "%s",
 		"blocks": [
 			{
 				"type": "section",
@@ -270,7 +272,8 @@ func (r *Result) SlackBlockJSON() string {
 	body := fmt.Sprintf("*%s*\\n>%s %s - ⏱ %s\n>%s",
 		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, JSONEscape(r.Message))
 	context := SlackTimeFormation(r.StartTime, " probed at ", r.TimeFormat)
-	return fmt.Sprintf(json, body, context)
+	summary := fmt.Sprintf("%s %s - %s", r.Title(), r.Status.Emoji(), r.Message )
+	return fmt.Sprintf(json, summary, body, context)
 }
 
 // StatText return the Text format string to stat
@@ -349,7 +352,16 @@ func (r *Result) StatSlackBlockSectionJSON() string {
 
 // StatSlackBlockJSON generate all probes stat message to slack block string
 func StatSlackBlockJSON(probers []Prober) string {
-	json := `{"blocks": [
+	sla := 0.0
+	for _, p := range probers {
+		sla += p.Result().SLA()
+	}
+	sla /= float64(len(probers))
+	summary := fmt.Sprintf("Total %d Services, Average %.2f%% SLA", len(probers), sla)
+	json := `{
+		"channel": "Report",
+		"text": "Daily Overall SLA Report - `+ summary + ` ",
+		"blocks": [
 		{
 			"type": "header",
 			"text": {
