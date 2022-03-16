@@ -80,7 +80,7 @@ notify:
       dry: false
   discord:
     - webhook: "https://discord.com/api/webhooks/950321965955186728/JyNx-l-2cp85MbjH5pmeFDfSaOB3-d97F29yhhrcNoE8G15sYmQzbjPBnypJLqppWxM7"
-      dry: false
+      dry: true
       retry:
         times: 3
         interval: 10s
@@ -89,7 +89,7 @@ notify:
       username: noreply@megaease.com
       password: 644D4u43n
       to: "service@megaease.com;chenhao@megaease.com"
-      dry : false
+      dry : true
 
 settings:
   notify:
