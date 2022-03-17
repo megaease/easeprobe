@@ -272,7 +272,7 @@ func (r *Result) SlackBlockJSON() string {
 	body := fmt.Sprintf("*%s*\\n>%s %s - ⏱ %s\n>%s",
 		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, JSONEscape(r.Message))
 	context := SlackTimeFormation(r.StartTime, " probed at ", r.TimeFormat)
-	summary := fmt.Sprintf("%s %s - %s", r.Title(), r.Status.Emoji(), r.Message )
+	summary := fmt.Sprintf("%s %s - %s", r.Title(), r.Status.Emoji(), JSONEscape(r.Message))
 	return fmt.Sprintf(json, summary, body, context)
 }
 
@@ -360,7 +360,7 @@ func StatSlackBlockJSON(probers []Prober) string {
 	summary := fmt.Sprintf("Total %d Services, Average %.2f%% SLA", len(probers), sla)
 	json := `{
 		"channel": "Report",
-		"text": "Daily Overall SLA Report - `+ summary + ` ",
+		"text": "Daily Overall SLA Report - ` + summary + ` ",
 		"blocks": [
 		{
 			"type": "header",

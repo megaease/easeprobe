@@ -1,4 +1,6 @@
 http:
+  - name: MegaCloud
+    url: https://cloud.megaease.cn/
   - name: MegaEase Website (China)
     url: https://megaease.cn
     method: GET
@@ -65,8 +67,8 @@ http:
     url: https://www.taobao.com
 
 tcp:
-  - name: MegaEase Error (China)
-    host: error.megaease.cn:22
+  - name: MegaEase (China)
+    host: megaease.cn:22
     timeout: 10s
   - name: MegaEase HTTP Service (China)
     host: megaease.cn:80
@@ -101,7 +103,7 @@ settings:
     interval: 2m
   #logfile: "test.log"
   loglevel: "debug"
-  debug: true
+  debug: false
   # Date format
   # Date
   #  - January 2, 2006
