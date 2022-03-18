@@ -3,6 +3,20 @@ package global
 import "time"
 
 const (
+	// Org is the organization
+	Org = "MegaEase"
+	// Prog is the program name
+	Prog = "EaseProbe"
+	// Ver is the program version
+	Ver = "0.1"
+
+	//OrgProg combine organization and program
+	OrgProg = Org + " " + Prog
+	//OrgProgVer combine organization and program and version
+	OrgProgVer = Org + " " + Prog + "/" + Ver
+)
+
+const (
 	// DefaultRetryTimes is 3 times
 	DefaultRetryTimes = 3
 	// DefaultRetryInterval is 5 seconds

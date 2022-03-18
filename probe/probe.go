@@ -257,11 +257,11 @@ func (r *Result) SlackBlockJSON() string {
 					{
 						"type": "image",
 						"image_url": "https://megaease.cn/favicon.png",
-						"alt_text": "MegaEase EaseProbe"
+						"alt_text": "` + global.OrgProg + `"
 					},
 					{
 						"type": "mrkdwn",
-						"text": "EaseProbe %s"
+						"text": "` + global.Prog + ` %s"
 					}
 				]
 			}
@@ -406,11 +406,11 @@ func StatSlackBlockJSON(probers []Prober) string {
 			{
 				"type": "image",
 				"image_url": "https://megaease.cn/favicon.png",
-				"alt_text": "MegaEase EaseProbe"
+				"alt_text": "` + global.OrgProg + `"
 			},
 			{
 				"type": "mrkdwn",
-				"text": "EaseProbe %s"
+				"text": "` + global.Prog + ` %s"
 			}
 		]
 	}`
