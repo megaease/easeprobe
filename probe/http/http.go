@@ -95,7 +95,7 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 	}
 
 	if len(h.CA) > 0 {
-		cert, err := ioutil.ReadFile("./certs/ca.crt")
+		cert, err := ioutil.ReadFile(h.CA)
 		if err != nil {
 			log.Errorf("could not open certificate file: %v", err)
 			return err
