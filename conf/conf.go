@@ -9,6 +9,7 @@ import (
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify"
 	"github.com/megaease/easeprobe/probe/http"
+	"github.com/megaease/easeprobe/probe/shell"
 	"github.com/megaease/easeprobe/probe/tcp"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
@@ -76,6 +77,7 @@ type Settings struct {
 type Conf struct {
 	HTTP     []http.HTTP   `yaml:"http"`
 	TCP      []tcp.TCP     `yaml:"tcp"`
+	Shell    []shell.Shell `yaml:"shell"`
 	Notify   notify.Config `yaml:"notify"`
 	Settings Settings      `yaml:"settings"`
 }

@@ -78,6 +78,14 @@ tcp:
   - name: MegaEase HTTP Service (China)
     host: megaease.cn:80
 
+shell:
+  - name: Google Service
+    cmd: "./resources/scripts/proxy.curl.sh"
+    args:
+      - "socks5://127.0.0.1:1085"
+      - "www.google.com"
+
+
 notify:
   log:
     - file: "/tmp/easeprobe.log"

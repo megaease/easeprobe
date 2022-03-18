@@ -153,6 +153,10 @@ func main() {
 		probers = append(probers, &conf.TCP[i])
 	}
 
+	for i := 0; i < len(conf.Shell); i++ {
+		probers = append(probers, &conf.Shell[i])
+	}
+
 	// Notification
 	var notifies []notify.Notify
 
