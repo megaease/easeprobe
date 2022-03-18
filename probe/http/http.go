@@ -148,6 +148,8 @@ func (h *HTTP) Probe() probe.Result {
 	// client close the connection
 	req.Close = true
 
+	req.Header.Set("User-Agent", global.OrgProgVer)
+
 	now := time.Now()
 	h.result.StartTime = now
 	h.result.StartTimestamp = now.UnixMilli()

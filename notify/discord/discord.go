@@ -122,7 +122,7 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 // NewDiscord new a discord object from a result
 func (c *NotifyConfig) NewDiscord(result probe.Result) Discord {
 	discord := Discord{
-		Username:  "Easeprobe",
+		Username:  global.Prog,
 		AvatarURL: "https://megaease.cn/favicon.png",
 		Content:   "",
 		Embeds:    []Embed{},
@@ -239,7 +239,7 @@ func (c *NotifyConfig) NewEmbeds(probers []probe.Prober) []Discord {
 
 	for p := 0; p < pages; p++ {
 		discord := Discord{
-			Username:  "Easeprobe",
+			Username:  global.Prog,
 			AvatarURL: "https://megaease.cn/favicon.png",
 			Content:   fmt.Sprintf("**Overall SLA Report (%d/%d)**", p+1, pages),
 			Embeds:    []Embed{},
