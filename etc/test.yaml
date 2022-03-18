@@ -84,6 +84,13 @@ shell:
     args:
       - "socks5://127.0.0.1:1085"
       - "www.google.com"
+  - name: Redis (Local)
+    cmd: "redis-cli"
+    args:
+      - "-h"
+      - "127.0.0.1"
+      - "ping"
+    contain : "PONG"
 
 
 notify:
