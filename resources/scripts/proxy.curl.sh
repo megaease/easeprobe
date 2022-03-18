@@ -2,4 +2,4 @@
 
 export http_proxy=${1}  https_proxy=${1} all_proxy=${1}
 
-curl ${2}
+curl -sI ${2}

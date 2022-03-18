@@ -17,9 +17,11 @@ const Kind string = "shell"
 
 // Shell implements a config  for shell command (os.Exec)
 type Shell struct {
-	Name    string   `yaml:"name"`
-	Command string   `yaml:"cmd"`
-	Args    []string `yaml:"args,omitempty"`
+	Name       string   `yaml:"name"`
+	Command    string   `yaml:"cmd"`
+	Args       []string `yaml:"args,omitempty"`
+	Contain    string   `yaml:"contain,omitempty"`
+	NotContain string   `yaml:"not_contain,omitempty"`
 
 	//Control Options
 	Timeout      time.Duration `yaml:"timeout,omitempty"`
@@ -103,12 +105,37 @@ func (s *Shell) Probe() probe.Result {
 		log.Errorf(s.result.Message)
 		status = probe.StatusDown
 	}
+	log.Debugf("[%s] - %s", s.Kind(), s.CommandLine())
+	log.Debugf("[%s] - %s", s.Kind(), outputFmt(output))
+
+	if err := s.CheckOutput(output); err != nil {
+		log.Errorf("[%s] - %v", s.Kind(), err)
+		status = probe.StatusDown
+	}
 
 	s.result.PreStatus = s.result.Status
 	s.result.Status = status
 
 	s.result.DoStat(s.TimeInterval)
 	return *s.result
+}
+
+// CheckOutput checks the output text,
+// - if it contains a configured string then return nil
+// - if it does not contain a configured string then return nil
+func (s *Shell) CheckOutput(output []byte) error {
+
+	str := string(output)
+	if len(s.Contain) > 0 && !strings.Contains(str, s.Contain) {
+
+		return fmt.Errorf("the output does not contain [%s]", s.Contain)
+	}
+
+	if len(s.NotContain) > 0 && strings.Contains(str, s.NotContain) {
+		return fmt.Errorf("the output contains [%s]", s.NotContain)
+
+	}
+	return nil
 }
 
 // CommandLine will return the whole command line which includes command and all arguments
