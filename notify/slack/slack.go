@@ -70,12 +70,12 @@ func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
 
 // DryNotify just log the notification message
 func (c *NotifyConfig) DryNotify(result probe.Result) {
-	log.Infoln("[%s] - %s", c.Kind(), result.SlackBlockJSON())
+	log.Infof("[%s] - %s", c.Kind(), result.SlackBlockJSON())
 }
 
 // DryNotifyStat just log the notification message
 func (c *NotifyConfig) DryNotifyStat(probers []probe.Prober) {
-	log.Infoln("[%s] - %s", c.Kind(), probe.StatSlackBlockJSON(probers))
+	log.Infof("[%s] - %s", c.Kind(), probe.StatSlackBlockJSON(probers))
 }
 
 // SendSlackNotificationWithRetry send the Slack notification with retry

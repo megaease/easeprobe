@@ -74,12 +74,12 @@ func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
 
 // DryNotify just log the notification message
 func (c *NotifyConfig) DryNotify(result probe.Result) {
-	log.Infoln("[%s] Dry Notify - %s", c.Kind(), result.HTML())
+	log.Infof("[%s] Dry Notify - %s", c.Kind(), result.HTML())
 }
 
 // DryNotifyStat just log the notification message
 func (c *NotifyConfig) DryNotifyStat(probers []probe.Prober) {
-	log.Infoln("[%s] Dry Notify - %s", c.Kind(), probe.StatHTML(probers))
+	log.Infof("[%s] Dry Notify - %s", c.Kind(), probe.StatHTML(probers))
 }
 
 // SendMailWithRetry sends the email with retry if got error
