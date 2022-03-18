@@ -1,4 +1,9 @@
 http:
+  # - name: Local mTLS test
+  #   url: https://localhost:8443/hello
+  #   ca: ../mTLS/certs/ca.crt
+  #   cert: ../mTLS/certs/client.b.crt
+  #   key: ../mTLS/certs/client.b.key
   - name: MegaCloud
     url: https://cloud.megaease.cn/
   - name: MegaEase Website (China)
@@ -79,7 +84,7 @@ notify:
       dry: true
   slack:
     - webhook: "https://hooks.slack.com/services/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"
-      dry: false
+      dry: true
   discord:
     - webhook: "https://discord.com/api/webhooks/950321965955186728/JyNx-l-2cp85MbjH5pmeFDfSaOB3-d97F29yhhrcNoE8G15sYmQzbjPBnypJLqppWxM7"
       dry: true
