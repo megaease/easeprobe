@@ -43,19 +43,8 @@ func (t *TCP) Result() *probe.Result {
 // Config HTTP Config Object
 func (t *TCP) Config(gConf global.ProbeSettings) error {
 
-	if t.Timeout <= 0 {
-		t.Timeout = global.DefaultTimeOut
-		if gConf.Timeout > 0 {
-			t.Timeout = gConf.Timeout
-		}
-	}
-
-	if t.TimeInterval <= 0 {
-		t.TimeInterval = global.DefaultProbeInterval
-		if gConf.Interval > 0 {
-			t.TimeInterval = gConf.Interval
-		}
-	}
+	t.Timeout = gConf.NormalizeTimeOut(t.Timeout)
+	t.TimeInterval = gConf.NormalizeInterval(t.TimeInterval)
 
 	t.result = probe.NewResult()
 	t.result.Endpoint = t.Host

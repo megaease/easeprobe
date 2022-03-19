@@ -73,19 +73,8 @@ func (h *HTTP) Result() *probe.Result {
 // Config HTTP Config Object
 func (h *HTTP) Config(gConf global.ProbeSettings) error {
 
-	if h.Timeout <= 0 {
-		h.Timeout = global.DefaultTimeOut
-		if gConf.Timeout > 0 {
-			h.Timeout = gConf.Timeout
-		}
-	}
-
-	if h.TimeInterval <= 0 {
-		h.TimeInterval = global.DefaultProbeInterval
-		if gConf.Interval > 0 {
-			h.TimeInterval = gConf.Interval
-		}
-	}
+	h.Timeout = gConf.NormalizeTimeOut(h.Timeout)
+	h.TimeInterval = gConf.NormalizeInterval(h.TimeInterval)
 
 	h.client = &http.Client{
 		Timeout: h.Timeout,

@@ -50,19 +50,8 @@ func (s *Shell) Result() *probe.Result {
 // Config Shell Config Object
 func (s *Shell) Config(gConf global.ProbeSettings) error {
 
-	if s.Timeout <= 0 {
-		s.Timeout = global.DefaultTimeOut
-		if gConf.Timeout > 0 {
-			s.Timeout = gConf.Timeout
-		}
-	}
-
-	if s.TimeInterval <= 0 {
-		s.TimeInterval = global.DefaultProbeInterval
-		if gConf.Interval > 0 {
-			s.TimeInterval = gConf.Interval
-		}
-	}
+	s.Timeout = gConf.NormalizeTimeOut(s.Timeout)
+	s.TimeInterval = gConf.NormalizeInterval(s.TimeInterval)
 
 	s.result = probe.NewResult()
 	s.result.Name = s.Name
