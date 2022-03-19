@@ -10,14 +10,15 @@ Ease Probe supports the following probing methods:
 
 Ease Probe supports the following notifications:
 
-- Email
-- Slack
-- Discord
-- Log File
+- **Email**. Support multiple email addresses.
+- **Slack**. Using Webhook for notification
+- **Discord**. Using Webhook for notification
+- **Log File**. Write the notification into a log file
 
-**Note**: The notification is the edge-trigger, only notified when the status changed.
+**Note**: 
 
-And Ease Probe would send the Daily SLA Report at 00:00 UTC 
+- The notification is **Edge-Triggered Mode**, only notified when the status changed.
+- Ease Probe would send the **Daily SLA Report at 00:00 UTC**.
 
 # Getting Start
 
@@ -128,7 +129,13 @@ shell:
     # check the command output, if does not contain the PONG, mark the status down
     contain : "PONG"
 
-
+  # Run Zookeeper command `stat` to check the zookeper status
+  - name: Zookeeper (Local)
+    cmd: "/bin/sh"
+    args:
+      - "-c"
+      - "echo stat | nc 127.0.0.1 2181"
+    contain: "Mode:"
 
 
 # Notification Configuration
