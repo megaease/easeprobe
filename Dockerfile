@@ -4,6 +4,7 @@ COPY ./ /go/src/github.com/megaease/easeprobe/
 RUN apk --no-cache add make git && make clean && make
 
 FROM alpine:latest
+RUN apk update && apk add busybox-extras && apk add curl redis
 WORKDIR /opt/
 COPY --from=builder /go/src/github.com/megaease/easeprobe/build/bin/* ./
 ENTRYPOINT ["/opt/easeprobe", "-f", "/opt/config.yaml"]
