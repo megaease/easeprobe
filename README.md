@@ -123,6 +123,10 @@ shell:
       - "-h"
       - "127.0.0.1"
       - "ping"
+    env:
+      # set the `REDISCLI_AUTH` environment variable for redis password
+      - "REDISCLI_AUTH=abc123" 
+    # check the command output, if does not contain the PONG, mark the status down
     contain : "PONG"
 
 

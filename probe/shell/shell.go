@@ -3,6 +3,7 @@ package shell
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -20,6 +21,7 @@ type Shell struct {
 	Name       string   `yaml:"name"`
 	Command    string   `yaml:"cmd"`
 	Args       []string `yaml:"args,omitempty"`
+	Env        []string `yaml:"env,omitempty"`
 	Contain    string   `yaml:"contain,omitempty"`
 	NotContain string   `yaml:"not_contain,omitempty"`
 
@@ -77,6 +79,11 @@ func (s *Shell) Probe() probe.Result {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+
+	for _, e := range s.Env {
+		v := strings.Split(e, "=")
+		os.Setenv(v[0], v[1])
+	}
 
 	now := time.Now()
 	s.result.StartTime = now
