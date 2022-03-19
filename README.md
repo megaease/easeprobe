@@ -91,14 +91,13 @@ http:
     url: http://easeservice-mgmt-control:38013/actuator/health
   - name: EaseService-Mesh
     url: http://easeservice-mgmt-mesh:38013/actuator/health
-  - name: EaseService-Notification (AWS China)
 
 
 
 # TCP Probe Configuration
 tcp:
-  - name: SSH Service (Invalid)
-    host: error.megaease.cn:22
+  - name: SSH Service
+    host: exmaple.com:22
     timeout: 10s # default is 30 seconds
     interval: 2m # default is 60 seconds
 
@@ -164,7 +163,8 @@ settings:
       times: 5
       interval: 10s
   probe:
-    interval: 1m # probe every minute
+    timeout: 30s # the time out for all probers
+    interval: 1m # probe every minute for all probers
   # easeprobe program running log file.
   logfile: "test.log" 
   
