@@ -106,9 +106,11 @@ func (s *Shell) Probe() probe.Result {
 
 	if err := s.CheckOutput(output); err != nil {
 		log.Errorf("[%s] - %v", s.Kind(), err)
+		s.result.Message = fmt.Sprintf("%v", err)
 		status = probe.StatusDown
 	}
 
+	s.result.Message = "Shell Command has been Run Successfully!"
 	s.result.PreStatus = s.result.Status
 	s.result.Status = status
 

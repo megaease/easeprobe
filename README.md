@@ -1,6 +1,6 @@
-# Ease Probe
+# EaseProbe
 
-Ease Probe is a simple, standalone, and lightWeight tool that can do health/status checking, written in Go.
+EaseProbe is a simple, standalone, and lightWeight tool that can do health/status checking, written in Go.
 
 Ease Probe supports the following probing methods:
 
@@ -17,7 +17,7 @@ Ease Probe supports the following notifications:
 
 **Note**: 
 
-- The notification is **Edge-Triggered Mode**, only notified when the status changed.
+- The notification is **Edge-Triggered Mode**, only notified while the status is changed.
 - Ease Probe would send the **Daily SLA Report at 00:00 UTC**.
 
 # Getting Start
@@ -162,7 +162,7 @@ notify:
       to: "user1@example.com;user2@example.com"
       # dry: true # dry notification, print the Email HTML in log(STDOUT)
 
-# Global settings for all probers and notifiers.
+# Global settings for all probes and notifiers.
 settings:
   notify:
     # dry: true # Global settings for dry run 
@@ -170,8 +170,8 @@ settings:
       times: 5
       interval: 10s
   probe:
-    timeout: 30s # the time out for all probers
-    interval: 1m # probe every minute for all probers
+    timeout: 30s # the time out for all probes
+    interval: 1m # probe every minute for all probes
   # easeprobe program running log file.
   logfile: "test.log" 
   
