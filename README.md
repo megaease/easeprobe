@@ -7,6 +7,11 @@ Ease Probe supports the following probing methods:
 - **HTTP**. Checking the HTTP status code, Support mTLS, HTTP Basic Auth, and can set the Request Header/Body.
 - **TCP**. Just check the server can be connected successfully.
 - **Shell**. Run a Shell command and check the result.
+- **Client**. Currently, support the following native client
+  - **MySQL**. Connect to MySQL server and run `SHOW STATUS` SQL.
+  - **Redis**. Connect to Redis server and run `PING` command.
+  - **MongoDB**. Connect to MongoDB server and just ping server.
+  - **Kafka**. Connect to Kafka server and list all topics.
 
 Ease Probe supports the following notifications:
 
@@ -137,6 +142,32 @@ shell:
       - "echo stat | nc 127.0.0.1 2181"
     contain: "Mode:"
 
+# Native Client Probe
+client:
+  - name: Redis Native Client (local)
+    driver: "redis"  # driver is redis
+    host: "localhost:6379"  # server and port
+    password: "abc123" # password
+
+  - name: MySQL Native Client (local)
+    driver: "mysql"
+    host: "localhost:3306"
+    username: "root"
+    password: "pass"
+
+  - name: MongoDB Native Client (local)
+    driver: "mongo"
+    host: "localhost:27017"
+    username: "admin"
+    password: "abc123"
+    timeout: 5s
+
+  - name: Kafka Native Client (local)
+    driver: "kafka"
+    host: "localhost:9092"
+
+
+
 
 # Notification Configuration
 notify:
@@ -161,6 +192,9 @@ notify:
       password: ********
       to: "user1@example.com;user2@example.com"
       # dry: true # dry notification, print the Email HTML in log(STDOUT)
+
+
+
 
 # Global settings for all probes and notifiers.
 settings:
