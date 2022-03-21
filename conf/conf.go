@@ -8,6 +8,7 @@ import (
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify"
+	"github.com/megaease/easeprobe/probe/client"
 	"github.com/megaease/easeprobe/probe/http"
 	"github.com/megaease/easeprobe/probe/shell"
 	"github.com/megaease/easeprobe/probe/tcp"
@@ -75,11 +76,12 @@ type Settings struct {
 
 // Conf is Probe configuration
 type Conf struct {
-	HTTP     []http.HTTP   `yaml:"http"`
-	TCP      []tcp.TCP     `yaml:"tcp"`
-	Shell    []shell.Shell `yaml:"shell"`
-	Notify   notify.Config `yaml:"notify"`
-	Settings Settings      `yaml:"settings"`
+	HTTP     []http.HTTP     `yaml:"http"`
+	TCP      []tcp.TCP       `yaml:"tcp"`
+	Shell    []shell.Shell   `yaml:"shell"`
+	Client   []client.Client `yaml:"client"`
+	Notify   notify.Config   `yaml:"notify"`
+	Settings Settings        `yaml:"settings"`
 }
 
 // New read the configuration from yaml

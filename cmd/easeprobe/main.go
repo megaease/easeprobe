@@ -157,6 +157,10 @@ func main() {
 		probers = append(probers, &conf.Shell[i])
 	}
 
+	for i := 0; i < len(conf.Client); i++ {
+		probers = append(probers, &conf.Client[i])
+	}
+
 	// Notification
 	var notifies []notify.Notify
 
