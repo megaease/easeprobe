@@ -116,7 +116,7 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 	h.result.PreStatus = probe.StatusInit
 	h.result.TimeFormat = gConf.TimeFormat
 
-	log.Debugf("%s configuration: %+v, %+v", h.Kind(), h, h.Result())
+	log.Debugf("[%s] configuration: %+v, %+v", h.Kind(), h, h.Result())
 	return nil
 }
 
@@ -157,11 +157,11 @@ func (h *HTTP) Probe() probe.Result {
 		if err != nil {
 			log.Debugf("%s", string(response))
 		}
+		h.result.Message = fmt.Sprintf("Success: HTTP Status Code is %d", resp.StatusCode)
 		if resp.StatusCode >= 500 {
 			h.result.Message = fmt.Sprintf("Error: HTTP Status Code is %d", resp.StatusCode)
 			status = probe.StatusDown
 		}
-		h.result.Message = fmt.Sprintf("Success: HTTP Status Code is %d", resp.StatusCode)
 	}
 
 	h.result.PreStatus = h.result.Status

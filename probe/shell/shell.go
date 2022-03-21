@@ -16,7 +16,7 @@ import (
 // Kind is the type of probe
 const Kind string = "shell"
 
-// Shell implements a config  for shell command (os.Exec)
+// Shell implements a config for shell command (os.Exec)
 type Shell struct {
 	Name       string   `yaml:"name"`
 	Command    string   `yaml:"cmd"`
@@ -59,7 +59,7 @@ func (s *Shell) Config(gConf global.ProbeSettings) error {
 	s.result.PreStatus = probe.StatusInit
 	s.result.TimeFormat = gConf.TimeFormat
 
-	log.Debugf("%s configuration: %+v, %+v", s.Kind(), s, s.Result())
+	log.Debugf("[%s] configuration: %+v, %+v", s.Kind(), s, s.Result())
 	return nil
 }
 
@@ -90,7 +90,10 @@ func (s *Shell) Probe() probe.Result {
 		}
 		return s
 	}
+
 	status := probe.StatusUp
+	s.result.Message = "Shell Command has been Run Successfully!"
+
 	if err != nil {
 		exitCode := 0
 		if exitError, ok := err.(*exec.ExitError); ok {
@@ -106,11 +109,10 @@ func (s *Shell) Probe() probe.Result {
 
 	if err := s.CheckOutput(output); err != nil {
 		log.Errorf("[%s] - %v", s.Kind(), err)
-		s.result.Message = fmt.Sprintf("%v", err)
+		s.result.Message = fmt.Sprintf("Error: %v", err)
 		status = probe.StatusDown
 	}
 
-	s.result.Message = "Shell Command has been Run Successfully!"
 	s.result.PreStatus = s.result.Status
 	s.result.Status = status
 

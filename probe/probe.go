@@ -87,7 +87,7 @@ func (s Status) Emoji() string {
 
 // UnmarshalJSON is Unmarshal the status
 func (s *Status) UnmarshalJSON(b []byte) (err error) {
-	*s = s.Status(string(b))
+	*s = s.Status(strings.ToLower(string(b)))
 	return nil
 }
 

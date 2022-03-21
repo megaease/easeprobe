@@ -52,7 +52,7 @@ func (t *TCP) Config(gConf global.ProbeSettings) error {
 	t.result.PreStatus = probe.StatusInit
 	t.result.TimeFormat = gConf.TimeFormat
 
-	log.Debugf("%s configuration: %+v, %+v", t.Kind(), t, t.Result())
+	log.Debugf("[%s] configuration: %+v, %+v", t.Kind(), t, t.Result())
 	return nil
 }
 
