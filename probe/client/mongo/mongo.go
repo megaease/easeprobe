@@ -30,7 +30,6 @@ func New(opt conf.Options) Mongo {
 			opt.Host, opt.Timeout.Milliseconds())
 	}
 
-
 	return Mongo{
 		Options: opt,
 		ConnStr: conn,
@@ -50,7 +49,7 @@ func (r Mongo) Probe() (bool, string) {
 	opt.ServerSelectionTimeout = &r.Timeout
 	opt.SetConnectTimeout(r.Timeout)
 
-	ctx , cancel := context.WithTimeout(r.Context, r.Timeout)
+	ctx, cancel := context.WithTimeout(r.Context, r.Timeout)
 	defer cancel()
 
 	db, err := mongo.Connect(ctx, opt)

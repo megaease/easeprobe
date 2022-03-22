@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/megaease/easeprobe/global"
@@ -34,7 +35,7 @@ func (l *LogLevel) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err := unmarshal(&level); err != nil {
 		return err
 	}
-	switch level {
+	switch strings.ToLower(level) {
 	case "debug":
 		l.Level = log.DebugLevel
 	case "info":
@@ -51,6 +52,39 @@ func (l *LogLevel) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
+// Schedule is the schedule.
+type Schedule int
+
+//
+const (
+	Hourly Schedule = iota
+	Daily
+	Weekly
+	Monthly
+	None
+)
+
+// UnmarshalYAML is unmarshal the debug level
+func (s *Schedule) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var level string
+	if err := unmarshal(&level); err != nil {
+		return err
+	}
+	switch strings.ToLower(level) {
+	case "hourly":
+		*s = Hourly
+	case "daily":
+		*s = Daily
+	case "weekly":
+		*s = Weekly
+	case "monthly":
+		*s = Monthly
+	default:
+		*s = None
+	}
+	return nil
+}
+
 // Notify is the settings of notification
 type Notify struct {
 	Retry global.Retry `yaml:"retry"`
@@ -63,15 +97,22 @@ type Probe struct {
 	Timeout  time.Duration `yaml:"timeout"`
 }
 
+// SLAReport is the settings for SLA report
+type SLAReport struct {
+	Schedule Schedule `yaml:"schedule"`
+	Time     string   `yaml:"time"`
+}
+
 // Settings is the EaseProbe configuration
 type Settings struct {
-	LogFile    string   `yaml:"logfile"`
-	LogLevel   LogLevel `yaml:"loglevel"`
-	Debug      bool     `yaml:"debug"`
-	TimeFormat string   `yaml:"timeformat"`
-	Probe      Probe    `yaml:"probe"`
-	Notify     Notify   `yaml:"notify"`
-	logfile    *os.File `yaml:"-"`
+	LogFile    string    `yaml:"logfile"`
+	LogLevel   LogLevel  `yaml:"loglevel"`
+	Debug      bool      `yaml:"debug"`
+	TimeFormat string    `yaml:"timeformat"`
+	Probe      Probe     `yaml:"probe"`
+	Notify     Notify    `yaml:"notify"`
+	SLAReport  SLAReport `yaml:"sla"`
+	logfile    *os.File  `yaml:"-"`
 }
 
 // Conf is Probe configuration
@@ -89,6 +130,8 @@ func New(conf *string) (Conf, error) {
 	c := Conf{
 		HTTP:   []http.HTTP{},
 		TCP:    []tcp.TCP{},
+		Shell:  []shell.Shell{},
+		Client: []client.Client{},
 		Notify: notify.Config{},
 		Settings: Settings{
 			LogFile:    "",
@@ -97,6 +140,7 @@ func New(conf *string) (Conf, error) {
 			TimeFormat: "2006-01-02 15:04:05 UTC",
 			Probe: Probe{
 				Interval: time.Second * 60,
+				Timeout:  time.Second * 10,
 			},
 			Notify: Notify{
 				Retry: global.Retry{
@@ -104,6 +148,10 @@ func New(conf *string) (Conf, error) {
 					Interval: time.Second * 5,
 				},
 				Dry: false,
+			},
+			SLAReport: SLAReport{
+				Schedule: Daily,
+				Time:     "00:00",
 			},
 			logfile: nil,
 		},

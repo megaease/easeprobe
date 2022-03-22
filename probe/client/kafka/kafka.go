@@ -53,7 +53,7 @@ func (k Kafka) Probe() (bool, string) {
 		}
 	}
 
-	ctx , cancel := context.WithTimeout(k.Context, k.Timeout)
+	ctx, cancel := context.WithTimeout(k.Context, k.Timeout)
 	defer cancel()
 
 	conn, err := dialer.DialContext(ctx, "tcp", k.Host)

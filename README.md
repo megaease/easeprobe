@@ -5,11 +5,11 @@ EaseProbe is a simple, standalone, and lightWeight tool that can do health/statu
 Ease Probe supports the following probing methods:
 
 - **HTTP**. Checking the HTTP status code, Support mTLS, HTTP Basic Auth, and can set the Request Header/Body.
-- **TCP**. Just check the server can be connected successfully.
+- **TCP**. Just check the TCP connection whether can be established or not.
 - **Shell**. Run a Shell command and check the result.
 - **Client**. Currently, support the following native client
-  - **MySQL**. Connect to MySQL server and run `SHOW STATUS` SQL.
-  - **Redis**. Connect to Redis server and run `PING` command.
+  - **MySQL**. Connect to the MySQL server and run the `SHOW STATUS` SQL.
+  - **Redis**. Connect to the Redis server and run the `PING` command.
   - **MongoDB**. Connect to MongoDB server and just ping server.
   - **Kafka**. Connect to Kafka server and list all topics.
 
@@ -103,11 +103,11 @@ http:
 # TCP Probe Configuration
 tcp:
   - name: SSH Service
-    host: exmaple.com:22
+    host: example.com:22
     timeout: 10s # default is 30 seconds
     interval: 2m # default is 60 seconds
 
-  - name: Kafkak
+  - name: Kafka
     host: kafka.server:9093
 
 
@@ -134,7 +134,7 @@ shell:
     # check the command output, if does not contain the PONG, mark the status down
     contain : "PONG"
 
-  # Run Zookeeper command `stat` to check the zookeper status
+  # Run Zookeeper command `stat` to check the zookeeper status
   - name: Zookeeper (Local)
     cmd: "/bin/sh"
     args:
@@ -198,24 +198,32 @@ notify:
 
 # Global settings for all probes and notifiers.
 settings:
+  # SLA Report schedule
+  sla:
+    #  daily, weekly (Sunday), monthly (Last Day), none
+    schedule : "daily"
+    # UTC time, the format is 'hour:min:sec'
+    time: "23:59"
+
   notify:
     # dry: true # Global settings for dry run 
     retry: # Global settings for retry 
       times: 5
       interval: 10s
+
   probe:
     timeout: 30s # the time out for all probes
     interval: 1m # probe every minute for all probes
   # easeprobe program running log file.
   logfile: "test.log" 
-  
+
   # Log Level Configuration
   # can be: panic, fatal, error, warn, info, debug.
   loglevel: "debug"
 
   # debug mode 
-  # - true: the SLA report would be sent in every minute
-  # - false: the SLA report would be sent in every day at 00:00 UTC time
+  # - true: send the SLA report every minute
+  # - false: send the SLA report in schedule
   debug: false
  
   # Date format

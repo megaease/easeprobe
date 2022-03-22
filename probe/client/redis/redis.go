@@ -38,7 +38,7 @@ func (r Redis) Probe() (bool, string) {
 		DialTimeout: r.Timeout,  // dial timout
 	})
 
-	ctx , cancel := context.WithTimeout(r.Context, r.Timeout)
+	ctx, cancel := context.WithTimeout(r.Context, r.Timeout)
 	defer cancel()
 
 	_, err := rdb.Ping(ctx).Result()
