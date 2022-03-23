@@ -41,3 +41,28 @@ type TLS struct {
 	Cert string `yaml:"cert"`
 	Key  string `yaml:"key"`
 }
+
+func normalizeTimeDuration(global, local, valid, _default time.Duration) time.Duration {
+	// if the val is in valid, the assign the default value
+	if local <= valid {
+		local = _default
+		//if the global configuration is validated, assign the global
+		if global > valid {
+			local = global
+		}
+	}
+	return local
+}
+
+func normalizeInteger(global, local, valid, _default int) int {
+	// if the val is in valid, the assign the default value
+	if local <= valid {
+		local = _default
+		//if the global configuration is validated, assign the global
+		if global > valid {
+			local = global
+		}
+	}
+	return local
+}
+

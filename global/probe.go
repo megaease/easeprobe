@@ -11,22 +11,10 @@ type ProbeSettings struct {
 
 // NormalizeTimeOut return a normalized timeout value
 func (p *ProbeSettings) NormalizeTimeOut(t time.Duration) time.Duration {
-	if t <= 0 {
-		t = DefaultTimeOut
-		if p.Timeout > 0 {
-			t = p.Timeout
-		}
-	}
-	return t
+	return normalizeTimeDuration(p.Timeout, t, 0, DefaultTimeOut)
 }
 
 // NormalizeInterval return a normalized time interval value
 func (p *ProbeSettings) NormalizeInterval(t time.Duration) time.Duration {
-	if t <= 0 {
-		t = DefaultProbeInterval
-		if p.Interval > 0 {
-			t = p.Interval
-		}
-	}
-	return t
+	return normalizeTimeDuration(p.Interval, t, 0, DefaultProbeInterval)
 }
