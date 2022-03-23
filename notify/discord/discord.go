@@ -100,19 +100,7 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 		log.Infof("Notification %s is running on Dry mode!", c.Kind())
 	}
 
-	if c.Retry.Interval <= 0 {
-		c.Retry.Interval = global.DefaultRetryInterval
-		if gConf.Retry.Interval > 0 {
-			c.Retry.Interval = gConf.Retry.Interval
-		}
-	}
-
-	if c.Retry.Times <= 0 {
-		c.Retry.Times = global.DefaultRetryTimes
-		if gConf.Retry.Times >= 0 {
-			c.Retry.Times = gConf.Retry.Times
-		}
-	}
+	c.Retry = gConf.NormalizeRetry(c.Retry)
 
 	log.Infof("[%s] configuration: %+v", c.Kind(), c)
 
