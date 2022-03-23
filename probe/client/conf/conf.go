@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/megaease/easeprobe/global"
 )
 
 // Driver Interface
@@ -33,9 +35,7 @@ type Options struct {
 	Password   string     `yaml:"password"`
 
 	//TLS
-	CA   string `yaml:"ca,omitempty"`
-	Cert string `yaml:"cert,omitempty"`
-	Key  string `yaml:"key,omitempty"`
+	global.TLS `yaml:",inline"`
 
 	//Control Option
 	Timeout      time.Duration `yaml:"timeout,omitempty"`

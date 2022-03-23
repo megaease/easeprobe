@@ -1,6 +1,11 @@
 package global
 
-import "time"
+import (
+	"crypto/tls"
+	"crypto/x509"
+	"io/ioutil"
+	"time"
+)
 
 const (
 	// Org is the organization
@@ -66,3 +71,25 @@ func normalizeInteger(global, local, valid, _default int) int {
 	return local
 }
 
+// Config return a tls.Config object
+func (t *TLS) Config() (*tls.Config, error) {
+	if len(t.CA) <= 0 || len(t.Cert) <= 0 || len(t.Key) <= 0 {
+		return nil, nil
+	}
+
+	cert, err := ioutil.ReadFile(t.CA)
+	if err != nil {
+		return nil, err
+	}
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(cert)
+
+	certificate, err := tls.LoadX509KeyPair(t.Cert, t.Key)
+	if err != nil {
+		return nil, err
+	}
+	return &tls.Config{
+		RootCAs:      caCertPool,
+		Certificates: []tls.Certificate{certificate},
+	}, nil
+}

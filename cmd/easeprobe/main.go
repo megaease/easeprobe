@@ -103,7 +103,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 	// Set the Cron Job for SLA Report
 	if conf.Get().Settings.SLAReport.Schedule != conf.None {
 		scheduleSLA(probers, notifies)
-	}else{
+	} else {
 		log.Info("No SLA Report would be sent!!")
 	}
 

@@ -2,8 +2,6 @@ package http
 
 import (
 	"bytes"
-	"crypto/tls"
-	"crypto/x509"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -32,9 +30,7 @@ type HTTP struct {
 	Pass string `yaml:"password,omitempty"`
 
 	//Option - TLS Config
-	CA   string `yaml:"ca,omitempty"`
-	Cert string `yaml:"cert,omitempty"`
-	Key  string `yaml:"key,omitempty"`
+	global.TLS `yaml:",inline"`
 
 	//Control Options
 	Timeout      time.Duration `yaml:"timeout,omitempty"`
@@ -76,38 +72,20 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 	h.Timeout = gConf.NormalizeTimeOut(h.Timeout)
 	h.TimeInterval = gConf.NormalizeInterval(h.TimeInterval)
 
+	tls, err := h.TLS.Config()
+	if err != nil {
+		log.Errorf("TLS configuration error - %s", err)
+		return err
+	}
+
 	h.client = &http.Client{
 		Timeout: h.Timeout,
+		Transport: &http.Transport{
+			TLSClientConfig: tls,
+		},
 	}
 	if !checkHTTPMethod(h.Method) {
 		h.Method = "GET"
-	}
-
-	if len(h.CA) > 0 {
-		cert, err := ioutil.ReadFile(h.CA)
-		if err != nil {
-			log.Errorf("could not open certificate file: %v", err)
-			return err
-		}
-		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM(cert)
-
-		log.Info("Load key pairs - ", h.Cert, h.Key)
-		certificate, err := tls.LoadX509KeyPair(h.Cert, h.Key)
-		if err != nil {
-			log.Errorf("could not load certificate: %v", err)
-			return err
-		}
-		h.client = &http.Client{
-			Timeout: time.Minute * 3,
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{
-					RootCAs:      caCertPool,
-					Certificates: []tls.Certificate{certificate},
-				},
-			},
-		}
-
 	}
 
 	h.result = probe.NewResult()
