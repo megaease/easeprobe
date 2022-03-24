@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"context"
+	"crypto/tls"
 
 	"github.com/megaease/easeprobe/probe/client/conf"
 	"github.com/segmentio/kafka-go"
@@ -15,15 +16,19 @@ const Kind string = "Kafka"
 // Kafka is the Kafka client
 type Kafka struct {
 	conf.Options `yaml:",inline"`
-	ConnStr      string          `yaml:"conn_str"`
+	tls          *tls.Config     `yaml:"-"`
 	Context      context.Context `yaml:"-"`
 }
 
 // New create a Redis client
 func New(opt conf.Options) Kafka {
+	tls, err := opt.TLS.Config()
+	if err != nil {
+		log.Errorf("[%s] %s - TLS Config error - %v", Kind, opt.Name, err)
+	}
 	return Kafka{
 		Options: opt,
-		ConnStr: "",
+		tls:     tls,
 		Context: context.Background(),
 	}
 }
@@ -41,6 +46,7 @@ func (k Kafka) Probe() (bool, string) {
 	if len(k.Password) > 0 {
 		dialer = &kafka.Dialer{
 			Timeout: k.Timeout,
+			TLS:     k.tls,
 			SASLMechanism: plain.Mechanism{
 				Username: k.Username,
 				Password: k.Password,
@@ -49,6 +55,7 @@ func (k Kafka) Probe() (bool, string) {
 	} else {
 		dialer = &kafka.Dialer{
 			Timeout:       k.Timeout,
+			TLS:           k.tls,
 			SASLMechanism: nil,
 		}
 	}
