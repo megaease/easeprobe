@@ -22,7 +22,7 @@ EaseProbe is a simple, standalone, and lightWeight tool that can do health/statu
 
 ## 1. Overview
 
-EaseProbe would do 3 kinds of works - **Probe**, **Notify** and **Report**. 
+EaseProbe would do 3 kinds of works - **Probe**, **Notify** and **Report**.
 
 ### 1.1 Probe
 
@@ -60,7 +60,7 @@ Ease Probe supports the following probing methods:
         - "ping"
       env:
         # set the `REDISCLI_AUTH` environment variable for redis password
-        - "REDISCLI_AUTH=abc123" 
+        - "REDISCLI_AUTH=abc123"
       # check the command output, if does not contain the PONG, mark the status down
       contain : "PONG"
   ```
@@ -70,7 +70,7 @@ Ease Probe supports the following probing methods:
   - **Redis**. Connect to the Redis server and run the `PING` command.
   - **MongoDB**. Connect to MongoDB server and just ping server.
   - **Kafka**. Connect to Kafka server and list all topics.
-
+  - **PostgreSQL**. Connect to PostgreSQL server and run `SELECT 1` SQL.
 
   ```YAML
   client:
@@ -86,7 +86,7 @@ Ease Probe supports the following probing methods:
 
 ### 1.2 Notification
 
-Ease Probe supports the following notifications: 
+Ease Probe supports the following notifications:
 
 - **Email**. Support multiple email addresses.
 - **Slack**. Using Webhook for notification
@@ -112,7 +112,7 @@ Check the  [Notification Configuration](#36-notification-configuration) to see h
 
 ### 1.3 Report
 
-- **SLA Report**. EaseProbe would send the daily, weekly or monthly SLA report. 
+- **SLA Report**. EaseProbe would send the daily, weekly or monthly SLA report.
 
 ```YAML
 settings:
@@ -125,7 +125,7 @@ settings:
 ```
 
 
-**Note**: 
+**Note**:
 
 - The notification is **Edge-Triggered Mode**, only notified while the status is changed.
 
@@ -146,7 +146,7 @@ $ make
 Running the following command for local test
 
 ```shell
-$ build/bin/easeprobe -f config.yaml 
+$ build/bin/easeprobe -f config.yaml
 ```
 
 
@@ -167,15 +167,15 @@ http:
   # Some of the Software support the HTTP Query
   - name: ElasticSearch
     url: http://elasticsearch.server:9200
-  - name: Eureka 
+  - name: Eureka
     url: http://eureka.server:8761
   - name: Prometheus
     url: http://prometheus:9090/graph
 
   # Spring Boot Application with Actuator Heath API
-  - name: EaseService-Governance 
+  - name: EaseService-Governance
     url: http://easeservice-mgmt-governance:38012/actuator/health
-  - name: EaseService-Control 
+  - name: EaseService-Control
     url: http://easeservice-mgmt-control:38013/actuator/health
   - name: EaseService-Mesh
     url: http://easeservice-mgmt-mesh:38013/actuator/health
@@ -226,7 +226,7 @@ tcp:
 shell:
   # A proxy curl shell script
   - name: Google Service
-    cmd: "./resources/probe/scripts/proxy.curl.sh" 
+    cmd: "./resources/probe/scripts/proxy.curl.sh"
     args:
       - "socks5://127.0.0.1:1085"
       - "www.google.com"
@@ -240,7 +240,7 @@ shell:
       - "ping"
     env:
       # set the `REDISCLI_AUTH` environment variable for redis password
-      - "REDISCLI_AUTH=abc123" 
+      - "REDISCLI_AUTH=abc123"
     # check the command output, if does not contain the PONG, mark the status down
     contain : "PONG"
 
@@ -287,6 +287,12 @@ client:
     ca: /path/to/file.ca
     cert: /path/to/file.crt
     key: /path/to/file.key
+
+  - name: PostgreSQL Native Client (local)
+    driver: "postgres"
+    host: "localhost:5432"
+    username: "postgres"
+    password: "pass"
 ```
 
 
@@ -298,7 +304,7 @@ notify:
   # Notify to a local log file
   log:
     - file: "/tmp/easeprobe.log"
-      dry: true  
+      dry: true
   # Notify to Slack Channel
   slack:
     - webhook: "https://hooks.slack.com/services/........../....../....../"
@@ -332,8 +338,8 @@ settings:
     time: "23:59"
 
   notify:
-    # dry: true # Global settings for dry run 
-    retry: # Global settings for retry 
+    # dry: true # Global settings for dry run
+    retry: # Global settings for retry
       times: 5
       interval: 10s
 
@@ -341,17 +347,17 @@ settings:
     timeout: 30s # the time out for all probes
     interval: 1m # probe every minute for all probes
   # easeprobe program running log file.
-  logfile: "test.log" 
+  logfile: "test.log"
 
   # Log Level Configuration
   # can be: panic, fatal, error, warn, info, debug.
   loglevel: "debug"
 
-  # debug mode 
+  # debug mode
   # - true: send the SLA report every minute
   # - false: send the SLA report in schedule
   debug: false
- 
+
   # Date format
   # Date
   #  - January 2, 2006
@@ -380,6 +386,6 @@ settings:
 - [Join Slack Workspace](https://join.slack.com/t/openmegaease/shared_invite/zt-upo7v306-lYPHvVwKnvwlqR0Zl2vveA) for requirement, issue and development.
 - [MegaEase on Twitter](https://twitter.com/megaease)
 
-## 5. License 
+## 5. License
 
 EaseProbe is under the Apache 2.0 license. See the [LICENSE](./LICENSE) file for details.

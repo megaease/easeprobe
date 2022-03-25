@@ -40,6 +40,7 @@ const (
 	Redis
 	Kafka
 	Mongo
+	PostgreSQL
 	Unknown
 )
 
@@ -70,6 +71,8 @@ func (d DriverType) String() string {
 		return "Kafka"
 	case Mongo:
 		return "Mongo"
+	case PostgreSQL:
+		return "PostgreSQL"
 	}
 	return "Unknown"
 }
@@ -85,6 +88,8 @@ func (d *DriverType) DriverType(driver string) DriverType {
 		return Kafka
 	case "mongo":
 		return Mongo
+	case "postgres":
+		return PostgreSQL
 	}
 	return Unknown
 }

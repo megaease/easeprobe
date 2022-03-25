@@ -27,6 +27,7 @@ import (
 	"github.com/megaease/easeprobe/probe/client/kafka"
 	"github.com/megaease/easeprobe/probe/client/mongo"
 	"github.com/megaease/easeprobe/probe/client/mysql"
+	"github.com/megaease/easeprobe/probe/client/postgres"
 	"github.com/megaease/easeprobe/probe/client/redis"
 	log "github.com/sirupsen/logrus"
 )
@@ -86,6 +87,8 @@ func (c *Client) configClientDriver() {
 		c.client = mongo.New(c.Options)
 	case conf.Kafka:
 		c.client = kafka.New(c.Options)
+	case conf.PostgreSQL:
+		c.client = postgres.New(c.Options)
 	default:
 		c.DriverType = conf.Unknown
 	}
