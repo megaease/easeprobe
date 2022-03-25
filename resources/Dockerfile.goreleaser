@@ -4,7 +4,7 @@ WORKDIR /opt/
 
 COPY easeprobe /opt/
 COPY resources/scripts/entrypoint.sh /
-RUN apk update && apk add tini tzdata busybox-extras curl redis mysql-client
+RUN apk update && apk add tini tzdata busybox-extras curl redis
 
 ENV PATH /opt/:$PATH
 ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
