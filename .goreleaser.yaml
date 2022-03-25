@@ -1,0 +1,57 @@
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    - go mod tidy
+    # you may remove this if you don't need go generate
+    - go generate ./...
+
+snapshot:
+  name_template: '{{ .Tag }}'
+checksum:
+  name_template: 'checksums.txt'
+changelog:
+  skip: true
+
+builds:
+  - id: build
+    main: cmd/easeprobe/main.go
+    binary: bin/easeprobe
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/megaease/easeprobe/pkg/version.RELEASE={{ .Tag }}
+      - -X github.com/megaease/easeprobe/pkg/version.COMMIT={{.Commit}}
+      - -X github.com/megaease/easeprobe/pkg/version.REPO=megaease/easeprobe
+
+archives:
+  - id: easeprobe
+    format: tar.gz
+    name_template: "{{ .ProjectName }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+    files:
+      - none*
+
+release:
+  github:
+    owner: megaease
+    name: easeprobe
+  name_template: "{{ .ProjectName }}-v{{ .Version }}"
+
+dockers:
+  - image_templates:
+    - megaease/easeprobe:latest
+    - megaease/easeprobe:{{ .Tag }}
+
+    goos: linux
+    goarch: amd64
+    ids:
+      - build
+
+    dockerfile: resources/Dockerfile.goreleaser
+    extra_files:
+      - resources/scripts/entrypoint.sh
