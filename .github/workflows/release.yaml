@@ -1,9 +1,9 @@
 name: Release
 
 on:
-  workflow_dispatch:
-  release:
-    types: [created]
+  push:
+    tags:
+      - 'v*'
 env:
   GO_VERSION: 1.17
 
