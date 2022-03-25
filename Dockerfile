@@ -4,7 +4,9 @@ COPY ./ /go/src/github.com/megaease/easeprobe/
 RUN apk --no-cache add make git && make clean && make
 
 FROM alpine:latest
-RUN apk update && apk add busybox-extras && apk add curl redis
+RUN apk update && apk add tini tzdata busybox-extras curl redis mysql-client
 WORKDIR /opt/
 COPY --from=builder /go/src/github.com/megaease/easeprobe/build/bin/* ./
-ENTRYPOINT ["/opt/easeprobe", "-f", "/opt/config.yaml"]
+COPY --from=builder /go/src/github.com/megaease/easeprobe/resources/scripts/entrypoint.sh /
+ENV PATH /opt/:$PATH
+ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
