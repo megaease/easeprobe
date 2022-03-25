@@ -25,9 +25,9 @@ builds:
       - arm64
     ldflags:
       - -s -w
-      - -X github.com/haoel/easeprobe/pkg/version.RELEASE={{ .Tag }}
-      - -X github.com/haoel/easeprobe/pkg/version.COMMIT={{.Commit}}
-      - -X github.com/haoel/easeprobe/pkg/version.REPO=haoel/easeprobe
+      - -X github.com/megaease/easeprobe/pkg/version.RELEASE={{ .Tag }}
+      - -X github.com/megaease/easeprobe/pkg/version.COMMIT={{.Commit}}
+      - -X github.com/megaease/easeprobe/pkg/version.REPO=megaease/easeprobe
 
 archives:
   - id: easeprobe
@@ -38,7 +38,7 @@ archives:
 
 release:
   github:
-    owner: haoel
+    owner: megaease
     name: easeprobe
   name_template: "{{ .ProjectName }}-v{{ .Version }}"
 
