@@ -54,3 +54,5 @@ dockers:
       - server
 
     dockerfile: resources/Dockerfile.goreleaser
+    extra_files:
+      - resources/scripts/entrypoint.sh
