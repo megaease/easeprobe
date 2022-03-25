@@ -38,7 +38,7 @@ archives:
 
 release:
   github:
-    owner: megaease
+    owner: haoel
     name: easeprobe
   name_template: "{{ .ProjectName }}-v{{ .Version }}"
 
