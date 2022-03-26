@@ -224,7 +224,7 @@ func (c *NotifyConfig) NewField(result probe.Result, inline bool) Fields {
 
 	desc := fmt.Sprintf(message, result.Endpoint,
 		result.Stat.UpTime.Round(time.Second), result.Stat.DownTime.Round(time.Second), result.SLA(),
-		result.Stat.Total, probe.StatStatusText(result.Stat, probe.Makerdown),
+		result.Stat.Total, probe.StatStatusText(result.Stat, probe.Makerdown2),
 		result.StartTime.UTC().Format(result.TimeFormat), result.Status.Emoji()+" "+result.Status.String(),
 		result.Message)
 

@@ -20,8 +20,11 @@ package global
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
 	"io/ioutil"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -112,4 +115,21 @@ func (t *TLS) Config() (*tls.Config, error) {
 		RootCAs:      caCertPool,
 		Certificates: []tls.Certificate{certificate},
 	}, nil
+}
+
+// DoRetry is a help function to retry the function if it returns error
+func DoRetry(kind string, tag string, r Retry, fn func() error) error {
+	for i := 0; i < r.Times; i++ {
+		err := fn()
+		if err == nil {
+			return nil
+		}
+		log.Warnf("[%s - %s ] Retried to send %d/%d - %v", kind, tag, i+1, r.Times, err)
+
+		// last time no need to sleep
+		if i < r.Times-1 {
+			time.Sleep(r.Interval)
+		}
+	}
+	return fmt.Errorf("[%s - %s] failed after %d retries", kind, tag, r.Times)
 }

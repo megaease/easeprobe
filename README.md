@@ -91,6 +91,7 @@ Ease Probe supports the following notifications:
 - **Email**. Support multiple email addresses.
 - **Slack**. Using Webhook for notification
 - **Discord**. Using Webhook for notification
+- **Telegram**. Using Telegram Bot for notification
 - **Log File**. Write the notification into a log file
 
 
@@ -101,6 +102,9 @@ notify:
     - webhook: "https://hooks.slack.com/services/........../....../....../"
   discord:
     - webhook: "https://discord.com/api/webhooks/...../....../"
+  telegram:
+    - token: 1234567890:ABCDEFGHIJKLMNOPQRSTUVWXYZ # Bot Token
+      chat_id: -123456789 # Channel / Group ID
   email:
     - server: smtp.email.example.com:465
       username: user@example.com
@@ -309,6 +313,9 @@ notify:
   slack:
     - webhook: "https://hooks.slack.com/services/........../....../....../"
       # dry: true   # dry notification, print the Slack JSON in log(STDOUT)
+  telegram:
+    - token: 1234567890:ABCDEFGHIJKLMNOPQRSTUVWXYZ # Bot Token
+      chat_id: -123456789 # Channel / Group ID
   # Notify to Discord Text Channel
   discord:
     - webhook: "https://discord.com/api/webhooks/...../....../"
