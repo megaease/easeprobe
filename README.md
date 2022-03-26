@@ -22,7 +22,7 @@ EaseProbe is a simple, standalone, and lightWeight tool that can do health/statu
 
 ## 1. Overview
 
-EaseProbe would do 3 kinds of works - **Probe**, **Notify** and **Report**.
+EaseProbe would do 3 kinds of work - **Probe**, **Notify**, and **Report**.
 
 ### 1.1 Probe
 
@@ -312,6 +312,9 @@ notify:
   # Notify to Discord Text Channel
   discord:
     - webhook: "https://discord.com/api/webhooks/...../....../"
+      # the avatar and thumbnail setting for notify block
+      avatar: "https://img.icons8.com/ios/72/appointment-reminders--v1.png"
+      thumbnail: "https://freeiconshop.com/wp-content/uploads/edd/notification-flat.png"
       # dry: true # dry notification, print the Discord JSON in log(STDOUT)
       retry: # something the network is not good need to retry.
         times: 3

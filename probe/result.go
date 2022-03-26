@@ -53,7 +53,6 @@ func (d *ConfigDuration) MarshalJSON() (b []byte, err error) {
 	return []byte(fmt.Sprintf(`"%s"`, d.Round(time.Millisecond))), nil
 }
 
-
 // Stat is the statistics of probe result
 type Stat struct {
 	Since    time.Time        `json:"since"`
@@ -198,7 +197,7 @@ func (r *Result) SlackBlockJSON() string {
 				"elements": [
 					{
 						"type": "image",
-						"image_url": "https://megaease.cn/favicon.png",
+						"image_url": "` + global.Icon + `",
 						"alt_text": "` + global.OrgProg + `"
 					},
 					{
@@ -347,7 +346,7 @@ func StatSlackBlockJSON(probers []Prober) string {
 		"elements": [
 			{
 				"type": "image",
-				"image_url": "https://megaease.cn/favicon.png",
+				"image_url": "` + global.Icon + `",
 				"alt_text": "` + global.OrgProg + `"
 			},
 			{
@@ -409,5 +408,3 @@ func SlackTimeFormation(t time.Time, act string, format string) string {
 	return fmt.Sprintf("<!date^%d^%s{date_num} {time_secs}|%s%s>",
 		t.Unix(), act, act, t.UTC().Format(format))
 }
-
-

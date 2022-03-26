@@ -36,6 +36,9 @@ const (
 	OrgProg = Org + " " + Prog
 	//OrgProgVer combine organization and program and version
 	OrgProgVer = Org + " " + Prog + "/" + Ver
+
+	// Icon is the default icon which used in Slack or Discord
+	Icon = "https://megaease.cn/favicon.png"
 )
 
 const (

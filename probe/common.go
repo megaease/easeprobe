@@ -24,7 +24,7 @@ import (
 
 // DurationStr convert the curation to string
 func DurationStr(d time.Duration) string {
-	
+
 	const day = time.Minute * 60 * 24
 
 	if d < 0 {
@@ -44,7 +44,6 @@ func DurationStr(d time.Duration) string {
 
 	return fmt.Sprintf("%dd%s", n, d)
 }
-
 
 // HTMLHeader return the HTML head
 func HTMLHeader(title string) string {

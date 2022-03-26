@@ -101,6 +101,8 @@ type Discord struct {
 // NotifyConfig is the slack notification configuration
 type NotifyConfig struct {
 	WebhookURL string       `yaml:"webhook"`
+	Avatar     string       `yaml:"avatar"`
+	Thumbnail  string       `yaml:"thumbnail"`
 	Dry        bool         `yaml:"dry"`
 	Retry      global.Retry `yaml:"retry"`
 }
@@ -117,6 +119,14 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 		log.Infof("Notification %s is running on Dry mode!", c.Kind())
 	}
 
+	if len(strings.TrimSpace(c.Avatar)) <= 0 {
+		c.Avatar = global.Icon
+	}
+
+	if len(strings.TrimSpace(c.Thumbnail)) <= 0 {
+		c.Thumbnail = global.Icon
+	}
+
 	c.Retry = gConf.NormalizeRetry(c.Retry)
 
 	log.Infof("[%s] configuration: %+v", c.Kind(), c)
@@ -128,7 +138,7 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 func (c *NotifyConfig) NewDiscord(result probe.Result) Discord {
 	discord := Discord{
 		Username:  global.Prog,
-		AvatarURL: "https://megaease.cn/favicon.png",
+		AvatarURL: c.Avatar,
 		Content:   "",
 		Embeds:    []Embed{},
 	}
@@ -150,9 +160,9 @@ func (c *NotifyConfig) NewDiscord(result probe.Result) Discord {
 		Color:       color,
 		Description: description,
 		Timestamp:   result.StartTime.UTC().Format(time.RFC3339),
-		Thumbnail:   Thumbnail{URL: "https://megaease.cn/favicon.png"},
+		Thumbnail:   Thumbnail{URL: c.Thumbnail},
 		Fields:      []Fields{},
-		Footer:      Footer{Text: "Probed at", IconURL: "https://megaease.cn/favicon.png"},
+		Footer:      Footer{Text: "Probed at", IconURL: global.Icon},
 	})
 	return discord
 }
@@ -245,7 +255,7 @@ func (c *NotifyConfig) NewEmbeds(probers []probe.Prober) []Discord {
 	for p := 0; p < pages; p++ {
 		discord := Discord{
 			Username:  global.Prog,
-			AvatarURL: "https://megaease.cn/favicon.png",
+			AvatarURL: c.Avatar,
 			Content:   fmt.Sprintf("**Overall SLA Report (%d/%d)**", p+1, pages),
 			Embeds:    []Embed{},
 		}
