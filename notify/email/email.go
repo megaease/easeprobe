@@ -32,12 +32,13 @@ import (
 
 // NotifyConfig is the email notification configuration
 type NotifyConfig struct {
-	Server string       `yaml:"server"`
-	User   string       `yaml:"username"`
-	Pass   string       `yaml:"password"`
-	To     string       `yaml:"to"`
-	Dry    bool         `yaml:"dry"`
-	Retry  global.Retry `yaml:"retry"`
+	Server  string        `yaml:"server"`
+	User    string        `yaml:"username"`
+	Pass    string        `yaml:"password"`
+	To      string        `yaml:"to"`
+	Dry     bool          `yaml:"dry"`
+	Timeout time.Duration `yaml:"timeout"`
+	Retry   global.Retry  `yaml:"retry"`
 }
 
 // Kind return the type of Notify
@@ -50,7 +51,7 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 	if c.Dry {
 		log.Infof("Notification %s is running on Dry mode!", c.Kind())
 	}
-
+	c.Timeout = gConf.NormalizeTimeOut(c.Timeout)
 	c.Retry = gConf.NormalizeRetry(c.Retry)
 
 	log.Infof("[%s] configuration: %+v", c.Kind(), c)

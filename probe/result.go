@@ -69,11 +69,12 @@ type Result struct {
 	StartTime      time.Time      `json:"time"`
 	StartTimestamp int64          `json:"timestamp"`
 	RoundTripTime  ConfigDuration `json:"rtt"`
-	TimeFormat     string         `json:"-"`
 	Status         Status         `json:"status"`
 	PreStatus      Status         `json:"prestatus"`
 	Message        string         `json:"message"`
 	Stat           Stat           `json:"stat"`
+
+	TimeFormat string `json:"-"`
 }
 
 // NewResult return a Result object

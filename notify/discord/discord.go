@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
@@ -100,11 +101,12 @@ type Discord struct {
 
 // NotifyConfig is the slack notification configuration
 type NotifyConfig struct {
-	WebhookURL string       `yaml:"webhook"`
-	Avatar     string       `yaml:"avatar"`
-	Thumbnail  string       `yaml:"thumbnail"`
-	Dry        bool         `yaml:"dry"`
-	Retry      global.Retry `yaml:"retry"`
+	WebhookURL string        `yaml:"webhook"`
+	Avatar     string        `yaml:"avatar"`
+	Thumbnail  string        `yaml:"thumbnail"`
+	Dry        bool          `yaml:"dry"`
+	Timeout    time.Duration `yaml:"timeout"`
+	Retry      global.Retry  `yaml:"retry"`
 }
 
 // Kind return the type of Notify
@@ -127,6 +129,7 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 		c.Thumbnail = global.Icon
 	}
 
+	c.Timeout = gConf.NormalizeTimeOut(c.Timeout)
 	c.Retry = gConf.NormalizeRetry(c.Retry)
 
 	log.Infof("[%s] configuration: %+v", c.Kind(), c)
@@ -346,17 +349,19 @@ func (c *NotifyConfig) SendDiscordNotification(discord Discord) error {
 	req.Close = true
 	req.Header.Add("Content-Type", "application/json")
 
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Timeout: c.Timeout}
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
+	buf, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
 	if resp.StatusCode != 204 {
-		return fmt.Errorf("Error response from Discord [%d] - [%s]", resp.StatusCode, buf.String())
+		return fmt.Errorf("Error response from Discord [%d] - [%s]", resp.StatusCode, string(buf))
 	}
 	return nil
 }

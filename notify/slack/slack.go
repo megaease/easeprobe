@@ -19,7 +19,8 @@ package slack
 
 import (
 	"bytes"
-	"errors"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -30,9 +31,10 @@ import (
 
 // NotifyConfig is the slack notification configuration
 type NotifyConfig struct {
-	WebhookURL string       `yaml:"webhook"`
-	Dry        bool         `yaml:"dry"`
-	Retry      global.Retry `yaml:"retry"`
+	WebhookURL string        `yaml:"webhook"`
+	Dry        bool          `yaml:"dry"`
+	Timeout    time.Duration `yaml:"timeout"`
+	Retry      global.Retry  `yaml:"retry"`
 }
 
 // Kind return the type of Notify
@@ -40,12 +42,13 @@ func (c *NotifyConfig) Kind() string {
 	return "slack"
 }
 
-// Config configures the log files
+// Config configures the slack notification
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 	if c.Dry {
 		log.Infof("Notification %s is running on Dry mode!", c.Kind())
 	}
 
+	c.Timeout = gConf.NormalizeTimeOut(c.Timeout)
 	c.Retry = gConf.NormalizeRetry(c.Retry)
 
 	log.Infof("[%s] configuration: %+v", c.Kind(), c)
@@ -124,10 +127,13 @@ func (c *NotifyConfig) SendSlackNotification(msg string) error {
 	}
 
 	defer resp.Body.Close()
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
+
+	buf, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
 	if resp.StatusCode != 200 {
-		return errors.New(buf.String())
+		return fmt.Errorf("Error response from Slack [%d] - [%s]", resp.StatusCode, string(buf))
 	}
 	// if buf.String() != "ok" {
 	// 	return errors.New("Non-ok response returned from Slack " + buf.String())
