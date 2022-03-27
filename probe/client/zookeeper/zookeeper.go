@@ -60,7 +60,7 @@ func (r Zookeeper) Kind() string {
 func (r Zookeeper) Probe() (bool, string) {
 	conn, _, err := zk.Connect([]string{r.Options.Host}, time.Second*5, zk.WithLogInfo(false))
 	if err != nil {
-		panic(err)
+		return false, err.Error()
 	}
 	defer conn.Close()
 
