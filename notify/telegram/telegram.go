@@ -95,7 +95,9 @@ func (c *NotifyConfig) SendTelegramNotificationWithRetry(tag string, text string
 	}
 	err := global.DoRetry(c.Kind(), tag, c.Retry, fn)
 	if err != nil {
-		log.Errorf("[%s] - failed to send the %s (%v)", c.Kind(), tag, err)
+		log.Errorf("[%s - %s] - failed to send! (%v)", c.Kind(), tag, err)
+	} else {
+		log.Infof("[%s - %s] - successfully sent! (%v)", c.Kind(), tag)
 	}
 }
 

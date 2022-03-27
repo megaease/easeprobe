@@ -123,7 +123,7 @@ settings:
   # SLA Report schedule
   sla:
     #  daily, weekly (Sunday), monthly (Last Day), none
-    schedule : "weekly"
+    schedule: "weekly"
     # UTC time, the format is 'hour:min:sec'
     time: "23:59"
 ```

@@ -178,24 +178,24 @@ func (c *NotifyConfig) Notify(result probe.Result) {
 	}
 
 	discord := c.NewDiscord(result)
-	for i := 0; i < c.Retry.Times; i++ {
-		senderr := c.SendDiscordNotification(discord)
-		if senderr == nil {
-			log.Infof("Successfully sent the Discord notification for %s (%s)!", result.Name, result.Endpoint)
-			return
-		}
+	tag := "Notification"
 
+	fn := func() error {
 		json, err := json.Marshal(discord)
 		if err != nil {
-			log.Debugf("[%s] - %v", c.Kind(), discord)
+			log.Debugf("[%s - %s] - %v", c.Kind(), tag, discord)
 		} else {
-			log.Debugf("[%s] - %s", c.Kind(), string(json))
+			log.Debugf("[%s - %s ] - %s", c.Kind(), tag, string(json))
 		}
-
-		log.Warnf("[%s] Retred to send notification %d/%d -  %v", c.Kind(), i+1, c.Retry.Times, senderr)
-		time.Sleep(c.Retry.Interval)
+		return c.SendDiscordNotification(discord)
 	}
-	log.Errorf("[%s] Failed to sent the notification after %d retries!", c.Kind(), c.Retry.Times)
+
+	err := global.DoRetry(c.Kind(), tag, c.Retry, fn)
+	if err != nil {
+		log.Errorf("[%s - %s ] - failed to send! (%v)", c.Kind(), tag, err)
+	} else {
+		log.Infof("[%s - %s ] - successfully sent! (%v)", c.Kind(), tag)
+	}
 
 }
 
@@ -288,29 +288,28 @@ func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
 		c.DryNotifyStat(probers)
 		return
 	}
+	tag := "SLA"
 	discords := c.NewEmbeds(probers)
 	total := len(discords)
 	for idx, discord := range discords {
-		i := 0
-		for i = 0; i < c.Retry.Times; i++ {
-			senderr := c.SendDiscordNotification(discord)
-			if senderr == nil {
-				log.Infof("[%s] Sent the [%d/%d] SLA to Discord Successfully!", c.Kind(), idx+1, total)
-				break
-			}
 
+		fn := func() error {
 			json, err := json.Marshal(discord)
 			if err != nil {
-				log.Debugf("[%s] - %v", c.Kind(), discord)
+				log.Debugf("[%s - %s ] - %v", c.Kind(), tag, discord)
 			} else {
-				log.Debugf("[%s] - %s", c.Kind(), string(json))
+				log.Debugf("[%s - %s ] - %s", c.Kind(), tag, string(json))
 			}
-			log.Warnf("[%s] Retried to send [%d/%d] SLA notification %d/%d - %v", c.Kind(), idx+1, total, i+1, c.Retry.Times, senderr)
-			time.Sleep(c.Retry.Interval)
+			return c.SendDiscordNotification(discord)
 		}
-		if i > c.Retry.Times {
-			log.Errorf("Failed to sent the Discord SLA notification after %d retries!", c.Retry.Times)
+
+		err := global.DoRetry(c.Kind(), tag, c.Retry, fn)
+		if err != nil {
+			log.Errorf("[%s - %s ] - failed to send part [%d/%d]! (%v)", c.Kind(), tag, idx+1, total, err)
+		} else {
+			log.Infof("[%s - %s ] - successfully sent part [%d/%d]! (%v)", c.Kind(), idx+1, total, tag)
 		}
+
 	}
 }
 

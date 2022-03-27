@@ -89,24 +89,17 @@ func (c *NotifyConfig) DryNotifyStat(probers []probe.Prober) {
 // SendSlackNotificationWithRetry send the Slack notification with retry
 func (c *NotifyConfig) SendSlackNotificationWithRetry(tag string, msg string) {
 
-	for i := 0; i < c.Retry.Times; i++ {
-		err := c.SendSlackNotification(msg)
-		if err == nil {
-			log.Infof("Successfully Sent the %s to Slack", tag)
-			return
-		}
-
-		log.Debugf("[%s] - %s", c.Kind(), msg)
-		log.Warnf("[%s] Retred to send %d/%d -  %v", c.Kind(), i+1, c.Retry.Times, err)
-
-		// last time no need to sleep
-		if i < c.Retry.Times-1 {
-			time.Sleep(c.Retry.Interval)
-		}
-
+	fn := func() error {
+		log.Debugf("[%s - %s] - %s", c.Kind(), tag, msg)
+		return c.SendSlackNotification(msg)
 	}
-	log.Errorf("[%s] Failed to sent the slack after %d retries!", c.Kind(), c.Retry.Times)
 
+	err := global.DoRetry(c.Kind(), tag, c.Retry, fn)
+	if err != nil {
+		log.Errorf("[%s - %s ] - failed to send! (%v)", c.Kind(), tag, err)
+	} else {
+		log.Infof("[%s - %s ] - successfully sent!", c.Kind(), tag)
+	}
 }
 
 // SendSlackNotification will post to an 'Incoming Webhook' url setup in Slack Apps. It accepts

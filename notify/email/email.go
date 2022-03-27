@@ -91,21 +91,17 @@ func (c *NotifyConfig) DryNotifyStat(probers []probe.Prober) {
 // SendMailWithRetry sends the email with retry if got error
 func (c *NotifyConfig) SendMailWithRetry(title string, message string, tag string) {
 
-	for i := 0; i < c.Retry.Times; i++ {
-		err := c.SendMail(title, message)
-		if err == nil {
-			log.Infof("Successfully Sent %s to the email - %s", tag, title)
-			return
-		}
-
-		log.Debugf("[%s] - %s", c.Kind(), message)
-		log.Warnf("[%s] Retred to send %d/%d -  %v", c.Kind(), i+1, c.Retry.Times, err)
-		// last time no need to sleep
-		if i < c.Retry.Times-1 {
-			time.Sleep(c.Retry.Interval)
-		}
+	fn := func() error {
+		log.Debugf("[%s - %s] - %s", c.Kind(), tag, title)
+		return c.SendMail(title, message)
 	}
-	log.Errorf("[%s] Failed to sent the %s to email after %d retries!", c.Kind(), tag, c.Retry.Times)
+	err := global.DoRetry(c.Kind(), tag, c.Retry, fn)
+	if err != nil {
+		log.Errorf("[%s - %s] - failed to send the %s (%v)", c.Kind(), tag, title, err)
+	} else {
+		log.Infof("[%s - %s] - Successfully sent %s ", c.Kind(), tag, title)
+	}
+
 }
 
 // SendMail sends the email
