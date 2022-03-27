@@ -18,6 +18,7 @@
 package zookeeper
 
 import (
+	"context"
 	"crypto/tls"
 	"github.com/go-zookeeper/zk"
 	"github.com/megaease/easeprobe/probe/client/conf"
@@ -30,14 +31,12 @@ const Kind string = "Zookeeper"
 // Zookeeper is the Zookeeper client
 type Zookeeper struct {
 	conf.Options `yaml:",inline"`
-	tls          *tls.Config `yaml:"-"`
-	ConnStr      string      `yaml:"conn_str"`
+	tls          *tls.Config     `yaml:"-"`
+	ConnStr      context.Context `yaml:"conn_str"`
 }
 
 // New create a Redis client
 func New(opt conf.Options) Zookeeper {
-	var conn string
-
 	tls, err := opt.TLS.Config()
 	if err != nil {
 		log.Errorf("[%s] %s - TLS Config error - %v", Kind, opt.Name, err)
@@ -46,7 +45,7 @@ func New(opt conf.Options) Zookeeper {
 	return Zookeeper{
 		Options: opt,
 		tls:     tls,
-		ConnStr: conn,
+		ConnStr: context.Background(),
 	}
 }
 
@@ -62,6 +61,11 @@ func (r Zookeeper) Probe() (bool, string) {
 		return false, err.Error()
 	}
 	defer conn.Close()
+
+	_, _, err = conn.Get("/")
+	if err != nil {
+		return false, err.Error()
+	}
 
 	return true, "Check Zookeeper Server Successfully!"
 }

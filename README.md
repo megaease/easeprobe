@@ -71,7 +71,7 @@ Ease Probe supports the following probing methods:
   - **MongoDB**. Connect to MongoDB server and just ping server.
   - **Kafka**. Connect to Kafka server and list all topics.
   - **PostgreSQL**. Connect to PostgreSQL server and run `SELECT 1` SQL.
-  - **Zookeeper**. Connect to Zookeeper server.
+  - **Zookeeper**. Connect to Zookeeper server and run `get /` command.
 
   ```YAML
   client:
