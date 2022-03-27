@@ -32,7 +32,8 @@ type Format int
 
 // The format types
 const (
-	Makerdown Format = iota
+	Makerdown1 Format = iota
+	Makerdown2
 	HTML
 	Text
 )
@@ -53,7 +54,6 @@ func (d *ConfigDuration) MarshalJSON() (b []byte, err error) {
 	return []byte(fmt.Sprintf(`"%s"`, d.Round(time.Millisecond))), nil
 }
 
-
 // Stat is the statistics of probe result
 type Stat struct {
 	Since    time.Time        `json:"since"`
@@ -70,11 +70,12 @@ type Result struct {
 	StartTime      time.Time      `json:"time"`
 	StartTimestamp int64          `json:"timestamp"`
 	RoundTripTime  ConfigDuration `json:"rtt"`
-	TimeFormat     string         `json:"-"`
 	Status         Status         `json:"status"`
 	PreStatus      Status         `json:"prestatus"`
 	Message        string         `json:"message"`
 	Stat           Stat           `json:"stat"`
+
+	TimeFormat string `json:"-"`
 }
 
 // NewResult return a Result object
@@ -177,6 +178,14 @@ func (r *Result) HTML() string {
 		r.StartTime.Format(r.TimeFormat), rtt, r.Message)
 }
 
+// Markdown convert the object to Markdown
+func (r *Result) Markdown() string {
+	tpl := "*%s* %s\n%s - ⏱ %s\n%s"
+	rtt := r.RoundTripTime.Round(time.Millisecond)
+	return fmt.Sprintf(tpl,
+		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, r.Message)
+}
+
 // SlackBlockJSON convert the object to Slack notification
 // Go to https://app.slack.com/block-kit-builder to build the notification block
 func (r *Result) SlackBlockJSON() string {
@@ -198,7 +207,7 @@ func (r *Result) SlackBlockJSON() string {
 				"elements": [
 					{
 						"type": "image",
-						"image_url": "https://megaease.cn/favicon.png",
+						"image_url": "` + global.Icon + `",
 						"alt_text": "` + global.OrgProg + `"
 					},
 					{
@@ -226,6 +235,30 @@ func (r *Result) StatText() string {
 		r.Stat.Total, StatStatusText(r.Stat, Text),
 		time.Now().UTC().Format(r.TimeFormat),
 		r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
+}
+
+// StatMarkDown return the Markdown format string to stat
+func (r *Result) StatMarkDown() string {
+	text := "\n*%s* - %s\n" +
+		"- Availability: Up - `%s`, Down - `%s`, SLA: `%.2f%%` \n" +
+		"- Probe-Times: Total: `%d` ( %s ) \n" +
+		"- Latest-Probe: %s - %s \n" +
+		"  ```%s```\n"
+	return fmt.Sprintf(text, r.Name, r.Endpoint,
+		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLA(),
+		r.Stat.Total, StatStatusText(r.Stat, Makerdown1),
+		time.Now().UTC().Format(r.TimeFormat),
+		r.Status.Emoji()+" "+r.Status.String(), r.Message)
+
+}
+
+// StatMarkDown return a full stat report
+func StatMarkDown(probers []Prober) string {
+	md := "*Overall SLA Report*\n"
+	for _, p := range probers {
+		md += p.Result().StatMarkDown()
+	}
+	return md
 }
 
 // StatHTMLSection return the HTML format string to stat
@@ -288,7 +321,7 @@ func (r *Result) StatSlackBlockSectionJSON() string {
 
 	return fmt.Sprintf(json, r.Name, r.Endpoint,
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLA(),
-		r.Stat.Total, StatStatusText(r.Stat, Makerdown),
+		r.Stat.Total, StatStatusText(r.Stat, Makerdown1),
 		t, r.Status.Emoji()+" "+r.Status.String(), message)
 }
 
@@ -347,7 +380,7 @@ func StatSlackBlockJSON(probers []Prober) string {
 		"elements": [
 			{
 				"type": "image",
-				"image_url": "https://megaease.cn/favicon.png",
+				"image_url": "` + global.Icon + `",
 				"alt_text": "` + global.OrgProg + `"
 			},
 			{
@@ -393,7 +426,9 @@ func StatStatusText(s Stat, t Format) string {
 	status := ""
 	format := "%s : %d \t"
 	switch t {
-	case Makerdown:
+	case Makerdown1:
+		format = "%s : `%d` \t"
+	case Makerdown2:
 		format = "**%s** : `%d` \t"
 	case HTML:
 		format = "<b>%s</b> : %d \t"
@@ -409,5 +444,3 @@ func SlackTimeFormation(t time.Time, act string, format string) string {
 	return fmt.Sprintf("<!date^%d^%s{date_num} {time_secs}|%s%s>",
 		t.Unix(), act, act, t.UTC().Format(format))
 }
-
-

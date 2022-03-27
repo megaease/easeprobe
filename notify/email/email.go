@@ -32,12 +32,14 @@ import (
 
 // NotifyConfig is the email notification configuration
 type NotifyConfig struct {
-	Server string       `yaml:"server"`
-	User   string       `yaml:"username"`
-	Pass   string       `yaml:"password"`
-	To     string       `yaml:"to"`
-	Dry    bool         `yaml:"dry"`
-	Retry  global.Retry `yaml:"retry"`
+	Name    string        `yaml:"name"`
+	Server  string        `yaml:"server"`
+	User    string        `yaml:"username"`
+	Pass    string        `yaml:"password"`
+	To      string        `yaml:"to"`
+	Dry     bool          `yaml:"dry"`
+	Timeout time.Duration `yaml:"timeout"`
+	Retry   global.Retry  `yaml:"retry"`
 }
 
 // Kind return the type of Notify
@@ -48,9 +50,9 @@ func (c *NotifyConfig) Kind() string {
 // Config configures the log files
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 	if c.Dry {
-		log.Infof("Notification %s is running on Dry mode!", c.Kind())
+		log.Infof("Notification [%s] - [%s]  is running on Dry mode!", c.Kind(), c.Name)
 	}
-
+	c.Timeout = gConf.NormalizeTimeOut(c.Timeout)
 	c.Retry = gConf.NormalizeRetry(c.Retry)
 
 	log.Infof("[%s] configuration: %+v", c.Kind(), c)
@@ -79,32 +81,23 @@ func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
 
 // DryNotify just log the notification message
 func (c *NotifyConfig) DryNotify(result probe.Result) {
-	log.Infof("[%s] Dry Notify - %s", c.Kind(), result.HTML())
+	log.Infof("[%s / %s] Dry Notify - %s", c.Kind(), c.Name, result.HTML())
 }
 
 // DryNotifyStat just log the notification message
 func (c *NotifyConfig) DryNotifyStat(probers []probe.Prober) {
-	log.Infof("[%s] Dry Notify - %s", c.Kind(), probe.StatHTML(probers))
+	log.Infof("[%s / %s] Dry Notify - %s", c.Kind(), c.Name, probe.StatHTML(probers))
 }
 
 // SendMailWithRetry sends the email with retry if got error
 func (c *NotifyConfig) SendMailWithRetry(title string, message string, tag string) {
 
-	for i := 0; i < c.Retry.Times; i++ {
-		err := c.SendMail(title, message)
-		if err == nil {
-			log.Infof("Successfully Sent %s to the email - %s", tag, title)
-			return
-		}
-
-		log.Debugf("[%s] - %s", c.Kind(), message)
-		log.Warnf("[%s] Retred to send %d/%d -  %v", c.Kind(), i+1, c.Retry.Times, err)
-		// last time no need to sleep
-		if i < c.Retry.Times-1 {
-			time.Sleep(c.Retry.Interval)
-		}
+	fn := func() error {
+		log.Debugf("[%s - %s] - %s", c.Kind(), tag, title)
+		return c.SendMail(title, message)
 	}
-	log.Errorf("[%s] Failed to sent the %s to email after %d retries!", c.Kind(), tag, c.Retry.Times)
+	err := global.DoRetry(c.Kind(), c.Name, tag, c.Retry, fn)
+	probe.LogSend(c.Kind(), c.Name, tag, title, err)
 }
 
 // SendMail sends the email

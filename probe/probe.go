@@ -100,5 +100,3 @@ func (s *Status) UnmarshalJSON(b []byte) (err error) {
 func (s *Status) MarshalJSON() (b []byte, err error) {
 	return []byte(fmt.Sprintf(`"%s"`, s.String())), nil
 }
-
-

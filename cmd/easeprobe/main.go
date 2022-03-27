@@ -96,6 +96,10 @@ func main() {
 		notifies = append(notifies, &conf.Notify.Discord[i])
 	}
 
+	for i := 0; i < len(conf.Notify.Telegram); i++ {
+		notifies = append(notifies, &conf.Notify.Telegram[i])
+	}
+
 	done := make(chan bool)
 	run(probers, notifies, done)
 

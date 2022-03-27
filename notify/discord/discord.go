@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
@@ -100,9 +101,13 @@ type Discord struct {
 
 // NotifyConfig is the slack notification configuration
 type NotifyConfig struct {
-	WebhookURL string       `yaml:"webhook"`
-	Dry        bool         `yaml:"dry"`
-	Retry      global.Retry `yaml:"retry"`
+	Name       string        `yaml:"name"`
+	WebhookURL string        `yaml:"webhook"`
+	Avatar     string        `yaml:"avatar"`
+	Thumbnail  string        `yaml:"thumbnail"`
+	Dry        bool          `yaml:"dry"`
+	Timeout    time.Duration `yaml:"timeout"`
+	Retry      global.Retry  `yaml:"retry"`
 }
 
 // Kind return the type of Notify
@@ -114,9 +119,18 @@ func (c *NotifyConfig) Kind() string {
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 
 	if c.Dry {
-		log.Infof("Notification %s is running on Dry mode!", c.Kind())
+		log.Infof("Notification [%s] - [%s]  is running on Dry mode!", c.Kind(), c.Name)
 	}
 
+	if len(strings.TrimSpace(c.Avatar)) <= 0 {
+		c.Avatar = global.Icon
+	}
+
+	if len(strings.TrimSpace(c.Thumbnail)) <= 0 {
+		c.Thumbnail = global.Icon
+	}
+
+	c.Timeout = gConf.NormalizeTimeOut(c.Timeout)
 	c.Retry = gConf.NormalizeRetry(c.Retry)
 
 	log.Infof("[%s] configuration: %+v", c.Kind(), c)
@@ -128,7 +142,7 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 func (c *NotifyConfig) NewDiscord(result probe.Result) Discord {
 	discord := Discord{
 		Username:  global.Prog,
-		AvatarURL: "https://megaease.cn/favicon.png",
+		AvatarURL: c.Avatar,
 		Content:   "",
 		Embeds:    []Embed{},
 	}
@@ -150,9 +164,9 @@ func (c *NotifyConfig) NewDiscord(result probe.Result) Discord {
 		Color:       color,
 		Description: description,
 		Timestamp:   result.StartTime.UTC().Format(time.RFC3339),
-		Thumbnail:   Thumbnail{URL: "https://megaease.cn/favicon.png"},
+		Thumbnail:   Thumbnail{URL: c.Thumbnail},
 		Fields:      []Fields{},
-		Footer:      Footer{Text: "Probed at", IconURL: "https://megaease.cn/favicon.png"},
+		Footer:      Footer{Text: "Probed at", IconURL: global.Icon},
 	})
 	return discord
 }
@@ -165,25 +179,20 @@ func (c *NotifyConfig) Notify(result probe.Result) {
 	}
 
 	discord := c.NewDiscord(result)
-	for i := 0; i < c.Retry.Times; i++ {
-		senderr := c.SendDiscordNotification(discord)
-		if senderr == nil {
-			log.Infof("Successfully sent the Discord notification for %s (%s)!", result.Name, result.Endpoint)
-			return
-		}
+	tag := "Notification"
 
+	fn := func() error {
 		json, err := json.Marshal(discord)
 		if err != nil {
-			log.Debugf("[%s] - %v", c.Kind(), discord)
+			log.Debugf("[%s - %s] - %v", c.Kind(), tag, discord)
 		} else {
-			log.Debugf("[%s] - %s", c.Kind(), string(json))
+			log.Debugf("[%s - %s ] - %s", c.Kind(), tag, string(json))
 		}
-
-		log.Warnf("[%s] Retred to send notification %d/%d -  %v", c.Kind(), i+1, c.Retry.Times, senderr)
-		time.Sleep(c.Retry.Interval)
+		return c.SendDiscordNotification(discord)
 	}
-	log.Errorf("[%s] Failed to sent the notification after %d retries!", c.Kind(), c.Retry.Times)
 
+	err := global.DoRetry(c.Kind(), c.Name, tag, c.Retry, fn)
+	probe.LogSend(c.Kind(), c.Name, tag, result.Name, err)
 }
 
 // NewEmbed new a embed object from a result
@@ -211,7 +220,7 @@ func (c *NotifyConfig) NewField(result probe.Result, inline bool) Fields {
 
 	desc := fmt.Sprintf(message, result.Endpoint,
 		result.Stat.UpTime.Round(time.Second), result.Stat.DownTime.Round(time.Second), result.SLA(),
-		result.Stat.Total, probe.StatStatusText(result.Stat, probe.Makerdown),
+		result.Stat.Total, probe.StatStatusText(result.Stat, probe.Makerdown2),
 		result.StartTime.UTC().Format(result.TimeFormat), result.Status.Emoji()+" "+result.Status.String(),
 		result.Message)
 
@@ -245,7 +254,7 @@ func (c *NotifyConfig) NewEmbeds(probers []probe.Prober) []Discord {
 	for p := 0; p < pages; p++ {
 		discord := Discord{
 			Username:  global.Prog,
-			AvatarURL: "https://megaease.cn/favicon.png",
+			AvatarURL: c.Avatar,
 			Content:   fmt.Sprintf("**Overall SLA Report (%d/%d)**", p+1, pages),
 			Embeds:    []Embed{},
 		}
@@ -275,29 +284,28 @@ func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
 		c.DryNotifyStat(probers)
 		return
 	}
+	tag := "SLA"
 	discords := c.NewEmbeds(probers)
 	total := len(discords)
 	for idx, discord := range discords {
-		i := 0
-		for i = 0; i < c.Retry.Times; i++ {
-			senderr := c.SendDiscordNotification(discord)
-			if senderr == nil {
-				log.Infof("[%s] Sent the [%d/%d] SLA to Discord Successfully!", c.Kind(), idx+1, total)
-				break
-			}
 
+		fn := func() error {
 			json, err := json.Marshal(discord)
 			if err != nil {
-				log.Debugf("[%s] - %v", c.Kind(), discord)
+				log.Debugf("[%s - %s ] - %v", c.Kind(), tag, discord)
 			} else {
-				log.Debugf("[%s] - %s", c.Kind(), string(json))
+				log.Debugf("[%s - %s ] - %s", c.Kind(), tag, string(json))
 			}
-			log.Warnf("[%s] Retried to send [%d/%d] SLA notification %d/%d - %v", c.Kind(), idx+1, total, i+1, c.Retry.Times, senderr)
-			time.Sleep(c.Retry.Interval)
+			return c.SendDiscordNotification(discord)
 		}
-		if i > c.Retry.Times {
-			log.Errorf("Failed to sent the Discord SLA notification after %d retries!", c.Retry.Times)
+
+		err := global.DoRetry(c.Kind(), c.Name, tag, c.Retry, fn)
+		if err != nil {
+			log.Errorf("[%s / %s / %s] - failed to send part [%d/%d]! (%v)", c.Kind(), c.Name, tag, idx+1, total, err)
+		} else {
+			log.Infof("[%s / %s / %s] - successfully sent part [%d/%d]!", c.Kind(), c.Name, tag, idx+1, total)
 		}
+
 	}
 }
 
@@ -309,7 +317,7 @@ func (c *NotifyConfig) DryNotify(result probe.Result) {
 		log.Errorf("error : %v", err)
 		return
 	}
-	log.Infof("[%s] Dry notify - %s", c.Kind(), string(json))
+	log.Infof("[%s / %s ] Dry notify - %s", c.Kind(), c.Name, string(json))
 }
 
 // DryNotifyStat just log the notification message
@@ -320,7 +328,7 @@ func (c *NotifyConfig) DryNotifyStat(probers []probe.Prober) {
 		log.Errorf("error : %v", err)
 		return
 	}
-	log.Infof("[%s] Dry notify - %s", c.Kind(), string(json))
+	log.Infof("[%s / %s ] Dry notify - %s", c.Kind(), c.Name, string(json))
 }
 
 // SendDiscordNotification will post to an 'Incoming Webhook' url setup in Discrod Apps.
@@ -336,17 +344,19 @@ func (c *NotifyConfig) SendDiscordNotification(discord Discord) error {
 	req.Close = true
 	req.Header.Add("Content-Type", "application/json")
 
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Timeout: c.Timeout}
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
+	buf, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
 	if resp.StatusCode != 204 {
-		return fmt.Errorf("Error response from Discord [%d] - [%s]", resp.StatusCode, buf.String())
+		return fmt.Errorf("Error response from Discord [%d] - [%s]", resp.StatusCode, string(buf))
 	}
 	return nil
 }

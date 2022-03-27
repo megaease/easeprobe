@@ -17,10 +17,18 @@
 
 package global
 
+import "time"
+
 // NotifySettings is the global notification setting
 type NotifySettings struct {
 	TimeFormat string
+	Timeout    time.Duration
 	Retry      Retry
+}
+
+// NormalizeTimeOut return a normalized timeout value
+func (n *NotifySettings) NormalizeTimeOut(t time.Duration) time.Duration {
+	return normalizeTimeDuration(n.Timeout, t, 0, DefaultTimeOut)
 }
 
 // NormalizeRetry return a normalized retry value

@@ -20,11 +20,13 @@ package probe
 import (
 	"fmt"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // DurationStr convert the curation to string
 func DurationStr(d time.Duration) string {
-	
+
 	const day = time.Minute * 60 * 24
 
 	if d < 0 {
@@ -44,7 +46,6 @@ func DurationStr(d time.Duration) string {
 
 	return fmt.Sprintf("%dd%s", n, d)
 }
-
 
 // HTMLHeader return the HTML head
 func HTMLHeader(title string) string {
@@ -88,4 +89,16 @@ func HTMLFooter() string {
 	return `
 	</body>
 	</html>`
+}
+
+// LogSend is helper function to log the send logs.
+func LogSend(kind, name, tag, message string, err error) {
+	if len(message) <= 0 {
+		message = " " + message + " "
+	}
+	if err != nil {
+		log.Errorf("[%s / %s / %s] - failed to send!%s(%v)", kind, name, tag, message, err)
+	} else {
+		log.Infof("[%s / %s / %s] - successfully sent!%s", kind, name, tag, message)
+	}
 }

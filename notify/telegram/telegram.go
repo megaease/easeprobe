@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-package slack
+package telegram
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/megaease/easeprobe/global"
@@ -29,21 +29,22 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// NotifyConfig is the slack notification configuration
+// NotifyConfig is the telegram notification configuration
 type NotifyConfig struct {
-	Name       string        `yaml:"name"`
-	WebhookURL string        `yaml:"webhook"`
-	Dry        bool          `yaml:"dry"`
-	Timeout    time.Duration `yaml:"timeout"`
-	Retry      global.Retry  `yaml:"retry"`
+	Name    string        `yaml:"name"`
+	Token   string        `yaml:"token"`
+	ChatID  string        `yaml:"chat_id"`
+	Dry     bool          `yaml:"dry"`
+	Timeout time.Duration `yaml:"timeout"`
+	Retry   global.Retry  `yaml:"retry"`
 }
 
 // Kind return the type of Notify
 func (c *NotifyConfig) Kind() string {
-	return "slack"
+	return "telegram"
 }
 
-// Config configures the slack notification
+// Config configures the telegram configuration
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 	if c.Dry {
 		log.Infof("Notification [%s] - [%s]  is running on Dry mode!", c.Kind(), c.Name)
@@ -62,8 +63,7 @@ func (c *NotifyConfig) Notify(result probe.Result) {
 		c.DryNotify(result)
 		return
 	}
-	json := result.SlackBlockJSON()
-	c.SendSlackNotificationWithRetry("Notification", json)
+	c.SendTelegramNotificationWithRetry("Notification", result.Markdown())
 }
 
 // NotifyStat write the all probe stat message to slack
@@ -72,50 +72,51 @@ func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
 		c.DryNotifyStat(probers)
 		return
 	}
-	json := probe.StatSlackBlockJSON(probers)
-	c.SendSlackNotificationWithRetry("SLA", json)
+
+	c.SendTelegramNotificationWithRetry("SLA", probe.StatMarkDown(probers))
 
 }
 
 // DryNotify just log the notification message
 func (c *NotifyConfig) DryNotify(result probe.Result) {
-	log.Infof("[%s / %s] - %s", c.Kind(), c.Name, result.SlackBlockJSON())
+	log.Infof("[%s / %s] - %s", c.Kind(), c.Name, result.Markdown())
 }
 
 // DryNotifyStat just log the notification message
 func (c *NotifyConfig) DryNotifyStat(probers []probe.Prober) {
-	log.Infof("[%s / %s] - %s", c.Kind(), c.Name, probe.StatSlackBlockJSON(probers))
+	log.Infof("[%s / %s] - %s", c.Kind(), c.Name, probe.StatMarkDown(probers))
 }
 
-// SendSlackNotificationWithRetry send the Slack notification with retry
-func (c *NotifyConfig) SendSlackNotificationWithRetry(tag string, msg string) {
+// SendTelegramNotificationWithRetry send the telegram notification with retry
+func (c *NotifyConfig) SendTelegramNotificationWithRetry(tag string, text string) {
 
 	fn := func() error {
-		log.Debugf("[%s - %s] - %s", c.Kind(), tag, msg)
-		return c.SendSlackNotification(msg)
+		log.Debugf("[%s / %s / %s] - %s", c.Kind(), c.Name, tag, text)
+		return c.SendTelegramNotification(text)
 	}
-
 	err := global.DoRetry(c.Kind(), c.Name, tag, c.Retry, fn)
 	probe.LogSend(c.Kind(), c.Name, tag, "", err)
 }
 
-// SendSlackNotification will post to an 'Incoming Webhook' url setup in Slack Apps. It accepts
-// some text and the slack channel is saved within Slack.
-func (c *NotifyConfig) SendSlackNotification(msg string) error {
-	req, err := http.NewRequest(http.MethodPost, c.WebhookURL, bytes.NewBuffer([]byte(msg)))
+// SendTelegramNotification will send the notification to telegram.
+func (c *NotifyConfig) SendTelegramNotification(text string) error {
+	api := "https://api.telegram.org/bot" + c.Token +
+		"/sendMessage?&chat_id=" + c.ChatID +
+		"&parse_mode=markdown" +
+		"&text=" + url.QueryEscape(text)
+	log.Debugf("[%s] - API %s", c.Kind(), api)
+	req, err := http.NewRequest(http.MethodPost, api, nil)
 	if err != nil {
 		return err
 	}
-
-	req.Header.Add("Content-Type", "application/json")
 	req.Close = true
+	req.Header.Add("Content-Type", "application/json")
 
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Timeout: c.Timeout}
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
-
 	defer resp.Body.Close()
 
 	buf, err := ioutil.ReadAll(resp.Body)
@@ -123,10 +124,7 @@ func (c *NotifyConfig) SendSlackNotification(msg string) error {
 		return err
 	}
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("Error response from Slack [%d] - [%s]", resp.StatusCode, string(buf))
+		return fmt.Errorf("Error response from Telegram [%d] - [%s]", resp.StatusCode, string(buf))
 	}
-	// if buf.String() != "ok" {
-	// 	return errors.New("Non-ok response returned from Slack " + buf.String())
-	// }
 	return nil
 }

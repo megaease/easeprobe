@@ -20,8 +20,11 @@ package global
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
 	"io/ioutil"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -36,6 +39,9 @@ const (
 	OrgProg = Org + " " + Prog
 	//OrgProgVer combine organization and program and version
 	OrgProgVer = Org + " " + Prog + "/" + Ver
+
+	// Icon is the default icon which used in Slack or Discord
+	Icon = "https://megaease.cn/favicon.png"
 )
 
 const (
@@ -109,4 +115,22 @@ func (t *TLS) Config() (*tls.Config, error) {
 		RootCAs:      caCertPool,
 		Certificates: []tls.Certificate{certificate},
 	}, nil
+}
+
+// DoRetry is a help function to retry the function if it returns error
+func DoRetry(kind, name, tag string, r Retry, fn func() error) error {
+	var err error 
+	for i := 0; i < r.Times; i++ {
+		err = fn()
+		if err == nil {
+			return nil
+		}
+		log.Warnf("[%s / %s / %s] Retried to send %d/%d - %v", kind, name, tag, i+1, r.Times, err)
+
+		// last time no need to sleep
+		if i < r.Times-1 {
+			time.Sleep(r.Interval)
+		}
+	}
+	return fmt.Errorf("[%s / %s / %s] failed after %d retries - %v", kind, name, tag, r.Times, err)
 }
