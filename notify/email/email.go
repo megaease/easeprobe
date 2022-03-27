@@ -32,6 +32,7 @@ import (
 
 // NotifyConfig is the email notification configuration
 type NotifyConfig struct {
+	Name    string        `yaml:"name"`
 	Server  string        `yaml:"server"`
 	User    string        `yaml:"username"`
 	Pass    string        `yaml:"password"`
@@ -49,7 +50,7 @@ func (c *NotifyConfig) Kind() string {
 // Config configures the log files
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 	if c.Dry {
-		log.Infof("Notification %s is running on Dry mode!", c.Kind())
+		log.Infof("Notification [%s] - [%s]  is running on Dry mode!", c.Kind(), c.Name)
 	}
 	c.Timeout = gConf.NormalizeTimeOut(c.Timeout)
 	c.Retry = gConf.NormalizeRetry(c.Retry)
@@ -80,12 +81,12 @@ func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
 
 // DryNotify just log the notification message
 func (c *NotifyConfig) DryNotify(result probe.Result) {
-	log.Infof("[%s] Dry Notify - %s", c.Kind(), result.HTML())
+	log.Infof("[%s / %s] Dry Notify - %s", c.Kind(), c.Name, result.HTML())
 }
 
 // DryNotifyStat just log the notification message
 func (c *NotifyConfig) DryNotifyStat(probers []probe.Prober) {
-	log.Infof("[%s] Dry Notify - %s", c.Kind(), probe.StatHTML(probers))
+	log.Infof("[%s / %s] Dry Notify - %s", c.Kind(), c.Name, probe.StatHTML(probers))
 }
 
 // SendMailWithRetry sends the email with retry if got error
@@ -95,13 +96,8 @@ func (c *NotifyConfig) SendMailWithRetry(title string, message string, tag strin
 		log.Debugf("[%s - %s] - %s", c.Kind(), tag, title)
 		return c.SendMail(title, message)
 	}
-	err := global.DoRetry(c.Kind(), tag, c.Retry, fn)
-	if err != nil {
-		log.Errorf("[%s - %s] - failed to send the %s (%v)", c.Kind(), tag, title, err)
-	} else {
-		log.Infof("[%s - %s] - Successfully sent %s ", c.Kind(), tag, title)
-	}
-
+	err := global.DoRetry(c.Kind(), c.Name, tag, c.Retry, fn)
+	probe.LogSend(c.Kind(), c.Name, tag, title, err)
 }
 
 // SendMail sends the email

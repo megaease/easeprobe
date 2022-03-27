@@ -31,6 +31,7 @@ import (
 
 // NotifyConfig is the telegram notification configuration
 type NotifyConfig struct {
+	Name    string        `yaml:"name"`
 	Token   string        `yaml:"token"`
 	ChatID  string        `yaml:"chat_id"`
 	Dry     bool          `yaml:"dry"`
@@ -46,7 +47,7 @@ func (c *NotifyConfig) Kind() string {
 // Config configures the telegram configuration
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 	if c.Dry {
-		log.Infof("Notification %s is running on Dry mode!", c.Kind())
+		log.Infof("Notification [%s] - [%s]  is running on Dry mode!", c.Kind(), c.Name)
 	}
 
 	c.Timeout = gConf.NormalizeTimeOut(c.Timeout)
@@ -78,27 +79,23 @@ func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
 
 // DryNotify just log the notification message
 func (c *NotifyConfig) DryNotify(result probe.Result) {
-	log.Infof("[%s] - %s", c.Kind(), result.Markdown())
+	log.Infof("[%s / %s] - %s", c.Kind(), c.Name, result.Markdown())
 }
 
 // DryNotifyStat just log the notification message
 func (c *NotifyConfig) DryNotifyStat(probers []probe.Prober) {
-	log.Infof("[%s] - %s", c.Kind(), probe.StatMarkDown(probers))
+	log.Infof("[%s / %s] - %s", c.Kind(), c.Name, probe.StatMarkDown(probers))
 }
 
 // SendTelegramNotificationWithRetry send the telegram notification with retry
 func (c *NotifyConfig) SendTelegramNotificationWithRetry(tag string, text string) {
 
 	fn := func() error {
-		log.Debugf("[%s - %s] - %s", c.Kind(), tag, text)
+		log.Debugf("[%s / %s / %s] - %s", c.Kind(), c.Name, tag, text)
 		return c.SendTelegramNotification(text)
 	}
-	err := global.DoRetry(c.Kind(), tag, c.Retry, fn)
-	if err != nil {
-		log.Errorf("[%s - %s] - failed to send! (%v)", c.Kind(), tag, err)
-	} else {
-		log.Infof("[%s - %s] - successfully sent! (%v)", c.Kind(), tag)
-	}
+	err := global.DoRetry(c.Kind(), c.Name, tag, c.Retry, fn)
+	probe.LogSend(c.Kind(), c.Name, tag, "", err)
 }
 
 // SendTelegramNotification will send the notification to telegram.

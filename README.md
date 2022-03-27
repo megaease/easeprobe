@@ -13,10 +13,10 @@ EaseProbe is a simple, standalone, and lightWeight tool that can do health/statu
   - [3. Configuration](#3-configuration)
     - [3.1 HTTP Probe Configuration](#31-http-probe-configuration)
     - [3.2 TCP Probe Configuration](#32-tcp-probe-configuration)
-    - [3.4 Shell Command Probe Configuration](#34-shell-command-probe-configuration)
-    - [3.5 Native Client Probe](#35-native-client-probe)
-    - [3.6 Notification Configuration](#36-notification-configuration)
-    - [3.7 Global Setting Configuration](#37-global-setting-configuration)
+    - [3.3 Shell Command Probe Configuration](#33-shell-command-probe-configuration)
+    - [3.4 Native Client Probe](#34-native-client-probe)
+    - [3.5 Notification Configuration](#35-notification-configuration)
+    - [3.6 Global Setting Configuration](#36-global-setting-configuration)
   - [4. Community](#4-community)
   - [5. License](#5-license)
 
@@ -47,7 +47,7 @@ Ease Probe supports the following probing methods:
       host: kafka.server:9093
   ```
 
-- **Shell**. Run a Shell command and check the result. ( [Shell Command Probe Configuration](#34-shell-command-probe-configuration) )
+- **Shell**. Run a Shell command and check the result. ( [Shell Command Probe Configuration](#33-shell-command-probe-configuration) )
 
   ```YAML
   shell:
@@ -65,7 +65,7 @@ Ease Probe supports the following probing methods:
       contain : "PONG"
   ```
 
-- **Client**. Currently, support the following native client. Support the mTLS. ( [Native Client Probe](#35-native-client-probe) )
+- **Client**. Currently, support the following native client. Support the mTLS. ( [Native Client Probe](#34-native-client-probe) )
   - **MySQL**. Connect to the MySQL server and run the `SHOW STATUS` SQL.
   - **Redis**. Connect to the Redis server and run the `PING` command.
   - **MongoDB**. Connect to MongoDB server and just ping server.
@@ -99,24 +99,28 @@ Ease Probe supports the following notifications:
 # Notification Configuration
 notify:
   slack:
-    - webhook: "https://hooks.slack.com/services/........../....../....../"
+    - name: "MegaEase#Alter"
+      webhook: "https://hooks.slack.com/services/........../....../....../"
   discord:
-    - webhook: "https://discord.com/api/webhooks/...../....../"
+    - name: "MegaEase#Alter"
+      webhook: "https://discord.com/api/webhooks/...../....../"
   telegram:
-    - token: 1234567890:ABCDEFGHIJKLMNOPQRSTUVWXYZ # Bot Token
+    - name: "MegaEase Alter Group"
+      token: 1234567890:ABCDEFGHIJKLMNOPQRSTUVWXYZ # Bot Token
       chat_id: -123456789 # Channel / Group ID
   email:
-    - server: smtp.email.example.com:465
+    - name: "DevOps Mailing List"
+      server: smtp.email.example.com:465
       username: user@example.com
       password: ********
       to: "user1@example.com;user2@example.com"
 ```
 
-Check the  [Notification Configuration](#36-notification-configuration) to see how to configure it.
+Check the  [Notification Configuration](#35-notification-configuration) to see how to configure it.
 
 ### 1.3 Report
 
-- **SLA Report**. EaseProbe would send the daily, weekly or monthly SLA report.
+- **SLA Report**. EaseProbe would send the daily, weekly, or monthly SLA report.
 
 ```YAML
 settings:
@@ -223,7 +227,7 @@ tcp:
     host: kafka.server:9093
 ```
 
-### 3.4 Shell Command Probe Configuration
+### 3.3 Shell Command Probe Configuration
 
 ```YAML
 # Shell Probe Configuration
@@ -257,7 +261,7 @@ shell:
     contain: "Mode:"
 ```
 
-### 3.5 Native Client Probe
+### 3.4 Native Client Probe
 
 ```YAML
 # Native Client Probe
@@ -300,25 +304,32 @@ client:
 ```
 
 
-### 3.6 Notification Configuration
+### 3.5 Notification Configuration
 
 ```YAML
 # Notification Configuration
 notify:
   # Notify to a local log file
   log:
-    - file: "/tmp/easeprobe.log"
+    - name: "Local Log"
+      file: "/tmp/easeprobe.log"
       dry: true
   # Notify to Slack Channel
   slack:
-    - webhook: "https://hooks.slack.com/services/........../....../....../"
+    - name: "Organization #Alter"
+      webhook: "https://hooks.slack.com/services/........../....../....../"
       # dry: true   # dry notification, print the Slack JSON in log(STDOUT)
   telegram:
-    - token: 1234567890:ABCDEFGHIJKLMNOPQRSTUVWXYZ # Bot Token
-      chat_id: -123456789 # Channel / Group ID
+    - name: "Group Name"
+      token: 1234567890:ABCDEFGHIJKLMNOPQRSTUVWXYZ # Bot Token
+      chat_id: -123456789 # Group ID
+    - name: "Channel Name"
+      token: 1234567890:ABCDEFGHIJKLMNOPQRSTUVWXYZ # Bot Token
+      chat_id: -1001234567890 # Channel ID
   # Notify to Discord Text Channel
   discord:
-    - webhook: "https://discord.com/api/webhooks/...../....../"
+    - name: "Server #Alter"
+      webhook: "https://discord.com/api/webhooks/...../....../"
       # the avatar and thumbnail setting for notify block
       avatar: "https://img.icons8.com/ios/72/appointment-reminders--v1.png"
       thumbnail: "https://freeiconshop.com/wp-content/uploads/edd/notification-flat.png"
@@ -327,15 +338,26 @@ notify:
         times: 3
         interval: 10s
   email:
-    - server: smtp.email.example.com:465
+    - name: "XXX Mail List"
+      server: smtp.email.example.com:465
       username: user@example.com
       password: ********
       to: "user1@example.com;user2@example.com"
       # dry: true # dry notification, print the Email HTML in log(STDOUT)
 ```
 
+**Notes**: All of the notification have the following configuration.
 
-### 3.7 Global Setting Configuration
+```YAML
+  dry: true # dry notification, print the Discord JSON in log(STDOUT)
+  timeout: 20s # the timeout sending notification, default: 30s
+  retry: # something the network is not good need to retry.
+    times: 3 # default: 3
+    interval: 10s # default: 5s
+```
+
+
+### 3.6 Global Setting Configuration
 
 ```YAML
 # Global settings for all probes and notifiers.

@@ -28,6 +28,7 @@ import (
 
 // NotifyConfig is the configuration of the Notify
 type NotifyConfig struct {
+	Name string `yaml:"name"`
 	File string `yaml:"file"`
 	Dry  bool   `yaml:"dry"`
 }
@@ -40,7 +41,7 @@ func (c *NotifyConfig) Kind() string {
 // Config configures the log files
 func (c *NotifyConfig) Config(global global.NotifySettings) error {
 	if c.Dry {
-		logrus.Infof("Notification %s is running on Dry mode!", c.Kind())
+		logrus.Infof("Notification [%s] - [%s]  is running on Dry mode!", c.Kind(), c.Name)
 		log.SetOutput(os.Stdout)
 		return nil
 	}

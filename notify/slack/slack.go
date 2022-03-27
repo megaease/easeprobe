@@ -31,6 +31,7 @@ import (
 
 // NotifyConfig is the slack notification configuration
 type NotifyConfig struct {
+	Name       string        `yaml:"name"`
 	WebhookURL string        `yaml:"webhook"`
 	Dry        bool          `yaml:"dry"`
 	Timeout    time.Duration `yaml:"timeout"`
@@ -45,7 +46,7 @@ func (c *NotifyConfig) Kind() string {
 // Config configures the slack notification
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 	if c.Dry {
-		log.Infof("Notification %s is running on Dry mode!", c.Kind())
+		log.Infof("Notification [%s] - [%s]  is running on Dry mode!", c.Kind(), c.Name)
 	}
 
 	c.Timeout = gConf.NormalizeTimeOut(c.Timeout)
@@ -78,12 +79,12 @@ func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
 
 // DryNotify just log the notification message
 func (c *NotifyConfig) DryNotify(result probe.Result) {
-	log.Infof("[%s] - %s", c.Kind(), result.SlackBlockJSON())
+	log.Infof("[%s / %s] - %s", c.Kind(), c.Name, result.SlackBlockJSON())
 }
 
 // DryNotifyStat just log the notification message
 func (c *NotifyConfig) DryNotifyStat(probers []probe.Prober) {
-	log.Infof("[%s] - %s", c.Kind(), probe.StatSlackBlockJSON(probers))
+	log.Infof("[%s / %s] - %s", c.Kind(), c.Name, probe.StatSlackBlockJSON(probers))
 }
 
 // SendSlackNotificationWithRetry send the Slack notification with retry
@@ -94,12 +95,8 @@ func (c *NotifyConfig) SendSlackNotificationWithRetry(tag string, msg string) {
 		return c.SendSlackNotification(msg)
 	}
 
-	err := global.DoRetry(c.Kind(), tag, c.Retry, fn)
-	if err != nil {
-		log.Errorf("[%s - %s ] - failed to send! (%v)", c.Kind(), tag, err)
-	} else {
-		log.Infof("[%s - %s ] - successfully sent!", c.Kind(), tag)
-	}
+	err := global.DoRetry(c.Kind(), c.Name, tag, c.Retry, fn)
+	probe.LogSend(c.Kind(), c.Name, tag, "", err)
 }
 
 // SendSlackNotification will post to an 'Incoming Webhook' url setup in Slack Apps. It accepts
