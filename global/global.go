@@ -119,8 +119,9 @@ func (t *TLS) Config() (*tls.Config, error) {
 
 // DoRetry is a help function to retry the function if it returns error
 func DoRetry(kind, name, tag string, r Retry, fn func() error) error {
+	var err error 
 	for i := 0; i < r.Times; i++ {
-		err := fn()
+		err = fn()
 		if err == nil {
 			return nil
 		}
@@ -131,5 +132,5 @@ func DoRetry(kind, name, tag string, r Retry, fn func() error) error {
 			time.Sleep(r.Interval)
 		}
 	}
-	return fmt.Errorf("[%s / %s / %s] failed after %d retries", kind, name, tag, r.Times)
+	return fmt.Errorf("[%s / %s / %s] failed after %d retries - %v", kind, name, tag, r.Times, err)
 }
