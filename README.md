@@ -306,6 +306,7 @@ client:
   - name: Zookeeper Native Client (local)
     driver: "zookeeper"
     host: "localhost:2181"
+    timeout: 5s
 ```
 
 

@@ -22,7 +22,6 @@ import (
 	"github.com/go-zookeeper/zk"
 	"github.com/megaease/easeprobe/probe/client/conf"
 	log "github.com/sirupsen/logrus"
-	"time"
 )
 
 // Kind is the type of driver
@@ -58,7 +57,7 @@ func (r Zookeeper) Kind() string {
 
 // Probe do the health check
 func (r Zookeeper) Probe() (bool, string) {
-	conn, _, err := zk.Connect([]string{r.Options.Host}, time.Second*5, zk.WithLogInfo(false))
+	conn, _, err := zk.Connect([]string{r.Host}, r.Timeout, zk.WithLogInfo(false))
 	if err != nil {
 		return false, err.Error()
 	}
