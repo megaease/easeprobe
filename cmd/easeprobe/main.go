@@ -218,7 +218,7 @@ func scheduleSLA(probers []probe.Prober, notifies []notify.Notify) {
 		log.Infof("Next Time to send the SLA Report - %s", t.Format(conf.Get().Settings.TimeFormat))
 	}
 
-	if conf.Get().Settings.Debug {
+	if conf.Get().Settings.SLAReport.Debug {
 		cron.Every(1).Minute().Do(SLAFn)
 		log.Infoln("Preparing to send the  SLA report in every minute...")
 	} else {

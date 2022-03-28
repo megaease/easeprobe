@@ -346,12 +346,12 @@ notify:
       # dry: true # dry notification, print the Email HTML in log(STDOUT)
 ```
 
-**Notes**: All of the notification have the following configuration.
+**Notes**: All of the notifications can have the following optional configuration.
 
 ```YAML
   dry: true # dry notification, print the Discord JSON in log(STDOUT)
-  timeout: 20s # the timeout sending notification, default: 30s
-  retry: # something the network is not good need to retry.
+  timeout: 20s # the timeout send out notification, default: 30s
+  retry: # somehow the network is not good needs to retry.
     times: 3 # default: 3
     interval: 10s # default: 5s
 ```
@@ -368,6 +368,10 @@ settings:
     schedule : "daily"
     # UTC time, the format is 'hour:min:sec'
     time: "23:59"
+    # debug mode
+    # - true: send the SLA report every minute
+    # - false: send the SLA report in schedule
+    debug: false
 
   notify:
     # dry: true # Global settings for dry run
@@ -384,11 +388,6 @@ settings:
   # Log Level Configuration
   # can be: panic, fatal, error, warn, info, debug.
   loglevel: "debug"
-
-  # debug mode
-  # - true: send the SLA report every minute
-  # - false: send the SLA report in schedule
-  debug: false
 
   # Date format
   # Date

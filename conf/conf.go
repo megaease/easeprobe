@@ -118,13 +118,13 @@ type Probe struct {
 type SLAReport struct {
 	Schedule Schedule `yaml:"schedule"`
 	Time     string   `yaml:"time"`
+	Debug    bool     `yaml:"debug"`
 }
 
 // Settings is the EaseProbe configuration
 type Settings struct {
 	LogFile    string    `yaml:"logfile"`
 	LogLevel   LogLevel  `yaml:"loglevel"`
-	Debug      bool      `yaml:"debug"`
 	TimeFormat string    `yaml:"timeformat"`
 	Probe      Probe     `yaml:"probe"`
 	Notify     Notify    `yaml:"notify"`
@@ -153,7 +153,6 @@ func New(conf *string) (Conf, error) {
 		Settings: Settings{
 			LogFile:    "",
 			LogLevel:   LogLevel{log.InfoLevel},
-			Debug:      false,
 			TimeFormat: "2006-01-02 15:04:05 UTC",
 			Probe: Probe{
 				Interval: time.Second * 60,
@@ -169,6 +168,7 @@ func New(conf *string) (Conf, error) {
 			SLAReport: SLAReport{
 				Schedule: Daily,
 				Time:     "00:00",
+				Debug:    false,
 			},
 			logfile: nil,
 		},
