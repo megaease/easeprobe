@@ -210,7 +210,7 @@ func (conf *Conf) initLog() {
 		// open a file
 		f, err := os.OpenFile(conf.Settings.LogFile, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0660)
 		if err != nil {
-			log.Warnf("Error when opening log file: %v", err)
+			log.Warnf("Cannot open log file: %v", err)
 			log.Infoln("Using Standard Output as the log output...")
 			log.SetOutput(os.Stdout)
 		} else {
