@@ -29,6 +29,7 @@ import (
 	"github.com/megaease/easeprobe/probe/client/mysql"
 	"github.com/megaease/easeprobe/probe/client/postgres"
 	"github.com/megaease/easeprobe/probe/client/redis"
+	"github.com/megaease/easeprobe/probe/client/zookeeper"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -89,6 +90,8 @@ func (c *Client) configClientDriver() {
 		c.client = kafka.New(c.Options)
 	case conf.PostgreSQL:
 		c.client = postgres.New(c.Options)
+	case conf.Zookeeper:
+		c.client = zookeeper.New(c.Options)
 	default:
 		c.DriverType = conf.Unknown
 	}

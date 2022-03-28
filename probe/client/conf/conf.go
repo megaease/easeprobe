@@ -41,6 +41,7 @@ const (
 	Kafka
 	Mongo
 	PostgreSQL
+	Zookeeper
 	Unknown
 )
 
@@ -73,6 +74,8 @@ func (d DriverType) String() string {
 		return "Mongo"
 	case PostgreSQL:
 		return "PostgreSQL"
+	case Zookeeper:
+		return "Zookeeper"
 	}
 	return "Unknown"
 }
@@ -90,6 +93,8 @@ func (d *DriverType) DriverType(driver string) DriverType {
 		return Mongo
 	case "postgres":
 		return PostgreSQL
+	case "zookeeper":
+		return Zookeeper
 	}
 	return Unknown
 }

@@ -6,6 +6,7 @@ require (
 	github.com/go-co-op/gocron v1.13.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-sql-driver/mysql v1.6.0
+	github.com/go-zookeeper/zk v1.0.2
 	github.com/segmentio/kafka-go v0.4.30
 	github.com/sirupsen/logrus v1.8.1
 	github.com/uptrace/bun/driver/pgdriver v1.1.2
