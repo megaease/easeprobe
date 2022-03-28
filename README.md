@@ -307,6 +307,10 @@ client:
     driver: "zookeeper"
     host: "localhost:2181"
     timeout: 5s
+    # mTLS
+    ca: /path/to/file.ca
+    cert: /path/to/file.crt
+    key: /path/to/file.key
 ```
 
 

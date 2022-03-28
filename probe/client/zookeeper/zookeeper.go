@@ -23,6 +23,8 @@ import (
 	"github.com/go-zookeeper/zk"
 	"github.com/megaease/easeprobe/probe/client/conf"
 	log "github.com/sirupsen/logrus"
+	"net"
+	"time"
 )
 
 // Kind is the type of driver
@@ -32,7 +34,7 @@ const Kind string = "Zookeeper"
 type Zookeeper struct {
 	conf.Options `yaml:",inline"`
 	tls          *tls.Config     `yaml:"-"`
-	ConnStr      context.Context `yaml:"conn_str"`
+	Context      context.Context `yaml:"conn_str"`
 }
 
 // New create a Redis client
@@ -45,18 +47,29 @@ func New(opt conf.Options) Zookeeper {
 	return Zookeeper{
 		Options: opt,
 		tls:     tls,
-		ConnStr: context.Background(),
+		Context: context.Background(),
 	}
 }
 
 // Kind return the name of client
-func (r Zookeeper) Kind() string {
+func (z Zookeeper) Kind() string {
 	return Kind
 }
 
 // Probe do the health check
-func (r Zookeeper) Probe() (bool, string) {
-	conn, _, err := zk.Connect([]string{r.Host}, r.Timeout, zk.WithLogInfo(false))
+func (z Zookeeper) Probe() (bool, string) {
+	var (
+		conn *zk.Conn
+		err  error
+	)
+
+	dialer := getDialer(z)
+	if dialer == nil {
+		conn, _, err = zk.Connect([]string{z.Host}, z.Timeout, zk.WithLogInfo(false))
+	} else {
+		conn, _, err = zk.Connect([]string{z.Host}, z.Timeout, zk.WithLogInfo(false), zk.WithDialer(dialer))
+	}
+
 	if err != nil {
 		return false, err.Error()
 	}
@@ -68,4 +81,31 @@ func (r Zookeeper) Probe() (bool, string) {
 	}
 
 	return true, "Check Zookeeper Server Successfully!"
+}
+
+func getDialer(z Zookeeper) func(network string, address string, _ time.Duration) (net.Conn, error) {
+	if z.tls == nil {
+		return nil
+	}
+
+	return func(network, address string, _ time.Duration) (net.Conn, error) {
+		tlsConfig := &tls.Config{
+			Certificates:       z.tls.Certificates,
+			RootCAs:            z.tls.RootCAs,
+			InsecureSkipVerify: true,
+		}
+
+		ipConn, err := net.DialTimeout(network, z.Host, z.Timeout)
+		if err != nil {
+			return nil, err
+		}
+
+		tlsConn := tls.Client(ipConn, tlsConfig)
+		err = tlsConn.Handshake()
+		if err != nil {
+			return nil, err
+		}
+
+		return tlsConn, nil
+	}
 }
