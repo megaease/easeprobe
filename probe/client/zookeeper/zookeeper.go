@@ -63,11 +63,10 @@ func (z Zookeeper) Probe() (bool, string) {
 		err  error
 	)
 
-	dialer := getDialer(z)
-	if dialer == nil {
-		conn, _, err = zk.Connect([]string{z.Host}, z.Timeout, zk.WithLogInfo(false))
-	} else {
+	if dialer := getDialer(z); dialer != nil {
 		conn, _, err = zk.Connect([]string{z.Host}, z.Timeout, zk.WithLogInfo(false), zk.WithDialer(dialer))
+	} else {
+		conn, _, err = zk.Connect([]string{z.Host}, z.Timeout, zk.WithLogInfo(false))
 	}
 
 	if err != nil {
