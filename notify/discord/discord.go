@@ -215,7 +215,7 @@ func (c *NotifyConfig) NewField(result probe.Result, inline bool) Fields {
 	message := "%s\n" +
 		"**Availability**\n>\t" + " **Up**:  `%s`  **Down** `%s`  -  **SLA**: `%.2f %%`" +
 		"\n**Probe Times**\n>\t**Total** : `%d` ( %s )" +
-		"\n**Lastest Probe**\n>\t%s | %s" +
+		"\n**Latest Probe**\n>\t%s | %s" +
 		"\n>\t`%s ` \n\n"
 
 	desc := fmt.Sprintf(message, result.Endpoint,
