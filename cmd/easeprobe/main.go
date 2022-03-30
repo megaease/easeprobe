@@ -59,46 +59,10 @@ func main() {
 	}
 
 	// Probers
-	var probers []probe.Prober
-
-	for i := 0; i < len(conf.HTTP); i++ {
-		probers = append(probers, &conf.HTTP[i])
-	}
-
-	for i := 0; i < len(conf.TCP); i++ {
-		probers = append(probers, &conf.TCP[i])
-	}
-
-	for i := 0; i < len(conf.Shell); i++ {
-		probers = append(probers, &conf.Shell[i])
-	}
-
-	for i := 0; i < len(conf.Client); i++ {
-		probers = append(probers, &conf.Client[i])
-	}
+	probers := conf.AllProbers()
 
 	// Notification
-	var notifies []notify.Notify
-
-	for i := 0; i < len(conf.Notify.Log); i++ {
-		notifies = append(notifies, &conf.Notify.Log[i])
-	}
-
-	for i := 0; i < len(conf.Notify.Email); i++ {
-		notifies = append(notifies, &conf.Notify.Email[i])
-	}
-
-	for i := 0; i < len(conf.Notify.Slack); i++ {
-		notifies = append(notifies, &conf.Notify.Slack[i])
-	}
-
-	for i := 0; i < len(conf.Notify.Discord); i++ {
-		notifies = append(notifies, &conf.Notify.Discord[i])
-	}
-
-	for i := 0; i < len(conf.Notify.Telegram); i++ {
-		notifies = append(notifies, &conf.Notify.Telegram[i])
-	}
+	notifies := conf.AllNotifiers()
 
 	done := make(chan bool)
 	run(probers, notifies, done)

@@ -89,12 +89,16 @@ Ease Probe supports the following probing methods:
 
 Ease Probe supports the following notifications:
 
-- **Email**. Support multiple email addresses.
 - **Slack**. Using Webhook for notification
 - **Discord**. Using Webhook for notification
 - **Telegram**. Using Telegram Bot for notification
+- **Email**. Support multiple email addresses.
+- **AWS SNS**. Support AWS Simple Notification Service.
 - **Log File**. Write the notification into a log file
 
+**Note**:
+
+- The notification is **Edge-Triggered Mode**, only notified while the status is changed.
 
 ```YAML
 # Notification Configuration
@@ -115,6 +119,14 @@ notify:
       username: user@example.com
       password: ********
       to: "user1@example.com;user2@example.com"
+  aws_sns:
+    - name: AWS SNS
+      region: us-west-2
+      arn: arn:aws:sns:us-west-2:298305261856:xxxxx
+      endpoint: https://sns.us-west-2.amazonaws.com
+      credential:
+        id: AWSXXXXXXXID
+        key: XXXXXXXX/YYYYYYY
 ```
 
 Check the  [Notification Configuration](#35-notification-configuration) to see how to configure it.
@@ -133,10 +145,6 @@ settings:
     time: "23:59"
 ```
 
-
-**Note**:
-
-- The notification is **Edge-Triggered Mode**, only notified while the status is changed.
 
 ## 2. Getting Start
 
@@ -319,11 +327,6 @@ client:
 ```YAML
 # Notification Configuration
 notify:
-  # Notify to a local log file
-  log:
-    - name: "Local Log"
-      file: "/tmp/easeprobe.log"
-      dry: true
   # Notify to Slack Channel
   slack:
     - name: "Organization #Alter"
@@ -347,6 +350,7 @@ notify:
       retry: # something the network is not good need to retry.
         times: 3
         interval: 10s
+  # Notify to email addresses
   email:
     - name: "XXX Mail List"
       server: smtp.email.example.com:465
@@ -354,6 +358,20 @@ notify:
       password: ********
       to: "user1@example.com;user2@example.com"
       # dry: true # dry notification, print the Email HTML in log(STDOUT)
+  # Notify to AWS Simple Notification Service
+  aws_sns:
+    - name: AWS SNS
+      region: us-west-2 # AWS Region
+      arn: arn:aws:sns:us-west-2:298305261856:xxxxx # SNS ARN
+      endpoint: https://sns.us-west-2.amazonaws.com # SNS Endpoint
+      credential: # AWS Access Credential
+        id: AWSXXXXXXXID  # AWS Access Key ID
+        key: XXXXXXXX/YYYYYYY # AWS Access Key Secret
+  # Notify to a local log file
+  log:
+    - name: "Local Log"
+      file: "/tmp/easeprobe.log"
+      dry: true
 ```
 
 **Notes**: All of the notifications can have the following optional configuration.

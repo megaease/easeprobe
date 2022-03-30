@@ -26,6 +26,7 @@ import (
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify"
+	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/client"
 	"github.com/megaease/easeprobe/probe/http"
 	"github.com/megaease/easeprobe/probe/shell"
@@ -226,4 +227,58 @@ func (conf *Conf) CloseLogFile() {
 	if conf.Settings.logfile != nil {
 		conf.Settings.logfile.Close()
 	}
+}
+
+// AllProbers return all probers
+func (conf *Conf) AllProbers() []probe.Prober {
+	// Probers
+	var probers []probe.Prober
+
+	for i := 0; i < len(conf.HTTP); i++ {
+		probers = append(probers, &conf.HTTP[i])
+	}
+
+	for i := 0; i < len(conf.TCP); i++ {
+		probers = append(probers, &conf.TCP[i])
+	}
+
+	for i := 0; i < len(conf.Shell); i++ {
+		probers = append(probers, &conf.Shell[i])
+	}
+
+	for i := 0; i < len(conf.Client); i++ {
+		probers = append(probers, &conf.Client[i])
+	}
+	return probers
+}
+
+// AllNotifiers return all notifiers
+func (conf *Conf) AllNotifiers() []notify.Notify {
+	var notifies []notify.Notify
+
+	for i := 0; i < len(conf.Notify.Log); i++ {
+		notifies = append(notifies, &conf.Notify.Log[i])
+	}
+
+	for i := 0; i < len(conf.Notify.Email); i++ {
+		notifies = append(notifies, &conf.Notify.Email[i])
+	}
+
+	for i := 0; i < len(conf.Notify.Slack); i++ {
+		notifies = append(notifies, &conf.Notify.Slack[i])
+	}
+
+	for i := 0; i < len(conf.Notify.Discord); i++ {
+		notifies = append(notifies, &conf.Notify.Discord[i])
+	}
+
+	for i := 0; i < len(conf.Notify.Telegram); i++ {
+		notifies = append(notifies, &conf.Notify.Telegram[i])
+	}
+
+	for i := 0; i < len(conf.Notify.AwsSNS); i++ {
+		notifies = append(notifies, &conf.Notify.AwsSNS[i])
+	}
+
+	return notifies
 }
