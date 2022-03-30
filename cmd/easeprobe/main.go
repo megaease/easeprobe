@@ -127,7 +127,7 @@ func configProbers(probers []probe.Prober, notifyChan chan probe.Result) {
 	probeFn := func(p probe.Prober) {
 		for {
 			res := p.Probe()
-			log.Debugf("%s: %s", p.Kind(), res.JSON())
+			log.Debugf("%s: %s", p.Kind(), res.DebugJSON())
 			notifyChan <- res
 			time.Sleep(p.Interval())
 		}

@@ -46,8 +46,8 @@ const (
 )
 
 // String convert the Status to string
-func (s Status) String() string {
-	switch s {
+func (s *Status) String() string {
+	switch *s {
 	case StatusUp:
 		return "up"
 	case StatusDown:
@@ -61,23 +61,23 @@ func (s Status) String() string {
 }
 
 //Status convert the string to Status
-func (s *Status) Status(status string) Status {
-	switch status {
+func (s *Status) Status(status string) {
+	switch strings.ToLower(status) {
 	case "up":
-		return StatusUp
+		*s = StatusUp
 	case "down":
-		return StatusDown
+		*s = StatusDown
 	case "unknown":
-		return StatusUnknown
+		*s = StatusUnknown
 	case "init":
-		return StatusInit
+		*s = StatusInit
 	}
-	return StatusUnknown
+	*s = StatusUnknown
 }
 
 // Emoji convert the status to emoji
-func (s Status) Emoji() string {
-	switch s {
+func (s *Status) Emoji() string {
+	switch *s {
 	case StatusUp:
 		return "✅"
 	case StatusDown:
@@ -92,11 +92,65 @@ func (s Status) Emoji() string {
 
 // UnmarshalJSON is Unmarshal the status
 func (s *Status) UnmarshalJSON(b []byte) (err error) {
-	*s = s.Status(strings.ToLower(string(b)))
+	s.Status(strings.ToLower(string(b)))
 	return nil
 }
 
 // MarshalJSON is marshal the status
 func (s *Status) MarshalJSON() (b []byte, err error) {
 	return []byte(fmt.Sprintf(`"%s"`, s.String())), nil
+}
+
+// Format is the format of text
+type Format int
+
+// The format types
+const (
+	MakerdownSocial Format = iota // *text* is bold
+	Makerdown                     // **text** is bold
+	HTML
+	JSON
+	Text
+)
+
+// String covert the Format to string
+func (f *Format) String() string {
+	switch *f {
+	case MakerdownSocial:
+		return "markdown-social"
+	case Makerdown:
+		return "markdown"
+	case HTML:
+		return "html"
+	case JSON:
+		return "json"
+	default:
+		return "text"
+	}
+}
+
+// Format covert the string to Format
+func (f *Format) Format(s string) {
+	switch strings.ToLower(s) {
+	case "markdown":
+		*f = Makerdown
+	case "markdown-social":
+		*f = MakerdownSocial
+	case "html":
+		*f = HTML
+	case "json":
+		*f = JSON
+	default:
+		*f = Text
+	}
+}
+
+// UnmarshalYAML is unmarshal the format
+func (f *Format) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var format string
+	if err := unmarshal(&format); err != nil {
+		return err
+	}
+	f.Format(format)
+	return nil
 }

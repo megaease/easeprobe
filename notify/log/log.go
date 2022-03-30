@@ -60,7 +60,7 @@ func (c *NotifyConfig) Notify(result probe.Result) {
 		c.DryNotify(result)
 		return
 	}
-	log.Println(result.JSON())
+	log.Println(result.DebugJSON())
 	logrus.Infof("Logged the notification for %s (%s)!", result.Name, result.Endpoint)
 }
 
