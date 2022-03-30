@@ -62,7 +62,7 @@ func (c *NotifyConfig) Notify(result probe.Result) {
 		c.DryNotify(result)
 		return
 	}
-	json := result.SlackBlockJSON()
+	json := BlockJSON(&result)
 	c.SendSlackNotificationWithRetry("Notification", json)
 }
 
@@ -72,19 +72,19 @@ func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
 		c.DryNotifyStat(probers)
 		return
 	}
-	json := probe.StatSlackBlockJSON(probers)
+	json := StatSlackBlockJSON(probers)
 	c.SendSlackNotificationWithRetry("SLA", json)
 
 }
 
 // DryNotify just log the notification message
 func (c *NotifyConfig) DryNotify(result probe.Result) {
-	log.Infof("[%s / %s] - %s", c.Kind(), c.Name, result.SlackBlockJSON())
+	log.Infof("[%s / %s] - %s", c.Kind(), c.Name, BlockJSON(&result))
 }
 
 // DryNotifyStat just log the notification message
 func (c *NotifyConfig) DryNotifyStat(probers []probe.Prober) {
-	log.Infof("[%s / %s] - %s", c.Kind(), c.Name, probe.StatSlackBlockJSON(probers))
+	log.Infof("[%s / %s] - %s", c.Kind(), c.Name, StatSlackBlockJSON(probers))
 }
 
 // SendSlackNotificationWithRetry send the Slack notification with retry
@@ -129,4 +129,150 @@ func (c *NotifyConfig) SendSlackNotification(msg string) error {
 	// 	return errors.New("Non-ok response returned from Slack " + buf.String())
 	// }
 	return nil
+}
+
+// BlockJSON convert the object to Slack notification
+// Go to https://app.slack.com/block-kit-builder to build the notification block
+func BlockJSON(r *probe.Result) string {
+
+	json := `
+	{
+		"channel": "Alert",
+		"text": "%s",
+		"blocks": [
+			{
+				"type": "section",
+				"text": {
+					"type": "mrkdwn",
+					"text": "%s"
+				}
+			},
+			{
+				"type": "context",
+				"elements": [
+					{
+						"type": "image",
+						"image_url": "` + global.Icon + `",
+						"alt_text": "` + global.OrgProg + `"
+					},
+					{
+						"type": "mrkdwn",
+						"text": "` + global.Prog + ` %s"
+					}
+				]
+			}
+		]
+	}
+	`
+	rtt := r.RoundTripTime.Round(time.Millisecond)
+	body := fmt.Sprintf("*%s*\\n>%s %s - ⏱ %s\n>%s",
+		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, probe.JSONEscape(r.Message))
+	context := TimeFormation(r.StartTime, " probed at ", r.TimeFormat)
+	summary := fmt.Sprintf("%s %s - %s", r.Title(), r.Status.Emoji(), probe.JSONEscape(r.Message))
+	return fmt.Sprintf(json, summary, body, context)
+}
+
+// StatSlackBlockSectionJSON return the slack json format string to stat
+func StatSlackBlockSectionJSON(r *probe.Result) string {
+
+	json := `
+			{
+				"type": "mrkdwn",
+				"text": "*%s* - %s` +
+		`\n>*Availability*\n>\t` + " *Up*:  `%s`  *Down* `%s`  -  *SLA*: `%.2f %%`" +
+		`\n>*Probe Times*\n>\t*Total* : %d ( %s )` +
+		`\n>*Lastest Probe*\n>\t%s | %s` +
+		`\n>\t%s"` + `
+			}`
+
+	t := TimeFormation(r.StartTime, "", r.TimeFormat)
+
+	message := probe.JSONEscape(r.Message)
+	if r.Status != probe.StatusUp {
+		message = "`" + message + "`"
+	}
+
+	return fmt.Sprintf(json, r.Name, r.Endpoint,
+		probe.DurationStr(r.Stat.UpTime), probe.DurationStr(r.Stat.DownTime), r.SLA(),
+		r.Stat.Total, probe.StatStatusText(r.Stat, probe.MakerdownSocial),
+		t, r.Status.Emoji()+" "+r.Status.String(), message)
+}
+
+// StatSlackBlockJSON generate all probes stat message to slack block string
+func StatSlackBlockJSON(probers []probe.Prober) string {
+	sla := 0.0
+	for _, p := range probers {
+		sla += p.Result().SLA()
+	}
+	sla /= float64(len(probers))
+	summary := fmt.Sprintf("Total %d Services, Average %.2f%% SLA", len(probers), sla)
+	json := `{
+		"channel": "Report",
+		"text": "Daily Overall SLA Report - ` + summary + ` ",
+		"blocks": [
+		{
+			"type": "header",
+			"text": {
+				"type": "plain_text",
+				"text": "Overall SLA Report",
+				"emoji": true
+			}
+		}`
+
+	sectionHead := `
+		{
+		"type": "section",
+		"fields": [`
+	sectionFoot := `
+				]
+		}`
+	total := len(probers)
+	pageCnt := 10
+	pages := total / pageCnt
+	if total%pageCnt > 0 {
+		pages++
+	}
+
+	for p := 0; p < pages; p++ {
+		start := p * pageCnt
+		end := (p + 1) * pageCnt
+		if len(probers) < end {
+			end = len(probers)
+		}
+		json += "," + sectionHead
+		for i := start; i < end-1; i++ {
+			json += StatSlackBlockSectionJSON(probers[i].Result()) + ","
+		}
+		json += StatSlackBlockSectionJSON(probers[end-1].Result())
+		json += sectionFoot
+	}
+
+	context := `,
+	{
+		"type": "context",
+		"elements": [
+			{
+				"type": "image",
+				"image_url": "` + global.Icon + `",
+				"alt_text": "` + global.OrgProg + `"
+			},
+			{
+				"type": "mrkdwn",
+				"text": "` + global.Prog + ` %s"
+			}
+		]
+	}`
+
+	time := TimeFormation(time.Now(), " reported at ", probers[len(probers)-1].Result().TimeFormat)
+	json += fmt.Sprintf(context, time)
+
+	json += `]}`
+
+	return json
+}
+
+// TimeFormation return the slack time formation
+func TimeFormation(t time.Time, act string, format string) string {
+	return fmt.Sprintf("<!date^%d^%s{date_num} {time_secs}|%s%s>",
+		t.Unix(), act, act, t.UTC().Format(format))
 }

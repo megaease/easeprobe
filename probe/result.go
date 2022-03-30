@@ -23,19 +23,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/megaease/easeprobe/global"
 	log "github.com/sirupsen/logrus"
-)
-
-// Format is the format of text
-type Format int
-
-// The format types
-const (
-	Makerdown1 Format = iota
-	Makerdown2
-	HTML
-	Text
 )
 
 //ConfigDuration is the struct used for custom the time formation
@@ -110,24 +98,16 @@ func (r *Result) DoStat(d time.Duration) {
 	}
 }
 
-// JSON convert the object to JSON
-func (r *Result) JSON() string {
-	j, err := json.Marshal(&r)
-	if err != nil {
-		log.Errorf("error: %v", err)
-		return ""
-	}
-	return string(j)
-}
-
-// JSONIndent convert the object to indent JSON
-func (r *Result) JSONIndent() string {
-	j, err := json.MarshalIndent(&r, "", "    ")
-	if err != nil {
-		log.Errorf("error: %v", err)
-		return ""
-	}
-	return string(j)
+// resultDTO only for JSON format notification
+type resultDTO struct {
+	Name           string         `json:"name"`
+	Endpoint       string         `json:"endpoint"`
+	StartTime      time.Time      `json:"time"`
+	StartTimestamp int64          `json:"timestamp"`
+	RoundTripTime  ConfigDuration `json:"rtt"`
+	Status         Status         `json:"status"`
+	PreStatus      Status         `json:"prestatus"`
+	Message        string         `json:"message"`
 }
 
 // Title return the title for notification
@@ -140,6 +120,74 @@ func (r *Result) Title() string {
 		t = "%s Failure"
 	}
 	return fmt.Sprintf(t, r.Name)
+}
+
+// DebugJSON convert the object to DebugJSON
+func (r *Result) DebugJSON() string {
+	j, err := json.Marshal(&r)
+	if err != nil {
+		log.Errorf("error: %v", err)
+		return ""
+	}
+	return string(j)
+}
+
+// DebugJSONIndent convert the object to indent JSON
+func (r *Result) DebugJSONIndent() string {
+	j, err := json.MarshalIndent(&r, "", "    ")
+	if err != nil {
+		log.Errorf("error: %v", err)
+		return ""
+	}
+	return string(j)
+}
+
+// Text convert the result object to Text
+func (r *Result) Text() string {
+	tpl := "[%s] %s\n%s - ⏱ %s\n%s"
+	rtt := r.RoundTripTime.Round(time.Millisecond)
+	return fmt.Sprintf(tpl,
+		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, r.Message)
+}
+
+// JSON convert the result object to JSON
+func (r *Result) JSON() string {
+	ro := resultDTO{
+		Name:           r.Title(),
+		Endpoint:       r.Endpoint,
+		StartTime:      r.StartTime,
+		StartTimestamp: r.StartTimestamp,
+		RoundTripTime:  r.RoundTripTime,
+		Status:         r.Status,
+		PreStatus:      r.PreStatus,
+		Message:        r.Message,
+	}
+	j, err := json.Marshal(&ro)
+	if err != nil {
+		log.Errorf("error: %v", err)
+		return ""
+	}
+	return string(j)
+}
+
+// JSONIndent convert the object to indent JSON
+func (r *Result) JSONIndent() string {
+	ro := resultDTO{
+		Name:           r.Title(),
+		Endpoint:       r.Endpoint,
+		StartTime:      r.StartTime,
+		StartTimestamp: r.StartTimestamp,
+		RoundTripTime:  r.RoundTripTime,
+		Status:         r.Status,
+		PreStatus:      r.PreStatus,
+		Message:        r.Message,
+	}
+	j, err := json.MarshalIndent(&ro, "", "    ")
+	if err != nil {
+		log.Errorf("error: %v", err)
+		return ""
+	}
+	return string(j)
 }
 
 // HTML convert the object to HTML
@@ -186,50 +234,88 @@ func (r *Result) Markdown() string {
 		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, r.Message)
 }
 
-// SlackBlockJSON convert the object to Slack notification
-// Go to https://app.slack.com/block-kit-builder to build the notification block
-func (r *Result) SlackBlockJSON() string {
-
-	json := `
-	{
-		"channel": "Alert",
-		"text": "%s",
-		"blocks": [
-			{
-				"type": "section",
-				"text": {
-					"type": "mrkdwn",
-					"text": "%s"
-				}
-			},
-			{
-				"type": "context",
-				"elements": [
-					{
-						"type": "image",
-						"image_url": "` + global.Icon + `",
-						"alt_text": "` + global.OrgProg + `"
-					},
-					{
-						"type": "mrkdwn",
-						"text": "` + global.Prog + ` %s"
-					}
-				]
-			}
-		]
-	}
-	`
-	rtt := r.RoundTripTime.Round(time.Millisecond)
-	body := fmt.Sprintf("*%s*\\n>%s %s - ⏱ %s\n>%s",
-		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, JSONEscape(r.Message))
-	context := SlackTimeFormation(r.StartTime, " probed at ", r.TimeFormat)
-	summary := fmt.Sprintf("%s %s - %s", r.Title(), r.Status.Emoji(), JSONEscape(r.Message))
-	return fmt.Sprintf(json, summary, body, context)
+// Availability is the Availability JSON structure
+type Availability struct {
+	UpTime   time.Duration `json:"up"`
+	DownTime time.Duration `json:"down"`
+	SLA      float64       `json:"sla"`
 }
 
-// StatText return the Text format string to stat
-func (r *Result) StatText() string {
-	text := "Name: %s - %s, Availability: Up - %s, Down - %s, SLA: %.2f%%, Probe-Times: Total: %d ( %s ), Last-Probe:%s - %s, Message:%s"
+// Summary is the Summary JSON structure
+type Summary struct {
+	Total int32 `json:"total"`
+	Up    int32 `json:"up"`
+	Down  int32 `json:"down"`
+}
+
+// LatestProbe is the LatestProbe JSON structure
+type LatestProbe struct {
+	Time    time.Time `json:"time"`
+	Status  Status    `json:"status"`
+	Message string    `json:"message"`
+}
+
+// SLA is the SLA JSON structure
+type SLA struct {
+	Name         string       `json:"name"`
+	Endpoint     string       `json:"endpoint"`
+	Availability Availability `json:"sla"`
+	ProbeTimes   Summary      `json:"probe_summary"`
+	LatestProbe  LatestProbe  `json:"latest_probe"`
+}
+
+// SLAObject covert the result to SLA struct
+func (r *Result) SLAObject() SLA {
+	return SLA{
+		Name:     r.Name,
+		Endpoint: r.Endpoint,
+		Availability: Availability{
+			UpTime:   r.Stat.UpTime,
+			DownTime: r.Stat.DownTime,
+			SLA:      r.SLA(),
+		},
+		ProbeTimes: Summary{
+			Total: r.Stat.Total,
+			Up:    r.Stat.Status[StatusUp],
+			Down:  r.Stat.Status[StatusDown] + r.Stat.Status[StatusUnknown],
+		},
+		LatestProbe: LatestProbe{
+			Time:    r.StartTime,
+			Status:  r.Status,
+			Message: r.Message,
+		},
+	}
+
+}
+
+// StatJSONSection return the JSON format string to stat
+func (r *Result) StatJSONSection() string {
+	sla := r.SLAObject()
+	j, err := json.Marshal(&sla)
+	if err != nil {
+		log.Errorf("error: %v", err)
+		return ""
+	}
+	return string(j)
+}
+
+// StatJSON return a full stat report
+func StatJSON(probers []Prober) string {
+	var sla []SLA
+	for _, p := range probers {
+		sla = append(sla, p.Result().SLAObject())
+	}
+	j, err := json.Marshal(&sla)
+	if err != nil {
+		log.Errorf("error: %v", err)
+		return ""
+	}
+	return string(j)
+}
+
+// StatTextSection return the Text format string to stat
+func (r *Result) StatTextSection() string {
+	text := "Name: %s - %s, \n\tAvailability: Up - %s, Down - %s, SLA: %.2f%%\n\tProbe-Times: Total: %d ( %s ), \n\tLast-Probe:%s - %s, Message:%s"
 	return fmt.Sprintf(text, r.Name, r.Endpoint,
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLA(),
 		r.Stat.Total, StatStatusText(r.Stat, Text),
@@ -237,8 +323,17 @@ func (r *Result) StatText() string {
 		r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
 }
 
-// StatMarkDown return the Markdown format string to stat
-func (r *Result) StatMarkDown() string {
+// StatText return a full stat report
+func StatText(probers []Prober) string {
+	text := "[Overall SLA Report]\n\n"
+	for _, p := range probers {
+		text += p.Result().StatTextSection() + "\n\b"
+	}
+	return text
+}
+
+// StatMarkDownSection return the Markdown format string to stat
+func (r *Result) StatMarkDownSection() string {
 	text := "\n*%s* - %s\n" +
 		"- Availability: Up - `%s`, Down - `%s`, SLA: `%.2f%%` \n" +
 		"- Probe-Times: Total: `%d` ( %s ) \n" +
@@ -246,7 +341,7 @@ func (r *Result) StatMarkDown() string {
 		"  ```%s```\n"
 	return fmt.Sprintf(text, r.Name, r.Endpoint,
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLA(),
-		r.Stat.Total, StatStatusText(r.Stat, Makerdown1),
+		r.Stat.Total, StatStatusText(r.Stat, MakerdownSocial),
 		time.Now().UTC().Format(r.TimeFormat),
 		r.Status.Emoji()+" "+r.Status.String(), r.Message)
 
@@ -256,7 +351,7 @@ func (r *Result) StatMarkDown() string {
 func StatMarkDown(probers []Prober) string {
 	md := "*Overall SLA Report*\n"
 	for _, p := range probers {
-		md += p.Result().StatMarkDown()
+		md += p.Result().StatMarkDownSection()
 	}
 	return md
 }
@@ -299,105 +394,6 @@ func StatHTML(probers []Prober) string {
 	return html
 }
 
-// StatSlackBlockSectionJSON return the slack json format string to stat
-func (r *Result) StatSlackBlockSectionJSON() string {
-
-	json := `
-			{
-				"type": "mrkdwn",
-				"text": "*%s* - %s` +
-		`\n>*Availability*\n>\t` + " *Up*:  `%s`  *Down* `%s`  -  *SLA*: `%.2f %%`" +
-		`\n>*Probe Times*\n>\t*Total* : %d ( %s )` +
-		`\n>*Lastest Probe*\n>\t%s | %s` +
-		`\n>\t%s"` + `
-			}`
-
-	t := SlackTimeFormation(r.StartTime, "", r.TimeFormat)
-
-	message := JSONEscape(r.Message)
-	if r.Status != StatusUp {
-		message = "`" + message + "`"
-	}
-
-	return fmt.Sprintf(json, r.Name, r.Endpoint,
-		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLA(),
-		r.Stat.Total, StatStatusText(r.Stat, Makerdown1),
-		t, r.Status.Emoji()+" "+r.Status.String(), message)
-}
-
-// StatSlackBlockJSON generate all probes stat message to slack block string
-func StatSlackBlockJSON(probers []Prober) string {
-	sla := 0.0
-	for _, p := range probers {
-		sla += p.Result().SLA()
-	}
-	sla /= float64(len(probers))
-	summary := fmt.Sprintf("Total %d Services, Average %.2f%% SLA", len(probers), sla)
-	json := `{
-		"channel": "Report",
-		"text": "Daily Overall SLA Report - ` + summary + ` ",
-		"blocks": [
-		{
-			"type": "header",
-			"text": {
-				"type": "plain_text",
-				"text": "Overall SLA Report",
-				"emoji": true
-			}
-		}`
-
-	sectionHead := `
-		{
-		"type": "section",
-		"fields": [`
-	sectionFoot := `
-				]
-		}`
-	total := len(probers)
-	pageCnt := 10
-	pages := total / pageCnt
-	if total%pageCnt > 0 {
-		pages++
-	}
-
-	for p := 0; p < pages; p++ {
-		start := p * pageCnt
-		end := (p + 1) * pageCnt
-		if len(probers) < end {
-			end = len(probers)
-		}
-		json += "," + sectionHead
-		for i := start; i < end-1; i++ {
-			json += probers[i].Result().StatSlackBlockSectionJSON() + ","
-		}
-		json += probers[end-1].Result().StatSlackBlockSectionJSON()
-		json += sectionFoot
-	}
-
-	context := `,
-	{
-		"type": "context",
-		"elements": [
-			{
-				"type": "image",
-				"image_url": "` + global.Icon + `",
-				"alt_text": "` + global.OrgProg + `"
-			},
-			{
-				"type": "mrkdwn",
-				"text": "` + global.Prog + ` %s"
-			}
-		]
-	}`
-
-	time := SlackTimeFormation(time.Now(), " reported at ", probers[len(probers)-1].Result().TimeFormat)
-	json += fmt.Sprintf(context, time)
-
-	json += `]}`
-
-	return json
-}
-
 //JSONEscape escape the string
 func JSONEscape(str string) string {
 	b, err := json.Marshal(str)
@@ -426,9 +422,9 @@ func StatStatusText(s Stat, t Format) string {
 	status := ""
 	format := "%s : %d \t"
 	switch t {
-	case Makerdown1:
+	case MakerdownSocial:
 		format = "%s : `%d` \t"
-	case Makerdown2:
+	case Makerdown:
 		format = "**%s** : `%d` \t"
 	case HTML:
 		format = "<b>%s</b> : %d \t"
@@ -439,8 +435,32 @@ func StatStatusText(s Stat, t Format) string {
 	return strings.TrimSpace(status)
 }
 
-// SlackTimeFormation return the slack time formation
-func SlackTimeFormation(t time.Time, act string, format string) string {
-	return fmt.Sprintf("<!date^%d^%s{date_num} {time_secs}|%s%s>",
-		t.Unix(), act, act, t.UTC().Format(format))
+// Transfer generate the notification by format
+func (r *Result) Transfer(f Format) string {
+	switch f {
+	case Text:
+		return r.Text()
+	case HTML:
+		return r.HTML()
+	case Makerdown:
+		return r.Markdown()
+	case JSON:
+		return r.JSON()
+	}
+	return ""
+}
+
+// StatTransfer generate the SLA report by format
+func StatTransfer(f Format, probers []Prober) string {
+	switch f {
+	case Text:
+		return StatText(probers)
+	case HTML:
+		return StatHTML(probers)
+	case Makerdown:
+		return StatMarkDown(probers)
+	case JSON:
+		return StatJSON(probers)
+	}
+	return ""
 }

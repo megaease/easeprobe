@@ -31,6 +31,7 @@ import (
 type SNSNotifyConfig struct {
 	Options  `yaml:",inline"`
 	TopicARN string          `yaml:"arn"`
+	Format   probe.Format    `yaml:"format"`
 	client   *sns.SNS        `yaml:"-"`
 	context  context.Context `yaml:"-"`
 }
@@ -49,6 +50,9 @@ func (c *SNSNotifyConfig) Config(gConf global.NotifySettings) error {
 	if err := c.Options.Config(gConf); err != nil {
 		return err
 	}
+	if c.Format == 0 {
+		c.Format = probe.Text
+	}
 	c.client = sns.New(c.session)
 	c.context = context.Background()
 
@@ -62,8 +66,8 @@ func (c *SNSNotifyConfig) Notify(result probe.Result) {
 		c.DryNotify(result)
 		return
 	}
-	json := result.SlackBlockJSON()
-	c.SendNotificationWithRetry("Notification", json)
+	msg := result.Transfer(c.Format)
+	c.SendNotificationWithRetry("Notification", msg)
 }
 
 // NotifyStat write the all probe stat message to slack
@@ -72,19 +76,19 @@ func (c *SNSNotifyConfig) NotifyStat(probers []probe.Prober) {
 		c.DryNotifyStat(probers)
 		return
 	}
-	json := probe.StatSlackBlockJSON(probers)
-	c.SendNotificationWithRetry("SLA", json)
+	msg := probe.StatTransfer(c.Format, probers)
+	c.SendNotificationWithRetry("SLA", msg)
 
 }
 
 // DryNotify just log the notification message
 func (c *SNSNotifyConfig) DryNotify(result probe.Result) {
-	log.Infof("[%s / %s] - %s", c.Kind(), c.Name, result.SlackBlockJSON())
+	log.Infof("[%s / %s] - %s", c.Kind(), c.Name, result.Transfer(c.Format))
 }
 
 // DryNotifyStat just log the notification message
 func (c *SNSNotifyConfig) DryNotifyStat(probers []probe.Prober) {
-	log.Infof("[%s / %s] - %s", c.Kind(), c.Name, probe.StatSlackBlockJSON(probers))
+	log.Infof("[%s / %s] - %s", c.Kind(), c.Name, probe.StatTransfer(c.Format, probers))
 }
 
 // SendNotificationWithRetry send the SNS notification with retry
