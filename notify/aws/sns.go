@@ -32,7 +32,7 @@ type SNSNotifyConfig struct {
 	Options  `yaml:",inline"`
 	TopicARN string          `yaml:"arn"`
 	client   *sns.SNS        `yaml:"-"`
-	Context  context.Context `yaml:"-"`
+	context  context.Context `yaml:"-"`
 }
 
 // Kind return the type of Notify
@@ -50,7 +50,7 @@ func (c *SNSNotifyConfig) Config(gConf global.NotifySettings) error {
 		return err
 	}
 	c.client = sns.New(c.session)
-	c.Context = context.Background()
+	c.context = context.Background()
 
 	log.Infof("[%s] configuration: %+v", c.Kind(), c)
 	return nil
@@ -101,7 +101,7 @@ func (c *SNSNotifyConfig) SendNotificationWithRetry(tag string, msg string) {
 
 // SendNotification sends the message to SNS
 func (c *SNSNotifyConfig) SendNotification(msg string) error {
-	ctx, cancel := context.WithTimeout(c.Context, c.Timeout)
+	ctx, cancel := context.WithTimeout(c.context, c.Timeout)
 	defer cancel()
 
 	res, err := c.client.PublishWithContext(ctx, &sns.PublishInput{
