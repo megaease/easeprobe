@@ -315,7 +315,7 @@ func StatJSON(probers []Prober) string {
 
 // StatTextSection return the Text format string to stat
 func (r *Result) StatTextSection() string {
-	text := "Name: %s - %s, \n\tAvailability: Up - %s, Down - %s, SLA: %.2f%%\n\tProbe-Times: Total: %d ( %s ), \n\tLast-Probe:%s - %s, Message:%s"
+	text := "Name: %s - %s, \n\tAvailability: Up - %s, Down - %s, SLA: %.2f%%\n\tProbe-Times: Total: %d ( %s ), \n\tLatest-Probe:%s - %s, Message:%s"
 	return fmt.Sprintf(text, r.Name, r.Endpoint,
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLA(),
 		r.Stat.Total, StatStatusText(r.Stat, Text),
@@ -369,7 +369,7 @@ func (r *Result) StatHTMLSection() string {
 		<td class="data"><b>Probe-Times</b><br><b>Total</b>: %d ( %s )</td>
 	</tr>
 	<tr>
-		<td  class="data" colspan="3"><b>Last Probe</b>: %s - %s<br>%s<td>
+		<td  class="data" colspan="3"><b>Latest Probe</b>: %s - %s<br>%s<td>
 	</tr>
 	`
 	return fmt.Sprintf(html, r.Name, r.Endpoint,
