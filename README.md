@@ -127,6 +127,9 @@ notify:
       credential:
         id: AWSXXXXXXXID
         key: XXXXXXXX/YYYYYYY
+  wecom:
+    - name: "wecom alert service"
+      webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=589f9674-a2aa-xxxxxxxx-16bb6c43034a" # wecom rebot webhook
 ```
 
 Check the  [Notification Configuration](#35-notification-configuration) to see how to configure it.

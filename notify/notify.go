@@ -25,6 +25,7 @@ import (
 	"github.com/megaease/easeprobe/notify/log"
 	"github.com/megaease/easeprobe/notify/slack"
 	"github.com/megaease/easeprobe/notify/telegram"
+	"github.com/megaease/easeprobe/notify/wecom"
 	"github.com/megaease/easeprobe/probe"
 )
 
@@ -36,6 +37,7 @@ type Config struct {
 	Discord  []discord.NotifyConfig  `yaml:"discord"`
 	Telegram []telegram.NotifyConfig `yaml:"telegram"`
 	AwsSNS   []aws.SNSNotifyConfig   `yaml:"aws_sns"`
+	Wecom    []wecom.NotifyConfig    `yaml:"wecom"`
 }
 
 // Notify is the configuration of the Notify
