@@ -129,7 +129,7 @@ notify:
         key: XXXXXXXX/YYYYYYY
   wecom:
     - name: "wecom alert service"
-      webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=589f9674-a2aa-xxxxxxxx-16bb6c43034a" # wecom rebot webhook
+      webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=589f9674-a2aa-xxxxxxxx-16bb6c43034a" # wecom robot webhook
 ```
 
 Check the  [Notification Configuration](#35-notification-configuration) to see how to configure it.
@@ -375,6 +375,10 @@ notify:
     - name: "Local Log"
       file: "/tmp/easeprobe.log"
       dry: true
+  # Notify to Wecom(WeChatwork) robot.
+  wecom:
+    - name: "wecom alert service"
+      webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=589f9674-a2aa-xxxxxxxx-16bb6c43034a" # wecom robot webhook
 ```
 
 **Notes**: All of the notifications can have the following optional configuration.
