@@ -94,6 +94,7 @@ Ease Probe supports the following notifications:
 - **Telegram**. Using Telegram Bot for notification
 - **Email**. Support multiple email addresses.
 - **AWS SNS**. Support AWS Simple Notification Service.
+- **WeChat Work**. Support Enterprise WeChat Wrok Notification.
 - **Log File**. Write the notification into a log file
 
 **Note**:
@@ -127,6 +128,9 @@ notify:
       credential:
         id: AWSXXXXXXXID
         key: XXXXXXXX/YYYYYYY
+  wecom:
+    - name: "wecom alert service"
+      webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=589f9674-a2aa-xxxxxxxx-16bb6c43034a" # wecom robot webhook
 ```
 
 Check the  [Notification Configuration](#35-notification-configuration) to see how to configure it.
@@ -367,6 +371,10 @@ notify:
       credential: # AWS Access Credential
         id: AWSXXXXXXXID  # AWS Access Key ID
         key: XXXXXXXX/YYYYYYY # AWS Access Key Secret
+  # Notify to Wecom(WeChatwork) robot.
+  wecom:
+    - name: "wecom alert service"
+      webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=589f9674-a2aa-xxxxxxxx-16bb6c43034a" # wecom robot webhook
   # Notify to a local log file
   log:
     - name: "Local Log"
