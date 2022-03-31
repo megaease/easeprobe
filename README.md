@@ -371,15 +371,15 @@ notify:
       credential: # AWS Access Credential
         id: AWSXXXXXXXID  # AWS Access Key ID
         key: XXXXXXXX/YYYYYYY # AWS Access Key Secret
+  # Notify to Wecom(WeChatwork) robot.
+  wecom:
+    - name: "wecom alert service"
+      webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=589f9674-a2aa-xxxxxxxx-16bb6c43034a" # wecom robot webhook
   # Notify to a local log file
   log:
     - name: "Local Log"
       file: "/tmp/easeprobe.log"
       dry: true
-  # Notify to Wecom(WeChatwork) robot.
-  wecom:
-    - name: "wecom alert service"
-      webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=589f9674-a2aa-xxxxxxxx-16bb6c43034a" # wecom robot webhook
 ```
 
 **Notes**: All of the notifications can have the following optional configuration.
