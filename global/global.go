@@ -24,6 +24,7 @@ import (
 	"io/ioutil"
 	"time"
 
+	"golang.org/x/exp/constraints"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -33,7 +34,7 @@ const (
 	// Prog is the program name
 	Prog = "EaseProbe"
 	// Ver is the program version
-	Ver = "0.1"
+	Ver = "v1.1.2"
 
 	//OrgProg combine organization and program
 	OrgProg = Org + " " + Prog
@@ -70,20 +71,14 @@ type TLS struct {
 	Key  string `yaml:"key"`
 }
 
-func normalizeTimeDuration(global, local, valid, _default time.Duration) time.Duration {
-	// if the val is in valid, the assign the default value
-	if local <= valid {
-		local = _default
-		//if the global configuration is validated, assign the global
-		if global > valid {
-			local = global
-		}
-	}
-	return local
-}
 
-func normalizeInteger(global, local, valid, _default int) int {
-	// if the val is in valid, the assign the default value
+// The normalize() function logic as below:
+// - if both global and local are not set, then return the _default.
+// - if set the global, but not the local, then return the global
+// - if set the local, but not the global, then return the local
+// - if both global and local are set, then return the local
+func normalize[T constraints.Ordered](global, local, valid, _default T) T {
+	// if the val is invalid, then assign the default value
 	if local <= valid {
 		local = _default
 		//if the global configuration is validated, assign the global

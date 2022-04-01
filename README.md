@@ -154,7 +154,7 @@ settings:
 
 ### 2.1 Build
 
-Compiler `Go 1.17+`
+Compiler `Go 1.18+` (Generics Programming Support)
 
 Use `make` to make the binary file. the target is under the `build/bin` directory
 
