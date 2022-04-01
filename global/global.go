@@ -34,7 +34,7 @@ const (
 	// Prog is the program name
 	Prog = "EaseProbe"
 	// Ver is the program version
-	Ver = "0.1"
+	Ver = "v1.1.2"
 
 	//OrgProg combine organization and program
 	OrgProg = Org + " " + Prog
