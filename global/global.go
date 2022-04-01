@@ -72,8 +72,13 @@ type TLS struct {
 }
 
 
+// The normalize() function logic as below:
+// - if both global and local are not set, then return the _default.
+// - if set the global, but not the local, then return the global
+// - if set the local, but not the global, then return the local
+// - if both global and local are set, then return the local
 func normalize[T constraints.Ordered](global, local, valid, _default T) T {
-	// if the val is in valid, then assign the default value
+	// if the val is invalid, then assign the default value
 	if local <= valid {
 		local = _default
 		//if the global configuration is validated, assign the global
