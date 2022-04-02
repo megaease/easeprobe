@@ -109,7 +109,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 					result.Name, result.Endpoint, result.PreStatus, result.Status)
 				continue
 			}
-			log.Infof("%s (%s) - Status changed [%d] ==> [%d]",
+			log.Infof("%s (%s) - Status changed [%s] ==> [%s]",
 				result.Name, result.Endpoint, result.PreStatus, result.Status)
 			for _, n := range notifies {
 				if dryNotify {
