@@ -10,7 +10,7 @@ build_image() {
     local docker_context_path=$3
     local docker_file=$4
 
-    docker build -t "${img_name}":${img_ver} -f "${docker_file}" "${docker_context_path}"
+    DOCKER_BUILDKIT=1 docker build -t "${img_name}":${img_ver} -f "${docker_file}" "${docker_context_path}"
 }
 
 show_usage() {
