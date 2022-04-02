@@ -1,7 +1,16 @@
-FROM golang:1.17-alpine as builder
+FROM golang:1.18-alpine as builder
 WORKDIR /go/src/github.com/megaease/easeprobe/
 COPY ./ /go/src/github.com/megaease/easeprobe/
-RUN apk --no-cache add make git && make clean && make
+RUN --mount=type=cache,target=/var/cache/apk \
+    apk --no-cache add make git 
+
+COPY go.mod go.mod
+COPY go.sum go.sum
+COPY . .
+
+RUN --mount=type=cache,mode=0777,id=gomodcache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    make 
 
 FROM alpine:latest
 RUN apk update && apk add tini tzdata busybox-extras curl redis
