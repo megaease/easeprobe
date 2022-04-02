@@ -131,6 +131,9 @@ notify:
   wecom:
     - name: "wecom alert service"
       webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=589f9674-a2aa-xxxxxxxx-16bb6c43034a" # wecom robot webhook
+  dingtalk:
+    - name: "dingtalk alert service"
+      webhook: "https://oapi.dingtalk.com/robot/send?access_token=xxxx"
 ```
 
 Check the  [Notification Configuration](#35-notification-configuration) to see how to configure it.
@@ -375,6 +378,10 @@ notify:
   wecom:
     - name: "wecom alert service"
       webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=589f9674-a2aa-xxxxxxxx-16bb6c43034a" # wecom robot webhook
+  # Notify to Dingtalk
+  dingtalk:
+    - name: "dingtalk alert service"
+      webhook: "https://oapi.dingtalk.com/robot/send?access_token=xxxx"
   # Notify to a local log file
   log:
     - name: "Local Log"
