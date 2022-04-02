@@ -279,6 +279,9 @@ func (conf *Conf) AllNotifiers() []notify.Notify {
 	for i := 0; i < len(conf.Notify.AwsSNS); i++ {
 		notifies = append(notifies, &conf.Notify.AwsSNS[i])
 	}
+	for i := 0; i < len(conf.Notify.Wecom); i++ {
+		notifies = append(notifies, &conf.Notify.Wecom[i])
+	}
 
 	return notifies
 }

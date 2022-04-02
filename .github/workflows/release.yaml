@@ -5,14 +5,14 @@ on:
     tags:
       - 'v*'
 env:
-  GO_VERSION: 1.17
+  GO_VERSION: 1.18
 
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Source Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Setup Go Environment

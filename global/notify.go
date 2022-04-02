@@ -28,12 +28,12 @@ type NotifySettings struct {
 
 // NormalizeTimeOut return a normalized timeout value
 func (n *NotifySettings) NormalizeTimeOut(t time.Duration) time.Duration {
-	return normalizeTimeDuration(n.Timeout, t, 0, DefaultTimeOut)
+	return normalize(n.Timeout, t, 0, DefaultTimeOut)
 }
 
 // NormalizeRetry return a normalized retry value
 func (n *NotifySettings) NormalizeRetry(retry Retry) Retry {
-	retry.Interval = normalizeTimeDuration(n.Retry.Interval, retry.Interval, 0, DefaultRetryInterval)
-	retry.Times = normalizeInteger(n.Retry.Times, retry.Times, 0, DefaultRetryTimes)
+	retry.Interval = normalize(n.Retry.Interval, retry.Interval, 0, DefaultRetryInterval)
+	retry.Times = normalize(n.Retry.Times, retry.Times, 0, DefaultRetryTimes)
 	return retry
 }
