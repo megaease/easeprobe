@@ -94,7 +94,8 @@ Ease Probe supports the following notifications:
 - **Telegram**. Using Telegram Bot for notification
 - **Email**. Support multiple email addresses.
 - **AWS SNS**. Support AWS Simple Notification Service.
-- **WeChat Work**. Support Enterprise WeChat Wrok Notification.
+- **WeChat Work**. Support Enterprise WeChat Wrok notification.
+- **DingTalk**. Support the DingTalk notification.
 - **Log File**. Write the notification into a log file
 
 **Note**:
