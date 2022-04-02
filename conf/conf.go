@@ -283,5 +283,8 @@ func (conf *Conf) AllNotifiers() []notify.Notify {
 		notifies = append(notifies, &conf.Notify.Wecom[i])
 	}
 
+	for i := 0; i < len(conf.Notify.Dingtalk); i++ {
+		notifies = append(notifies, &conf.Notify.Dingtalk[i])
+	}
 	return notifies
 }

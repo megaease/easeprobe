@@ -20,6 +20,7 @@ package notify
 import (
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify/aws"
+	"github.com/megaease/easeprobe/notify/dingtalk"
 	"github.com/megaease/easeprobe/notify/discord"
 	"github.com/megaease/easeprobe/notify/email"
 	"github.com/megaease/easeprobe/notify/log"
@@ -38,6 +39,7 @@ type Config struct {
 	Telegram []telegram.NotifyConfig `yaml:"telegram"`
 	AwsSNS   []aws.SNSNotifyConfig   `yaml:"aws_sns"`
 	Wecom    []wecom.NotifyConfig    `yaml:"wecom"`
+	Dingtalk []dingtalk.NotifyConfig `yaml:"dingtalk"`
 }
 
 // Notify is the configuration of the Notify
