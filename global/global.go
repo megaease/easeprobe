@@ -24,8 +24,8 @@ import (
 	"io/ioutil"
 	"time"
 
-	"golang.org/x/exp/constraints"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/exp/constraints"
 )
 
 const (
@@ -70,7 +70,6 @@ type TLS struct {
 	Cert string `yaml:"cert"`
 	Key  string `yaml:"key"`
 }
-
 
 // The normalize() function logic as below:
 // - if both global and local are not set, then return the _default.

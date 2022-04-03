@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"reflect"
 	"strings"
 	"time"
 
@@ -229,26 +230,31 @@ func (conf *Conf) CloseLogFile() {
 	}
 }
 
+func isProbe(p probe.Prober) bool {
+	modelType := reflect.TypeOf((*probe.Prober)(nil)).Elem()
+	return reflect.TypeOf(p).Implements(modelType)
+}
+
 // AllProbers return all probers
 func (conf *Conf) AllProbers() []probe.Prober {
-	// Probers
+
 	var probers []probe.Prober
 
-	for i := 0; i < len(conf.HTTP); i++ {
-		probers = append(probers, &conf.HTTP[i])
+	log.Debugf("--------- Process the probers settings ---------")
+	t := reflect.TypeOf(*conf)
+	for i := 0; i < t.NumField(); i++ {
+
+		if t.Field(i).Type.Kind() == reflect.Slice {
+			v := reflect.ValueOf(*conf).Field(i)
+			for j := 0; j < v.Len(); j++ {
+				if isProbe(v.Index(j).Addr().Interface().(probe.Prober)) {
+					log.Debugf("%s - %s - %v", t.Field(i).Name, t.Field(i).Type.Kind(), v.Index(j))
+					probers = append(probers, v.Index(j).Addr().Interface().(probe.Prober))
+				}
+			}
+		}
 	}
 
-	for i := 0; i < len(conf.TCP); i++ {
-		probers = append(probers, &conf.TCP[i])
-	}
-
-	for i := 0; i < len(conf.Shell); i++ {
-		probers = append(probers, &conf.Shell[i])
-	}
-
-	for i := 0; i < len(conf.Client); i++ {
-		probers = append(probers, &conf.Client[i])
-	}
 	return probers
 }
 
@@ -256,35 +262,17 @@ func (conf *Conf) AllProbers() []probe.Prober {
 func (conf *Conf) AllNotifiers() []notify.Notify {
 	var notifies []notify.Notify
 
-	for i := 0; i < len(conf.Notify.Log); i++ {
-		notifies = append(notifies, &conf.Notify.Log[i])
+	log.Debugf("--------- Process the notification settings ---------")
+	t := reflect.TypeOf(conf.Notify)
+	for i := 0; i < t.NumField(); i++ {
+		if t.Field(i).Type.Kind() == reflect.Slice {
+			v := reflect.ValueOf(conf.Notify).Field(i)
+			for j := 0; j < v.Len(); j++ {
+				log.Debugf("%s - %s - %v", t.Field(i).Name, t.Field(i).Type.Kind(), v.Index(j))
+				notifies = append(notifies, v.Index(j).Addr().Interface().(notify.Notify))
+			}
+		}
 	}
 
-	for i := 0; i < len(conf.Notify.Email); i++ {
-		notifies = append(notifies, &conf.Notify.Email[i])
-	}
-
-	for i := 0; i < len(conf.Notify.Slack); i++ {
-		notifies = append(notifies, &conf.Notify.Slack[i])
-	}
-
-	for i := 0; i < len(conf.Notify.Discord); i++ {
-		notifies = append(notifies, &conf.Notify.Discord[i])
-	}
-
-	for i := 0; i < len(conf.Notify.Telegram); i++ {
-		notifies = append(notifies, &conf.Notify.Telegram[i])
-	}
-
-	for i := 0; i < len(conf.Notify.AwsSNS); i++ {
-		notifies = append(notifies, &conf.Notify.AwsSNS[i])
-	}
-	for i := 0; i < len(conf.Notify.Wecom); i++ {
-		notifies = append(notifies, &conf.Notify.Wecom[i])
-	}
-
-	for i := 0; i < len(conf.Notify.Dingtalk); i++ {
-		notifies = append(notifies, &conf.Notify.Dingtalk[i])
-	}
 	return notifies
 }
