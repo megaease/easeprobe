@@ -73,6 +73,7 @@ func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
 		return
 	}
 	json := StatSlackBlockJSON(probers)
+
 	c.SendSlackNotificationWithRetry("SLA", json)
 
 }
@@ -263,7 +264,11 @@ func StatSlackBlockJSON(probers []probe.Prober) string {
 		]
 	}`
 
-	time := TimeFormation(time.Now(), " reported at ", probers[len(probers)-1].Result().TimeFormat)
+	timeFmt := "2006-01-02 15:04:05"
+	if len(probers) > 0 {
+		timeFmt = probers[len(probers)-1].Result().TimeFormat
+	}
+	time := TimeFormation(time.Now(), " reported at ", timeFmt)
 	json += fmt.Sprintf(context, time)
 
 	json += `]}`

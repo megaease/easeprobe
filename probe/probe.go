@@ -46,8 +46,8 @@ const (
 )
 
 // String convert the Status to string
-func (s *Status) String() string {
-	switch *s {
+func (s Status) String() string {
+	switch s {
 	case StatusUp:
 		return "up"
 	case StatusDown:
@@ -114,8 +114,8 @@ const (
 )
 
 // String covert the Format to string
-func (f *Format) String() string {
-	switch *f {
+func (f Format) String() string {
+	switch f {
 	case MakerdownSocial:
 		return "markdown-social"
 	case Makerdown:
@@ -143,6 +143,11 @@ func (f *Format) Format(s string) {
 	default:
 		*f = Text
 	}
+}
+
+// MarshalYAML is marshal the format
+func (f *Format) MarshalYAML() ([]byte, error) {
+	return []byte(f.String()), nil
 }
 
 // UnmarshalYAML is unmarshal the format
