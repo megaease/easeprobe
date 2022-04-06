@@ -99,6 +99,11 @@ func (d *DriverType) DriverType(driver string) DriverType {
 	return Unknown
 }
 
+// MarshalYAML is marshal the driver type
+func (d *DriverType) MarshalYAML() ([]byte, error) {
+	return []byte(d.String()), nil
+}
+
 // UnmarshalYAML is unmarshal the driver type
 func (d *DriverType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var s string
