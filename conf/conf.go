@@ -244,15 +244,16 @@ func (conf *Conf) AllProbers() []probe.Prober {
 	log.Debugf("--------- Process the probers settings ---------")
 	t := reflect.TypeOf(*conf)
 	for i := 0; i < t.NumField(); i++ {
-
-		if t.Field(i).Type.Kind() == reflect.Slice {
-			v := reflect.ValueOf(*conf).Field(i)
-			for j := 0; j < v.Len(); j++ {
-				if isProbe(v.Index(j).Addr().Type()) {
-					log.Debugf("%s - %s - %v", t.Field(i).Name, t.Field(i).Type.Kind(), v.Index(j))
-					probers = append(probers, v.Index(j).Addr().Interface().(probe.Prober))
-				}
+		if t.Field(i).Type.Kind() != reflect.Slice {
+			continue
+		}
+		v := reflect.ValueOf(*conf).Field(i)
+		for j := 0; j < v.Len(); j++ {
+			if !isProbe(v.Index(j).Addr().Type()) {
+				continue
 			}
+			log.Debugf("%s - %s - %v", t.Field(i).Name, t.Field(i).Type.Kind(), v.Index(j))
+			probers = append(probers, v.Index(j).Addr().Interface().(probe.Prober))
 		}
 	}
 
@@ -272,14 +273,16 @@ func (conf *Conf) AllNotifiers() []notify.Notify {
 	log.Debugf("--------- Process the notification settings ---------")
 	t := reflect.TypeOf(conf.Notify)
 	for i := 0; i < t.NumField(); i++ {
-		if t.Field(i).Type.Kind() == reflect.Slice {
-			v := reflect.ValueOf(conf.Notify).Field(i)
-			for j := 0; j < v.Len(); j++ {
-				if isNotify(v.Index(j).Addr().Type()) {
-					log.Debugf("%s - %s - %v", t.Field(i).Name, t.Field(i).Type.Kind(), v.Index(j))
-					notifies = append(notifies, v.Index(j).Addr().Interface().(notify.Notify))
-				}
+		if t.Field(i).Type.Kind() != reflect.Slice {
+			continue
+		}
+		v := reflect.ValueOf(conf.Notify).Field(i)
+		for j := 0; j < v.Len(); j++ {
+			if !isNotify(v.Index(j).Addr().Type()) {
+				continue
 			}
+			log.Debugf("%s - %s - %v", t.Field(i).Name, t.Field(i).Type.Kind(), v.Index(j))
+			notifies = append(notifies, v.Index(j).Addr().Interface().(notify.Notify))
 		}
 	}
 
