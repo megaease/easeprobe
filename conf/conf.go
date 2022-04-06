@@ -250,6 +250,7 @@ func (conf *Conf) AllProbers() []probe.Prober {
 		v := reflect.ValueOf(*conf).Field(i)
 		for j := 0; j < v.Len(); j++ {
 			if !isProbe(v.Index(j).Addr().Type()) {
+				log.Debugf("%s is not a probe type", v.Index(j).Type())
 				continue
 			}
 			log.Debugf("%s - %s - %v", t.Field(i).Name, t.Field(i).Type.Kind(), v.Index(j))
@@ -279,6 +280,7 @@ func (conf *Conf) AllNotifiers() []notify.Notify {
 		v := reflect.ValueOf(conf.Notify).Field(i)
 		for j := 0; j < v.Len(); j++ {
 			if !isNotify(v.Index(j).Addr().Type()) {
+				log.Debugf("%s is not a probe type", v.Index(j).Type())
 				continue
 			}
 			log.Debugf("%s - %s - %v", t.Field(i).Name, t.Field(i).Type.Kind(), v.Index(j))
