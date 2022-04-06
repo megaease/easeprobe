@@ -230,9 +230,10 @@ func (conf *Conf) CloseLogFile() {
 	}
 }
 
-func isProbe(p probe.Prober) bool {
+// isProbe checks whether a interface is a probe type
+func isProbe(t reflect.Type) bool {
 	modelType := reflect.TypeOf((*probe.Prober)(nil)).Elem()
-	return reflect.TypeOf(p).Implements(modelType)
+	return t.Implements(modelType)
 }
 
 // AllProbers return all probers
@@ -247,7 +248,7 @@ func (conf *Conf) AllProbers() []probe.Prober {
 		if t.Field(i).Type.Kind() == reflect.Slice {
 			v := reflect.ValueOf(*conf).Field(i)
 			for j := 0; j < v.Len(); j++ {
-				if isProbe(v.Index(j).Addr().Interface().(probe.Prober)) {
+				if isProbe(v.Index(j).Addr().Type()) {
 					log.Debugf("%s - %s - %v", t.Field(i).Name, t.Field(i).Type.Kind(), v.Index(j))
 					probers = append(probers, v.Index(j).Addr().Interface().(probe.Prober))
 				}
@@ -256,6 +257,12 @@ func (conf *Conf) AllProbers() []probe.Prober {
 	}
 
 	return probers
+}
+
+// isNotify checks whether a interface is a Notify type
+func isNotify(t reflect.Type) bool {
+	modelType := reflect.TypeOf((*notify.Notify)(nil)).Elem()
+	return t.Implements(modelType)
 }
 
 // AllNotifiers return all notifiers
@@ -268,8 +275,10 @@ func (conf *Conf) AllNotifiers() []notify.Notify {
 		if t.Field(i).Type.Kind() == reflect.Slice {
 			v := reflect.ValueOf(conf.Notify).Field(i)
 			for j := 0; j < v.Len(); j++ {
-				log.Debugf("%s - %s - %v", t.Field(i).Name, t.Field(i).Type.Kind(), v.Index(j))
-				notifies = append(notifies, v.Index(j).Addr().Interface().(notify.Notify))
+				if isNotify(v.Index(j).Addr().Type()) {
+					log.Debugf("%s - %s - %v", t.Field(i).Name, t.Field(i).Type.Kind(), v.Index(j))
+					notifies = append(notifies, v.Index(j).Addr().Interface().(notify.Notify))
+				}
 			}
 		}
 	}
