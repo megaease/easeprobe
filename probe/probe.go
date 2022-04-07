@@ -106,24 +106,30 @@ type Format int
 
 // The format types
 const (
-	MakerdownSocial Format = iota // *text* is bold
-	Makerdown                     // **text** is bold
+	MarkdownSocial Format = iota // *text* is bold
+	Markdown                     // **text** is bold
 	HTML
 	JSON
 	Text
+	Slack
+	Discord
 )
 
 // String covert the Format to string
 func (f Format) String() string {
 	switch f {
-	case MakerdownSocial:
+	case MarkdownSocial:
 		return "markdown-social"
-	case Makerdown:
+	case Markdown:
 		return "markdown"
 	case HTML:
 		return "html"
 	case JSON:
 		return "json"
+	case Slack:
+		return "slack"
+	case Discord:
+		return "discord"
 	default:
 		return "text"
 	}
@@ -133,13 +139,17 @@ func (f Format) String() string {
 func (f *Format) Format(s string) {
 	switch strings.ToLower(s) {
 	case "markdown":
-		*f = Makerdown
+		*f = Markdown
 	case "markdown-social":
-		*f = MakerdownSocial
+		*f = MarkdownSocial
 	case "html":
 		*f = HTML
 	case "json":
 		*f = JSON
+	case "slack":
+		*f = Slack
+	case "discrod":
+		*f = Discord
 	default:
 		*f = Text
 	}

@@ -23,81 +23,35 @@ import (
 	"net"
 	"net/smtp"
 	"strings"
-	"time"
 
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/notify/base"
 	"github.com/megaease/easeprobe/probe"
 	log "github.com/sirupsen/logrus"
 )
 
 // NotifyConfig is the email notification configuration
 type NotifyConfig struct {
-	Name    string        `yaml:"name"`
-	Server  string        `yaml:"server"`
-	User    string        `yaml:"username"`
-	Pass    string        `yaml:"password"`
-	To      string        `yaml:"to"`
-	Dry     bool          `yaml:"dry"`
-	Timeout time.Duration `yaml:"timeout"`
-	Retry   global.Retry  `yaml:"retry"`
+	base.DefaultNotify `yaml:",inline"`
+	Server             string `yaml:"server"`
+	User               string `yaml:"username"`
+	Pass               string `yaml:"password"`
+	To                 string `yaml:"to"`
 }
 
 // Kind return the type of Notify
 func (c *NotifyConfig) Kind() string {
-	return "email"
+	return c.MyKind
 }
 
 // Config configures the log files
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
-	if c.Dry {
-		log.Infof("Notification [%s] - [%s]  is running on Dry mode!", c.Kind(), c.Name)
-	}
-	c.Timeout = gConf.NormalizeTimeOut(c.Timeout)
-	c.Retry = gConf.NormalizeRetry(c.Retry)
-
-	log.Infof("[%s] configuration: %+v", c.Kind(), c)
+	c.MyKind = "email"
+	c.Format = probe.HTML
+	c.SendFunc = c.SendMail
+	c.DefaultNotify.Config(gConf)
+	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.MyKind, c.Name, c)
 	return nil
-}
-
-// Notify send the result message to the email
-func (c *NotifyConfig) Notify(result probe.Result) {
-	if c.Dry {
-		c.DryNotify(result)
-		return
-	}
-	message := fmt.Sprintf("%s", result.HTML())
-	c.SendMailWithRetry(result.Title(), message, "Notification")
-}
-
-// NotifyStat send the stat message into the email
-func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
-	if c.Dry {
-		c.DryNotifyStat(probers)
-		return
-	}
-	message := probe.StatHTML(probers)
-	c.SendMailWithRetry("Overall SLA Report", message, "SLA")
-}
-
-// DryNotify just log the notification message
-func (c *NotifyConfig) DryNotify(result probe.Result) {
-	log.Infof("[%s / %s] Dry Notify - %s", c.Kind(), c.Name, result.HTML())
-}
-
-// DryNotifyStat just log the notification message
-func (c *NotifyConfig) DryNotifyStat(probers []probe.Prober) {
-	log.Infof("[%s / %s] Dry Notify - %s", c.Kind(), c.Name, probe.StatHTML(probers))
-}
-
-// SendMailWithRetry sends the email with retry if got error
-func (c *NotifyConfig) SendMailWithRetry(title string, message string, tag string) {
-
-	fn := func() error {
-		log.Debugf("[%s - %s] - %s", c.Kind(), tag, title)
-		return c.SendMail(title, message)
-	}
-	err := global.DoRetry(c.Kind(), c.Name, tag, c.Retry, fn)
-	probe.LogSend(c.Kind(), c.Name, tag, title, err)
 }
 
 // SendMail sends the email

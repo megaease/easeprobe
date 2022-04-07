@@ -18,12 +18,11 @@
 package aws
 
 import (
-	"time"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/notify/base"
 )
 
 // Credentials is AWS access id and access token
@@ -34,14 +33,11 @@ type Credentials struct {
 
 // Options is AWS Configuration
 type Options struct {
-	Name        string        `yaml:"name"`
-	Region      string        `yaml:"region"`
-	Endpoint    string        `yaml:"endpoint"`
-	Credentials Credentials   `yaml:"credential"`
-	Profile     string        `yaml:"profile"`
-	Dry         bool          `yaml:"dry"`
-	Timeout     time.Duration `yaml:"timeout"`
-	Retry       global.Retry  `yaml:"retry"`
+	base.DefaultNotify `yaml:",inline"`
+	Region             string      `yaml:"region"`
+	Endpoint           string      `yaml:"endpoint"`
+	Credentials        Credentials `yaml:"credential"`
+	Profile            string      `yaml:"profile"`
 
 	session *session.Session `yaml:"-"`
 }
@@ -49,8 +45,7 @@ type Options struct {
 // Config config a AWS configuration
 func (conf *Options) Config(gConf global.NotifySettings) error {
 
-	conf.Timeout = gConf.NormalizeTimeOut(conf.Timeout)
-	conf.Retry = gConf.NormalizeRetry(conf.Retry)
+	conf.DefaultNotify.Config(gConf)
 
 	session, err := session.NewSessionWithOptions(
 		session.Options{

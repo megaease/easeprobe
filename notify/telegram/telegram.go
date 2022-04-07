@@ -22,80 +22,38 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"time"
 
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/notify/base"
 	"github.com/megaease/easeprobe/probe"
 	log "github.com/sirupsen/logrus"
 )
 
 // NotifyConfig is the telegram notification configuration
 type NotifyConfig struct {
-	Name    string        `yaml:"name"`
-	Token   string        `yaml:"token"`
-	ChatID  string        `yaml:"chat_id"`
-	Dry     bool          `yaml:"dry"`
-	Timeout time.Duration `yaml:"timeout"`
-	Retry   global.Retry  `yaml:"retry"`
+	base.DefaultNotify `yaml:",inline"`
+	Token              string `yaml:"token"`
+	ChatID             string `yaml:"chat_id"`
 }
 
 // Kind return the type of Notify
 func (c *NotifyConfig) Kind() string {
-	return "telegram"
+	return c.MyKind
 }
 
 // Config configures the telegram configuration
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
-	if c.Dry {
-		log.Infof("Notification [%s] - [%s]  is running on Dry mode!", c.Kind(), c.Name)
-	}
-
-	c.Timeout = gConf.NormalizeTimeOut(c.Timeout)
-	c.Retry = gConf.NormalizeRetry(c.Retry)
-
-	log.Infof("[%s] configuration: %+v", c.Kind(), c)
+	c.MyKind = "telegram"
+	c.Format = probe.Markdown
+	c.SendFunc = c.SendTelegram
+	c.DefaultNotify.Config(gConf)
+	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.MyKind, c.Name, c)
 	return nil
 }
 
-// Notify write the message into the slack
-func (c *NotifyConfig) Notify(result probe.Result) {
-	if c.Dry {
-		c.DryNotify(result)
-		return
-	}
-	c.SendTelegramNotificationWithRetry("Notification", result.Markdown())
-}
-
-// NotifyStat write the all probe stat message to slack
-func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
-	if c.Dry {
-		c.DryNotifyStat(probers)
-		return
-	}
-
-	c.SendTelegramNotificationWithRetry("SLA", probe.StatMarkDown(probers))
-
-}
-
-// DryNotify just log the notification message
-func (c *NotifyConfig) DryNotify(result probe.Result) {
-	log.Infof("[%s / %s] - %s", c.Kind(), c.Name, result.Markdown())
-}
-
-// DryNotifyStat just log the notification message
-func (c *NotifyConfig) DryNotifyStat(probers []probe.Prober) {
-	log.Infof("[%s / %s] - %s", c.Kind(), c.Name, probe.StatMarkDown(probers))
-}
-
-// SendTelegramNotificationWithRetry send the telegram notification with retry
-func (c *NotifyConfig) SendTelegramNotificationWithRetry(tag string, text string) {
-
-	fn := func() error {
-		log.Debugf("[%s / %s / %s] - %s", c.Kind(), c.Name, tag, text)
-		return c.SendTelegramNotification(text)
-	}
-	err := global.DoRetry(c.Kind(), c.Name, tag, c.Retry, fn)
-	probe.LogSend(c.Kind(), c.Name, tag, "", err)
+// SendTelegram is the wrapper for SendTelegramNotification
+func (c *NotifyConfig) SendTelegram(title, text string) error {
+	return c.SendTelegramNotification(text)
 }
 
 // SendTelegramNotification will send the notification to telegram.

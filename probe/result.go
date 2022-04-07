@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/megaease/easeprobe/global"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -228,11 +229,66 @@ func (r *Result) HTML() string {
 
 // Markdown convert the object to Markdown
 func (r *Result) Markdown() string {
-	tpl := "*%s* %s\n%s - ⏱ %s\n%s"
+	return r.markdown(Markdown)
+}
+
+// MarkdownSocial convert the object to Markdown
+func (r *Result) MarkdownSocial() string {
+	return r.markdown(MarkdownSocial)
+}
+
+func (r *Result) markdown(f Format) string {
+	tpl := "**%s** %s\n%s - ⏱ %s\n%s"
+	if f == MarkdownSocial {
+		tpl = "*%s* %s\n%s - ⏱ %s\n%s"
+	}
 	rtt := r.RoundTripTime.Round(time.Millisecond)
 	return fmt.Sprintf(tpl,
 		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, r.Message)
 }
+
+// Slack convert the object to Slack notification
+// Go to https://app.slack.com/block-kit-builder to build the notification block
+func (r *Result) Slack() string {
+
+	json := `
+	{
+		"channel": "Alert",
+		"text": "%s",
+		"blocks": [
+			{
+				"type": "section",
+				"text": {
+					"type": "mrkdwn",
+					"text": "%s"
+				}
+			},
+			{
+				"type": "context",
+				"elements": [
+					{
+						"type": "image",
+						"image_url": "` + global.Icon + `",
+						"alt_text": "` + global.OrgProg + `"
+					},
+					{
+						"type": "mrkdwn",
+						"text": "` + global.Prog + ` %s"
+					}
+				]
+			}
+		]
+	}
+	`
+	rtt := r.RoundTripTime.Round(time.Millisecond)
+	body := fmt.Sprintf("*%s*\\n>%s %s - ⏱ %s\n>%s",
+		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, JSONEscape(r.Message))
+	context := SlackTimeFormation(r.StartTime, " probed at ", r.TimeFormat)
+	summary := fmt.Sprintf("%s %s - %s", r.Title(), r.Status.Emoji(), JSONEscape(r.Message))
+	return fmt.Sprintf(json, summary, body, context)
+}
+
+// -------------------------------------------------------------------------------------------
 
 // Availability is the Availability JSON structure
 type Availability struct {
@@ -332,26 +388,43 @@ func StatText(probers []Prober) string {
 	return text
 }
 
-// StatMarkDownSection return the Markdown format string to stat
-func (r *Result) StatMarkDownSection() string {
-	text := "\n*%s* - %s\n" +
-		"- Availability: Up - `%s`, Down - `%s`, SLA: `%.2f%%` \n" +
+// StatMarkdownSection return the Markdown format string to stat
+func (r *Result) StatMarkdownSection(f Format) string {
+
+	text := "\n**%s** - %s\n"
+	if f == MarkdownSocial {
+		text = "\n*%s* - %s\n"
+	}
+
+	text += "- Availability: Up - `%s`, Down - `%s`, SLA: `%.2f%%` \n" +
 		"- Probe-Times: Total: `%d` ( %s ) \n" +
 		"- Latest-Probe: %s - %s \n" +
 		"  ```%s```\n"
+
 	return fmt.Sprintf(text, r.Name, r.Endpoint,
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLA(),
-		r.Stat.Total, StatStatusText(r.Stat, MakerdownSocial),
+		r.Stat.Total, StatStatusText(r.Stat, MarkdownSocial),
 		time.Now().UTC().Format(r.TimeFormat),
 		r.Status.Emoji()+" "+r.Status.String(), r.Message)
-
 }
 
-// StatMarkDown return a full stat report
-func StatMarkDown(probers []Prober) string {
-	md := "*Overall SLA Report*\n"
+// StatMarkdown return a full stat report with Markdown format
+func StatMarkdown(probers []Prober) string {
+	return statMarkdown(probers, Markdown)
+}
+
+// StatMarkdownSocial return a full stat report with social markdown
+func StatMarkdownSocial(probers []Prober) string {
+	return statMarkdown(probers, MarkdownSocial)
+}
+
+func statMarkdown(probers []Prober, f Format) string {
+	md := "**Overall SLA Report**\n"
+	if f == MarkdownSocial {
+		md = "*Overall SLA Report*\n"
+	}
 	for _, p := range probers {
-		md += p.Result().StatMarkDownSection()
+		md += p.Result().StatMarkdownSection(f)
 	}
 	return md
 }
@@ -394,6 +467,115 @@ func StatHTML(probers []Prober) string {
 	return html
 }
 
+// StatSlackSection return the slack json format string to stat
+func (r *Result) StatSlackSection() string {
+
+	json := `
+			{
+				"type": "mrkdwn",
+				"text": "*%s* - %s` +
+		`\n>*Availability*\n>\t` + " *Up*:  `%s`  *Down* `%s`  -  *SLA*: `%.2f %%`" +
+		`\n>*Probe Times*\n>\t*Total* : %d ( %s )` +
+		`\n>*Latest Probe*\n>\t%s | %s` +
+		`\n>\t%s"` + `
+			}`
+
+	t := SlackTimeFormation(r.StartTime, "", r.TimeFormat)
+
+	message := JSONEscape(r.Message)
+	if r.Status != StatusUp {
+		message = "`" + message + "`"
+	}
+
+	return fmt.Sprintf(json, r.Name, r.Endpoint,
+		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLA(),
+		r.Stat.Total, StatStatusText(r.Stat, MarkdownSocial),
+		t, r.Status.Emoji()+" "+r.Status.String(), message)
+}
+
+// StatSlack generate all probes stat message to slack block string
+func StatSlack(probers []Prober) string {
+	sla := 0.0
+	for _, p := range probers {
+		sla += p.Result().SLA()
+	}
+	sla /= float64(len(probers))
+	summary := fmt.Sprintf("Total %d Services, Average %.2f%% SLA", len(probers), sla)
+	json := `{
+		"channel": "Report",
+		"text": "Overall SLA Report - ` + summary + ` ",
+		"blocks": [
+		{
+			"type": "header",
+			"text": {
+				"type": "plain_text",
+				"text": "Overall SLA Report",
+				"emoji": true
+			}
+		}`
+
+	sectionHead := `
+		{
+		"type": "section",
+		"fields": [`
+	sectionFoot := `
+				]
+		}`
+	total := len(probers)
+	pageCnt := 10
+	pages := total / pageCnt
+	if total%pageCnt > 0 {
+		pages++
+	}
+
+	for p := 0; p < pages; p++ {
+		start := p * pageCnt
+		end := (p + 1) * pageCnt
+		if len(probers) < end {
+			end = len(probers)
+		}
+		json += "," + sectionHead
+		for i := start; i < end-1; i++ {
+			json += probers[i].Result().StatSlackSection() + ","
+		}
+		json += probers[end-1].Result().StatSlackSection()
+		json += sectionFoot
+	}
+
+	context := `,
+	{
+		"type": "context",
+		"elements": [
+			{
+				"type": "image",
+				"image_url": "` + global.Icon + `",
+				"alt_text": "` + global.OrgProg + `"
+			},
+			{
+				"type": "mrkdwn",
+				"text": "` + global.Prog + ` %s"
+			}
+		]
+	}`
+
+	timeFmt := "2006-01-02 15:04:05"
+	if len(probers) > 0 {
+		timeFmt = probers[len(probers)-1].Result().TimeFormat
+	}
+	time := SlackTimeFormation(time.Now(), " reported at ", timeFmt)
+	json += fmt.Sprintf(context, time)
+
+	json += `]}`
+
+	return json
+}
+
+// SlackTimeFormation return the slack time formation
+func SlackTimeFormation(t time.Time, act string, format string) string {
+	return fmt.Sprintf("<!date^%d^%s{date_num} {time_secs}|%s%s>",
+		t.Unix(), act, act, t.UTC().Format(format))
+}
+
 //JSONEscape escape the string
 func JSONEscape(str string) string {
 	b, err := json.Marshal(str)
@@ -422,9 +604,9 @@ func StatStatusText(s Stat, t Format) string {
 	status := ""
 	format := "%s : %d \t"
 	switch t {
-	case MakerdownSocial:
+	case MarkdownSocial:
 		format = "%s : `%d` \t"
-	case Makerdown:
+	case Markdown:
 		format = "**%s** : `%d` \t"
 	case HTML:
 		format = "<b>%s</b> : %d \t"
@@ -433,34 +615,4 @@ func StatStatusText(s Stat, t Format) string {
 		status += fmt.Sprintf(format, k.String(), v)
 	}
 	return strings.TrimSpace(status)
-}
-
-// Transfer generate the notification by format
-func (r *Result) Transfer(f Format) string {
-	switch f {
-	case Text:
-		return r.Text()
-	case HTML:
-		return r.HTML()
-	case Makerdown:
-		return r.Markdown()
-	case JSON:
-		return r.JSON()
-	}
-	return ""
-}
-
-// StatTransfer generate the SLA report by format
-func StatTransfer(f Format, probers []Prober) string {
-	switch f {
-	case Text:
-		return StatText(probers)
-	case HTML:
-		return StatHTML(probers)
-	case Makerdown:
-		return StatMarkDown(probers)
-	case JSON:
-		return StatJSON(probers)
-	}
-	return ""
 }
