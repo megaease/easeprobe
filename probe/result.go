@@ -143,16 +143,16 @@ func (r *Result) DebugJSONIndent() string {
 	return string(j)
 }
 
-// Text convert the result object to Text
-func (r *Result) Text() string {
+// ToText convert the result object to ToText
+func ToText(r Result) string {
 	tpl := "[%s] %s\n%s - ⏱ %s\n%s"
 	rtt := r.RoundTripTime.Round(time.Millisecond)
 	return fmt.Sprintf(tpl,
 		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, r.Message)
 }
 
-// JSON convert the result object to JSON
-func (r *Result) JSON() string {
+// ToJSON convert the result object to ToJSON
+func ToJSON(r Result) string {
 	ro := resultDTO{
 		Name:           r.Title(),
 		Endpoint:       r.Endpoint,
@@ -171,8 +171,8 @@ func (r *Result) JSON() string {
 	return string(j)
 }
 
-// JSONIndent convert the object to indent JSON
-func (r *Result) JSONIndent() string {
+// ToJSONIndent convert the object to indent JSON
+func ToJSONIndent(r Result) string {
 	ro := resultDTO{
 		Name:           r.Title(),
 		Endpoint:       r.Endpoint,
@@ -191,8 +191,8 @@ func (r *Result) JSONIndent() string {
 	return string(j)
 }
 
-// HTML convert the object to HTML
-func (r *Result) HTML() string {
+// ToHTML convert the object to ToHTML
+func ToHTML(r Result) string {
 	html := HTMLHeader(r.Title()) + `
 			<table style="font-size: 16px; line-height: 20px;">
 				<tr>
@@ -227,17 +227,17 @@ func (r *Result) HTML() string {
 		r.StartTime.Format(r.TimeFormat), rtt, r.Message)
 }
 
-// Markdown convert the object to Markdown
-func (r *Result) Markdown() string {
-	return r.markdown(Markdown)
+// ToMarkdown convert the object to ToMarkdown
+func ToMarkdown(r Result) string {
+	return markdown(r, Markdown)
 }
 
-// MarkdownSocial convert the object to Markdown
-func (r *Result) MarkdownSocial() string {
-	return r.markdown(MarkdownSocial)
+// ToMarkdownSocial convert the object to Markdown
+func ToMarkdownSocial(r Result) string {
+	return markdown(r, MarkdownSocial)
 }
 
-func (r *Result) markdown(f Format) string {
+func markdown(r Result, f Format) string {
 	tpl := "**%s** %s\n%s - ⏱ %s\n%s"
 	if f == MarkdownSocial {
 		tpl = "*%s* %s\n%s - ⏱ %s\n%s"
@@ -247,9 +247,9 @@ func (r *Result) markdown(f Format) string {
 		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, r.Message)
 }
 
-// Slack convert the object to Slack notification
+// ToSlack convert the object to ToSlack notification
 // Go to https://app.slack.com/block-kit-builder to build the notification block
-func (r *Result) Slack() string {
+func ToSlack(r Result) string {
 
 	json := `
 	{

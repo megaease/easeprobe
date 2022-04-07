@@ -169,3 +169,25 @@ func (f *Format) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	f.Format(format)
 	return nil
 }
+
+// FormatFuncType is the format function
+type FormatFuncType func(Result) string
+
+// StatFormatFuncType is the format function for Stat
+type StatFormatFuncType func([]Prober) string
+
+// FormatFuncStruct is the format function struct
+type FormatFuncStruct struct {
+	ResultFn FormatFuncType
+	StatFn   StatFormatFuncType
+}
+
+// FormatFuncs is the format function map
+var FormatFuncs = map[Format]FormatFuncStruct{
+	Text:           {ToText, StatText},
+	JSON:           {ToJSON, StatJSON},
+	Markdown:       {ToMarkdown, StatMarkdown},
+	MarkdownSocial: {ToMarkdownSocial, StatMarkdownSocial},
+	HTML:           {ToHTML, StatHTML},
+	Slack:          {ToSlack, StatSlack},
+}

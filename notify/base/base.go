@@ -58,23 +58,7 @@ func (c *DefaultNotify) Notify(result probe.Result) {
 		return
 	}
 	title := result.Title()
-	message := ""
-	switch c.Format {
-	case probe.JSON:
-		message = result.JSON()
-	case probe.Markdown:
-		message = result.Markdown()
-	case probe.HTML:
-		message = result.HTML()
-	case probe.Text:
-		message = result.Text()
-	case probe.MarkdownSocial:
-		message = result.MarkdownSocial()
-	case probe.Slack:
-		message = result.Slack()
-	default:
-		message = result.Text()
-	}
+	message := probe.FormatFuncs[c.Format].ResultFn(result)
 
 	c.SendWithRetry(title, message, "Notification")
 }
@@ -86,23 +70,7 @@ func (c *DefaultNotify) NotifyStat(probers []probe.Prober) {
 		return
 	}
 	title := "Overall SLA Report"
-	message := ""
-	switch c.Format {
-	case probe.JSON:
-		message = probe.StatJSON(probers)
-	case probe.Markdown:
-		message = probe.StatMarkdown(probers)
-	case probe.HTML:
-		message = probe.StatHTML(probers)
-	case probe.Text:
-		message = probe.StatText(probers)
-	case probe.MarkdownSocial:
-		message = probe.StatMarkdownSocial(probers)
-	case probe.Slack:
-		message = probe.StatSlack(probers)
-	default:
-		message = probe.StatText(probers)
-	}
+	message := probe.FormatFuncs[c.Format].StatFn(probers)
 	c.SendWithRetry(title, message, "SLA")
 }
 
@@ -121,40 +89,12 @@ func (c *DefaultNotify) SendWithRetry(title string, message string, tag string) 
 
 // DryNotify just log the notification message
 func (c *DefaultNotify) DryNotify(result probe.Result) {
-	switch c.Format {
-	case probe.JSON:
-		log.Infof("[%s / %s] - %s", c.MyKind, c.Name, result.JSON())
-	case probe.Markdown:
-		log.Infof("[%s / %s] - %s", c.MyKind, c.Name, result.Markdown())
-	case probe.HTML:
-		log.Infof("[%s / %s] - %s", c.MyKind, c.Name, result.HTML())
-	case probe.Text:
-		log.Infof("[%s / %s] - %s", c.MyKind, c.Name, result.Text())
-	case probe.MarkdownSocial:
-		log.Infof("[%s / %s] - %s", c.MyKind, c.Name, result.Markdown())
-	case probe.Slack:
-		log.Infof("[%s / %s] - %s", c.MyKind, c.Name, result.Slack())
-	default:
-		log.Infof("[%s / %s] - %s", c.MyKind, c.Name, result.Text())
-	}
+	log.Infof("[%s / %s] - %s", c.MyKind, c.Name,
+		probe.FormatFuncs[c.Format].ResultFn(result))
 }
 
 // DryNotifyStat just log the notification message
 func (c *DefaultNotify) DryNotifyStat(probers []probe.Prober) {
-	switch c.Format {
-	case probe.JSON:
-		log.Infof("[%s / %s] - %s", c.MyKind, c.Name, probe.StatJSON(probers))
-	case probe.Markdown:
-		log.Infof("[%s / %s] - %s", c.MyKind, c.Name, probe.StatMarkdown(probers))
-	case probe.HTML:
-		log.Infof("[%s / %s] - %s", c.MyKind, c.Name, probe.StatHTML(probers))
-	case probe.Text:
-		log.Infof("[%s / %s] - %s", c.MyKind, c.Name, probe.StatText(probers))
-	case probe.MarkdownSocial:
-		log.Infof("[%s / %s] - %s", c.MyKind, c.Name, probe.StatMarkdown(probers))
-	case probe.Slack:
-		log.Infof("[%s / %s] - %s", c.MyKind, c.Name, probe.StatSlack(probers))
-	default:
-		log.Infof("[%s / %s] - %s", c.MyKind, c.Name, probe.StatText(probers))
-	}
+	log.Infof("[%s / %s] - %s", c.MyKind, c.Name,
+		probe.FormatFuncs[c.Format].StatFn(probers))
 }
