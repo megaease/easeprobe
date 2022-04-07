@@ -30,6 +30,7 @@ import (
 // SNSNotifyConfig is the AWS SNS notification configuration
 type SNSNotifyConfig struct {
 	Options  `yaml:",inline"`
+	Format   probe.Format    `yaml:"format"`
 	TopicARN string          `yaml:"arn"`
 	client   *sns.SNS        `yaml:"-"`
 	context  context.Context `yaml:"-"`
@@ -43,9 +44,10 @@ func (c *SNSNotifyConfig) Kind() string {
 // Config configures the slack notification
 func (c *SNSNotifyConfig) Config(gConf global.NotifySettings) error {
 	c.MyKind = "AWS-SNS"
-	if c.Format == 0 {
+	if c.Format == probe.Unknown {
 		c.Format = probe.Text
 	}
+	c.DefaultNotify.Format = c.Format
 	c.SendFunc = c.SendSNS
 
 	if err := c.Options.Config(gConf); err != nil {

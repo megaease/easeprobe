@@ -106,8 +106,9 @@ type Format int
 
 // The format types
 const (
-	MarkdownSocial Format = iota // *text* is bold
-	Markdown                     // **text** is bold
+	Unknown        Format = iota
+	MarkdownSocial        // *text* is bold
+	Markdown              // **text** is bold
 	HTML
 	JSON
 	Text
@@ -131,7 +132,7 @@ func (f Format) String() string {
 	case Discord:
 		return "discord"
 	default:
-		return "text"
+		return "unknown"
 	}
 }
 
@@ -151,7 +152,7 @@ func (f *Format) Format(s string) {
 	case "discrod":
 		*f = Discord
 	default:
-		*f = Text
+		*f = Unknown
 	}
 }
 
@@ -184,6 +185,7 @@ type FormatFuncStruct struct {
 
 // FormatFuncs is the format function map
 var FormatFuncs = map[Format]FormatFuncStruct{
+	Unknown:        {ToText, StatText},
 	Text:           {ToText, StatText},
 	JSON:           {ToJSON, StatJSON},
 	Markdown:       {ToMarkdown, StatMarkdown},
