@@ -20,9 +20,9 @@ package conf
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/probe/base"
 )
 
 // Driver Interface
@@ -36,14 +36,25 @@ type DriverType int
 
 // The Driver Type of native client
 const (
-	MySQL DriverType = iota
+	Unknown DriverType = iota
+	MySQL
 	Redis
 	Kafka
 	Mongo
 	PostgreSQL
 	Zookeeper
-	Unknown
 )
+
+// DriverMap is the map of [driver, name]
+var DriverMap = map[DriverType]string{
+	MySQL:      "mysql",
+	Redis:      "redis",
+	Kafka:      "kafka",
+	Mongo:      "mongo",
+	PostgreSQL: "postgres",
+	Zookeeper:  "zookeeper",
+	Unknown:    "unknown",
+}
 
 // Options implements the configuration for native client
 type Options struct {
@@ -56,45 +67,32 @@ type Options struct {
 	//TLS
 	global.TLS `yaml:",inline"`
 
-	//Control Option
-	Timeout      time.Duration `yaml:"timeout,omitempty"`
-	TimeInterval time.Duration `yaml:"interval,omitempty"`
+	base.DefaultOptions `yaml:",inline"`
+}
+
+// DriverTypeMap is the map of driver [name, driver]
+var DriverTypeMap = reverseMap(DriverMap)
+
+func reverseMap(m map[DriverType]string) map[string]DriverType {
+	n := make(map[string]DriverType, len(m))
+	for k, v := range m {
+		n[v] = k
+	}
+	return n
 }
 
 // String convert the DriverType to string
 func (d DriverType) String() string {
-	switch d {
-	case MySQL:
-		return "MySQL"
-	case Redis:
-		return "Redis"
-	case Kafka:
-		return "Kafka"
-	case Mongo:
-		return "Mongo"
-	case PostgreSQL:
-		return "PostgreSQL"
-	case Zookeeper:
-		return "Zookeeper"
+	if val, ok := DriverMap[d]; ok {
+		return val
 	}
-	return "Unknown"
+	return DriverMap[Unknown]
 }
 
 // DriverType convert the string to DriverType
-func (d *DriverType) DriverType(driver string) DriverType {
-	switch driver {
-	case "mysql":
-		return MySQL
-	case "redis":
-		return Redis
-	case "kafka":
-		return Kafka
-	case "mongo":
-		return Mongo
-	case "postgres":
-		return PostgreSQL
-	case "zookeeper":
-		return Zookeeper
+func (d *DriverType) DriverType(name string) DriverType {
+	if val, ok := DriverTypeMap[name]; ok {
+		return val
 	}
 	return Unknown
 }

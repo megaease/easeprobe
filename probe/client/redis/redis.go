@@ -61,13 +61,13 @@ func (r Redis) Probe() (bool, string) {
 
 	rdb := redis.NewClient(&redis.Options{
 		Addr:        r.Host,
-		Password:    r.Password, // no password set
-		DB:          0,          // use default DB
-		DialTimeout: r.Timeout,  // dial timout
-		TLSConfig:   r.tls,      //tls
+		Password:    r.Password,  // no password set
+		DB:          0,           // use default DB
+		DialTimeout: r.Timeout(), // dial timout
+		TLSConfig:   r.tls,       //tls
 	})
 
-	ctx, cancel := context.WithTimeout(r.Context, r.Timeout)
+	ctx, cancel := context.WithTimeout(r.Context, r.Timeout())
 	defer cancel()
 
 	_, err := rdb.Ping(ctx).Result()

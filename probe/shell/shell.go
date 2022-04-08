@@ -27,11 +27,9 @@ import (
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
+	"github.com/megaease/easeprobe/probe/base"
 	log "github.com/sirupsen/logrus"
 )
-
-// Kind is the type of probe
-const Kind string = "shell"
 
 // Shell implements a config for shell command (os.Exec)
 type Shell struct {
@@ -42,39 +40,13 @@ type Shell struct {
 	Contain    string   `yaml:"contain,omitempty"`
 	NotContain string   `yaml:"not_contain,omitempty"`
 
-	//Control Options
-	Timeout      time.Duration `yaml:"timeout,omitempty"`
-	TimeInterval time.Duration `yaml:"interval,omitempty"`
-
-	result *probe.Result `yaml:"-"`
-}
-
-// Kind return the Shell kind
-func (s *Shell) Kind() string {
-	return Kind
-}
-
-// Interval get the interval
-func (s *Shell) Interval() time.Duration {
-	return s.TimeInterval
-}
-
-// Result get the probe result
-func (s *Shell) Result() *probe.Result {
-	return s.result
+	base.DefaultOptions `yaml:",inline"`
 }
 
 // Config Shell Config Object
 func (s *Shell) Config(gConf global.ProbeSettings) error {
-
-	s.Timeout = gConf.NormalizeTimeOut(s.Timeout)
-	s.TimeInterval = gConf.NormalizeInterval(s.TimeInterval)
-
-	s.result = probe.NewResult()
-	s.result.Name = s.Name
-	s.result.Endpoint = s.CommandLine()
-	s.result.PreStatus = probe.StatusInit
-	s.result.TimeFormat = gConf.TimeFormat
+	s.ProbeKind = "shell"
+	s.DefaultOptions.Config(gConf, s.Name, s.CommandLine())
 
 	log.Debugf("[%s] configuration: %+v, %+v", s.Kind(), s, s.Result())
 	return nil
@@ -92,13 +64,13 @@ func (s *Shell) Probe() probe.Result {
 	}
 
 	now := time.Now()
-	s.result.StartTime = now
-	s.result.StartTimestamp = now.UnixMilli()
+	s.Result().StartTime = now
+	s.Result().StartTimestamp = now.UnixMilli()
 
 	cmd := exec.CommandContext(ctx, s.Command, s.Args...)
 	output, err := cmd.CombinedOutput()
 
-	s.result.RoundTripTime.Duration = time.Since(now)
+	s.Result().RoundTripTime.Duration = time.Since(now)
 
 	outputFmt := func(output []byte) string {
 		s := string(output)
@@ -109,7 +81,7 @@ func (s *Shell) Probe() probe.Result {
 	}
 
 	status := probe.StatusUp
-	s.result.Message = "Shell Command has been Run Successfully!"
+	s.ProbeResult.Message = "Shell Command has been Run Successfully!"
 
 	if err != nil {
 		exitCode := 0
@@ -117,8 +89,8 @@ func (s *Shell) Probe() probe.Result {
 			exitCode = exitError.ExitCode()
 		}
 
-		s.result.Message = fmt.Sprintf("Error: %v, ExitCode(%d), Output:%s", err, exitCode, outputFmt(output))
-		log.Errorf(s.result.Message)
+		s.ProbeResult.Message = fmt.Sprintf("Error: %v, ExitCode(%d), Output:%s", err, exitCode, outputFmt(output))
+		log.Errorf(s.ProbeResult.Message)
 		status = probe.StatusDown
 	}
 	log.Debugf("[%s] - %s", s.Kind(), s.CommandLine())
@@ -126,15 +98,15 @@ func (s *Shell) Probe() probe.Result {
 
 	if err := s.CheckOutput(output); err != nil {
 		log.Errorf("[%s] - %v", s.Kind(), err)
-		s.result.Message = fmt.Sprintf("Error: %v", err)
+		s.ProbeResult.Message = fmt.Sprintf("Error: %v", err)
 		status = probe.StatusDown
 	}
 
-	s.result.PreStatus = s.result.Status
-	s.result.Status = status
+	s.ProbeResult.PreStatus = s.ProbeResult.Status
+	s.ProbeResult.Status = status
 
-	s.result.DoStat(s.TimeInterval)
-	return *s.result
+	s.ProbeResult.DoStat(s.Interval())
+	return *s.ProbeResult
 }
 
 // CheckOutput checks the output text,

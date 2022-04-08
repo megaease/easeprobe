@@ -45,10 +45,10 @@ func New(opt conf.Options) MySQL {
 	var conn string
 	if len(opt.Password) > 0 {
 		conn = fmt.Sprintf("%s:%s@tcp(%s)/?timeout=%s",
-			opt.Username, opt.Password, opt.Host, opt.Timeout.Round(time.Second))
+			opt.Username, opt.Password, opt.Host, opt.Timeout().Round(time.Second))
 	} else {
 		conn = fmt.Sprintf("%s@tcp(%s)/?timeout=%s",
-			opt.Username, opt.Host, opt.Timeout.Round(time.Second))
+			opt.Username, opt.Host, opt.Timeout().Round(time.Second))
 	}
 
 	tls, err := opt.TLS.Config()
