@@ -29,6 +29,7 @@ import (
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify/base"
 	"github.com/megaease/easeprobe/probe"
+	"github.com/megaease/easeprobe/report"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -184,7 +185,7 @@ func (c *NotifyConfig) Notify(result probe.Result) {
 	}
 
 	err := global.DoRetry(c.Kind(), c.Name, tag, c.Retry, fn)
-	probe.LogSend(c.Kind(), c.Name, tag, result.Name, err)
+	report.LogSend(c.Kind(), c.Name, tag, result.Name, err)
 }
 
 // NewEmbed new a embed object from a result
@@ -211,8 +212,8 @@ func (c *NotifyConfig) NewField(result probe.Result, inline bool) Fields {
 		"\n>\t`%s ` \n\n"
 
 	desc := fmt.Sprintf(message, result.Endpoint,
-		result.Stat.UpTime.Round(time.Second), result.Stat.DownTime.Round(time.Second), result.SLA(),
-		result.Stat.Total, probe.StatStatusText(result.Stat, probe.Markdown),
+		result.Stat.UpTime.Round(time.Second), result.Stat.DownTime.Round(time.Second), report.SLAPercent(&result),
+		result.Stat.Total, report.SLAStatusText(result.Stat, report.Markdown),
 		result.StartTime.UTC().Format(result.TimeFormat), result.Status.Emoji()+" "+result.Status.String(),
 		result.Message)
 

@@ -25,7 +25,7 @@ import (
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify/base"
-	"github.com/megaease/easeprobe/probe"
+	"github.com/megaease/easeprobe/report"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -43,7 +43,7 @@ func (c *NotifyConfig) Kind() string {
 // Config configures the slack notification
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 	c.MyKind = "wecom"
-	c.Format = probe.Markdown
+	c.Format = report.Markdown
 	c.SendFunc = c.SendWecom
 	c.DefaultNotify.Config(gConf)
 	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.MyKind, c.Name, c)

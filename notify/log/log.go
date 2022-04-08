@@ -24,6 +24,7 @@ import (
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify/base"
 	"github.com/megaease/easeprobe/probe"
+	"github.com/megaease/easeprobe/report"
 	"github.com/sirupsen/logrus"
 )
 
@@ -41,7 +42,7 @@ func (c *NotifyConfig) Kind() string {
 // Config configures the log files
 func (c *NotifyConfig) Config(global global.NotifySettings) error {
 	c.MyKind = "log"
-	c.Format = probe.Text
+	c.Format = report.Text
 	if c.Dry {
 		logrus.Infof("Notification [%s] - [%s] is running on Dry mode!", c.MyKind, c.Name)
 		log.SetOutput(os.Stdout)

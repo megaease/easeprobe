@@ -22,13 +22,14 @@ import (
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
+	"github.com/megaease/easeprobe/report"
 	log "github.com/sirupsen/logrus"
 )
 
 // DefaultNotify is the base struct of the Notify
 type DefaultNotify struct {
 	MyKind   string                     `yaml:"-"`
-	Format   probe.Format               `yaml:"-"`
+	Format   report.Format              `yaml:"-"`
 	SendFunc func(string, string) error `yaml:"-"`
 
 	Name    string        `yaml:"name"`
@@ -58,7 +59,7 @@ func (c *DefaultNotify) Notify(result probe.Result) {
 		return
 	}
 	title := result.Title()
-	message := probe.FormatFuncs[c.Format].ResultFn(result)
+	message := report.FormatFuncs[c.Format].ResultFn(result)
 
 	c.SendWithRetry(title, message, "Notification")
 }
@@ -70,7 +71,7 @@ func (c *DefaultNotify) NotifyStat(probers []probe.Prober) {
 		return
 	}
 	title := "Overall SLA Report"
-	message := probe.FormatFuncs[c.Format].StatFn(probers)
+	message := report.FormatFuncs[c.Format].StatFn(probers)
 	c.SendWithRetry(title, message, "SLA")
 }
 
@@ -84,17 +85,17 @@ func (c *DefaultNotify) SendWithRetry(title string, message string, tag string) 
 		return c.SendFunc(title, message)
 	}
 	err := global.DoRetry(c.MyKind, c.Name, tag, c.Retry, fn)
-	probe.LogSend(c.MyKind, c.Name, tag, title, err)
+	report.LogSend(c.MyKind, c.Name, tag, title, err)
 }
 
 // DryNotify just log the notification message
 func (c *DefaultNotify) DryNotify(result probe.Result) {
 	log.Infof("[%s / %s] - %s", c.MyKind, c.Name,
-		probe.FormatFuncs[c.Format].ResultFn(result))
+		report.FormatFuncs[c.Format].ResultFn(result))
 }
 
 // DryNotifyStat just log the notification message
 func (c *DefaultNotify) DryNotifyStat(probers []probe.Prober) {
 	log.Infof("[%s / %s] - %s", c.MyKind, c.Name,
-		probe.FormatFuncs[c.Format].StatFn(probers))
+		report.FormatFuncs[c.Format].StatFn(probers))
 }
