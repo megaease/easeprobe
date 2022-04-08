@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -69,6 +70,11 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 	h.ProbeKind = "http"
 	h.DefaultOptions.Config(gConf, h.Name, h.URL)
 
+	if _, err := url.ParseRequestURI(h.URL); err != nil {
+		log.Errorf("URL is not valid - %+v url=%+v", err)
+		return err
+	}
+
 	tls, err := h.TLS.Config()
 	if err != nil {
 		log.Errorf("TLS configuration error - %s", err)
@@ -92,7 +98,11 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 // Probe return the checking result
 func (h *HTTP) Probe() probe.Result {
 
-	req, _ := http.NewRequest(h.Method, h.URL, bytes.NewBuffer([]byte(h.Body)))
+	req, err := http.NewRequest(h.Method, h.URL, bytes.NewBuffer([]byte(h.Body)))
+	if err != nil {
+		log.Errorf("HTTP request error - %v", err)
+		return *h.ProbeResult
+	}
 	if len(h.User) > 0 && len(h.Pass) > 0 {
 		req.SetBasicAuth(h.User, h.Pass)
 	}
