@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-package probe
+package report
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -101,4 +102,20 @@ func LogSend(kind, name, tag, message string, err error) {
 	} else {
 		log.Infof("[%s / %s / %s] - successfully sent!%s", kind, name, tag, message)
 	}
+}
+
+// SlackTimeFormation return the slack time formation
+func SlackTimeFormation(t time.Time, act string, format string) string {
+	return fmt.Sprintf("<!date^%d^%s{date_num} {time_secs}|%s%s>",
+		t.Unix(), act, act, t.UTC().Format(format))
+}
+
+//JSONEscape escape the string
+func JSONEscape(str string) string {
+	b, err := json.Marshal(str)
+	if err != nil {
+		return str
+	}
+	s := string(b)
+	return s[1 : len(s)-1]
 }

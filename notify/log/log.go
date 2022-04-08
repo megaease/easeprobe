@@ -22,26 +22,29 @@ import (
 	"os"
 
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/notify/base"
 	"github.com/megaease/easeprobe/probe"
+	"github.com/megaease/easeprobe/report"
 	"github.com/sirupsen/logrus"
 )
 
 // NotifyConfig is the configuration of the Notify
 type NotifyConfig struct {
-	Name string `yaml:"name"`
-	File string `yaml:"file"`
-	Dry  bool   `yaml:"dry"`
+	base.DefaultNotify `yaml:",inline"`
+	File               string `yaml:"file"`
 }
 
 // Kind return the type of Notify
 func (c *NotifyConfig) Kind() string {
-	return "log"
+	return c.MyKind
 }
 
 // Config configures the log files
 func (c *NotifyConfig) Config(global global.NotifySettings) error {
+	c.MyKind = "log"
+	c.Format = report.Text
 	if c.Dry {
-		logrus.Infof("Notification [%s] - [%s]  is running on Dry mode!", c.Kind(), c.Name)
+		logrus.Infof("Notification [%s] - [%s] is running on Dry mode!", c.MyKind, c.Name)
 		log.SetOutput(os.Stdout)
 		return nil
 	}
@@ -51,6 +54,9 @@ func (c *NotifyConfig) Config(global global.NotifySettings) error {
 		return err
 	}
 	log.SetOutput(file)
+
+	logrus.Infof("Notification [%s] - [%s] is configured!", c.Kind(), c.Name)
+	logrus.Debugf("Notification [%s] - [%s] configuration: %+v", c.Kind(), c.Name, c)
 	return nil
 }
 
@@ -75,14 +81,4 @@ func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
 		log.Println(p.Result())
 	}
 	logrus.Infoln("Logged the Statstics into %s!", c.File)
-}
-
-// DryNotify just log the notification message
-func (c *NotifyConfig) DryNotify(result probe.Result) {
-	logrus.Infof("[%s] - %s", c.Kind(), result.HTML())
-}
-
-// DryNotifyStat just log the notification message
-func (c *NotifyConfig) DryNotifyStat(probers []probe.Prober) {
-	logrus.Infof("[%s] - %s", c.Kind(), probe.StatHTML(probers))
 }

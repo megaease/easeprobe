@@ -27,7 +27,9 @@ import (
 	"time"
 
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/notify/base"
 	"github.com/megaease/easeprobe/probe"
+	"github.com/megaease/easeprobe/report"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -101,26 +103,21 @@ type Discord struct {
 
 // NotifyConfig is the slack notification configuration
 type NotifyConfig struct {
-	Name       string        `yaml:"name"`
-	WebhookURL string        `yaml:"webhook"`
-	Avatar     string        `yaml:"avatar"`
-	Thumbnail  string        `yaml:"thumbnail"`
-	Dry        bool          `yaml:"dry"`
-	Timeout    time.Duration `yaml:"timeout"`
-	Retry      global.Retry  `yaml:"retry"`
+	base.DefaultNotify `yaml:",inline"`
+	WebhookURL         string `yaml:"webhook"`
+	Avatar             string `yaml:"avatar"`
+	Thumbnail          string `yaml:"thumbnail"`
 }
 
 // Kind return the type of Notify
 func (c *NotifyConfig) Kind() string {
-	return "discord"
+	return c.MyKind
 }
 
 // Config configures the log files
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
-
-	if c.Dry {
-		log.Infof("Notification [%s] - [%s]  is running on Dry mode!", c.Kind(), c.Name)
-	}
+	c.MyKind = "discord"
+	c.DefaultNotify.Config(gConf)
 
 	if len(strings.TrimSpace(c.Avatar)) <= 0 {
 		c.Avatar = global.Icon
@@ -130,11 +127,7 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 		c.Thumbnail = global.Icon
 	}
 
-	c.Timeout = gConf.NormalizeTimeOut(c.Timeout)
-	c.Retry = gConf.NormalizeRetry(c.Retry)
-
-	log.Infof("[%s] configuration: %+v", c.Kind(), c)
-
+	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.MyKind, c.Name, c)
 	return nil
 }
 
@@ -192,7 +185,7 @@ func (c *NotifyConfig) Notify(result probe.Result) {
 	}
 
 	err := global.DoRetry(c.Kind(), c.Name, tag, c.Retry, fn)
-	probe.LogSend(c.Kind(), c.Name, tag, result.Name, err)
+	report.LogSend(c.Kind(), c.Name, tag, result.Name, err)
 }
 
 // NewEmbed new a embed object from a result
@@ -219,8 +212,8 @@ func (c *NotifyConfig) NewField(result probe.Result, inline bool) Fields {
 		"\n>\t`%s ` \n\n"
 
 	desc := fmt.Sprintf(message, result.Endpoint,
-		result.Stat.UpTime.Round(time.Second), result.Stat.DownTime.Round(time.Second), result.SLA(),
-		result.Stat.Total, probe.StatStatusText(result.Stat, probe.Makerdown),
+		result.Stat.UpTime.Round(time.Second), result.Stat.DownTime.Round(time.Second), report.SLAPercent(&result),
+		result.Stat.Total, report.SLAStatusText(result.Stat, report.Markdown),
 		result.StartTime.UTC().Format(result.TimeFormat), result.Status.Emoji()+" "+result.Status.String(),
 		result.Message)
 

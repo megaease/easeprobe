@@ -23,88 +23,51 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/sns"
 	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/probe"
+	"github.com/megaease/easeprobe/report"
 	log "github.com/sirupsen/logrus"
 )
 
 // SNSNotifyConfig is the AWS SNS notification configuration
 type SNSNotifyConfig struct {
 	Options  `yaml:",inline"`
+	Format   report.Format   `yaml:"format"`
 	TopicARN string          `yaml:"arn"`
-	Format   probe.Format    `yaml:"format"`
 	client   *sns.SNS        `yaml:"-"`
 	context  context.Context `yaml:"-"`
 }
 
 // Kind return the type of Notify
 func (c *SNSNotifyConfig) Kind() string {
-	return "AWS-SNS"
+	return c.MyKind
 }
 
 // Config configures the slack notification
 func (c *SNSNotifyConfig) Config(gConf global.NotifySettings) error {
-	if c.Dry {
-		log.Infof("Notification [%s] - [%s]  is running on Dry mode!", c.Kind(), c.Name)
+	c.MyKind = "AWS-SNS"
+	if c.Format == report.Unknown {
+		c.Format = report.Text
 	}
+	c.DefaultNotify.Format = c.Format
+	c.SendFunc = c.SendSNS
 
 	if err := c.Options.Config(gConf); err != nil {
 		return err
 	}
-	if c.Format == 0 {
-		c.Format = probe.Text
-	}
+
 	c.client = sns.New(c.session)
 	c.context = context.Background()
 
-	log.Infof("[%s] configuration: %+v", c.Kind(), c)
+	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.MyKind, c.Name, c)
 	return nil
 }
 
-// Notify write the message into the slack
-func (c *SNSNotifyConfig) Notify(result probe.Result) {
-	if c.Dry {
-		c.DryNotify(result)
-		return
-	}
-	msg := result.Transfer(c.Format)
-	c.SendNotificationWithRetry("Notification", msg)
+// SendSNS is the warp function of SendSNSNotification
+func (c *SNSNotifyConfig) SendSNS(title, msg string) error {
+	return c.SendSNSNotification(msg)
 }
 
-// NotifyStat write the all probe stat message to slack
-func (c *SNSNotifyConfig) NotifyStat(probers []probe.Prober) {
-	if c.Dry {
-		c.DryNotifyStat(probers)
-		return
-	}
-	msg := probe.StatTransfer(c.Format, probers)
-	c.SendNotificationWithRetry("SLA", msg)
-
-}
-
-// DryNotify just log the notification message
-func (c *SNSNotifyConfig) DryNotify(result probe.Result) {
-	log.Infof("[%s / %s] - %s", c.Kind(), c.Name, result.Transfer(c.Format))
-}
-
-// DryNotifyStat just log the notification message
-func (c *SNSNotifyConfig) DryNotifyStat(probers []probe.Prober) {
-	log.Infof("[%s / %s] - %s", c.Kind(), c.Name, probe.StatTransfer(c.Format, probers))
-}
-
-// SendNotificationWithRetry send the SNS notification with retry
-func (c *SNSNotifyConfig) SendNotificationWithRetry(tag string, msg string) {
-
-	fn := func() error {
-		log.Debugf("[%s - %s] - %s", c.Kind(), tag, msg)
-		return c.SendNotification(msg)
-	}
-
-	err := global.DoRetry(c.Kind(), c.Name, tag, c.Retry, fn)
-	probe.LogSend(c.Kind(), c.Name, tag, "", err)
-}
-
-// SendNotification sends the message to SNS
-func (c *SNSNotifyConfig) SendNotification(msg string) error {
+// SendSNSNotification sends the message to SNS
+func (c *SNSNotifyConfig) SendSNSNotification(msg string) error {
 	ctx, cancel := context.WithTimeout(c.context, c.Timeout)
 	defer cancel()
 

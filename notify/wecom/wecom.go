@@ -22,79 +22,37 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"time"
 
 	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/probe"
+	"github.com/megaease/easeprobe/notify/base"
+	"github.com/megaease/easeprobe/report"
 	log "github.com/sirupsen/logrus"
 )
 
 // NotifyConfig is the slack notification configuration
 type NotifyConfig struct {
-	Name       string        `yaml:"name"`
-	WebhookURL string        `yaml:"webhook"`
-	Dry        bool          `yaml:"dry"`
-	Timeout    time.Duration `yaml:"timeout"`
-	Retry      global.Retry  `yaml:"retry"`
+	base.DefaultNotify `yaml:",inline"`
+	WebhookURL         string `yaml:"webhook"`
 }
 
 // Kind return the type of Notify
 func (c *NotifyConfig) Kind() string {
-	return "wecom"
+	return c.MyKind
 }
 
 // Config configures the slack notification
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
-	if c.Dry {
-		log.Infof("Notification [%s] - [%s]  is running on Dry mode!", c.Kind(), c.Name)
-	}
-
-	c.Timeout = gConf.NormalizeTimeOut(c.Timeout)
-	c.Retry = gConf.NormalizeRetry(c.Retry)
-
-	log.Infof("[%s] configuration: %+v", c.Kind(), c)
+	c.MyKind = "wecom"
+	c.Format = report.Markdown
+	c.SendFunc = c.SendWecom
+	c.DefaultNotify.Config(gConf)
+	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.MyKind, c.Name, c)
 	return nil
 }
 
-// Notify write the message into the wecom
-func (c *NotifyConfig) Notify(result probe.Result) {
-	if c.Dry {
-		c.DryNotify(result)
-		return
-	}
-	c.SendWecomNotificationWithRetry("Notification", result.Markdown())
-}
-
-// NotifyStat write the all probe stat message to wecom
-func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
-	if c.Dry {
-		c.DryNotifyStat(probers)
-		return
-	}
-	c.SendWecomNotificationWithRetry("SLA", probe.StatMarkDown(probers))
-
-}
-
-// DryNotify just log the notification message
-func (c *NotifyConfig) DryNotify(result probe.Result) {
-	log.Infof("[%s / %s] - %s", c.Kind(), c.Name, result.Markdown())
-}
-
-// DryNotifyStat just log the notification message
-func (c *NotifyConfig) DryNotifyStat(probers []probe.Prober) {
-	log.Infof("[%s / %s] - %s", c.Kind(), c.Name, probe.StatMarkDown(probers))
-}
-
-// SendWecomNotificationWithRetry send the wecom notification with retry
-func (c *NotifyConfig) SendWecomNotificationWithRetry(tag string, msg string) {
-
-	fn := func() error {
-		log.Debugf("[%s - %s] - %s", c.Kind(), tag, msg)
-		return c.SendWecomNotification(msg)
-	}
-
-	err := global.DoRetry(c.Kind(), c.Name, tag, c.Retry, fn)
-	probe.LogSend(c.Kind(), c.Name, tag, "", err)
+// SendWecom is the wrapper of SendWecomNotification
+func (c *NotifyConfig) SendWecom(title, msg string) error {
+	return c.SendWecomNotification(msg)
 }
 
 // SendWecomNotification will post to an 'Robot Webhook' url in Wecom Apps. It accepts
