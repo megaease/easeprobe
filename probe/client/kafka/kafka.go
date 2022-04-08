@@ -62,7 +62,7 @@ func (k Kafka) Probe() (bool, string) {
 
 	if len(k.Password) > 0 {
 		dialer = &kafka.Dialer{
-			Timeout: k.Timeout,
+			Timeout: k.Timeout(),
 			TLS:     k.tls,
 			SASLMechanism: plain.Mechanism{
 				Username: k.Username,
@@ -71,13 +71,13 @@ func (k Kafka) Probe() (bool, string) {
 		}
 	} else {
 		dialer = &kafka.Dialer{
-			Timeout:       k.Timeout,
+			Timeout:       k.Timeout(),
 			TLS:           k.tls,
 			SASLMechanism: nil,
 		}
 	}
 
-	ctx, cancel := context.WithTimeout(k.Context, k.Timeout)
+	ctx, cancel := context.WithTimeout(k.Context, k.Timeout())
 	defer cancel()
 
 	conn, err := dialer.DialContext(ctx, "tcp", k.Host)

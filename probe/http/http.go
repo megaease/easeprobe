@@ -22,16 +22,15 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
+	"github.com/megaease/easeprobe/probe/base"
 	log "github.com/sirupsen/logrus"
 )
-
-// Kind is the type of probe
-const Kind string = "http"
 
 // HTTP implements a config for HTTP.
 type HTTP struct {
@@ -49,12 +48,9 @@ type HTTP struct {
 	//Option - TLS Config
 	global.TLS `yaml:",inline"`
 
-	//Control Options
-	Timeout      time.Duration `yaml:"timeout,omitempty"`
-	TimeInterval time.Duration `yaml:"interval,omitempty"`
+	base.DefaultOptions `yaml:",inline"`
 
-	client *http.Client  `yaml:"-"`
-	result *probe.Result `yaml:"-"`
+	client *http.Client `yaml:"-"`
 }
 
 func checkHTTPMethod(m string) bool {
@@ -68,26 +64,16 @@ func checkHTTPMethod(m string) bool {
 	return false
 }
 
-// Kind return the HTTP kind
-func (h *HTTP) Kind() string {
-	return Kind
-}
-
-// Interval get the interval
-func (h *HTTP) Interval() time.Duration {
-	return h.TimeInterval
-}
-
-// Result get the probe result
-func (h *HTTP) Result() *probe.Result {
-	return h.result
-}
-
 // Config HTTP Config Object
 func (h *HTTP) Config(gConf global.ProbeSettings) error {
 
-	h.Timeout = gConf.NormalizeTimeOut(h.Timeout)
-	h.TimeInterval = gConf.NormalizeInterval(h.TimeInterval)
+	h.ProbeKind = "http"
+	h.DefaultOptions.Config(gConf, h.Name, h.URL)
+
+	if _, err := url.ParseRequestURI(h.URL); err != nil {
+		log.Errorf("URL is not valid - %+v url=%+v", err)
+		return err
+	}
 
 	tls, err := h.TLS.Config()
 	if err != nil {
@@ -96,7 +82,7 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 	}
 
 	h.client = &http.Client{
-		Timeout: h.Timeout,
+		Timeout: h.Timeout(),
 		Transport: &http.Transport{
 			TLSClientConfig: tls,
 		},
@@ -105,12 +91,6 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 		h.Method = "GET"
 	}
 
-	h.result = probe.NewResult()
-	h.result.Name = h.Name
-	h.result.Endpoint = h.URL
-	h.result.PreStatus = probe.StatusInit
-	h.result.TimeFormat = gConf.TimeFormat
-
 	log.Debugf("[%s] configuration: %+v, %+v", h.Kind(), h, h.Result())
 	return nil
 }
@@ -118,7 +98,11 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 // Probe return the checking result
 func (h *HTTP) Probe() probe.Result {
 
-	req, _ := http.NewRequest(h.Method, h.URL, bytes.NewBuffer([]byte(h.Body)))
+	req, err := http.NewRequest(h.Method, h.URL, bytes.NewBuffer([]byte(h.Body)))
+	if err != nil {
+		log.Errorf("HTTP request error - %v", err)
+		return *h.ProbeResult
+	}
 	if len(h.User) > 0 && len(h.Pass) > 0 {
 		req.SetBasicAuth(h.User, h.Pass)
 	}
@@ -135,14 +119,14 @@ func (h *HTTP) Probe() probe.Result {
 	req.Header.Set("User-Agent", global.OrgProgVer)
 
 	now := time.Now()
-	h.result.StartTime = now
-	h.result.StartTimestamp = now.UnixMilli()
+	h.ProbeResult.StartTime = now
+	h.ProbeResult.StartTimestamp = now.UnixMilli()
 
 	resp, err := h.client.Do(req)
-	h.result.RoundTripTime.Duration = time.Since(now)
+	h.ProbeResult.RoundTripTime.Duration = time.Since(now)
 	status := probe.StatusUp
 	if err != nil {
-		h.result.Message = fmt.Sprintf("Error: %v", err)
+		h.ProbeResult.Message = fmt.Sprintf("Error: %v", err)
 		log.Errorf("error making get request: %v", err)
 		status = probe.StatusDown
 	} else {
@@ -152,17 +136,17 @@ func (h *HTTP) Probe() probe.Result {
 		if err != nil {
 			log.Debugf("%s", string(response))
 		}
-		h.result.Message = fmt.Sprintf("Success: HTTP Status Code is %d", resp.StatusCode)
+		h.ProbeResult.Message = fmt.Sprintf("Success: HTTP Status Code is %d", resp.StatusCode)
 		if resp.StatusCode >= 500 {
-			h.result.Message = fmt.Sprintf("Error: HTTP Status Code is %d", resp.StatusCode)
+			h.ProbeResult.Message = fmt.Sprintf("Error: HTTP Status Code is %d", resp.StatusCode)
 			status = probe.StatusDown
 		}
 	}
 
-	h.result.PreStatus = h.result.Status
-	h.result.Status = status
+	h.ProbeResult.PreStatus = h.ProbeResult.Status
+	h.ProbeResult.Status = status
 
-	h.result.DoStat(h.TimeInterval)
+	h.ProbeResult.DoStat(h.Interval())
 
-	return *h.result
+	return *h.ProbeResult
 }

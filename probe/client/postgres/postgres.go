@@ -42,7 +42,7 @@ func New(opt conf.Options) PostgreSQL {
 		pgdriver.WithNetwork("tcp"),
 		pgdriver.WithAddr(opt.Host),
 		pgdriver.WithUser(opt.Username),
-		pgdriver.WithTimeout(opt.Timeout.Round(time.Second)),
+		pgdriver.WithTimeout(opt.Timeout().Round(time.Second)),
 		pgdriver.WithApplicationName(global.OrgProgVer),
 	}
 	if len(opt.Password) > 0 {

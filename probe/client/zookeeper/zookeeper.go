@@ -64,9 +64,9 @@ func (z Zookeeper) Probe() (bool, string) {
 	)
 
 	if dialer := getDialer(z); dialer != nil {
-		conn, _, err = zk.Connect([]string{z.Host}, z.Timeout, zk.WithLogInfo(false), zk.WithDialer(dialer))
+		conn, _, err = zk.Connect([]string{z.Host}, z.Timeout(), zk.WithLogInfo(false), zk.WithDialer(dialer))
 	} else {
-		conn, _, err = zk.Connect([]string{z.Host}, z.Timeout, zk.WithLogInfo(false))
+		conn, _, err = zk.Connect([]string{z.Host}, z.Timeout(), zk.WithLogInfo(false))
 	}
 
 	if err != nil {
@@ -94,7 +94,7 @@ func getDialer(z Zookeeper) func(network string, address string, _ time.Duration
 			InsecureSkipVerify: true,
 		}
 
-		ipConn, err := net.DialTimeout(network, z.Host, z.Timeout)
+		ipConn, err := net.DialTimeout(network, z.Host, z.Timeout())
 		if err != nil {
 			return nil, err
 		}

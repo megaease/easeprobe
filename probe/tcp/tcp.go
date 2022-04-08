@@ -24,50 +24,22 @@ import (
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
+	"github.com/megaease/easeprobe/probe/base"
 	log "github.com/sirupsen/logrus"
 )
-
-// Kind is the type
-const Kind string = "tcp"
 
 // TCP implements a config for TCP
 type TCP struct {
 	Name string `yaml:"name"`
 	Host string `yaml:"host"`
 
-	//Control Option
-	Timeout      time.Duration `yaml:"timeout,omitempty"`
-	TimeInterval time.Duration `yaml:"interval,omitempty"`
-
-	result *probe.Result `yaml:"-"`
-}
-
-// Kind return the HTTP kind
-func (t *TCP) Kind() string {
-	return Kind
-}
-
-// Interval get the interval
-func (t *TCP) Interval() time.Duration {
-	return t.TimeInterval
-}
-
-// Result get the probe result
-func (t *TCP) Result() *probe.Result {
-	return t.result
+	base.DefaultOptions `yaml:",inline"`
 }
 
 // Config HTTP Config Object
 func (t *TCP) Config(gConf global.ProbeSettings) error {
-
-	t.Timeout = gConf.NormalizeTimeOut(t.Timeout)
-	t.TimeInterval = gConf.NormalizeInterval(t.TimeInterval)
-
-	t.result = probe.NewResult()
-	t.result.Endpoint = t.Host
-	t.result.Name = t.Name
-	t.result.PreStatus = probe.StatusInit
-	t.result.TimeFormat = gConf.TimeFormat
+	t.ProbeKind = "tcp"
+	t.DefaultOptions.Config(gConf, t.Name, t.Host)
 
 	log.Debugf("[%s] configuration: %+v, %+v", t.Kind(), t, t.Result())
 	return nil
@@ -77,24 +49,24 @@ func (t *TCP) Config(gConf global.ProbeSettings) error {
 func (t *TCP) Probe() probe.Result {
 
 	now := time.Now()
-	t.result.StartTime = now
-	t.result.StartTimestamp = now.UnixMilli()
+	t.ProbeResult.StartTime = now
+	t.ProbeResult.StartTimestamp = now.UnixMilli()
 
-	conn, err := net.DialTimeout("tcp", t.Host, t.Timeout)
-	t.result.RoundTripTime.Duration = time.Since(now)
+	conn, err := net.DialTimeout("tcp", t.Host, t.Timeout())
+	t.ProbeResult.RoundTripTime.Duration = time.Since(now)
 	status := probe.StatusUp
 	if err != nil {
-		t.result.Message = fmt.Sprintf("Error: %v", err)
+		t.ProbeResult.Message = fmt.Sprintf("Error: %v", err)
 		log.Errorf("error: %v", err)
 		status = probe.StatusDown
 	} else {
-		t.result.Message = "TCP Connection Established Successfully!"
+		t.ProbeResult.Message = "TCP Connection Established Successfully!"
 		conn.Close()
 	}
-	t.result.PreStatus = t.result.Status
-	t.result.Status = status
+	t.ProbeResult.PreStatus = t.ProbeResult.Status
+	t.ProbeResult.Status = status
 
-	t.result.DoStat(t.TimeInterval)
+	t.ProbeResult.DoStat(t.Interval())
 
-	return *t.result
+	return *t.ProbeResult
 }

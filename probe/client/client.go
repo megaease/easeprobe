@@ -33,46 +33,19 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Kind is the type of probe
-const Kind string = "client"
-
 // Client implements the structure of client
 type Client struct {
 	//Embed structure
 	conf.Options `yaml:",inline"`
 
-	result *probe.Result `yaml:"-"`
-	client conf.Driver   `yaml:"-"`
-}
-
-// Kind return the Client kind
-func (c *Client) Kind() string {
-	return Kind
-}
-
-// Interval get the interval
-func (c *Client) Interval() time.Duration {
-	return c.TimeInterval
-}
-
-// Result get the probe result
-func (c *Client) Result() *probe.Result {
-	return c.result
+	client conf.Driver `yaml:"-"`
 }
 
 // Config Client Config Object
 func (c *Client) Config(gConf global.ProbeSettings) error {
-
-	c.Timeout = gConf.NormalizeTimeOut(c.Timeout)
-	c.TimeInterval = gConf.NormalizeInterval(c.TimeInterval)
-
+	c.ProbeKind = "client"
+	c.DefaultOptions.Config(gConf, c.Name, c.Host)
 	c.configClientDriver()
-
-	c.result = probe.NewResult()
-	c.result.Name = c.Name
-	c.result.Endpoint = c.Host
-	c.result.PreStatus = probe.StatusInit
-	c.result.TimeFormat = gConf.TimeFormat
 
 	log.Debugf("[%s] configuration: %+v, %+v", c.Kind(), c, c.Result())
 	return nil
@@ -101,33 +74,33 @@ func (c *Client) configClientDriver() {
 // Probe return the checking result
 func (c *Client) Probe() probe.Result {
 	if c.DriverType == conf.Unknown {
-		c.result.PreStatus = probe.StatusUnknown
-		c.result.Status = probe.StatusUnknown
-		return *c.result
+		c.ProbeResult.PreStatus = probe.StatusUnknown
+		c.ProbeResult.Status = probe.StatusUnknown
+		return *c.ProbeResult
 	}
 
 	now := time.Now()
-	c.result.StartTime = now
-	c.result.StartTimestamp = now.UnixMilli()
+	c.ProbeResult.StartTime = now
+	c.ProbeResult.StartTimestamp = now.UnixMilli()
 
 	stat, msg := c.client.Probe()
 
-	c.result.RoundTripTime.Duration = time.Since(now)
+	c.ProbeResult.RoundTripTime.Duration = time.Since(now)
 
 	status := probe.StatusUp
-	c.result.Message = fmt.Sprintf("%s client checked up successfully!", c.DriverType.String())
+	c.ProbeResult.Message = fmt.Sprintf("%s client checked up successfully!", c.DriverType.String())
 
 	if stat != true {
-		c.result.Message = fmt.Sprintf("Error (%s): %s", c.DriverType.String(), msg)
+		c.ProbeResult.Message = fmt.Sprintf("Error (%s): %s", c.DriverType.String(), msg)
 		log.Errorf("[%s / %s / %s] - %s", c.Kind(), c.client.Kind(), c.Name, msg)
 		status = probe.StatusDown
 	} else {
 		log.Debugf("[%s / %s / %s] - %s", c.Kind(), c.client.Kind(), c.Name, msg)
 	}
 
-	c.result.PreStatus = c.result.Status
-	c.result.Status = status
+	c.ProbeResult.PreStatus = c.ProbeResult.Status
+	c.ProbeResult.Status = status
 
-	c.result.DoStat(c.TimeInterval)
-	return *c.result
+	c.ProbeResult.DoStat(c.Interval())
+	return *c.ProbeResult
 }

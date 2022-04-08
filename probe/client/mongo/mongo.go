@@ -44,16 +44,16 @@ func New(opt conf.Options) Mongo {
 	var conn string
 	if len(opt.Password) > 0 {
 		conn = fmt.Sprintf("mongodb://%s:%s@%s/?connectTimeoutMS=%d",
-			opt.Username, opt.Password, opt.Host, opt.Timeout.Milliseconds())
+			opt.Username, opt.Password, opt.Host, opt.Timeout().Milliseconds())
 	} else {
 		conn = fmt.Sprintf("mongodb://%s/?connectTimeoutMS=%d",
-			opt.Host, opt.Timeout.Milliseconds())
+			opt.Host, opt.Timeout().Milliseconds())
 	}
 
 	var maxConn uint64 = 1
 	client := options.Client().ApplyURI(conn)
-	client.ServerSelectionTimeout = &opt.Timeout
-	client.ConnectTimeout = &opt.Timeout
+	client.ServerSelectionTimeout = &opt.ProbeTimeout
+	client.ConnectTimeout = &opt.ProbeTimeout
 	client.MaxConnecting = &maxConn
 	client.MaxPoolSize = &maxConn
 	client.MinPoolSize = &maxConn
@@ -82,7 +82,7 @@ func (r Mongo) Kind() string {
 // Probe do the health check
 func (r Mongo) Probe() (bool, string) {
 
-	ctx, cancel := context.WithTimeout(r.Context, r.Timeout)
+	ctx, cancel := context.WithTimeout(r.Context, r.Timeout())
 	defer cancel()
 
 	log.Debugln(r.ClientOpt)
