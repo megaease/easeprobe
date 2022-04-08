@@ -24,7 +24,7 @@ import (
 	"github.com/megaease/easeprobe/probe"
 )
 
-//DefaultOptions is the default options for all probe
+// DefaultOptions is the default options for all probe
 type DefaultOptions struct {
 	ProbeKind         string        `yaml:"kind"`
 	ProbeTimeout      time.Duration `yaml:"timeout,omitempty"`
@@ -45,22 +45,22 @@ func (d *DefaultOptions) Config(gConf global.ProbeSettings, name, endpoint strin
 	return nil
 }
 
-// Kind return the HTTP kind
+// Kind return the probe kind
 func (d *DefaultOptions) Kind() string {
 	return d.ProbeKind
 }
 
-// Timeout get the timeout
+// Timeout get the probe timeout
 func (d *DefaultOptions) Timeout() time.Duration {
 	return d.ProbeTimeout
 }
 
-// Interval get the interval
+// Interval get the probe interval
 func (d *DefaultOptions) Interval() time.Duration {
 	return d.ProbeTimeInterval
 }
 
-// Result get the result
+// Result get the probe result
 func (d *DefaultOptions) Result() *probe.Result {
 	return d.ProbeResult
 }
