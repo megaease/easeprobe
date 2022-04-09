@@ -18,9 +18,6 @@
 package client
 
 import (
-	"fmt"
-	"time"
-
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/client/conf"
@@ -43,11 +40,13 @@ type Client struct {
 
 // Config Client Config Object
 func (c *Client) Config(gConf global.ProbeSettings) error {
-	c.ProbeKind = "client"
-	c.DefaultOptions.Config(gConf, c.Name, c.Host)
+	kind := "client"
+	tag := c.DriverType.String()
+	name := c.ProbeName
+	c.DefaultOptions.Config(gConf, kind, tag, name, c.Host, c.DoProbe)
 	c.configClientDriver()
 
-	log.Debugf("[%s] configuration: %+v, %+v", c.Kind(), c, c.Result())
+	log.Debugf("[%s] configuration: %+v, %+v", c.ProbeKind, c, c.Result())
 	return nil
 }
 
@@ -71,36 +70,12 @@ func (c *Client) configClientDriver() {
 
 }
 
-// Probe return the checking result
-func (c *Client) Probe() probe.Result {
+// DoProbe return the checking result
+func (c *Client) DoProbe() (bool, string) {
 	if c.DriverType == conf.Unknown {
 		c.ProbeResult.PreStatus = probe.StatusUnknown
 		c.ProbeResult.Status = probe.StatusUnknown
-		return *c.ProbeResult
+		return false, "Wrong Driver Type"
 	}
-
-	now := time.Now()
-	c.ProbeResult.StartTime = now
-	c.ProbeResult.StartTimestamp = now.UnixMilli()
-
-	stat, msg := c.client.Probe()
-
-	c.ProbeResult.RoundTripTime.Duration = time.Since(now)
-
-	status := probe.StatusUp
-	c.ProbeResult.Message = fmt.Sprintf("%s client checked up successfully!", c.DriverType.String())
-
-	if stat != true {
-		c.ProbeResult.Message = fmt.Sprintf("Error (%s): %s", c.DriverType.String(), msg)
-		log.Errorf("[%s / %s / %s] - %s", c.Kind(), c.client.Kind(), c.Name, msg)
-		status = probe.StatusDown
-	} else {
-		log.Debugf("[%s / %s / %s] - %s", c.Kind(), c.client.Kind(), c.Name, msg)
-	}
-
-	c.ProbeResult.PreStatus = c.ProbeResult.Status
-	c.ProbeResult.Status = status
-
-	c.ProbeResult.DoStat(c.Interval())
-	return *c.ProbeResult
+	return c.client.Probe()
 }

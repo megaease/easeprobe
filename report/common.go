@@ -98,9 +98,9 @@ func LogSend(kind, name, tag, message string, err error) {
 		message = " " + message + " "
 	}
 	if err != nil {
-		log.Errorf("[%s / %s / %s] - failed to send!%s(%v)", kind, name, tag, message, err)
+		log.Errorf("[%s / %s / %s] - %s(%v) - failed to send! ", kind, name, tag, message, err)
 	} else {
-		log.Infof("[%s / %s / %s] - successfully sent!%s", kind, name, tag, message)
+		log.Infof("[%s / %s / %s] - %s - successfully sent!", kind, name, tag, message)
 	}
 }
 

@@ -41,7 +41,7 @@ type Kafka struct {
 func New(opt conf.Options) Kafka {
 	tls, err := opt.TLS.Config()
 	if err != nil {
-		log.Errorf("[%s] %s - TLS Config error - %v", Kind, opt.Name, err)
+		log.Errorf("[%s] %s - TLS Config error - %v", Kind, opt.ProbeName, err)
 	}
 	return Kafka{
 		Options: opt,
@@ -99,7 +99,7 @@ func (k Kafka) Probe() (bool, string) {
 		m[p.Topic] = struct{}{}
 	}
 	for t := range m {
-		log.Debugf("[%s] Topic Name - %s", k.Kind(), t)
+		log.Debugf("[%s] Topic Name - %s", k.ProbeKind, t)
 	}
 
 	return true, "Check Kafka Server Successfully!"

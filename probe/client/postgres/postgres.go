@@ -51,7 +51,7 @@ func New(opt conf.Options) PostgreSQL {
 
 	tls, err := opt.TLS.Config()
 	if err != nil {
-		log.Errorf("[%s] %s - TLS Config error - %v", Kind, opt.Name, err)
+		log.Errorf("[%s] %s - TLS Config error - %v", Kind, opt.ProbeName, err)
 	} else {
 		tls.InsecureSkipVerify = true
 		clientOptions = append(clientOptions, pgdriver.WithTLSConfig(tls))

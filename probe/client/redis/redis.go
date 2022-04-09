@@ -41,7 +41,7 @@ func New(opt conf.Options) Redis {
 
 	tls, err := opt.TLS.Config()
 	if err != nil {
-		log.Errorf("[%s] %s - TLS Config error - %v", Kind, opt.Name, err)
+		log.Errorf("[%s] %s - TLS Config error - %v", Kind, opt.ProbeName, err)
 	}
 
 	return Redis{
