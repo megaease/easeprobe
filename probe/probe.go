@@ -26,8 +26,10 @@ import (
 // Prober Interface
 type Prober interface {
 	Kind() string
-	Config(global.ProbeSettings) error
-	Probe() Result
+	Name() string
+	Timeout() time.Duration
 	Interval() time.Duration
 	Result() *Result
+	Config(global.ProbeSettings) error
+	Probe() Result
 }

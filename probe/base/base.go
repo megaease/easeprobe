@@ -18,36 +18,37 @@
 package base
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
+
+	log "github.com/sirupsen/logrus"
 )
+
+// ProbeFuncType is the probe function type
+type ProbeFuncType func() (bool, string)
 
 // DefaultOptions is the default options for all probe
 type DefaultOptions struct {
-	ProbeKind         string        `yaml:"kind"`
+	ProbeKind         string        `yaml:"-"`
+	ProbeTag          string        `yaml:"-"`
+	ProbeName         string        `yaml:"name"`
 	ProbeTimeout      time.Duration `yaml:"timeout,omitempty"`
 	ProbeTimeInterval time.Duration `yaml:"interval,omitempty"`
+	ProbeFunc         ProbeFuncType `yaml:"-"`
 	ProbeResult       *probe.Result `yaml:"-"`
-}
-
-// Config default config
-func (d *DefaultOptions) Config(gConf global.ProbeSettings, name, endpoint string) error {
-	d.ProbeTimeout = gConf.NormalizeTimeOut(d.ProbeTimeout)
-	d.ProbeTimeInterval = gConf.NormalizeInterval(d.ProbeTimeInterval)
-
-	d.ProbeResult = probe.NewResult()
-	d.ProbeResult.Name = name
-	d.ProbeResult.Endpoint = endpoint
-	d.ProbeResult.PreStatus = probe.StatusInit
-	d.ProbeResult.TimeFormat = gConf.TimeFormat
-	return nil
 }
 
 // Kind return the probe kind
 func (d *DefaultOptions) Kind() string {
 	return d.ProbeKind
+}
+
+// Name return the probe name
+func (d *DefaultOptions) Name() string {
+	return d.ProbeName
 }
 
 // Timeout get the probe timeout
@@ -63,4 +64,74 @@ func (d *DefaultOptions) Interval() time.Duration {
 // Result get the probe result
 func (d *DefaultOptions) Result() *probe.Result {
 	return d.ProbeResult
+}
+
+// Config default config
+func (d *DefaultOptions) Config(gConf global.ProbeSettings,
+	kind, tag, name, endpoint string, fn ProbeFuncType) error {
+
+	d.ProbeKind = kind
+	d.ProbeName = name
+	d.ProbeTag = tag
+	d.ProbeFunc = fn
+
+	d.ProbeTimeout = gConf.NormalizeTimeOut(d.ProbeTimeout)
+	d.ProbeTimeInterval = gConf.NormalizeInterval(d.ProbeTimeInterval)
+
+	d.ProbeResult = probe.NewResult()
+	d.ProbeResult.Name = name
+	d.ProbeResult.Endpoint = endpoint
+	d.ProbeResult.PreStatus = probe.StatusInit
+	d.ProbeResult.TimeFormat = gConf.TimeFormat
+
+	if len(d.ProbeTag) > 0 {
+		log.Infof("Probe [%s / %s] - [%s] is configured!", d.ProbeKind, d.ProbeTag, d.ProbeName)
+	} else {
+		log.Infof("Probe [%s] - [%s] is configured!", d.ProbeKind, d.ProbeName)
+	}
+	return nil
+}
+
+// Probe return the checking result
+func (d *DefaultOptions) Probe() probe.Result {
+	if d.ProbeFunc == nil {
+		return *d.ProbeResult
+	}
+
+	now := time.Now()
+	d.ProbeResult.StartTime = now
+	d.ProbeResult.StartTimestamp = now.UnixMilli()
+
+	stat, msg := d.ProbeFunc()
+
+	d.ProbeResult.RoundTripTime.Duration = time.Since(now)
+
+	status := probe.StatusUp
+	if len(d.ProbeTag) > 0 {
+		d.ProbeResult.Message = fmt.Sprintf("%s / %s checked up successfully!", d.ProbeKind, d.ProbeTag)
+	} else {
+		d.ProbeResult.Message = fmt.Sprintf("%s checked up successfully!", d.ProbeKind)
+	}
+
+	if stat != true {
+		d.ProbeResult.Message = fmt.Sprintf("Error (%s): %s", d.ProbeKind, msg)
+		if len(d.ProbeTag) > 0 {
+			log.Errorf("[%s / %s / %s] - %s", d.ProbeKind, d.ProbeTag, d.ProbeName, msg)
+		} else {
+			log.Errorf("[%s / %s] - %s", d.ProbeKind, d.ProbeName, msg)
+		}
+		status = probe.StatusDown
+	} else {
+		if len(d.ProbeTag) > 0 {
+			log.Debugf("[%s / %s / %s] - %s", d.ProbeKind, d.ProbeTag, d.ProbeName, msg)
+		} else {
+			log.Debugf("[%s / %s] - %s", d.ProbeKind, d.ProbeName, msg)
+		}
+	}
+
+	d.ProbeResult.PreStatus = d.ProbeResult.Status
+	d.ProbeResult.Status = status
+
+	d.ProbeResult.DoStat(d.Interval())
+	return *d.ProbeResult
 }

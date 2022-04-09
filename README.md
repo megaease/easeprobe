@@ -14,9 +14,10 @@ EaseProbe is a simple, standalone, and lightWeight tool that can do health/statu
     - [3.1 HTTP Probe Configuration](#31-http-probe-configuration)
     - [3.2 TCP Probe Configuration](#32-tcp-probe-configuration)
     - [3.3 Shell Command Probe Configuration](#33-shell-command-probe-configuration)
-    - [3.4 Native Client Probe](#34-native-client-probe)
-    - [3.5 Notification Configuration](#35-notification-configuration)
-    - [3.6 Global Setting Configuration](#36-global-setting-configuration)
+    - [3.4 SSH Command Probe Configuration](#34-ssh-command-probe-configuration)
+    - [3.5 Native Client Probe](#35-native-client-probe)
+    - [3.6 Notification Configuration](#36-notification-configuration)
+    - [3.7 Global Setting Configuration](#37-global-setting-configuration)
   - [4. Community](#4-community)
   - [5. License](#5-license)
 
@@ -39,7 +40,7 @@ Ease Probe supports the following probing methods:
       url: http://prometheus:9090/graph
   ```
 
-- **TCP**. Just simply check the TCP connection can be established or not. ( [TCP Probe Configuration](#32-tcp-probe-configuration) )
+- **TCP**. Just simply check whether the TCP connection can be established or not. ( [TCP Probe Configuration](#32-tcp-probe-configuration) )
 
   ```YAML
   tcp:
@@ -65,7 +66,21 @@ Ease Probe supports the following probing methods:
       contain : "PONG"
   ```
 
-- **Client**. Currently, support the following native client. Support the mTLS. ( [Native Client Probe](#34-native-client-probe) )
+- **SSH**. Run a remote command via SSH and check the result. ([SSH Command Probe Configuration](#34-ssh-command-probe-configuration))
+
+```YAML
+ssh:
+  - name : CubieBoard
+    host: 192.168.10.10:22
+    username: root
+    password: xxxxxxx
+    key: /Users/user/.ssh/id_rsa
+    cmd: "ps auxwe | grep easeprobe | grep -v grep"
+    contain: easeprobe
+```
+
+
+- **Client**. Currently, support the following native client. Support the mTLS. ( [Native Client Probe](#35-native-client-probe) )
   - **MySQL**. Connect to the MySQL server and run the `SHOW STATUS` SQL.
   - **Redis**. Connect to the Redis server and run the `PING` command.
   - **MongoDB**. Connect to MongoDB server and just ping server.
@@ -137,7 +152,7 @@ notify:
       webhook: "https://oapi.dingtalk.com/robot/send?access_token=xxxx"
 ```
 
-Check the  [Notification Configuration](#35-notification-configuration) to see how to configure it.
+Check the  [Notification Configuration](#36-notification-configuration) to see how to configure it.
 
 ### 1.3 Report
 
@@ -153,6 +168,7 @@ settings:
     time: "23:59"
 ```
 
+for more information, please check the [3.7 Global Setting Configuration](#37-global-setting-configuration)
 
 ## 2. Getting Start
 
@@ -246,6 +262,10 @@ tcp:
 
 ### 3.3 Shell Command Probe Configuration
 
+The shell command probe is used to execute a shell command and check the output.
+
+The following example shows how to configure the shell command probe.
+
 ```YAML
 # Shell Probe Configuration
 shell:
@@ -278,7 +298,35 @@ shell:
     contain: "Mode:"
 ```
 
-### 3.4 Native Client Probe
+### 3.4 SSH Command Probe Configuration
+
+SSH probe is similar with Shell probe, and it supports password and private key authentication.
+
+The following are example of SSH probe configuration.
+
+```YAML
+# SSH Probe Configuration
+ssh:
+  # run redis-cli ping and check the "PONG"
+  - name: Redis (Remote)
+    username: ubuntu  # SSH Login username
+    password: xxxxx   # SSH Login password
+    key: /path/to/private.key # SSH login private file
+    cmd: "redis-cli"
+    args:
+      - "-h"
+      - "127.0.0.1"
+      - "ping"
+    env:
+      # set the `REDISCLI_AUTH` environment variable for redis password
+      - "REDISCLI_AUTH=abc123"
+    # check the command output, if does not contain the PONG, mark the status down
+    contain : "PONG"
+```
+
+
+
+### 3.5 Native Client Probe
 
 ```YAML
 # Native Client Probe
@@ -330,7 +378,7 @@ client:
 ```
 
 
-### 3.5 Notification Configuration
+### 3.6 Notification Configuration
 
 ```YAML
 # Notification Configuration
@@ -401,7 +449,7 @@ notify:
 ```
 
 
-### 3.6 Global Setting Configuration
+### 3.7 Global Setting Configuration
 
 ```YAML
 # Global settings for all probes and notifiers.

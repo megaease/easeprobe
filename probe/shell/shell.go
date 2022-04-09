@@ -23,7 +23,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"time"
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
@@ -33,29 +32,30 @@ import (
 
 // Shell implements a config for shell command (os.Exec)
 type Shell struct {
-	Name       string   `yaml:"name"`
-	Command    string   `yaml:"cmd"`
-	Args       []string `yaml:"args,omitempty"`
-	Env        []string `yaml:"env,omitempty"`
-	Contain    string   `yaml:"contain,omitempty"`
-	NotContain string   `yaml:"not_contain,omitempty"`
-
 	base.DefaultOptions `yaml:",inline"`
+	Command             string   `yaml:"cmd"`
+	Args                []string `yaml:"args,omitempty"`
+	Env                 []string `yaml:"env,omitempty"`
+	Contain             string   `yaml:"contain,omitempty"`
+	NotContain          string   `yaml:"not_contain,omitempty"`
 }
 
 // Config Shell Config Object
 func (s *Shell) Config(gConf global.ProbeSettings) error {
-	s.ProbeKind = "shell"
-	s.DefaultOptions.Config(gConf, s.Name, s.CommandLine())
+	kind := "shell"
+	tag := ""
+	name := s.ProbeName
+	s.DefaultOptions.Config(gConf, kind, tag, name,
+		probe.CommandLine(s.Command, s.Args), s.DoProbe)
 
-	log.Debugf("[%s] configuration: %+v, %+v", s.Kind(), s, s.Result())
+	log.Debugf("[%s] configuration: %+v, %+v", s.ProbeKind, s, s.Result())
 	return nil
 }
 
-// Probe return the checking result
-func (s *Shell) Probe() probe.Result {
+// DoProbe return the checking result
+func (s *Shell) DoProbe() (bool, string) {
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), s.ProbeTimeout)
 	defer cancel()
 
 	for _, e := range s.Env {
@@ -63,25 +63,11 @@ func (s *Shell) Probe() probe.Result {
 		os.Setenv(v[0], v[1])
 	}
 
-	now := time.Now()
-	s.Result().StartTime = now
-	s.Result().StartTimestamp = now.UnixMilli()
-
 	cmd := exec.CommandContext(ctx, s.Command, s.Args...)
 	output, err := cmd.CombinedOutput()
 
-	s.Result().RoundTripTime.Duration = time.Since(now)
-
-	outputFmt := func(output []byte) string {
-		s := string(output)
-		if len(strings.TrimSpace(s)) <= 0 {
-			return "empty"
-		}
-		return s
-	}
-
-	status := probe.StatusUp
-	s.ProbeResult.Message = "Shell Command has been Run Successfully!"
+	status := true
+	message := "Shell Command has been Run Successfully!"
 
 	if err != nil {
 		exitCode := 0
@@ -89,49 +75,19 @@ func (s *Shell) Probe() probe.Result {
 			exitCode = exitError.ExitCode()
 		}
 
-		s.ProbeResult.Message = fmt.Sprintf("Error: %v, ExitCode(%d), Output:%s", err, exitCode, outputFmt(output))
-		log.Errorf(s.ProbeResult.Message)
-		status = probe.StatusDown
+		message = fmt.Sprintf("Error: %v, ExitCode(%d), Output:%s",
+			err, exitCode, probe.CheckEmpty(string(output)))
+		log.Errorf(message)
+		status = false
 	}
-	log.Debugf("[%s] - %s", s.Kind(), s.CommandLine())
-	log.Debugf("[%s] - %s", s.Kind(), outputFmt(output))
+	log.Debugf("[%s - %s] - %s", s.ProbeKind, s.ProbeName, probe.CommandLine(s.Command, s.Args))
+	log.Debugf("[%s - %s] - %s", s.ProbeKind, s.ProbeName, probe.CheckEmpty(string(output)))
 
-	if err := s.CheckOutput(output); err != nil {
-		log.Errorf("[%s] - %v", s.Kind(), err)
+	if err := probe.CheckOutput(s.Contain, s.NotContain, string(output)); err != nil {
+		log.Errorf("[%s - %s] - %v", s.ProbeKind, s.ProbeName, err)
 		s.ProbeResult.Message = fmt.Sprintf("Error: %v", err)
-		status = probe.StatusDown
+		status = false
 	}
 
-	s.ProbeResult.PreStatus = s.ProbeResult.Status
-	s.ProbeResult.Status = status
-
-	s.ProbeResult.DoStat(s.Interval())
-	return *s.ProbeResult
-}
-
-// CheckOutput checks the output text,
-// - if it contains a configured string then return nil
-// - if it does not contain a configured string then return nil
-func (s *Shell) CheckOutput(output []byte) error {
-
-	str := string(output)
-	if len(s.Contain) > 0 && !strings.Contains(str, s.Contain) {
-
-		return fmt.Errorf("the output does not contain [%s]", s.Contain)
-	}
-
-	if len(s.NotContain) > 0 && strings.Contains(str, s.NotContain) {
-		return fmt.Errorf("the output contains [%s]", s.NotContain)
-
-	}
-	return nil
-}
-
-// CommandLine will return the whole command line which includes command and all arguments
-func (s *Shell) CommandLine() string {
-	result := s.Command
-	for _, arg := range s.Args {
-		result += " " + arg
-	}
-	return result
+	return status, message
 }

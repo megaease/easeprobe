@@ -24,22 +24,20 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/base"
 	log "github.com/sirupsen/logrus"
 )
 
 // HTTP implements a config for HTTP.
 type HTTP struct {
-	Name            string            `yaml:"name"`
-	URL             string            `yaml:"url"`
-	ContentEncoding string            `yaml:"content_encoding,omitempty"`
-	Method          string            `yaml:"method,omitempty"`
-	Headers         map[string]string `yaml:"headers,omitempty"`
-	Body            string            `yaml:"body,omitempty"`
+	base.DefaultOptions `yaml:",inline"`
+	URL                 string            `yaml:"url"`
+	ContentEncoding     string            `yaml:"content_encoding,omitempty"`
+	Method              string            `yaml:"method,omitempty"`
+	Headers             map[string]string `yaml:"headers,omitempty"`
+	Body                string            `yaml:"body,omitempty"`
 
 	//Option - HTTP Basic Auth Credentials
 	User string `yaml:"username,omitempty"`
@@ -47,8 +45,6 @@ type HTTP struct {
 
 	//Option - TLS Config
 	global.TLS `yaml:",inline"`
-
-	base.DefaultOptions `yaml:",inline"`
 
 	client *http.Client `yaml:"-"`
 }
@@ -67,8 +63,10 @@ func checkHTTPMethod(m string) bool {
 // Config HTTP Config Object
 func (h *HTTP) Config(gConf global.ProbeSettings) error {
 
-	h.ProbeKind = "http"
-	h.DefaultOptions.Config(gConf, h.Name, h.URL)
+	kind := "http"
+	tag := ""
+	name := h.ProbeName
+	h.DefaultOptions.Config(gConf, kind, tag, name, h.URL, h.DoProbe)
 
 	if _, err := url.ParseRequestURI(h.URL); err != nil {
 		log.Errorf("URL is not valid - %+v url=%+v", err)
@@ -91,17 +89,16 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 		h.Method = "GET"
 	}
 
-	log.Debugf("[%s] configuration: %+v, %+v", h.Kind(), h, h.Result())
+	log.Debugf("[%s] configuration: %+v, %+v", h.ProbeKind, h, h.Result())
 	return nil
 }
 
-// Probe return the checking result
-func (h *HTTP) Probe() probe.Result {
+// DoProbe return the checking result
+func (h *HTTP) DoProbe() (bool, string) {
 
 	req, err := http.NewRequest(h.Method, h.URL, bytes.NewBuffer([]byte(h.Body)))
 	if err != nil {
-		log.Errorf("HTTP request error - %v", err)
-		return *h.ProbeResult
+		return false, fmt.Sprintf("HTTP request error - %v", err)
 	}
 	if len(h.User) > 0 && len(h.Pass) > 0 {
 		req.SetBasicAuth(h.User, h.Pass)
@@ -117,18 +114,14 @@ func (h *HTTP) Probe() probe.Result {
 	req.Close = true
 
 	req.Header.Set("User-Agent", global.OrgProgVer)
-
-	now := time.Now()
-	h.ProbeResult.StartTime = now
-	h.ProbeResult.StartTimestamp = now.UnixMilli()
-
 	resp, err := h.client.Do(req)
-	h.ProbeResult.RoundTripTime.Duration = time.Since(now)
-	status := probe.StatusUp
+
+	status := true
+	message := ""
 	if err != nil {
-		h.ProbeResult.Message = fmt.Sprintf("Error: %v", err)
+		message = fmt.Sprintf("Error: %v", err)
 		log.Errorf("error making get request: %v", err)
-		status = probe.StatusDown
+		status = false
 	} else {
 		// Read the response body
 		defer resp.Body.Close()
@@ -136,17 +129,12 @@ func (h *HTTP) Probe() probe.Result {
 		if err != nil {
 			log.Debugf("%s", string(response))
 		}
-		h.ProbeResult.Message = fmt.Sprintf("Success: HTTP Status Code is %d", resp.StatusCode)
+		message = fmt.Sprintf("Success: HTTP Status Code is %d", resp.StatusCode)
 		if resp.StatusCode >= 500 {
-			h.ProbeResult.Message = fmt.Sprintf("Error: HTTP Status Code is %d", resp.StatusCode)
-			status = probe.StatusDown
+			message = fmt.Sprintf("Error: HTTP Status Code is %d", resp.StatusCode)
+			status = false
 		}
 	}
 
-	h.ProbeResult.PreStatus = h.ProbeResult.Status
-	h.ProbeResult.Status = status
-
-	h.ProbeResult.DoStat(h.Interval())
-
-	return *h.ProbeResult
+	return status, message
 }

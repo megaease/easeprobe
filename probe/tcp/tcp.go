@@ -20,53 +20,41 @@ package tcp
 import (
 	"fmt"
 	"net"
-	"time"
 
 	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/base"
 	log "github.com/sirupsen/logrus"
 )
 
 // TCP implements a config for TCP
 type TCP struct {
-	Name string `yaml:"name"`
-	Host string `yaml:"host"`
-
 	base.DefaultOptions `yaml:",inline"`
+	Host                string `yaml:"host"`
 }
 
 // Config HTTP Config Object
 func (t *TCP) Config(gConf global.ProbeSettings) error {
-	t.ProbeKind = "tcp"
-	t.DefaultOptions.Config(gConf, t.Name, t.Host)
+	kind := "tcp"
+	tag := ""
+	name := t.ProbeName
+	t.DefaultOptions.Config(gConf, kind, tag, name, t.Host, t.DoProbe)
 
-	log.Debugf("[%s] configuration: %+v, %+v", t.Kind(), t, t.Result())
+	log.Debugf("[%s] configuration: %+v, %+v", t.ProbeKind, t, t.Result())
 	return nil
 }
 
-// Probe return the checking result
-func (t *TCP) Probe() probe.Result {
-
-	now := time.Now()
-	t.ProbeResult.StartTime = now
-	t.ProbeResult.StartTimestamp = now.UnixMilli()
-
+// DoProbe return the checking result
+func (t *TCP) DoProbe() (bool, string) {
 	conn, err := net.DialTimeout("tcp", t.Host, t.Timeout())
-	t.ProbeResult.RoundTripTime.Duration = time.Since(now)
-	status := probe.StatusUp
+	status := true
+	message := ""
 	if err != nil {
-		t.ProbeResult.Message = fmt.Sprintf("Error: %v", err)
+		message = fmt.Sprintf("Error: %v", err)
 		log.Errorf("error: %v", err)
-		status = probe.StatusDown
+		status = false
 	} else {
-		t.ProbeResult.Message = "TCP Connection Established Successfully!"
+		message = "TCP Connection Established Successfully!"
 		conn.Close()
 	}
-	t.ProbeResult.PreStatus = t.ProbeResult.Status
-	t.ProbeResult.Status = status
-
-	t.ProbeResult.DoStat(t.Interval())
-
-	return *t.ProbeResult
+	return status, message
 }
