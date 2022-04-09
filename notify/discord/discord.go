@@ -177,9 +177,9 @@ func (c *NotifyConfig) Notify(result probe.Result) {
 	fn := func() error {
 		json, err := json.Marshal(discord)
 		if err != nil {
-			log.Debugf("[%s - %s] - %v", c.Kind(), tag, discord)
+			log.Debugf("[%s / %s] - %v", c.Kind(), tag, discord)
 		} else {
-			log.Debugf("[%s - %s ] - %s", c.Kind(), tag, string(json))
+			log.Debugf("[%s / %s ] - %s", c.Kind(), tag, string(json))
 		}
 		return c.SendDiscordNotification(discord)
 	}
@@ -285,9 +285,9 @@ func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
 		fn := func() error {
 			json, err := json.Marshal(discord)
 			if err != nil {
-				log.Debugf("[%s - %s ] - %v", c.Kind(), tag, discord)
+				log.Debugf("[%s / %s ] - %v", c.Kind(), tag, discord)
 			} else {
-				log.Debugf("[%s - %s ] - %s", c.Kind(), tag, string(json))
+				log.Debugf("[%s / %s ] - %s", c.Kind(), tag, string(json))
 			}
 			return c.SendDiscordNotification(discord)
 		}

@@ -80,11 +80,11 @@ func (s *Shell) DoProbe() (bool, string) {
 		log.Errorf(message)
 		status = false
 	}
-	log.Debugf("[%s - %s] - %s", s.ProbeKind, s.ProbeName, probe.CommandLine(s.Command, s.Args))
-	log.Debugf("[%s - %s] - %s", s.ProbeKind, s.ProbeName, probe.CheckEmpty(string(output)))
+	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, probe.CommandLine(s.Command, s.Args))
+	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, probe.CheckEmpty(string(output)))
 
 	if err := probe.CheckOutput(s.Contain, s.NotContain, string(output)); err != nil {
-		log.Errorf("[%s - %s] - %v", s.ProbeKind, s.ProbeName, err)
+		log.Errorf("[%s / %s] - %v", s.ProbeKind, s.ProbeName, err)
 		s.ProbeResult.Message = fmt.Sprintf("Error: %v", err)
 		status = false
 	}
