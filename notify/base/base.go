@@ -78,9 +78,9 @@ func (c *DefaultNotify) NotifyStat(probers []probe.Prober) {
 // SendWithRetry sends the notification with retry if got error
 func (c *DefaultNotify) SendWithRetry(title string, message string, tag string) {
 	fn := func() error {
-		log.Debugf("[%s - %s] - %s", c.MyKind, tag, title)
+		log.Debugf("[%s / %s] - %s", c.MyKind, tag, title)
 		if c.SendFunc == nil {
-			log.Errorf("[%s - %s] - %s SendFunc is nil", c.MyKind, tag, title)
+			log.Errorf("[%s / %s] - %s SendFunc is nil", c.MyKind, tag, title)
 		}
 		return c.SendFunc(title, message)
 	}

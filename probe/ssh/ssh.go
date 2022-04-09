@@ -56,16 +56,16 @@ func (s *SSH) DoProbe() (bool, string) {
 	message := "SSH Command has been Run Successfully!"
 
 	if err != nil {
-		log.Errorf("[%s - %s] %v", s.ProbeKind, s.ProbeName, err)
+		log.Errorf("[%s / %s] %v", s.ProbeKind, s.ProbeName, err)
 		status = false
 		message = err.Error() + " - " + output
 	}
 
-	log.Debugf("[%s - %s] - %s", s.ProbeKind, s.ProbeName, probe.CommandLine(s.Command, s.Args))
-	log.Debugf("[%s - %s] - %s", s.ProbeKind, s.ProbeName, probe.CheckEmpty(string(output)))
+	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, probe.CommandLine(s.Command, s.Args))
+	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, probe.CheckEmpty(string(output)))
 
 	if err := probe.CheckOutput(s.Contain, s.NotContain, string(output)); err != nil {
-		log.Errorf("[%s - %s] - %v", s.ProbeKind, err)
+		log.Errorf("[%s / %s] - %v", s.ProbeKind, err)
 		message = fmt.Sprintf("Error: %v", err)
 		status = false
 	}
@@ -102,11 +102,11 @@ func (s *SSH) RunSSHCmd() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		hostKeyCallback = nil
-		log.Warnf("[%s - %s] unable to get home directory: %v", s.ProbeKind, s.ProbeName, err)
+		log.Warnf("[%s / %s] unable to get home directory: %v", s.ProbeKind, s.ProbeName, err)
 	} else {
 		hostKeyCallback, err = knownhosts.New(home + "/.ssh/known_hosts")
 		if err != nil {
-			log.Warnf("[%s - %s] could not create hostkeycallback function: ", s.ProbeKind, s.ProbeName, err)
+			log.Warnf("[%s / %s] could not create hostkeycallback function: ", s.ProbeKind, s.ProbeName, err)
 		}
 	}
 

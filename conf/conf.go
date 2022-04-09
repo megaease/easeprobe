@@ -255,7 +255,7 @@ func (conf *Conf) AllProbers() []probe.Prober {
 				log.Debugf("%s is not a probe type", v.Index(j).Type())
 				continue
 			}
-			log.Debugf("%s - %s - %v", t.Field(i).Name, t.Field(i).Type.Kind(), v.Index(j))
+			log.Debugf("%s / %s / %v", t.Field(i).Name, t.Field(i).Type.Kind(), v.Index(j))
 			probers = append(probers, v.Index(j).Addr().Interface().(probe.Prober))
 		}
 	}
