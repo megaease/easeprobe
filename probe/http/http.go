@@ -129,9 +129,9 @@ func (h *HTTP) DoProbe() (bool, string) {
 		if err != nil {
 			log.Debugf("%s", string(response))
 		}
-		message = fmt.Sprintf("Success: HTTP Status Code is %d", resp.StatusCode)
+		message = fmt.Sprintf("HTTP Status Code is %d", resp.StatusCode)
 		if resp.StatusCode >= 500 {
-			message = fmt.Sprintf("Error: HTTP Status Code is %d", resp.StatusCode)
+			message = fmt.Sprintf("HTTP Status Code is %d", resp.StatusCode)
 			status = false
 		}
 	}

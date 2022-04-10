@@ -106,26 +106,24 @@ func (d *DefaultOptions) Probe() probe.Result {
 
 	d.ProbeResult.RoundTripTime.Duration = time.Since(now)
 
-	status := probe.StatusUp
-	if len(d.ProbeTag) > 0 {
-		d.ProbeResult.Message = fmt.Sprintf("%s / %s checked up successfully!", d.ProbeKind, d.ProbeTag)
-	} else {
-		d.ProbeResult.Message = fmt.Sprintf("%s checked up successfully!", d.ProbeKind)
-	}
-
-	if stat != true {
-		d.ProbeResult.Message = fmt.Sprintf("Error (%s): %s", d.ProbeKind, msg)
+	var status probe.Status
+	if stat == true {
+		status = probe.StatusUp
 		if len(d.ProbeTag) > 0 {
-			log.Errorf("[%s / %s / %s] - %s", d.ProbeKind, d.ProbeTag, d.ProbeName, msg)
-		} else {
-			log.Errorf("[%s / %s] - %s", d.ProbeKind, d.ProbeName, msg)
-		}
-		status = probe.StatusDown
-	} else {
-		if len(d.ProbeTag) > 0 {
+			d.ProbeResult.Message = fmt.Sprintf("Success (%s/%s): %s", d.ProbeKind, d.ProbeTag, msg)
 			log.Debugf("[%s / %s / %s] - %s", d.ProbeKind, d.ProbeTag, d.ProbeName, msg)
 		} else {
+			d.ProbeResult.Message = fmt.Sprintf("Success (%s): %s", d.ProbeKind, msg)
 			log.Debugf("[%s / %s] - %s", d.ProbeKind, d.ProbeName, msg)
+		}
+	} else {
+		status = probe.StatusDown
+		if len(d.ProbeTag) > 0 {
+			d.ProbeResult.Message = fmt.Sprintf("Error (%s/%s): %s", d.ProbeKind, d.ProbeTag, msg)
+			log.Errorf("[%s / %s / %s] - %s", d.ProbeKind, d.ProbeTag, d.ProbeName, msg)
+		} else {
+			d.ProbeResult.Message = fmt.Sprintf("Error (%s): %s", d.ProbeKind, msg)
+			log.Errorf("[%s / %s] - %s", d.ProbeKind, d.ProbeName, msg)
 		}
 	}
 
