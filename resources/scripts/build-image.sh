@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-pushd `dirname $0` > /dev/null
-SCRIPT_PATH=`pwd -P`
-popd > /dev/null
+pushd "$(dirname $0)" > /dev/null || exit
+SCRIPT_PATH=$(pwd -P)
+popd > /dev/null || exit
 
 build_image() {
     local img_name=$1
@@ -10,7 +10,7 @@ build_image() {
     local docker_context_path=$3
     local docker_file=$4
 
-    DOCKER_BUILDKIT=1 docker build -t "${img_name}":${img_ver} -f "${docker_file}" "${docker_context_path}"
+    DOCKER_BUILDKIT=1 docker build -t "${img_name}":"${img_ver}" -f "${docker_file}" "${docker_context_path}"
 }
 
 show_usage() {
@@ -60,4 +60,4 @@ fi
 build_image "${IMAGE_NAME}" \
 	"${IMAGE_VERSION}" \
 	"${REPOSITORY_DIR}/" \
-  "${DOCKER_FILE}"
+   "${DOCKER_FILE}"
