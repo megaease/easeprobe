@@ -183,6 +183,8 @@ func New(conf *string) (Conf, error) {
 		return c, err
 	}
 
+	y = []byte(os.ExpandEnv(string(y)))
+
 	err = yaml.Unmarshal(y, &c)
 	if err != nil {
 		log.Errorf("error: %v", err)
