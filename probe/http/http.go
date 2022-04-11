@@ -20,14 +20,15 @@ package http
 import (
 	"bytes"
 	"fmt"
-	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/probe/base"
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/probe/base"
+	log "github.com/sirupsen/logrus"
 )
 
 // HTTP implements a config for HTTP.
