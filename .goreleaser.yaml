@@ -57,3 +57,16 @@ dockers:
     dockerfile: resources/Dockerfile.goreleaser
     extra_files:
       - resources/scripts/entrypoint.sh
+
+  - image_templates:
+      - megaease/easeprobe:latest
+      - megaease/easeprobe:{{ .Tag }}
+
+    goos: linux
+    goarch: arm64
+    ids:
+      - build
+
+    dockerfile: resources/Dockerfile.goreleaser
+    extra_files:
+      - resources/scripts/entrypoint.sh
