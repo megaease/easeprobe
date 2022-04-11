@@ -20,14 +20,14 @@ package http
 import (
 	"bytes"
 	"fmt"
+	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/probe/base"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
-
-	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/probe/base"
-	log "github.com/sirupsen/logrus"
+	"time"
 )
 
 // HTTP implements a config for HTTP.
@@ -38,6 +38,7 @@ type HTTP struct {
 	Method              string            `yaml:"method,omitempty"`
 	Headers             map[string]string `yaml:"headers,omitempty"`
 	Body                string            `yaml:"body,omitempty"`
+	InternalTimeout     time.Duration     `yaml:"timeout,omitempty"`
 
 	//Option - HTTP Basic Auth Credentials
 	User string `yaml:"username,omitempty"`
@@ -79,8 +80,12 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 		return err
 	}
 
+	if h.InternalTimeout == 0 {
+		h.InternalTimeout = h.Timeout()
+	}
+
 	h.client = &http.Client{
-		Timeout: h.Timeout(),
+		Timeout: h.InternalTimeout,
 		Transport: &http.Transport{
 			TLSClientConfig: tls,
 		},
