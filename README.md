@@ -208,6 +208,7 @@ http:
   # Some of the Software support the HTTP Query
   - name: ElasticSearch
     url: http://elasticsearch.server:9200
+    timeout: "2m"
   - name: Eureka
     url: http://eureka.server:8761
   - name: Prometheus
