@@ -21,13 +21,12 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"os"
+	"time"
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/base"
 	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/knownhosts"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -35,22 +34,41 @@ import (
 // Kind is the type of probe
 const Kind string = "ssh"
 
-// SSH implements a config for ssh command (os.Exec)
-type SSH struct {
+// Endpoint is SSH Endpoint
+type Endpoint struct {
+	PrivateKey string      `yaml:"key"`
+	Host       string      `yaml:"host"`
+	User       string      `yaml:"username"`
+	Password   string      `yaml:"password"`
+	client     *ssh.Client `yaml:"-"`
+}
+
+// Server implements a config for ssh command
+type Server struct {
 	base.DefaultOptions `yaml:",inline"`
-	PrivateKey          string   `yaml:"key"`
-	Host                string   `yaml:"host"`
-	User                string   `yaml:"username"`
-	Password            string   `yaml:"password"`
+	Endpoint            `yaml:",inline"`
 	Command             string   `yaml:"cmd"`
 	Args                []string `yaml:"args,omitempty"`
 	Env                 []string `yaml:"env,omitempty"`
 	Contain             string   `yaml:"contain,omitempty"`
 	NotContain          string   `yaml:"not_contain,omitempty"`
+
+	BastionID string    `yaml:"bastion"`
+	bastion   *Endpoint `yaml:"-"`
 }
 
+// SSH is the SSH probe Configuration
+type SSH struct {
+	Bastion *map[string]Endpoint `yaml:"bastion"`
+	Servers []Server             `yaml:"servers"`
+}
+
+// BastionMap is a map of bastion
+var BastionMap map[string]Endpoint
+
 // Config SSH Config Object
-func (s *SSH) Config(gConf global.ProbeSettings) error {
+func (s *Server) Config(gConf global.ProbeSettings) error {
+
 	kind := "ssh"
 	tag := ""
 	name := s.ProbeName
@@ -60,12 +78,19 @@ func (s *SSH) Config(gConf global.ProbeSettings) error {
 		return fmt.Errorf("password or private key is required")
 	}
 
+	if len(s.BastionID) > 0 {
+		if bastion, ok := BastionMap[s.BastionID]; ok {
+			log.Debugf("[%s / %s] - has the bastion [%s]", s.ProbeKind, s.ProbeName, bastion.Host)
+			s.bastion = &bastion
+		}
+	}
+
 	log.Debugf("[%s] configuration: %+v, %+v", s.ProbeKind, s, s.Result())
 	return nil
 }
 
 // DoProbe return the checking result
-func (s *SSH) DoProbe() (bool, string) {
+func (s *Server) DoProbe() (bool, string) {
 
 	output, err := s.RunSSHCmd()
 
@@ -90,59 +115,106 @@ func (s *SSH) DoProbe() (bool, string) {
 	return status, message
 }
 
-// RunSSHCmd run ssh command
-func (s *SSH) RunSSHCmd() (string, error) {
-
+// SSHConfig returns the ssh.ClientConfig
+func (e *Endpoint) SSHConfig(kind, name string, timeout time.Duration) (*ssh.ClientConfig, error) {
 	var Auth []ssh.AuthMethod
 
-	if len(s.Password) > 0 {
-		Auth = append(Auth, ssh.Password(s.Password))
+	if len(e.Password) > 0 {
+		Auth = append(Auth, ssh.Password(e.Password))
 	}
 
-	var hostKeyCallback ssh.HostKeyCallback
-
-	if len(s.PrivateKey) > 0 {
-		key, err := ioutil.ReadFile(s.PrivateKey)
+	if len(e.PrivateKey) > 0 {
+		key, err := ioutil.ReadFile(e.PrivateKey)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		// Create the Signer for this private key.
 		signer, err := ssh.ParsePrivateKey(key)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		Auth = append(Auth, ssh.PublicKeys(signer))
 	}
 
-	home, err := os.UserHomeDir()
-	if err != nil {
-		hostKeyCallback = nil
-		log.Warnf("[%s / %s] unable to get home directory: %v", s.ProbeKind, s.ProbeName, err)
-	} else {
-		hostKeyCallback, err = knownhosts.New(home + "/.ssh/known_hosts")
-		if err != nil {
-			log.Warnf("[%s / %s] could not create hostkeycallback function: ", s.ProbeKind, s.ProbeName, err)
-		}
+	config := &ssh.ClientConfig{
+		User:            e.User,
+		Auth:            Auth,
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		Timeout:         timeout,
 	}
 
-	config := &ssh.ClientConfig{
-		User:            s.User,
-		Auth:            Auth,
-		HostKeyCallback: hostKeyCallback,
-		Timeout:         s.Timeout(),
+	return config, nil
+}
+
+// GetSSHClient returns a ssh.Client
+func (s *Server) GetSSHClient() error {
+	config, err := s.Endpoint.SSHConfig(s.ProbeKind, s.ProbeName, s.Timeout())
+	if err != nil {
+		return err
 	}
 
 	// Connect to the remote server and perform the SSH handshake.
 	client, err := ssh.Dial("tcp", s.Host, config)
 	if err != nil {
-		return "", err
+		return err
 	}
-	defer client.Close()
+
+	s.client = client
+	return nil
+}
+
+// GetSSHClientFromBastion returns a ssh.Client via bastion server
+func (s *Server) GetSSHClientFromBastion() error {
+	bConfig, err := s.bastion.SSHConfig(s.ProbeKind, s.ProbeName, s.Timeout())
+	if err != nil {
+		return err
+	}
+
+	bClient, err := ssh.Dial("tcp", s.bastion.Host, bConfig)
+	if err != nil {
+		return err
+	}
+	s.bastion.client = bClient
+
+	config, err := s.Endpoint.SSHConfig(s.ProbeKind, s.ProbeName, s.Timeout())
+	if err != nil {
+		return err
+	}
+
+	// Connect to the remote server and perform the SSH handshake.
+	conn, err := bClient.Dial("tcp", s.Host)
+	if err != nil {
+		return err
+	}
+
+	ncc, chans, reqs, err := ssh.NewClientConn(conn, s.Host, config)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	s.client = ssh.NewClient(ncc, chans, reqs)
+	return nil
+}
+
+// RunSSHCmd run ssh command
+func (s *Server) RunSSHCmd() (string, error) {
+
+	if s.bastion != nil && len(s.bastion.Host) > 0 {
+		if err := s.GetSSHClientFromBastion(); err != nil {
+			return "", err
+		}
+		defer s.bastion.client.Close()
+	} else {
+		if err := s.GetSSHClient(); err != nil {
+			return "", err
+		}
+	}
+	defer s.client.Close()
 
 	// Create a session.
-	session, err := client.NewSession()
+	session, err := s.client.NewSession()
 	if err != nil {
 		return "", err
 	}

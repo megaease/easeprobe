@@ -140,7 +140,7 @@ type Conf struct {
 	HTTP     []http.HTTP     `yaml:"http"`
 	TCP      []tcp.TCP       `yaml:"tcp"`
 	Shell    []shell.Shell   `yaml:"shell"`
-	SSH      []ssh.SSH       `yaml:"ssh"`
+	SSH      ssh.SSH         `yaml:"ssh"`
 	Client   []client.Client `yaml:"client"`
 	Notify   notify.Config   `yaml:"notify"`
 	Settings Settings        `yaml:"settings"`
@@ -149,9 +149,13 @@ type Conf struct {
 // New read the configuration from yaml
 func New(conf *string) (Conf, error) {
 	c := Conf{
-		HTTP:   []http.HTTP{},
-		TCP:    []tcp.TCP{},
-		Shell:  []shell.Shell{},
+		HTTP:  []http.HTTP{},
+		TCP:   []tcp.TCP{},
+		Shell: []shell.Shell{},
+		SSH: ssh.SSH{
+			Bastion: &ssh.BastionMap,
+			Servers: []ssh.Server{},
+		},
 		Client: []client.Client{},
 		Notify: notify.Config{},
 		Settings: Settings{
@@ -202,6 +206,7 @@ func New(conf *string) (Conf, error) {
 			log.Debugf("%s", string(s))
 		}
 	}
+
 	return c, err
 }
 
@@ -240,23 +245,38 @@ func isProbe(t reflect.Type) bool {
 
 // AllProbers return all probers
 func (conf *Conf) AllProbers() []probe.Prober {
+	log.Debugf("--------- Process the probers settings ---------")
+	return allProbersHelper(*conf)
+}
+
+func allProbersHelper(i interface{}) []probe.Prober {
 
 	var probers []probe.Prober
+	t := reflect.TypeOf(i)
+	v := reflect.ValueOf(i)
+	if t.Kind() != reflect.Struct {
+		return probers
+	}
 
-	log.Debugf("--------- Process the probers settings ---------")
-	t := reflect.TypeOf(*conf)
 	for i := 0; i < t.NumField(); i++ {
-		if t.Field(i).Type.Kind() != reflect.Slice {
+		tField := t.Field(i).Type.Kind()
+		if tField == reflect.Struct {
+			probers = append(probers, allProbersHelper(v.Field(i).Interface())...)
 			continue
 		}
-		v := reflect.ValueOf(*conf).Field(i)
-		for j := 0; j < v.Len(); j++ {
-			if !isProbe(v.Index(j).Addr().Type()) {
-				log.Debugf("%s is not a probe type", v.Index(j).Type())
+		if tField != reflect.Slice {
+			continue
+		}
+
+		vField := v.Field(i)
+		for j := 0; j < vField.Len(); j++ {
+			if !isProbe(vField.Index(j).Addr().Type()) {
+				//log.Debugf("%s is not a probe type", vField.Index(j).Type())
 				continue
 			}
-			log.Debugf("%s / %s / %v", t.Field(i).Name, t.Field(i).Type.Kind(), v.Index(j))
-			probers = append(probers, v.Index(j).Addr().Interface().(probe.Prober))
+
+			log.Debugf("--> %s / %s / %v", t.Field(i).Name, t.Field(i).Type.Kind(), vField.Index(j))
+			probers = append(probers, vField.Index(j).Addr().Interface().(probe.Prober))
 		}
 	}
 
@@ -285,7 +305,7 @@ func (conf *Conf) AllNotifiers() []notify.Notify {
 				log.Debugf("%s is not a probe type", v.Index(j).Type())
 				continue
 			}
-			log.Debugf("%s - %s - %v", t.Field(i).Name, t.Field(i).Type.Kind(), v.Index(j))
+			log.Debugf("--> %s - %s - %v", t.Field(i).Name, t.Field(i).Type.Kind(), v.Index(j))
 			notifies = append(notifies, v.Index(j).Addr().Interface().(notify.Notify))
 		}
 	}
