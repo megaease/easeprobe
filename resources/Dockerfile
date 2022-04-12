@@ -2,7 +2,7 @@ FROM golang:1.18-alpine as builder
 WORKDIR /go/src/github.com/megaease/easeprobe/
 COPY ./ /go/src/github.com/megaease/easeprobe/
 RUN --mount=type=cache,target=/var/cache/apk \
-    apk --no-cache add make git 
+    apk --no-cache add make git gcc libc-dev
 
 COPY go.mod go.mod
 COPY go.sum go.sum
