@@ -66,19 +66,18 @@ Ease Probe supports the following probing methods:
       contain : "PONG"
   ```
 
-- **SSH**. Run a remote command via SSH and check the result. ([SSH Command Probe Configuration](#34-ssh-command-probe-configuration))
+- **SSH**. Run a remote command via SSH and check the result. Support the bastion/jump server  ([SSH Command Probe Configuration](#34-ssh-command-probe-configuration))
 
-```YAML
-ssh:
-  - name : CubieBoard
-    host: 192.168.10.10:22
-    username: root
-    password: xxxxxxx
-    key: /Users/user/.ssh/id_rsa
-    cmd: "ps auxwe | grep easeprobe | grep -v grep"
-    contain: easeprobe
-```
-
+  ```YAML
+  ssh:
+    servers:
+      - name : ServerX
+        host: ubuntu@172.10.1.1:22
+        password: xxxxxxx
+        key: /Users/user/.ssh/id_rsa
+        cmd: "ps auxwe | grep easeprobe | grep -v grep"
+        contain: easeprobe
+  ```
 
 - **Client**. Currently, support the following native client. Support the mTLS. ( [Native Client Probe](#35-native-client-probe) )
   - **MySQL**. Connect to the MySQL server and run the `SHOW STATUS` SQL.
@@ -109,7 +108,7 @@ Ease Probe supports the following notifications:
 - **Telegram**. Using Telegram Bot for notification
 - **Email**. Support multiple email addresses.
 - **AWS SNS**. Support AWS Simple Notification Service.
-- **WeChat Work**. Support Enterprise WeChat Wrok notification.
+- **WeChat Work**. Support Enterprise WeChat Work notification.
 - **DingTalk**. Support the DingTalk notification.
 - **Log File**. Write the notification into a log file
 
@@ -184,7 +183,7 @@ $ make
 
 ### 2.2 Run
 
-Running the following command for local test
+Running the following command for the local test
 
 ```shell
 $ build/bin/easeprobe -f config.yaml
@@ -300,28 +299,57 @@ shell:
 
 ### 3.4 SSH Command Probe Configuration
 
-SSH probe is similar with Shell probe, and it supports password and private key authentication.
+SSH probe is similar with Shell probe.
+- Support Password and Private key authentication.
+- Support the Bastion host tunnel.
+
+The `host` supports the following configuration
+- `example.com`
+- `example.com:22`
+- `user@example.com:22`
 
 The following are example of SSH probe configuration.
 
 ```YAML
 # SSH Probe Configuration
 ssh:
-  # run redis-cli ping and check the "PONG"
-  - name: Redis (Remote)
-    username: ubuntu  # SSH Login username
-    password: xxxxx   # SSH Login password
-    key: /path/to/private.key # SSH login private file
-    cmd: "redis-cli"
-    args:
-      - "-h"
-      - "127.0.0.1"
-      - "ping"
-    env:
-      # set the `REDISCLI_AUTH` environment variable for redis password
-      - "REDISCLI_AUTH=abc123"
-    # check the command output, if does not contain the PONG, mark the status down
-    contain : "PONG"
+  # SSH bastion host configuration
+  bastion:
+    aws: # bastion host ID      ◄──────────────────────────────┐
+      host: aws.basition.com:22 #                              │
+      username: ubuntu # login user                            │
+      key: /patch/to/aws/basion/key.pem # private key file     │
+    gcp: # bastion host ID                                     │
+      host: ubuntu@gcp.basition.com:22 # bastion host          │
+      username: ubuntu # login user                            │
+      key: /patch/to/gcp/basion/key.pem # private key file     │
+  # SSH Probe configuration                                    │
+  servers:   #                                                 │
+    # run redis-cli ping and check the "PONG"                  │
+    - name: Redis (AWS) # Name                                 │
+      bastion: aws  # bastion host id ------------------------─┘
+      host: 172.20.2.202:22
+      username: ubuntu  # SSH Login username
+      password: xxxxx   # SSH Login password
+      key: /path/to/private.key # SSH login private file
+      cmd: "redis-cli"
+      args:
+        - "-h"
+        - "127.0.0.1"
+        - "ping"
+      env:
+        # set the `REDISCLI_AUTH` environment variable for redis password
+        - "REDISCLI_AUTH=abc123"
+      # check the command output, if does not contain the PONG, mark the status down
+      contain : "PONG"
+    
+    # Check the process status of `Kafka`
+    - name:  Kafka (GCP)
+      bastion: gcp         #  ◄------ bastion host id
+      host: 172.10.1.100:22
+      username: ubuntu
+      key: /path/to/private.key
+      cmd: "ps -ef | grep kafka"
 ```
 
 
