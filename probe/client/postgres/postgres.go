@@ -44,6 +44,7 @@ func New(opt conf.Options) PostgreSQL {
 		pgdriver.WithUser(opt.Username),
 		pgdriver.WithTimeout(opt.Timeout().Round(time.Second)),
 		pgdriver.WithApplicationName(global.OrgProgVer),
+		pgdriver.WithDatabase("template1"),
 	}
 	if len(opt.Password) > 0 {
 		clientOptions = append(clientOptions, pgdriver.WithPassword(opt.Password))
@@ -52,7 +53,7 @@ func New(opt conf.Options) PostgreSQL {
 	tls, err := opt.TLS.Config()
 	if err != nil {
 		log.Errorf("[%s] %s - TLS Config error - %v", Kind, opt.ProbeName, err)
-	} else {
+	} else if tls != nil {
 		tls.InsecureSkipVerify = true
 		clientOptions = append(clientOptions, pgdriver.WithTLSConfig(tls))
 	}

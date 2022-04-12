@@ -54,7 +54,7 @@ func New(opt conf.Options) MySQL {
 	tls, err := opt.TLS.Config()
 	if err != nil {
 		log.Errorf("[%s] %s - TLS Config error - %v", Kind, opt.ProbeName, err)
-	} else {
+	} else if tls != nil {
 		conn += "&tls=" + global.Prog
 	}
 
