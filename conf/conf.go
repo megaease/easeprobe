@@ -194,6 +194,7 @@ func New(conf *string) (Conf, error) {
 	}
 
 	c.initLog()
+	ssh.ParseAllBastionHost()
 
 	config = &c
 

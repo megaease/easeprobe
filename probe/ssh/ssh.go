@@ -55,6 +55,19 @@ type SSH struct {
 // BastionMap is a map of bastion
 var BastionMap map[string]Endpoint
 
+// ParseAllBastionHost parse all bastion host
+func ParseAllBastionHost() {
+	for k, v:= range BastionMap {
+		err := v.ParseHost()
+		if err != nil {
+			log.Errorf("Bastion Host error: [%s / %s] - %v", k, BastionMap[k].Host, err)
+			delete(BastionMap, k)
+			continue
+		}
+		BastionMap[k] = v
+	}
+}
+
 // Config SSH Config Object
 func (s *Server) Config(gConf global.ProbeSettings) error {
 
@@ -71,9 +84,8 @@ func (s *Server) Config(gConf global.ProbeSettings) error {
 		if bastion, ok := BastionMap[s.BastionID]; ok {
 			log.Debugf("[%s / %s] - has the bastion [%s]", s.ProbeKind, s.ProbeName, bastion.Host)
 			s.bastion = &bastion
-			if err := s.bastion.ParseHost(); err != nil {
-				return err
-			}
+		} else {
+			log.Warnf("[%s / %s] - wrong bastion [%s]", s.ProbeKind, s.ProbeName, s.BastionID)
 		}
 	}
 

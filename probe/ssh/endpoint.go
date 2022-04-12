@@ -25,9 +25,10 @@ func (e *Endpoint) ParseHost() error {
 	if strings.LastIndex(e.Host, ":") < 0 {
 		e.Host = e.Host + ":22"
 	}
-	if strings.Index(e.Host, "@") > 0 {
-		e.User = e.Host[:strings.Index(e.Host, "@")]
-		e.Host = e.Host[strings.Index(e.Host, "@")+1:]
+	userIdx := strings.Index(e.Host, "@")
+	if userIdx > 0 {
+		e.User = e.Host[:userIdx]
+		e.Host = e.Host[userIdx+1:]
 	}
 	_, _, err := net.SplitHostPort(e.Host)
 
