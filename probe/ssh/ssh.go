@@ -20,8 +20,6 @@ package ssh
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
-	"time"
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
@@ -33,15 +31,6 @@ import (
 
 // Kind is the type of probe
 const Kind string = "ssh"
-
-// Endpoint is SSH Endpoint
-type Endpoint struct {
-	PrivateKey string      `yaml:"key"`
-	Host       string      `yaml:"host"`
-	User       string      `yaml:"username"`
-	Password   string      `yaml:"password"`
-	client     *ssh.Client `yaml:"-"`
-}
 
 // Server implements a config for ssh command
 type Server struct {
@@ -82,7 +71,14 @@ func (s *Server) Config(gConf global.ProbeSettings) error {
 		if bastion, ok := BastionMap[s.BastionID]; ok {
 			log.Debugf("[%s / %s] - has the bastion [%s]", s.ProbeKind, s.ProbeName, bastion.Host)
 			s.bastion = &bastion
+			if err := s.bastion.ParseHost(); err != nil {
+				return err
+			}
 		}
+	}
+
+	if err := s.Endpoint.ParseHost(); err != nil {
+		return err
 	}
 
 	log.Debugf("[%s] configuration: %+v, %+v", s.ProbeKind, s, s.Result())
@@ -107,45 +103,12 @@ func (s *Server) DoProbe() (bool, string) {
 	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, probe.CheckEmpty(string(output)))
 
 	if err := probe.CheckOutput(s.Contain, s.NotContain, string(output)); err != nil {
-		log.Errorf("[%s / %s] - %v", s.ProbeKind, err)
+		log.Errorf("[%s / %s] - %v", s.ProbeKind, s.ProbeName, err)
 		message = fmt.Sprintf("Error: %v", err)
 		status = false
 	}
 
 	return status, message
-}
-
-// SSHConfig returns the ssh.ClientConfig
-func (e *Endpoint) SSHConfig(kind, name string, timeout time.Duration) (*ssh.ClientConfig, error) {
-	var Auth []ssh.AuthMethod
-
-	if len(e.Password) > 0 {
-		Auth = append(Auth, ssh.Password(e.Password))
-	}
-
-	if len(e.PrivateKey) > 0 {
-		key, err := ioutil.ReadFile(e.PrivateKey)
-		if err != nil {
-			return nil, err
-		}
-
-		// Create the Signer for this private key.
-		signer, err := ssh.ParsePrivateKey(key)
-		if err != nil {
-			return nil, err
-		}
-
-		Auth = append(Auth, ssh.PublicKeys(signer))
-	}
-
-	config := &ssh.ClientConfig{
-		User:            e.User,
-		Auth:            Auth,
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		Timeout:         timeout,
-	}
-
-	return config, nil
 }
 
 // GetSSHClient returns a ssh.Client
@@ -169,29 +132,29 @@ func (s *Server) GetSSHClient() error {
 func (s *Server) GetSSHClientFromBastion() error {
 	bConfig, err := s.bastion.SSHConfig(s.ProbeKind, s.ProbeName, s.Timeout())
 	if err != nil {
-		return err
+		return fmt.Errorf("Bastion: %s", err)
 	}
 
 	bClient, err := ssh.Dial("tcp", s.bastion.Host, bConfig)
 	if err != nil {
-		return err
+		return fmt.Errorf("Bastion: %s", err)
 	}
 	s.bastion.client = bClient
 
 	config, err := s.Endpoint.SSHConfig(s.ProbeKind, s.ProbeName, s.Timeout())
 	if err != nil {
-		return err
+		return fmt.Errorf("Server: %s", err)
 	}
 
 	// Connect to the remote server and perform the SSH handshake.
 	conn, err := bClient.Dial("tcp", s.Host)
 	if err != nil {
-		return err
+		return fmt.Errorf("Server: %s", err)
 	}
 
 	ncc, chans, reqs, err := ssh.NewClientConn(conn, s.Host, config)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("Server: %s", err)
 	}
 
 	s.client = ssh.NewClient(ncc, chans, reqs)
