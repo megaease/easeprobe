@@ -72,8 +72,7 @@ Ease Probe supports the following probing methods:
   ssh:
     servers:
       - name : ServerX
-        host: 172.10.1.1:22
-        username: ubuntu
+        host: ubuntu@172.10.1.1:22
         password: xxxxxxx
         key: /Users/user/.ssh/id_rsa
         cmd: "ps auxwe | grep easeprobe | grep -v grep"
@@ -304,6 +303,11 @@ SSH probe is similar with Shell probe.
 - Support Password and Private key authentication.
 - Support the Bastion host tunnel.
 
+The `host` supports the following configuration
+- `example.com`
+- `example.com:22`
+- `user@example.com:22`
+
 The following are example of SSH probe configuration.
 
 ```YAML
@@ -312,11 +316,11 @@ ssh:
   # SSH bastion host configuration
   bastion:
     aws: # bastion host ID      ◄──────────────────────────────┐
-      host: aws.basition.exmaple.com:22 #                      │
+      host: aws.basition.com:22 #                              │
       username: ubuntu # login user                            │
       key: /patch/to/aws/basion/key.pem # private key file     │
     gcp: # bastion host ID                                     │
-      host: gcp.basition.exmaple.com:22 # bastion host         │
+      host: ubuntu@gcp.basition.com:22 # bastion host          │
       username: ubuntu # login user                            │
       key: /patch/to/gcp/basion/key.pem # private key file     │
   # SSH Probe configuration                                    │
