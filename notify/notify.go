@@ -27,6 +27,7 @@ import (
 	"github.com/megaease/easeprobe/notify/slack"
 	"github.com/megaease/easeprobe/notify/telegram"
 	"github.com/megaease/easeprobe/notify/wecom"
+	"github.com/megaease/easeprobe/notify/lark"
 	"github.com/megaease/easeprobe/probe"
 )
 
@@ -40,6 +41,7 @@ type Config struct {
 	AwsSNS   []aws.SNSNotifyConfig   `yaml:"aws_sns"`
 	Wecom    []wecom.NotifyConfig    `yaml:"wecom"`
 	Dingtalk []dingtalk.NotifyConfig `yaml:"dingtalk"`
+	Lark     []lark.NotifyConfig     `yaml:"lark"`
 }
 
 // Notify is the configuration of the Notify

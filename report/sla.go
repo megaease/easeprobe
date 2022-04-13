@@ -338,3 +338,66 @@ func SLAStatusText(s probe.Stat, t Format) string {
 	}
 	return strings.TrimSpace(status)
 }
+
+// SLATextSection return the Text format string to stat
+func SLALarkSection(r *probe.Result) string {
+	text := `
+	{
+		"tag": "hr"
+	}, {
+		"tag": "div",
+		"text": {
+		  "content": "**Name:** %s - %s\n**Availability:** Up - %s, Down - %s\n**SLA:** %.2f%%\n**Probe-Times:** Total: %d ( %s )\n**Latest-Probe:** %s - %s\n**Message:**%s",
+		  "tag": "lark_md"
+		}
+	},`
+	return fmt.Sprintf(text, r.Name, r.Endpoint,
+		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), SLAPercent(r),
+		r.Stat.Total, SLAStatusText(r.Stat, Lark),
+		time.Now().UTC().Format(r.TimeFormat),
+		r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
+}
+
+// SLALark return a full stat report
+func SLALark(probers []probe.Prober) string {
+	json := `
+	{
+		"msg_type": "interactive",
+		"card": {
+			"header": {
+				"template": "blue",
+				"title": {
+				"content": "%s",
+				"tag": "plain_text"
+				}
+			},
+			"config": {
+				"wide_screen_mode": true
+			},
+			"elements": [%s
+				{
+					"tag": "hr"
+				}, {
+					"tag": "note",
+					"elements": [
+						{
+							"tag": "plain_text",
+							"content": "来自EaseProbe"
+						}
+					]
+				}
+			]
+		}
+	}`
+
+	title := "Overall SLA Report"
+	sections := []string{}
+	for _, p := range probers {
+		sections = append(sections, SLALarkSection(p.Result()))
+	}
+
+	elements := strings.Join(sections, "")
+	s := fmt.Sprintf(json, title, elements)
+	fmt.Printf("SLA: %s\n", s)
+	return s
+}
