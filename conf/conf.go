@@ -29,6 +29,7 @@ import (
 	"github.com/megaease/easeprobe/notify"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/client"
+	"github.com/megaease/easeprobe/probe/host"
 	"github.com/megaease/easeprobe/probe/http"
 	"github.com/megaease/easeprobe/probe/shell"
 	"github.com/megaease/easeprobe/probe/ssh"
@@ -140,8 +141,9 @@ type Conf struct {
 	HTTP     []http.HTTP     `yaml:"http"`
 	TCP      []tcp.TCP       `yaml:"tcp"`
 	Shell    []shell.Shell   `yaml:"shell"`
-	SSH      ssh.SSH         `yaml:"ssh"`
 	Client   []client.Client `yaml:"client"`
+	SSH      ssh.SSH         `yaml:"ssh"`
+	Host     host.Host       `yaml:"host"`
 	Notify   notify.Config   `yaml:"notify"`
 	Settings Settings        `yaml:"settings"`
 }
@@ -149,14 +151,18 @@ type Conf struct {
 // New read the configuration from yaml
 func New(conf *string) (Conf, error) {
 	c := Conf{
-		HTTP:  []http.HTTP{},
-		TCP:   []tcp.TCP{},
-		Shell: []shell.Shell{},
+		HTTP:   []http.HTTP{},
+		TCP:    []tcp.TCP{},
+		Shell:  []shell.Shell{},
+		Client: []client.Client{},
 		SSH: ssh.SSH{
 			Bastion: &ssh.BastionMap,
 			Servers: []ssh.Server{},
 		},
-		Client: []client.Client{},
+		Host: host.Host{
+			Bastion: &host.BastionMap,
+			Servers: []host.Server{},
+		},
 		Notify: notify.Config{},
 		Settings: Settings{
 			LogFile:    "",
@@ -196,7 +202,8 @@ func New(conf *string) (Conf, error) {
 	}
 
 	c.initLog()
-	ssh.ParseAllBastionHost()
+	ssh.BastionMap.ParseAllBastionHost()
+	host.BastionMap.ParseAllBastionHost()
 
 	config = &c
 

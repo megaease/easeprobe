@@ -80,6 +80,7 @@ func (c *NotifyConfig) SendSlackNotification(msg string) error {
 		return err
 	}
 	if resp.StatusCode != 200 {
+		log.Debugf(msg)
 		return fmt.Errorf("Error response from Slack [%d] - [%s]", resp.StatusCode, string(buf))
 	}
 	// if buf.String() != "ok" {
