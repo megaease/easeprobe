@@ -57,7 +57,7 @@ var BastionMap map[string]Endpoint
 
 // ParseAllBastionHost parse all bastion host
 func ParseAllBastionHost() {
-	for k, v:= range BastionMap {
+	for k, v := range BastionMap {
 		err := v.ParseHost()
 		if err != nil {
 			log.Errorf("Bastion Host error: [%s / %s] - %v", k, BastionMap[k].Host, err)

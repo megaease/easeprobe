@@ -321,7 +321,6 @@ ssh:
       key: /patch/to/aws/basion/key.pem # private key file     │
     gcp: # bastion host ID                                     │
       host: ubuntu@gcp.basition.com:22 # bastion host          │
-      username: ubuntu # login user                            │
       key: /patch/to/gcp/basion/key.pem # private key file     │
   # SSH Probe configuration                                    │
   servers:   #                                                 │
