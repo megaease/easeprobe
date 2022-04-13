@@ -15,6 +15,7 @@ EaseProbe is a simple, standalone, and lightWeight tool that can do health/statu
     - [3.2 TCP Probe Configuration](#32-tcp-probe-configuration)
     - [3.3 Shell Command Probe Configuration](#33-shell-command-probe-configuration)
     - [3.4 SSH Command Probe Configuration](#34-ssh-command-probe-configuration)
+    - [3.5 Host Resource Usage Probe Configuration](#35-host-resource-usage-probe-configuration)
     - [3.5 Native Client Probe](#35-native-client-probe)
     - [3.6 Notification Configuration](#36-notification-configuration)
     - [3.7 Global Setting Configuration](#37-global-setting-configuration)
@@ -27,7 +28,7 @@ EaseProbe would do 3 kinds of work - **Probe**, **Notify**, and **Report**.
 
 ### 1.1 Probe
 
-Ease Probe supports the following probing methods:
+Ease Probe supports the following probing methods: **HTTP**, **TCP**, **Shell Command**, **SSH Command**,  **Host Resource Usage**, and **Native Client**.
 
 - **HTTP**. Checking the HTTP status code, Support mTLS, HTTP Basic Auth, and can set the Request Header/Body. ( [HTTP Probe Configuration](#31-http-probe-configuration) )
 
@@ -77,6 +78,20 @@ Ease Probe supports the following probing methods:
         key: /Users/user/.ssh/id_rsa
         cmd: "ps auxwe | grep easeprobe | grep -v grep"
         contain: easeprobe
+  ```
+
+  - **Host**. Run a SSh command on remote host and check the CPU, Memory, and Disk usage. ( [Host Load Probe](#35-native-client-probe) )
+
+  ```yaml
+  host:
+    servers:
+      - name : server
+        host: ubuntu@172.20.2.202:22
+        key: /path/to/server.pem
+        threshold:
+          cpu: 0.80  # cpu usage  80%
+          mem: 0.70  # memory usage 70%
+          disk: 0.90  # disk usage 90%
   ```
 
 - **Client**. Currently, support the following native client. Support the mTLS. ( [Native Client Probe](#35-native-client-probe) )
@@ -351,7 +366,35 @@ ssh:
       cmd: "ps -ef | grep kafka"
 ```
 
+### 3.5 Host Resource Usage Probe Configuration
 
+Support the host probe, the configuration example as below.
+
+The feature probe the CPU, Memory, and Disk usage, if one of them exceeds the threshold, then mark the host as status down.
+
+```yaml
+host:
+  bastion: # bastion server configuration
+    aws: # bastion host ID      ◄──────────────────┐
+      host: ubuntu@example.com # bastion host      │
+      key: /path/to/bastion.pem # private key file │
+  # Servers List                                   │
+  servers: #                                       │
+    - name : aws server   #                        │
+      bastion: aws #  <-- bastion server id ------─┘
+      host: ubuntu@172.20.2.202:22
+      key: /path/to/server.pem
+      threshold:
+        cpu: 0.80  # cpu usage  80%
+        mem: 0.70  # memory usage 70%
+        disk: 0.90  # disk usage 90%
+
+    # Using the default threshold 
+    # cpu 80%, mem 80% and disk 95%
+    - name : My VPS
+      host: user@example.com:22
+      key: /Users/user/.ssh/id_rsa
+```
 
 ### 3.5 Native Client Probe
 
