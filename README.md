@@ -16,9 +16,9 @@ EaseProbe is a simple, standalone, and lightWeight tool that can do health/statu
     - [3.3 Shell Command Probe Configuration](#33-shell-command-probe-configuration)
     - [3.4 SSH Command Probe Configuration](#34-ssh-command-probe-configuration)
     - [3.5 Host Resource Usage Probe Configuration](#35-host-resource-usage-probe-configuration)
-    - [3.5 Native Client Probe](#35-native-client-probe)
-    - [3.6 Notification Configuration](#36-notification-configuration)
-    - [3.7 Global Setting Configuration](#37-global-setting-configuration)
+    - [3.6 Native Client Probe](#36-native-client-probe)
+    - [3.7 Notification Configuration](#37-notification-configuration)
+    - [3.8 Global Setting Configuration](#38-global-setting-configuration)
   - [4. Community](#4-community)
   - [5. License](#5-license)
 
@@ -80,7 +80,7 @@ Ease Probe supports the following probing methods: **HTTP**, **TCP**, **Shell Co
         contain: easeprobe
   ```
 
-  - **Host**. Run a SSh command on remote host and check the CPU, Memory, and Disk usage. ( [Host Load Probe](#35-native-client-probe) )
+- **Host**. Run a SSH command on remote host and check the CPU, Memory, and Disk usage. ( [Host Load Probe](#35-host-resource-usage-probe-configuration) )
 
   ```yaml
   host:
@@ -94,7 +94,7 @@ Ease Probe supports the following probing methods: **HTTP**, **TCP**, **Shell Co
           disk: 0.90  # disk usage 90%
   ```
 
-- **Client**. Currently, support the following native client. Support the mTLS. ( [Native Client Probe](#35-native-client-probe) )
+- **Client**. Currently, support the following native client. Support the mTLS. ( [Native Client Probe](#36-native-client-probe) )
   - **MySQL**. Connect to the MySQL server and run the `SHOW STATUS` SQL.
   - **Redis**. Connect to the Redis server and run the `PING` command.
   - **MongoDB**. Connect to MongoDB server and just ping server.
@@ -166,7 +166,7 @@ notify:
       webhook: "https://oapi.dingtalk.com/robot/send?access_token=xxxx"
 ```
 
-Check the  [Notification Configuration](#36-notification-configuration) to see how to configure it.
+Check the  [Notification Configuration](#37-notification-configuration) to see how to configure it.
 
 ### 1.3 Report
 
@@ -182,7 +182,7 @@ settings:
     time: "23:59"
 ```
 
-for more information, please check the [3.7 Global Setting Configuration](#37-global-setting-configuration)
+For more information, please check the [Global Setting Configuration](#38-global-setting-configuration)
 
 ## 2. Getting Start
 
@@ -372,6 +372,8 @@ Support the host probe, the configuration example as below.
 
 The feature probe the CPU, Memory, and Disk usage, if one of them exceeds the threshold, then mark the host as status down.
 
+> Note: The disk usage only check the root disk.
+
 ```yaml
 host:
   bastion: # bastion server configuration
@@ -396,7 +398,7 @@ host:
       key: /Users/user/.ssh/id_rsa
 ```
 
-### 3.5 Native Client Probe
+### 3.6 Native Client Probe
 
 ```YAML
 # Native Client Probe
@@ -448,7 +450,7 @@ client:
 ```
 
 
-### 3.6 Notification Configuration
+### 3.7 Notification Configuration
 
 ```YAML
 # Notification Configuration
@@ -519,7 +521,7 @@ notify:
 ```
 
 
-### 3.7 Global Setting Configuration
+### 3.8 Global Setting Configuration
 
 ```YAML
 # Global settings for all probes and notifiers.
