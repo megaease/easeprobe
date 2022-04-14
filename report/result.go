@@ -217,7 +217,7 @@ func ToLark(r probe.Result) string {
 					"elements": [
 						{
 							"tag": "plain_text",
-							"content": "来自EaseProbe"
+							"content": global.Prog 
 						}
 					]
 				}
