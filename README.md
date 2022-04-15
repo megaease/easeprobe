@@ -125,6 +125,7 @@ Ease Probe supports the following notifications:
 - **AWS SNS**. Support AWS Simple Notification Service.
 - **WeChat Work**. Support Enterprise WeChat Work notification.
 - **DingTalk**. Support the DingTalk notification.
+- **Lark**. Support the Lark(Feishu) notification.
 - **Log File**. Write the notification into a log file
 
 **Note**:
@@ -164,6 +165,9 @@ notify:
   dingtalk:
     - name: "dingtalk alert service"
       webhook: "https://oapi.dingtalk.com/robot/send?access_token=xxxx"
+  lark:
+    - name: "lark alert service"
+      webhook: "https://open.feishu.cn/open-apis/bot/v2/hook/d5366199-xxxx-xxxx-bd81-a57d1dd95de4"
 ```
 
 Check the  [Notification Configuration](#37-notification-configuration) to see how to configure it.
@@ -506,6 +510,10 @@ notify:
   dingtalk:
     - name: "dingtalk alert service"
       webhook: "https://oapi.dingtalk.com/robot/send?access_token=xxxx"
+  # Notify to Lark
+  lark:
+    - name: "lark alert service"
+      webhook: "https://open.feishu.cn/open-apis/bot/v2/hook/d5366199-xxxx-xxxx-bd81-a57d1dd95de4"
   # Notify to a local log file
   log:
     - name: "Local Log"

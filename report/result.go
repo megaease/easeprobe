@@ -183,3 +183,62 @@ func ToSlack(r probe.Result) string {
 	summary := fmt.Sprintf("%s %s - %s", r.Title(), r.Status.Emoji(), JSONEscape(r.Message))
 	return fmt.Sprintf(json, summary, body, context)
 }
+
+// ToLark convert the object to Lark notification
+// Go to https://open.feishu.cn/document/ukTMukTMukTM/ucTM5YjL3ETO24yNxkjN#4996824a to build the notification block
+func ToLark(r probe.Result) string {
+	json := `
+	{
+		"msg_type": "interactive",
+		"card": {
+			"config": {
+				"wide_screen_mode": true
+			},
+			"header": {
+				"template": "%s",
+				"title": {
+				"content": "%s",
+				"tag": "plain_text"
+				}
+			},
+			"elements": [
+				{
+					"tag": "div",
+					"text": {
+						"content": "%s",
+						"tag": "lark_md"
+					}
+				},
+				{
+					"tag": "hr"
+				},
+				{
+					"tag": "note",
+					"elements": [
+						{
+							"tag": "plain_text",
+							"content": global.Prog 
+						}
+					]
+				}
+			]
+		}
+	}`
+
+	headerColor := "gray"
+	switch r.Status {
+	case probe.StatusUp:
+		headerColor = "green"
+	case probe.StatusDown:
+		headerColor = "red"
+	case probe.StatusUnknown:
+		headerColor = "gray"
+	case probe.StatusInit:
+		headerColor = "blue"
+	}
+
+	title := fmt.Sprintf("%s %s", r.Title(), r.Status.Emoji())
+	rtt := r.RoundTripTime.Round(time.Millisecond)
+	content := fmt.Sprintf("%s - ⏱ %s\\n%s", r.Endpoint, rtt, JSONEscape(r.Message))
+	return fmt.Sprintf(json, headerColor, title, content)
+}

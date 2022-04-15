@@ -36,6 +36,7 @@ const (
 	Text
 	Slack
 	Discord
+	Lark
 )
 
 // String covert the Format to string
@@ -53,6 +54,8 @@ func (f Format) String() string {
 		return "slack"
 	case Discord:
 		return "discord"
+	case Lark:
+		return "lark"
 	default:
 		return "unknown"
 	}
@@ -73,6 +76,8 @@ func (f *Format) Format(s string) {
 		*f = Slack
 	case "discrod":
 		*f = Discord
+	case "lark":
+		*f = Lark
 	default:
 		*f = Unknown
 	}
@@ -114,4 +119,5 @@ var FormatFuncs = map[Format]FormatFuncStruct{
 	MarkdownSocial: {ToMarkdownSocial, SLAMarkdownSocial},
 	HTML:           {ToHTML, SLAHTML},
 	Slack:          {ToSlack, SLASlack},
+	Lark:           {ToLark, SLALark},
 }
