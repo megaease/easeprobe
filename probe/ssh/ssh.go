@@ -48,23 +48,26 @@ type Server struct {
 
 // SSH is the SSH probe Configuration
 type SSH struct {
-	Bastion *map[string]Endpoint `yaml:"bastion"`
-	Servers []Server             `yaml:"servers"`
+	Bastion *BastionMapType `yaml:"bastion"`
+	Servers []Server        `yaml:"servers"`
 }
 
+// BastionMapType is the type of bastion
+type BastionMapType map[string]Endpoint
+
 // BastionMap is a map of bastion
-var BastionMap map[string]Endpoint
+var BastionMap BastionMapType
 
 // ParseAllBastionHost parse all bastion host
-func ParseAllBastionHost() {
-	for k, v := range BastionMap {
+func (bm *BastionMapType) ParseAllBastionHost() {
+	for k, v := range *bm {
 		err := v.ParseHost()
 		if err != nil {
 			log.Errorf("Bastion Host error: [%s / %s] - %v", k, BastionMap[k].Host, err)
 			delete(BastionMap, k)
 			continue
 		}
-		BastionMap[k] = v
+		(*bm)[k] = v
 	}
 }
 
@@ -74,14 +77,25 @@ func (s *Server) Config(gConf global.ProbeSettings) error {
 	kind := "ssh"
 	tag := ""
 	name := s.ProbeName
-	s.DefaultOptions.Config(gConf, kind, tag, name, probe.CommandLine(s.Command, s.Args), s.DoProbe)
+	endpoint := probe.CommandLine(s.Command, s.Args)
+
+	return s.Configure(gConf, kind, tag, name, endpoint, &BastionMap, s.DoProbe)
+
+}
+
+// Configure configure the SSH probe
+func (s *Server) Configure(gConf global.ProbeSettings,
+	kind, tag, name, endpoint string,
+	bastionMap *BastionMapType, fn base.ProbeFuncType) error {
+
+	s.DefaultOptions.Config(gConf, kind, tag, name, endpoint, fn)
 
 	if len(s.Password) <= 0 && len(s.PrivateKey) <= 0 {
 		return fmt.Errorf("password or private key is required")
 	}
 
 	if len(s.BastionID) > 0 {
-		if bastion, ok := BastionMap[s.BastionID]; ok {
+		if bastion, ok := (*bastionMap)[s.BastionID]; ok {
 			log.Debugf("[%s / %s] - has the bastion [%s]", s.ProbeKind, s.ProbeName, bastion.Host)
 			s.bastion = &bastion
 		} else {
@@ -121,6 +135,15 @@ func (s *Server) DoProbe() (bool, string) {
 	}
 
 	return status, message
+}
+
+// SetBastion set the bastion
+func (s *Server) SetBastion(b *Endpoint) {
+	if err := b.ParseHost(); err != nil {
+		log.Errorf("[%s / %s] - %v", s.ProbeKind, s.ProbeName, err)
+		return
+	}
+	s.bastion = b
 }
 
 // GetSSHClient returns a ssh.Client

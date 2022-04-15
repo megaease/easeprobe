@@ -238,7 +238,7 @@ func SLASlackSection(r *probe.Result) string {
 		message = "`" + message + "`"
 	}
 
-	return fmt.Sprintf(json, r.Name, r.Endpoint,
+	return fmt.Sprintf(json, r.Name, JSONEscape(r.Endpoint),
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), SLAPercent(r),
 		r.Stat.Total, SLAStatusText(r.Stat, MarkdownSocial),
 		t, r.Status.Emoji()+" "+r.Status.String(), message)
