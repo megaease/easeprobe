@@ -71,9 +71,13 @@ func (s *Server) Config(gConf global.ProbeSettings) error {
 	// 1. retrive the hostname: 	`hostname``
 	// 2. retrive the os:  			`awk -F= '/^NAME/{print $2}' /etc/os-release | tr -d '\"'`
 	// 3. retrive the memory usage:	`free -m | awk 'NR==2{printf "%s %s %.2f\n", $3,$2,$3*100/$2 }'`
+	//    output: used(MB) total(MB) usage(%), example: 19379 31654 61.22
 	// 4. retrive the cpu core:		`grep -c ^processor /proc/cpuinfo;`
 	// 5. retrive the cpu usage:	`top -b -n 1 | grep Cpu | awk -F ":" '{print $2}'`
+	//    output example: 1.6 us,  0.0 sy,  0.0 ni, 98.4 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
 	// 6. retrive the disk usage	`df -h | awk '$NF=="/"{printf "%d %d %s\n", $3,$2,$5}'`
+	//    output: used(GB) total(GB) usage(%), example: 40 970 5%
+
 	s.Command = `hostname;
 	awk -F= '/^NAME/{print $2}' /etc/os-release | tr -d '\"';
 	free -m | awk 'NR==2{printf "%s %s %.2f\n", $3,$2,$3*100/$2 }';
@@ -120,18 +124,35 @@ func (s *Server) DoProbe() (bool, string) {
 // CheckThreshold check the threshold
 func (s *Server) CheckThreshold(info Info) (bool, string) {
 	status := true
-	head := "Fine! "
-	message := fmt.Sprintf("( CPU: %.2f%% - ", (100 - info.CPU.Idle))
-	message += fmt.Sprintf("Memory: %.2f%% - ", info.Memory.Usage)
-	message += fmt.Sprintf("Disk: %.2f%% )", info.Disk.Usage)
+	message := ""
+	usage := fmt.Sprintf(" ( CPU: %.2f%% - ", (100 - info.CPU.Idle))
+	usage += fmt.Sprintf("Memory: %.2f%% - ", info.Memory.Usage)
+	usage += fmt.Sprintf("Disk: %.2f%% )", info.Disk.Usage)
 
-	if (s.Threshold.CPU > 0 && s.Threshold.CPU <= (100-info.CPU.Idle)/100) ||
-		(s.Threshold.Mem > 0 && s.Threshold.Mem <= info.Memory.Usage/100) ||
-		(s.Threshold.Disk > 0 && s.Threshold.Disk <= info.Disk.Usage/100) {
-		head = "Busy! "
+	if s.Threshold.CPU > 0 && s.Threshold.CPU <= (100-info.CPU.Idle)/100 {
 		status = false
+		message += "CPU Busy!"
 	}
-	return status, head + message
+	if s.Threshold.Mem > 0 && s.Threshold.Mem <= info.Memory.Usage/100 {
+		status = false
+		if message != "" {
+			message += " | "
+		}
+		message += "Memory Shortage!"
+	}
+	if s.Threshold.Disk > 0 && s.Threshold.Disk <= info.Disk.Usage/100 {
+		status = false
+		if message != "" {
+			message += " | "
+		}
+		message += "Disk Full!"
+	}
+
+	if message == "" {
+		message = "Fine!"
+	}
+
+	return status, message + usage
 }
 
 // Usage is the resource usage for memory and disk
