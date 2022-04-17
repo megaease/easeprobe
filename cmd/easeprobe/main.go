@@ -141,9 +141,12 @@ func configProbers(probers []probe.Prober, notifyChan chan probe.Result) {
 	for _, p := range probers {
 		err := p.Config(gProbeConf)
 		if err != nil {
+			p.Result().Message = "Bad Configuration: " + err.Error()
 			log.Errorf("error: %v", err)
 			continue
 		}
+
+		p.Result().Message = "Good Configuration!"
 		log.Infof("Ready to monitor(%s): %s - %s", p.Kind(), p.Result().Name, p.Result().Endpoint)
 		go probeFn(p)
 	}
