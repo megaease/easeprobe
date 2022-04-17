@@ -85,9 +85,9 @@ func (d *DefaultOptions) Config(gConf global.ProbeSettings,
 	d.ProbeResult.TimeFormat = gConf.TimeFormat
 
 	if len(d.ProbeTag) > 0 {
-		log.Infof("Probe [%s / %s] - [%s] is configured!", d.ProbeKind, d.ProbeTag, d.ProbeName)
+		log.Infof("Probe [%s / %s] - [%s] base options are configured!", d.ProbeKind, d.ProbeTag, d.ProbeName)
 	} else {
-		log.Infof("Probe [%s] - [%s] is configured!", d.ProbeKind, d.ProbeName)
+		log.Infof("Probe [%s] - [%s] base options are configured!", d.ProbeKind, d.ProbeName)
 	}
 	return nil
 }

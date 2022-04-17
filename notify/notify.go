@@ -23,11 +23,11 @@ import (
 	"github.com/megaease/easeprobe/notify/dingtalk"
 	"github.com/megaease/easeprobe/notify/discord"
 	"github.com/megaease/easeprobe/notify/email"
+	"github.com/megaease/easeprobe/notify/lark"
 	"github.com/megaease/easeprobe/notify/log"
 	"github.com/megaease/easeprobe/notify/slack"
 	"github.com/megaease/easeprobe/notify/telegram"
 	"github.com/megaease/easeprobe/notify/wecom"
-	"github.com/megaease/easeprobe/notify/lark"
 	"github.com/megaease/easeprobe/probe"
 )
 
