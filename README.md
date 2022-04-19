@@ -136,13 +136,13 @@ Ease Probe supports the following notifications:
 # Notification Configuration
 notify:
   slack:
-    - name: "MegaEase#Alter"
+    - name: "MegaEase#Alert"
       webhook: "https://hooks.slack.com/services/........../....../....../"
   discord:
-    - name: "MegaEase#Alter"
+    - name: "MegaEase#Alert"
       webhook: "https://discord.com/api/webhooks/...../....../"
   telegram:
-    - name: "MegaEase Alter Group"
+    - name: "MegaEase Alert Group"
       token: 1234567890:ABCDEFGHIJKLMNOPQRSTUVWXYZ # Bot Token
       chat_id: -123456789 # Channel / Group ID
   email:
@@ -213,6 +213,9 @@ $ build/bin/easeprobe -f config.yaml
 
 The following configuration is an example.
 
+**Notes**: All probes have the `timeout` configuration, which is the maximum time to wait for the probe to complete, and the default value is `30s`.
+
+
 ### 3.1 HTTP Probe Configuration
 
 ```YAML
@@ -261,7 +264,6 @@ http:
     key: /path/to/file.key
     # configuration
     timeout: 10s # default is 30 seconds
-    interval: 60s # default is 60 seconds
 
 ```
 ### 3.2 TCP Probe Configuration
@@ -464,7 +466,7 @@ client:
 notify:
   # Notify to Slack Channel
   slack:
-    - name: "Organization #Alter"
+    - name: "Organization #Alert"
       webhook: "https://hooks.slack.com/services/........../....../....../"
       # dry: true   # dry notification, print the Slack JSON in log(STDOUT)
   telegram:
@@ -476,7 +478,7 @@ notify:
       chat_id: -1001234567890 # Channel ID
   # Notify to Discord Text Channel
   discord:
-    - name: "Server #Alter"
+    - name: "Server #Alert"
       webhook: "https://discord.com/api/webhooks/...../....../"
       # the avatar and thumbnail setting for notify block
       avatar: "https://img.icons8.com/ios/72/appointment-reminders--v1.png"
