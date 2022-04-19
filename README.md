@@ -213,7 +213,7 @@ $ build/bin/easeprobe -f config.yaml
 
 The following configuration is an example.
 
-**Notes**: All of probe have the `timeout` configuration, which is the maximum time to wait for the probe to complete. and the default value is `30s`.
+**Notes**: All probes have the `timeout` configuration, which is the maximum time to wait for the probe to complete, and the default value is `30s`.
 
 
 ### 3.1 HTTP Probe Configuration
