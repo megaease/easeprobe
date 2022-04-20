@@ -19,7 +19,6 @@ package main
 
 import (
 	"flag"
-	"net/url"
 	"os"
 	"time"
 
@@ -39,15 +38,10 @@ func getEnvOrDefault(key, defaultValue string) string {
 	return defaultValue
 }
 
-func isExternalLink(value string) bool {
-	_, err := url.Parse(value)
-	return err == nil
-}
-
 func main() {
 
-	dryNotify := flag.Bool("d", os.Getenv("DRY") == "true", "dry notification mode")
-	yamlFile := flag.String("f", getEnvOrDefault("CONFIG", "config.yaml"), "configuration file")
+	dryNotify := flag.Bool("d", os.Getenv("PROBE_DRY") == "true", "dry notification mode")
+	yamlFile := flag.String("f", getEnvOrDefault("PROBE_CONFIG", "config.yaml"), "configuration file")
 	flag.Parse()
 
 	conf, err := conf.New(yamlFile)
