@@ -31,16 +31,18 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+func getEnvOrDefault(key, defaultValue string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return defaultValue
+}
+
 func main() {
 
-	dryNotify := flag.Bool("d", false, "dry notification mode")
-	yamlFile := flag.String("f", "config.yaml", "configuration file")
+	dryNotify := flag.Bool("d", os.Getenv("PROBE_DRY") == "true", "dry notification mode")
+	yamlFile := flag.String("f", getEnvOrDefault("PROBE_CONFIG", "config.yaml"), "configuration file")
 	flag.Parse()
-
-	if _, err := os.Stat(*yamlFile); err != nil {
-		log.Fatalf("Configuration file is not found! - %s", *yamlFile)
-		os.Exit(-1)
-	}
 
 	conf, err := conf.New(yamlFile)
 	if err != nil {

@@ -20,8 +20,10 @@ package conf
 import (
 	"encoding/json"
 	"io/ioutil"
+	httpClient "net/http"
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -148,6 +150,50 @@ type Conf struct {
 	Settings Settings        `yaml:"settings"`
 }
 
+func isExternalURL(url string) bool {
+	return strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://")
+}
+
+func getYamlFileFromInternet(url string) ([]byte, error) {
+	r, err := httpClient.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	if os.Getenv("HTTP_AUTHORIZATION") != "" {
+		r.Header.Set("Authorization", os.Getenv("HTTP_AUTHORIZATION"))
+	}
+
+	httpClientObject := httpClient.Client{}
+	if os.Getenv("HTTP_TIMEOUT") != "" {
+		timeout, err := strconv.ParseInt(os.Getenv("HTTP_TIMEOUT"), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		httpClientObject.Timeout = time.Duration(timeout) * time.Second
+	}
+
+	resp, err := httpClientObject.Do(r)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	return ioutil.ReadAll(resp.Body)
+}
+
+func getYamlFileFromFile(path string) ([]byte, error) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return nil, err
+	}
+	return ioutil.ReadFile(path)
+}
+
+func getYamlFile(path string) ([]byte, error) {
+	if isExternalURL(path) {
+		return getYamlFileFromInternet(path)
+	}
+	return getYamlFileFromFile(path)
+}
+
 // New read the configuration from yaml
 func New(conf *string) (Conf, error) {
 	c := Conf{
@@ -187,7 +233,7 @@ func New(conf *string) (Conf, error) {
 			logfile: nil,
 		},
 	}
-	y, err := ioutil.ReadFile(*conf)
+	y, err := getYamlFile(*conf)
 	if err != nil {
 		log.Errorf("error: %v ", err)
 		return c, err
