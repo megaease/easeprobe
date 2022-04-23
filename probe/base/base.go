@@ -121,9 +121,25 @@ func (d *DefaultOptions) Probe() probe.Result {
 		log.Debugf("[%s / %s] - %s", d.ProbeKind, d.ProbeName, msg)
 	}
 
+	d.DownTimeCalculation(status)
+
 	d.ProbeResult.PreStatus = d.ProbeResult.Status
 	d.ProbeResult.Status = status
 
 	d.ProbeResult.DoStat(d.Interval())
 	return *d.ProbeResult
+}
+
+// DownTimeCalculation calculate the down time
+func (d *DefaultOptions) DownTimeCalculation(status probe.Status) {
+
+	// Status from UP to DOWN - Failure
+	if d.ProbeResult.PreStatus != probe.StatusDown && status == probe.StatusDown {
+		d.ProbeResult.LatestDownTime = time.Now()
+	}
+
+	// Status from DOWN to UP - Recovery
+	if d.ProbeResult.PreStatus == probe.StatusDown && status == probe.StatusUp {
+		d.ProbeResult.RecoveryDuration = time.Since(d.ProbeResult.LatestDownTime)
+	}
 }
