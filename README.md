@@ -213,7 +213,10 @@ $ build/bin/easeprobe -f config.yaml
 
 The following configuration is an example.
 
-**Notes**: All probes have the `timeout` configuration, which is the maximum time to wait for the probe to complete, and the default value is `30s`.
+**Notes**: All probes have the following options:
+
+- `timeout` - the maximum time to wait for the probe to complete. default : `30s`.
+- `interval` - the interval time to run the probe. default: `1m`.
 
 
 ### 3.1 HTTP Probe Configuration
@@ -320,7 +323,7 @@ shell:
 
 ### 3.4 SSH Command Probe Configuration
 
-SSH probe is similar with Shell probe.
+SSH probe is similar to Shell probe.
 - Support Password and Private key authentication.
 - Support the Bastion host tunnel.
 
