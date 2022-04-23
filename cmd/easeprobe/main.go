@@ -154,7 +154,7 @@ func configProbers(probers []probe.Prober, notifyChan chan probe.Result) {
 	}
 }
 
-func configNotifiers(notifies []notify.Notify, notifyChan chan probe.Result) {
+func configNotifiers(notifies []notify.Notify) {
 	gNotifyConf := global.NotifySettings{
 		TimeFormat: conf.Get().Settings.TimeFormat,
 		Retry:      conf.Get().Settings.Notify.Retry,
