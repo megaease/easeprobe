@@ -339,7 +339,7 @@ func SLAStatusText(s probe.Stat, t Format) string {
 	return strings.TrimSpace(status)
 }
 
-// SLATextSection return the Text format string to stat
+// SLALarkSection return the Text format string to stat
 func SLALarkSection(r *probe.Result) string {
 	text := `
 	{
