@@ -30,7 +30,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// NotifyConfig is the slack notification configuration
+// NotifyConfig is the dingtalk notification configuration
 type NotifyConfig struct {
 	base.DefaultNotify `yaml:",inline"`
 	WebhookURL         string `yaml:"webhook"`
