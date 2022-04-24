@@ -18,7 +18,6 @@
 package conf
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	httpClient "net/http"
 	"os"
@@ -255,11 +254,11 @@ func New(conf *string) (Conf, error) {
 
 	log.Infoln("Load the configuration file successfully!")
 	if log.GetLevel() >= log.DebugLevel {
-		s, err := json.MarshalIndent(c, "", "  ")
+		s, err := yaml.Marshal(c)
 		if err != nil {
-			log.Debugf("%+v", c)
+			log.Debugf("%v\n%+v", err, c)
 		} else {
-			log.Debugf("%s", string(s))
+			log.Debugf("\n%s", string(s))
 		}
 	}
 

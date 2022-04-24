@@ -120,15 +120,17 @@ type Stat struct {
 
 // Result is the status of health check
 type Result struct {
-	Name           string         `json:"name"`
-	Endpoint       string         `json:"endpoint"`
-	StartTime      time.Time      `json:"time"`
-	StartTimestamp int64          `json:"timestamp"`
-	RoundTripTime  ConfigDuration `json:"rtt"`
-	Status         Status         `json:"status"`
-	PreStatus      Status         `json:"prestatus"`
-	Message        string         `json:"message"`
-	Stat           Stat           `json:"stat"`
+	Name             string         `json:"name"`
+	Endpoint         string         `json:"endpoint"`
+	StartTime        time.Time      `json:"time"`
+	StartTimestamp   int64          `json:"timestamp"`
+	RoundTripTime    ConfigDuration `json:"rtt"`
+	Status           Status         `json:"status"`
+	PreStatus        Status         `json:"prestatus"`
+	Message          string         `json:"message"`
+	LatestDownTime   time.Time      `json:"latestdowntime"`
+	RecoveryDuration time.Duration  `json:"recoverytime"`
+	Stat             Stat           `json:"stat"`
 
 	TimeFormat string `json:"-"`
 }
@@ -136,14 +138,16 @@ type Result struct {
 // NewResult return a Result object
 func NewResult() *Result {
 	return &Result{
-		Name:           "",
-		Endpoint:       "",
-		StartTime:      time.Now(),
-		StartTimestamp: 0,
-		RoundTripTime:  ConfigDuration{0},
-		Status:         StatusInit,
-		PreStatus:      StatusInit,
-		Message:        "",
+		Name:             "",
+		Endpoint:         "",
+		StartTime:        time.Now(),
+		StartTimestamp:   0,
+		RoundTripTime:    ConfigDuration{0},
+		Status:           StatusInit,
+		PreStatus:        StatusInit,
+		Message:          "",
+		LatestDownTime:   time.Time{},
+		RecoveryDuration: 0,
 		Stat: Stat{
 			Since:    time.Now(),
 			Total:    0,
@@ -167,12 +171,14 @@ func (r *Result) DoStat(d time.Duration) {
 
 // Title return the title for notification
 func (r *Result) Title() string {
-	t := "%s Recovery"
+	t := "%s"
 	if r.PreStatus == StatusInit {
 		t = "Monitoring %s"
 	}
 	if r.Status != StatusUp {
 		t = "%s Failure"
+	} else {
+		t = "%s Recovery - ( " + r.RecoveryDuration.Round(time.Second).String() + " Downtime )"
 	}
 	return fmt.Sprintf(t, r.Name)
 }
