@@ -121,10 +121,10 @@ func (d *DefaultOptions) Probe() probe.Result {
 		log.Debugf("[%s / %s] - %s", d.ProbeKind, d.ProbeName, msg)
 	}
 
-	d.DownTimeCalculation(status)
-
 	d.ProbeResult.PreStatus = d.ProbeResult.Status
 	d.ProbeResult.Status = status
+
+	d.DownTimeCalculation(status)
 
 	d.ProbeResult.DoStat(d.Interval())
 	return *d.ProbeResult
