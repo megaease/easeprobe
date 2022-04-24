@@ -85,7 +85,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 	configProbers(probers, notifyChan)
 
 	// Configure the Notifiers
-	configNotifiers(notifies, notifyChan)
+	configNotifiers(notifies)
 
 	// Set the Cron Job for SLA Report
 	if conf.Get().Settings.SLAReport.Schedule != conf.None {
@@ -154,7 +154,7 @@ func configProbers(probers []probe.Prober, notifyChan chan probe.Result) {
 	}
 }
 
-func configNotifiers(notifies []notify.Notify, notifyChan chan probe.Result) {
+func configNotifiers(notifies []notify.Notify) {
 	gNotifyConf := global.NotifySettings{
 		TimeFormat: conf.Get().Settings.TimeFormat,
 		Retry:      conf.Get().Settings.Notify.Retry,
