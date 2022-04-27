@@ -83,7 +83,7 @@ func Server() {
 	// Start the http server
 	go func() {
 		http.HandleFunc("/", slaHTML)
-		http.HandleFunc("/api/sla", slaJSON)
+		http.HandleFunc("/api/v1/sla", slaJSON)
 		log.Infof("[Web] HTTP server is listening on %s:%s", host, port)
 		if err := http.ListenAndServe(host+":"+port, nil); err != nil {
 			log.Errorf("[Web] HTTP server error: %s", err)
