@@ -556,7 +556,7 @@ settings:
   # A HTTP Server configuration
   http:
     ip: localhost # the IP address of the server. default:""
-    port: 8181 # the port  of the server. default: 8181
+    port: 8181 # the port of the server. default: 8181
     refresh: 5s # the auto refresh interval of the server. default: the minimum value of the probes' interval.
 
   # SLA Report schedule
