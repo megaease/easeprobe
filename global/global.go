@@ -60,7 +60,7 @@ const (
 
 const (
 	// DefaultHTTPServerIP is the default ip of the HTTP server
-	DefaultHTTPServerIP = ""
+	DefaultHTTPServerIP = "0.0.0.0"
 	// DefaultHTTPServerPort is the default port of the HTTP server
 	DefaultHTTPServerPort = "8181"
 )

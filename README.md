@@ -192,8 +192,10 @@ Check the  [Notification Configuration](#37-notification-configuration) to see h
 
 - **SLA Live Report**. You can query the SLA Live Report
 
-  - HTML: `http://localhsot:8181/`
-  - JSON: `http://localhsot:8181/api/v1/sla/`
+The EaseProbe would listen on `0.0.0.0:8181` port by default. And you can access the Live SLA report by the following URL:
+
+  - HTML: `http://localhost:8181/`
+  - JSON: `http://localhost:8181/api/v1/sla/`
 
 
 For more information, please check the [Global Setting Configuration](#38-global-setting-configuration)
@@ -555,7 +557,7 @@ settings:
 
   # A HTTP Server configuration
   http:
-    ip: localhost # the IP address of the server. default:""
+    ip: 127.0.0.1 # the IP address of the server. default:"0.0.0.0"
     port: 8181 # the port of the server. default: 8181
     refresh: 5s # the auto-refresh interval of the server. default: the minimum value of the probes' interval.
 
