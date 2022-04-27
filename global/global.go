@@ -58,6 +58,13 @@ const (
 	DefaultTimeOut = time.Second * 30
 )
 
+const (
+	// DefaultHTTPServerIP is the default ip of the HTTP server
+	DefaultHTTPServerIP = "0.0.0.0"
+	// DefaultHTTPServerPort is the default port of the HTTP server
+	DefaultHTTPServerPort = "8181"
+)
+
 // Retry is the settings of retry
 type Retry struct {
 	Times    int           `yaml:"times"`
