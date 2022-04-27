@@ -26,6 +26,9 @@ EaseProbe is a simple, standalone, and lightWeight tool that can do health/statu
 
 EaseProbe would do 3 kinds of work - **Probe**, **Notify**, and **Report**.
 
+![](docs/overview.png)
+
+
 ### 1.1 Probe
 
 Ease Probe supports the following probing methods: **HTTP**, **TCP**, **Shell Command**, **SSH Command**,  **Host Resource Usage**, and **Native Client**.
