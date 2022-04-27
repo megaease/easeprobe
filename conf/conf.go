@@ -126,15 +126,23 @@ type SLAReport struct {
 	Debug    bool     `yaml:"debug"`
 }
 
+// HTTPServer is the settings of http server
+type HTTPServer struct {
+	IP              string        `yaml:"ip"`
+	Port            string        `yaml:"port"`
+	AutoRefreshTime time.Duration `yaml:"refresh"`
+}
+
 // Settings is the EaseProbe configuration
 type Settings struct {
-	LogFile    string    `yaml:"logfile"`
-	LogLevel   LogLevel  `yaml:"loglevel"`
-	TimeFormat string    `yaml:"timeformat"`
-	Probe      Probe     `yaml:"probe"`
-	Notify     Notify    `yaml:"notify"`
-	SLAReport  SLAReport `yaml:"sla"`
-	logfile    *os.File  `yaml:"-"`
+	LogFile    string     `yaml:"logfile"`
+	LogLevel   LogLevel   `yaml:"loglevel"`
+	TimeFormat string     `yaml:"timeformat"`
+	Probe      Probe      `yaml:"probe"`
+	Notify     Notify     `yaml:"notify"`
+	SLAReport  SLAReport  `yaml:"sla"`
+	HTTPServer HTTPServer `yaml:"http"`
+	logfile    *os.File   `yaml:"-"`
 }
 
 // Conf is Probe configuration

@@ -26,6 +26,7 @@ import (
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify"
 	"github.com/megaease/easeprobe/probe"
+	"github.com/megaease/easeprobe/web"
 
 	"github.com/go-co-op/gocron"
 	log "github.com/sirupsen/logrus"
@@ -86,6 +87,10 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 
 	// Configure the Notifiers
 	configNotifiers(notifies)
+
+	// Start the HTTP Server
+	web.SetProbers(probers)
+	web.Server()
 
 	// Set the Cron Job for SLA Report
 	if conf.Get().Settings.SLAReport.Schedule != conf.None {

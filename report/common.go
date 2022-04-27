@@ -80,6 +80,7 @@ func HTMLHeader(title string) string {
 			text-align: center;
 		 }
 		</style>
+		<title>` + title + `</title>
 	</head>
 	<body style="font-family: Montserrat, sans-serif;">
 		<h1 style="font-weight: normal; letter-spacing: -1px;color: #3b3b3b;">` + title + `</h1>`
@@ -90,6 +91,16 @@ func HTMLFooter() string {
 	return `
 	</body>
 	</html>`
+}
+
+// AutoRefreshJS return the auto refresh javascript
+func AutoRefreshJS(time string) string {
+	return `<script>
+    function autoRefresh() {
+        window.location = window.location.href;
+    }
+    setInterval('autoRefresh()', ` + time + `);
+	</script>`
 }
 
 // LogSend is helper function to log the send logs.

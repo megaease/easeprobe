@@ -174,17 +174,23 @@ Check the  [Notification Configuration](#37-notification-configuration) to see h
 
 ### 1.3 Report
 
-- **SLA Report**. EaseProbe would send the daily, weekly, or monthly SLA report.
+- **SLA Report Notify**. EaseProbe would send the daily, weekly, or monthly SLA report.
 
-```YAML
-settings:
-  # SLA Report schedule
-  sla:
-    #  daily, weekly (Sunday), monthly (Last Day), none
-    schedule: "weekly"
-    # UTC time, the format is 'hour:min:sec'
-    time: "23:59"
-```
+  ```YAML
+  settings:
+    # SLA Report schedule
+    sla:
+      #  daily, weekly (Sunday), monthly (Last Day), none
+      schedule: "weekly"
+      # UTC time, the format is 'hour:min:sec'
+      time: "23:59"
+  ```
+
+- **SLA Live Report**. You can query the SLA Live Report
+
+  - HTML: `http://localhsot:8181/`
+  - JSON: `http://localhsot:8181/api/v1/sla/`
+
 
 For more information, please check the [Global Setting Configuration](#38-global-setting-configuration)
 
@@ -542,6 +548,13 @@ notify:
 ```YAML
 # Global settings for all probes and notifiers.
 settings:
+
+  # A HTTP Server configuration
+  http:
+    ip: localhost # the IP address of the server. default:""
+    port: 8181 # the port  of the server. default: 8181
+    refresh: 5s # the auto refresh interval of the server. default: the minimum value of the probes' interval.
+
   # SLA Report schedule
   sla:
     #  daily, weekly (Sunday), monthly (Last Day), none
