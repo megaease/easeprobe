@@ -2,6 +2,10 @@
 
 EaseProbe is a simple, standalone, and lightWeight tool that can do health/status checking, written in Go.
 
+![](docs/overview.png)
+
+<h2>Table of Contents</h2>
+
 - [EaseProbe](#easeprobe)
   - [1. Overview](#1-overview)
     - [1.1 Probe](#11-probe)
@@ -25,9 +29,6 @@ EaseProbe is a simple, standalone, and lightWeight tool that can do health/statu
 ## 1. Overview
 
 EaseProbe would do 3 kinds of work - **Probe**, **Notify**, and **Report**.
-
-![](docs/overview.png)
-
 
 ### 1.1 Probe
 
