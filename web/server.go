@@ -38,12 +38,12 @@ func slaHTML(w http.ResponseWriter, req *http.Request) {
 	refresh := fmt.Sprintf("%d", interval.Milliseconds())
 	html := []byte(report.SLAHTML(*probers) + report.AutoRefreshJS(refresh))
 
-	w.Header().Set("Content-Type", "text/html")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Write(html)
 }
 
 func slaJSON(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Write([]byte(report.SLAJSON(*probers)))
 }
 
