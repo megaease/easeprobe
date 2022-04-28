@@ -39,18 +39,21 @@ type HTTP struct {
 	Headers             map[string]string `yaml:"headers,omitempty"`
 	Body                string            `yaml:"body,omitempty"`
 
-	//Option - HTTP Basic Auth Credentials
+	// Option - HTTP Basic Auth Credentials
 	User string `yaml:"username,omitempty"`
 	Pass string `yaml:"password,omitempty"`
 
-	//Option - TLS Config
+	// Option - Prefered HTTP response code ranges, only HTTP standard codes(smaller than 500) are supported;
+	// If no set, default is [0, 499].
+	SuccessCode [][]int `yaml:"success_code,omitempty"`
+
+	// Option - TLS Config
 	global.TLS `yaml:",inline"`
 
 	client *http.Client `yaml:"-"`
 }
 
 func checkHTTPMethod(m string) bool {
-
 	methods := [...]string{"GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "CONNECT", "OPTIONS", "TRACE"}
 	for _, method := range methods {
 		if strings.EqualFold(m, method) {
@@ -62,7 +65,6 @@ func checkHTTPMethod(m string) bool {
 
 // Config HTTP Config Object
 func (h *HTTP) Config(gConf global.ProbeSettings) error {
-
 	kind := "http"
 	tag := ""
 	name := h.ProbeName
@@ -89,13 +91,25 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 		h.Method = "GET"
 	}
 
+	var codeRange [][]int
+	for _, r := range h.SuccessCode {
+		if len(r) != 2 {
+			log.Warnf("HTTP Success Code range is not valid - %v, skip", r)
+			continue
+		}
+		codeRange = append(codeRange, []int{r[0], r[1]})
+	}
+	if len(codeRange) == 0 {
+		codeRange = [][]int{{0, 499}}
+	}
+	h.SuccessCode = codeRange
+
 	log.Debugf("[%s] configuration: %+v, %+v", h.ProbeKind, h, h.Result())
 	return nil
 }
 
 // DoProbe return the checking result
 func (h *HTTP) DoProbe() (bool, string) {
-
 	req, err := http.NewRequest(h.Method, h.URL, bytes.NewBuffer([]byte(h.Body)))
 	if err != nil {
 		return false, fmt.Sprintf("HTTP request error - %v", err)
@@ -115,26 +129,28 @@ func (h *HTTP) DoProbe() (bool, string) {
 
 	req.Header.Set("User-Agent", global.OrgProgVer)
 	resp, err := h.client.Do(req)
-
-	status := true
-	message := ""
 	if err != nil {
-		message = fmt.Sprintf("Error: %v", err)
 		log.Errorf("error making get request: %v", err)
-		status = false
-	} else {
-		// Read the response body
-		defer resp.Body.Close()
-		response, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Debugf("%s", string(response))
-		}
-		message = fmt.Sprintf("HTTP Status Code is %d", resp.StatusCode)
-		if resp.StatusCode >= 500 {
-			message = fmt.Sprintf("HTTP Status Code is %d", resp.StatusCode)
-			status = false
-		}
+		return false, fmt.Sprintf("Error: %v", err)
+	}
+	// Read the response body
+	defer resp.Body.Close()
+	response, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Debugf("%s", string(response))
+		return false, fmt.Sprintf("Error: %v", err)
 	}
 
-	return status, message
+	var valid bool
+	for _, r := range h.SuccessCode {
+		if r[0] <= resp.StatusCode && resp.StatusCode <= r[1] {
+			valid = true
+			break
+		}
+	}
+	if !valid {
+		return false, fmt.Sprintf("HTTP Status Code is %d. It missed in %v", resp.StatusCode, h.SuccessCode)
+	}
+
+	return true, fmt.Sprintf("HTTP Status Code is %d", resp.StatusCode)
 }
