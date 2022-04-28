@@ -43,8 +43,8 @@ type HTTP struct {
 	User string `yaml:"username,omitempty"`
 	Pass string `yaml:"password,omitempty"`
 
-	// Option - Prefered HTTP response code, only HTTP standard codes(smaller than 500) are supported
-	Code int `yaml:"code,omitempty"`
+	// Option - Prefered HTTP response code ranges, only HTTP standard codes(smaller than 500) are supported
+	SuccessCode [][]int `yaml:"success_code,omitempty"`
 
 	// Option - TLS Config
 	global.TLS `yaml:",inline"`
@@ -90,6 +90,13 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 		h.Method = "GET"
 	}
 
+	for _, r := range h.SuccessCode {
+		if len(r) != 2 {
+			log.Errorf("HTTP Success Code is invalid - %+v", r)
+			return fmt.Errorf("HTTP Success Code is invalid - %+v", r)
+		}
+	}
+
 	log.Debugf("[%s] configuration: %+v, %+v", h.ProbeKind, h, h.Result())
 	return nil
 }
@@ -133,9 +140,17 @@ func (h *HTTP) DoProbe() (bool, string) {
 		if resp.StatusCode >= 500 {
 			message = fmt.Sprintf("HTTP Status Code is %d", resp.StatusCode)
 			status = false
-		} else if h.Code > 0 && resp.StatusCode != h.Code {
-			message = fmt.Sprintf("HTTP Status Code is %d, you want %d", resp.StatusCode, h.Code)
-			status = false
+		} else if len(h.SuccessCode) > 0 {
+			var hitted bool
+			for _, r := range h.SuccessCode {
+				if r[0] <= resp.StatusCode && resp.StatusCode <= r[1] {
+					hitted = true
+					break
+				}
+			}
+			if !hitted {
+				return false, fmt.Sprintf("HTTP Status Code is %d, you want %v", resp.StatusCode, h.SuccessCode)
+			}
 		}
 	}
 
