@@ -91,18 +91,18 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 		h.Method = "GET"
 	}
 
-	if len(h.SuccessCode) != 0 {
-		for _, r := range h.SuccessCode {
-			if len(r) != 2 {
-				log.Warnf("HTTP Success Code is invalid - %+v, use default [0, 499]", r)
-				h.SuccessCode = [][]int{{0, 499}}
-				break
-			}
+	var codeRange [][]int
+	for _, r := range h.SuccessCode {
+		if len(r) != 2 {
+			log.Warnf("HTTP Success Code range is not valid - %v, skip", r)
+			continue
 		}
-	} else {
-		log.Debug("HTTP Success Code is not set, use default [0, 499]")
-		h.SuccessCode = [][]int{{0, 499}}
+		codeRange = append(codeRange, []int{r[0], r[1]})
 	}
+	if len(codeRange) == 0 {
+		codeRange = [][]int{{0, 499}}
+	}
+	h.SuccessCode = codeRange
 
 	log.Debugf("[%s] configuration: %+v, %+v", h.ProbeKind, h, h.Result())
 	return nil
@@ -129,30 +129,28 @@ func (h *HTTP) DoProbe() (bool, string) {
 
 	req.Header.Set("User-Agent", global.OrgProgVer)
 	resp, err := h.client.Do(req)
-
 	if err != nil {
 		log.Errorf("error making get request: %v", err)
 		return false, fmt.Sprintf("Error: %v", err)
-	} else {
-		// Read the response body
-		defer resp.Body.Close()
-		response, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Debugf("%s", string(response))
-			return false, fmt.Sprintf("Error: %v", err)
-		}
-
-		var valid bool
-		for _, r := range h.SuccessCode {
-			if r[0] <= resp.StatusCode && resp.StatusCode <= r[1] {
-				valid = true
-				break
-			}
-		}
-		if !valid {
-			return false, fmt.Sprintf("HTTP Status Code is %d. It missed in %v", resp.StatusCode, h.SuccessCode)
-		}
+	}
+	// Read the response body
+	defer resp.Body.Close()
+	response, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Debugf("%s", string(response))
+		return false, fmt.Sprintf("Error: %v", err)
 	}
 
-	return true, ""
+	var valid bool
+	for _, r := range h.SuccessCode {
+		if r[0] <= resp.StatusCode && resp.StatusCode <= r[1] {
+			valid = true
+			break
+		}
+	}
+	if !valid {
+		return false, fmt.Sprintf("HTTP Status Code is %d. It missed in %v", resp.StatusCode, h.SuccessCode)
+	}
+
+	return true, fmt.Sprintf("HTTP Status Code is %d", resp.StatusCode)
 }
