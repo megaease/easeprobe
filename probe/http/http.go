@@ -94,8 +94,8 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 	if len(h.SuccessCode) != 0 {
 		for _, r := range h.SuccessCode {
 			if len(r) != 2 {
-				log.Errorf("HTTP Success Code is invalid - %+v", r)
-				return fmt.Errorf("HTTP Success Code is invalid - %+v", r)
+				log.Warnf("HTTP Success Code is invalid - %+v, use default [0, 499]", r)
+				h.SuccessCode = [][]int{{0, 499}}
 			}
 		}
 	} else {
@@ -129,37 +129,29 @@ func (h *HTTP) DoProbe() (bool, string) {
 	req.Header.Set("User-Agent", global.OrgProgVer)
 	resp, err := h.client.Do(req)
 
-	status := true
-	message := ""
 	if err != nil {
-		message = fmt.Sprintf("Error: %v", err)
 		log.Errorf("error making get request: %v", err)
-		status = false
+		return false, fmt.Sprintf("Error: %v", err)
 	} else {
 		// Read the response body
 		defer resp.Body.Close()
 		response, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			log.Debugf("%s", string(response))
-		}
-		message = fmt.Sprintf("HTTP Status Code is %d", resp.StatusCode)
-		if resp.StatusCode >= 500 {
-			message = fmt.Sprintf("HTTP Status Code is %d", resp.StatusCode)
-			status = false
+			return false, fmt.Sprintf("Error: %v", err)
 		}
 
-		var hitted bool
+		var valid bool
 		for _, r := range h.SuccessCode {
 			if r[0] <= resp.StatusCode && resp.StatusCode <= r[1] {
-				hitted = true
+				valid = true
 				break
 			}
 		}
-		if !hitted {
-			return false, fmt.Sprintf("HTTP Status Code is %d, you want %v", resp.StatusCode, h.SuccessCode)
+		if !valid {
+			return false, fmt.Sprintf("HTTP Status Code is %d. It missed in %v", resp.StatusCode, h.SuccessCode)
 		}
-
 	}
 
-	return status, message
+	return true, ""
 }
