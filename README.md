@@ -277,10 +277,10 @@ http:
     ca: /path/to/file.ca
     cert: /path/to/file.crt
     key: /path/to/file.key
-    # Optional HTTP response code range you want, only HTTP standard codes(>=200 and < 500) work, default is [0, 499].
+    # HTTP successful response code range, default is [0, 499].
     success_code:
-      - [200,210]
-      - [300,320]
+      - [200,206] # the code >=200 and <= 206
+      - [300,308] # the code >=300 and <= 308
     # configuration
     timeout: 10s # default is 30 seconds
 
