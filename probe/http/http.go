@@ -39,18 +39,20 @@ type HTTP struct {
 	Headers             map[string]string `yaml:"headers,omitempty"`
 	Body                string            `yaml:"body,omitempty"`
 
-	//Option - HTTP Basic Auth Credentials
+	// Option - HTTP Basic Auth Credentials
 	User string `yaml:"username,omitempty"`
 	Pass string `yaml:"password,omitempty"`
 
-	//Option - TLS Config
+	// Option - Prefered HTTP response code, only HTTP standard codes(smaller than 500) are supported
+	Code int `yaml:"code,omitempty"`
+
+	// Option - TLS Config
 	global.TLS `yaml:",inline"`
 
 	client *http.Client `yaml:"-"`
 }
 
 func checkHTTPMethod(m string) bool {
-
 	methods := [...]string{"GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "CONNECT", "OPTIONS", "TRACE"}
 	for _, method := range methods {
 		if strings.EqualFold(m, method) {
@@ -62,7 +64,6 @@ func checkHTTPMethod(m string) bool {
 
 // Config HTTP Config Object
 func (h *HTTP) Config(gConf global.ProbeSettings) error {
-
 	kind := "http"
 	tag := ""
 	name := h.ProbeName
@@ -95,7 +96,6 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 
 // DoProbe return the checking result
 func (h *HTTP) DoProbe() (bool, string) {
-
 	req, err := http.NewRequest(h.Method, h.URL, bytes.NewBuffer([]byte(h.Body)))
 	if err != nil {
 		return false, fmt.Sprintf("HTTP request error - %v", err)
@@ -132,6 +132,9 @@ func (h *HTTP) DoProbe() (bool, string) {
 		message = fmt.Sprintf("HTTP Status Code is %d", resp.StatusCode)
 		if resp.StatusCode >= 500 {
 			message = fmt.Sprintf("HTTP Status Code is %d", resp.StatusCode)
+			status = false
+		} else if h.Code > 0 && resp.StatusCode != h.Code {
+			message = fmt.Sprintf("HTTP Status Code is %d, you want %d", resp.StatusCode, h.Code)
 			status = false
 		}
 	}

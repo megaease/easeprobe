@@ -277,6 +277,8 @@ http:
     ca: /path/to/file.ca
     cert: /path/to/file.crt
     key: /path/to/file.key
+    # Optional HTTP response code you want, only HTTP standard codes(>=200 and < 500) work.
+    code: 200
     # configuration
     timeout: 10s # default is 30 seconds
 
