@@ -96,6 +96,7 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 			if len(r) != 2 {
 				log.Warnf("HTTP Success Code is invalid - %+v, use default [0, 499]", r)
 				h.SuccessCode = [][]int{{0, 499}}
+				break
 			}
 		}
 	} else {
