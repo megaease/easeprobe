@@ -540,6 +540,13 @@ notify:
     - name: "Local Log"
       file: "/tmp/easeprobe.log"
       dry: true
+  # Notify by sms using yunpian  https://www.yunpian.com/official/document/sms/zh_cn/domestic_single_send
+  sms:
+    - name: "sms alert service"
+      apikey: xxxxxxxxxxxx # yunpian apikey 
+      mobile: 18800000000 # mobile phone number
+      sign: "【megaease】" # need to register
+
 ```
 
 **Notes**: All of the notifications can have the following optional configuration.
