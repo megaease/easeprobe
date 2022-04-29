@@ -75,7 +75,7 @@ func (s *Server) Config(gConf global.ProbeSettings) error {
 	// 4. retrive the cpu core:		`grep -c ^processor /proc/cpuinfo;`
 	// 5. retrive the cpu usage:	`top -b -n 1 | grep Cpu | awk -F ":" '{print $2}'`
 	//    output example: 1.6 us,  0.0 sy,  0.0 ni, 98.4 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
-	// 6. retrive the disk usage	`df -h | awk '$NF=="/"{printf "%d %d %s\n", $3,$2,$5}'`
+	// 6. retrive the disk usage	`df -h 2>/dev/null | awk '$NF=="/"{printf "%d %d %s\n", $3,$2,$5}'`
 	//    output: used(GB) total(GB) usage(%), example: 40 970 5%
 
 	s.Command = `hostname;
@@ -83,7 +83,7 @@ func (s *Server) Config(gConf global.ProbeSettings) error {
 	free -m | awk 'NR==2{printf "%s %s %.2f\n", $3,$2,$3*100/$2 }';
 	grep -c ^processor /proc/cpuinfo;
 	top -b -n 1 | grep Cpu | awk -F ":" '{print $2}';
-	df -h | awk '$NF=="/"{printf "%d %d %s\n", $3,$2,$5}'`
+	df -h 2>/dev/null | awk '$NF=="/"{printf "%d %d %s\n", $3,$2,$5}'`
 
 	if s.Threshold.CPU == 0 {
 		s.Threshold.CPU = DefaultCPUThreshold
