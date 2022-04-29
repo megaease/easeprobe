@@ -200,7 +200,7 @@ The EaseProbe would listen on `0.0.0.0:8181` port by default. And you can access
 
 For more information, please check the [Global Setting Configuration](#38-global-setting-configuration)
 
-## 2. Getting Start
+## 2. Getting Started
 
 ### 2.1 Build
 
@@ -219,11 +219,23 @@ Running the following command for the local test
 ```shell
 $ build/bin/easeprobe -f config.yaml
 ```
-
+* `-f` configuration file or url. Can also be achieved by setting the environment variable `PROBE_CONFIG`
+* `-d` dry run. Can also be achieved by setting the environment variable `PROBE_DRY`
 
 ## 3. Configuration
+Easeprobe can be configured by supplying a yaml file or url to fetch configuration settings from. 
+By default easeprobe will look for its `config.yaml` on the current folder, this can be changed by supplying the `-f` parameter.
 
-The following configuration is an example.
+```shell
+easeprobe -f path/to/config.yaml
+easeprobe -f https://example.com/config
+```
+
+The following environment variables can be used to finetune the request to the configuration file
+* `HTTP_AUTHORIZATION`
+* `HTTP_TIMEOUT`
+
+The following example configurations illustrate the easeprobe supported features.
 
 **Notes**: All probes have the following options:
 
