@@ -84,10 +84,11 @@ func (r MySQL) Probe() (bool, string) {
 	if err != nil {
 		return false, err.Error()
 	}
-	_, err = db.Query("show status like \"uptime\"") // run a SQL to test
+	row, err := db.Query("show status like \"uptime\"") // run a SQL to test
 	if err != nil {
 		return false, err.Error()
 	}
+	defer row.Close()
 
 	return true, "Check MySQL Server Successfully!"
 
