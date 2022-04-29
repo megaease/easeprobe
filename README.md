@@ -399,7 +399,7 @@ The feature probe the CPU, Memory, and Disk usage, if one of them exceeds the th
 
 > Note: 
 > - The thresholds are **OR** condition, if one of them exceeds the threshold, then mark the host as status down.
-> - The Host needs remote server have the following command: `top`, `df`, `free`, `awk`, `grep`, `tr`, and `hostname` (check the [source code](./blob/work/probe/host/host.go) to see how it works).
+> - The Host needs remote server have the following command: `top`, `df`, `free`, `awk`, `grep`, `tr`, and `hostname` (check the [source code](./probe/host/host.go) to see how it works).
 > - The disk usage only check the root disk.
 
 ```yaml
