@@ -78,6 +78,9 @@ func (r MySQL) Probe() (bool, string) {
 	}
 
 	db, err := sql.Open("mysql", r.ConnStr)
+	if err != nil {
+		return false, err.Error()
+	}
 	defer db.Close()
 
 	err = db.Ping()
