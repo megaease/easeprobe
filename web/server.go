@@ -59,10 +59,10 @@ func Server() {
 	host := c.Settings.HTTPServer.IP
 	port := c.Settings.HTTPServer.Port
 
-	// Configure the http server 
-	if len(host)>0 && net.ParseIP(host) == nil {
+	// Configure the http server
+	if len(host) > 0 && net.ParseIP(host) == nil {
 		host = global.DefaultHTTPServerIP
-	} 
+	}
 	p, err := strconv.Atoi(port)
 	if err != nil || p <= 1024 || p > 65535 {
 		log.Warnf("[Web] Invalid port number: %s, use the default value: %s", port, global.DefaultHTTPServerPort)
