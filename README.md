@@ -11,7 +11,7 @@ EaseProbe is a simple, standalone, and lightWeight tool that can do health/statu
     - [1.1 Probe](#11-probe)
     - [1.2 Notification](#12-notification)
     - [1.3 Report](#13-report)
-  - [2. Getting Start](#2-getting-start)
+  - [2. Getting Started](#2-getting-started)
     - [2.1 Build](#21-build)
     - [2.2 Run](#22-run)
   - [3. Configuration](#3-configuration)
@@ -195,7 +195,7 @@ Check the  [Notification Configuration](#37-notification-configuration) to see h
 The EaseProbe would listen on `0.0.0.0:8181` port by default. And you can access the Live SLA report by the following URL:
 
   - HTML: `http://localhost:8181/`
-  - JSON: `http://localhost:8181/api/v1/sla/`
+  - JSON: `http://localhost:8181/api/v1/sla`
 
 
 For more information, please check the [Global Setting Configuration](#38-global-setting-configuration)
@@ -223,7 +223,7 @@ $ build/bin/easeprobe -f config.yaml
 * `-d` dry run. Can also be achieved by setting the environment variable `PROBE_DRY`
 
 ## 3. Configuration
-Easeprobe can be configured by supplying a yaml file or url to fetch configuration settings from. 
+Easeprobe can be configured by supplying a yaml file or url to fetch configuration settings from.
 By default easeprobe will look for its `config.yaml` on the current folder, this can be changed by supplying the `-f` parameter.
 
 ```shell
@@ -393,7 +393,7 @@ ssh:
         - "REDISCLI_AUTH=abc123"
       # check the command output, if does not contain the PONG, mark the status down
       contain : "PONG"
-    
+
     # Check the process status of `Kafka`
     - name:  Kafka (GCP)
       bastion: gcp         #  ◄------ bastion host id
@@ -409,7 +409,7 @@ Support the host probe, the configuration example as below.
 
 The feature probe the CPU, Memory, and Disk usage, if one of them exceeds the threshold, then mark the host as status down.
 
-> Note: 
+> Note:
 > - The thresholds are **OR** condition, if one of them exceeds the threshold, then mark the host as status down.
 > - The Host needs remote server have the following command: `top`, `df`, `free`, `awk`, `grep`, `tr`, and `hostname` (check the [source code](./probe/host/host.go) to see how it works).
 > - The disk usage only check the root disk.
@@ -431,7 +431,7 @@ host:
         mem: 0.70  # memory usage 70%
         disk: 0.90  # disk usage 90%
 
-    # Using the default threshold 
+    # Using the default threshold
     # cpu 80%, mem 80% and disk 95%
     - name : My VPS
       host: user@example.com:22
