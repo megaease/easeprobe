@@ -11,7 +11,7 @@ require (
 	github.com/segmentio/kafka-go v0.4.31
 	github.com/sirupsen/logrus v1.8.1
 	github.com/uptrace/bun/driver/pgdriver v1.1.2
-	go.mongodb.org/mongo-driver v1.8.4
+	go.mongodb.org/mongo-driver v1.9.0
 	golang.org/x/crypto v0.0.0-20220321153916-2c7772ba3064
 	golang.org/x/exp v0.0.0-20220328175248-053ad81199eb
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
