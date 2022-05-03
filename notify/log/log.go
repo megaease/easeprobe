@@ -80,5 +80,5 @@ func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
 	for _, p := range probers {
 		log.Println(p.Result())
 	}
-	logrus.Infoln("Logged the Statstics into %s!", c.File)
+	logrus.Infof("Logged the Statstics into %s!", c.File)
 }

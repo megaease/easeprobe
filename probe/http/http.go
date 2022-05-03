@@ -71,7 +71,7 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 	h.DefaultOptions.Config(gConf, kind, tag, name, h.URL, h.DoProbe)
 
 	if _, err := url.ParseRequestURI(h.URL); err != nil {
-		log.Errorf("URL is not valid - %+v url=%+v", err)
+		log.Errorf("URL is not valid - %+v url=%+v", err, h.URL)
 		return err
 	}
 
