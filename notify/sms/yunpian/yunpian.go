@@ -15,9 +15,6 @@ const Kind string = "Yunpian"
 
 type Yunpian struct {
 	conf.Options `yaml:",inline"`
-
-	Apikey string `yaml:"apikey"`
-	Sign   string `yaml:"sign"`
 }
 
 // New create a yunpian sms provider
@@ -37,7 +34,7 @@ func (c Yunpian) Notify(title, text string) error {
 	api := "https://sms.yunpian.com/v2/sms/batch_send.json"
 
 	form := url.Values{}
-	form.Add("apikey", c.Apikey)
+	form.Add("apikey", c.ApiKey)
 	form.Add("mobile", c.Mobile)
 	form.Add("text", c.Sign+text)
 

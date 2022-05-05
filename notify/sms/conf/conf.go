@@ -55,6 +55,11 @@ type Options struct {
 
 	ProviderType ProviderType `yaml:"provider"`
 	Mobile       string       `yaml:"mobile"`
+	From         string       `yaml:"from"`
+	ApiKey       string       `yaml:"apikey"`
+	ApiSecret    string       `yaml:"api_secret"`
+	ApiUrl       string       `yaml:"api_url"`
+	Sign         string       `yaml:"sign"`
 }
 
 // ProviderTypeMap is the map of provider [name, provider]

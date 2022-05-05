@@ -15,11 +15,6 @@ const Kind string = "Twilio"
 
 type Twilio struct {
 	conf.Options `yaml:",inline"`
-
-	Sid    string `yaml:"sid"`
-	Token  string `yaml:"token"`
-	From   string `yaml:"from"`
-	ApiUrl string `yaml:"api_url"`
 }
 
 // New create a Twilio sms provider
@@ -36,7 +31,7 @@ func (c Twilio) Kind() string {
 
 // Notify return the type of Notify
 func (c Twilio) Notify(title, text string) error {
-	api := c.ApiUrl + c.Sid + "/Messages.json"
+	api := c.ApiUrl + c.ApiKey + "/Messages.json"
 
 	form := url.Values{}
 	form.Add("From", c.From)
@@ -45,7 +40,7 @@ func (c Twilio) Notify(title, text string) error {
 
 	log.Debugf("[%s] - API %s - Form %s", c.Kind(), api, form)
 	req, err := http.NewRequest(http.MethodPost, api, strings.NewReader(form.Encode()))
-	req.SetBasicAuth(c.Sid, c.Token)
+	req.SetBasicAuth(c.ApiKey, c.ApiSecret)
 	if err != nil {
 		return err
 	}

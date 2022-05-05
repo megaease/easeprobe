@@ -9,10 +9,6 @@ const Kind string = "Nexmo"
 
 type Nexmo struct {
 	conf.Options `yaml:",inline"`
-
-	ApiKey    string `yaml:"apikey"`
-	ApiSecret string `yaml:"api_secret"`
-	From      string `yaml:"from"`
 }
 
 // New create a Nexmo sms provider
