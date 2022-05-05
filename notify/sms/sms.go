@@ -18,75 +18,56 @@
 package sms
 
 import (
-	"fmt"
+	"errors"
 	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/notify/base"
-	"github.com/megaease/easeprobe/report"
+	"github.com/megaease/easeprobe/notify/sms/conf"
+	"github.com/megaease/easeprobe/notify/sms/nexmo"
+	"github.com/megaease/easeprobe/notify/sms/twilio"
+	"github.com/megaease/easeprobe/notify/sms/yunpian"
 	log "github.com/sirupsen/logrus"
-	"io/ioutil"
-	"net/http"
-	"net/url"
-	"strings"
 )
 
-// NotifyConfig is the sms notification configuration
+//NotifyConfig implements the structure of Sms
 type NotifyConfig struct {
-	base.DefaultNotify `yaml:",inline"`
-	Apikey             string `yaml:"apikey"`
-	Mobile             string `yaml:"mobile"`
-	Sign               string `yaml:"sign"`
+	//Embed structure
+	conf.Options `yaml:",inline"`
+
+	Provider conf.Provider `yaml:"-"`
 }
 
-// Kind return the type of Notify
+// Kind return the probe kind
 func (c *NotifyConfig) Kind() string {
 	return c.MyKind
 }
 
-// Config configures the sms configuration
+// Config Sms Config Object
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
-	c.MyKind = "sms"
-	c.Format = report.Markdown
-	c.SendFunc = c.SendSms
 	c.DefaultNotify.Config(gConf)
-	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.MyKind, c.Name, c)
+	c.configSmsDriver()
+	c.SendFunc = c.DoNotify
+
+	log.Debugf("[%s] configuration: %+v, %+v", c.NotifyStat, c, c)
 	return nil
 }
 
-// SendSms is the wrapper for SendSmsNotification
-func (c *NotifyConfig) SendSms(title, text string) error {
-	return c.SendSmsNotification(text)
+func (c *NotifyConfig) configSmsDriver() {
+	switch c.ProviderType {
+	case conf.Yunpian:
+		c.Provider = yunpian.New(c.Options)
+	case conf.Twilio:
+		c.Provider = twilio.New(c.Options)
+	case conf.Nexmo:
+		c.Provider = nexmo.New(c.Options)
+	default:
+		c.ProviderType = conf.Unknown
+	}
+
 }
 
-// SendSmsNotification will send the notification by sms.
-func (c *NotifyConfig) SendSmsNotification(text string) error {
-	api := "https://sms.yunpian.com/v2/sms/single_send.json"
-
-	form := url.Values{}
-	form.Add("apikey", c.Apikey)
-	form.Add("mobile", c.Mobile)
-	form.Add("text", c.Sign+text)
-
-	log.Debugf("[%s] - API %s - Form %s", c.Kind(), api, form)
-	req, err := http.NewRequest(http.MethodPost, api, strings.NewReader(form.Encode()))
-	if err != nil {
-		return err
+// DoNotify return the notify function
+func (c *NotifyConfig) DoNotify(title, text string) error {
+	if c.ProviderType == conf.Unknown {
+		return errors.New("wrong Provider type")
 	}
-	req.Close = true
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
-	client := &http.Client{Timeout: c.Timeout}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	buf, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("Error response from Sms [%d] - [%s]", resp.StatusCode, string(buf))
-	}
-	return nil
+	return c.Provider.Notify(title, text)
 }
