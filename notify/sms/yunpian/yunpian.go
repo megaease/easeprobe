@@ -31,10 +31,10 @@ func (c Yunpian) Kind() string {
 
 // Notify return the type of Notify
 func (c Yunpian) Notify(title, text string) error {
-	api := "https://sms.yunpian.com/v2/sms/batch_send.json"
+	api := c.Url
 
 	form := url.Values{}
-	form.Add("apikey", c.ApiKey)
+	form.Add("apikey", c.Key)
 	form.Add("mobile", c.Mobile)
 	form.Add("text", c.Sign+text)
 

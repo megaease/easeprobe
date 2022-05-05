@@ -31,7 +31,7 @@ func (c Twilio) Kind() string {
 
 // Notify return the type of Notify
 func (c Twilio) Notify(title, text string) error {
-	api := c.ApiUrl + c.ApiKey + "/Messages.json"
+	api := c.Url + c.Key + "/Messages.json"
 
 	form := url.Values{}
 	form.Add("From", c.From)
@@ -40,7 +40,7 @@ func (c Twilio) Notify(title, text string) error {
 
 	log.Debugf("[%s] - API %s - Form %s", c.Kind(), api, form)
 	req, err := http.NewRequest(http.MethodPost, api, strings.NewReader(form.Encode()))
-	req.SetBasicAuth(c.ApiKey, c.ApiSecret)
+	req.SetBasicAuth(c.Key, c.Secret)
 	if err != nil {
 		return err
 	}

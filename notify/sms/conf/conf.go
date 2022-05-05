@@ -56,9 +56,9 @@ type Options struct {
 	ProviderType ProviderType `yaml:"provider"`
 	Mobile       string       `yaml:"mobile"`
 	From         string       `yaml:"from"`
-	ApiKey       string       `yaml:"apikey"`
-	ApiSecret    string       `yaml:"api_secret"`
-	ApiUrl       string       `yaml:"api_url"`
+	Key          string       `yaml:"key"`
+	Secret       string       `yaml:"secret"`
+	Url          string       `yaml:"url"`
 	Sign         string       `yaml:"sign"`
 }
 
