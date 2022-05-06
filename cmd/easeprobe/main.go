@@ -133,7 +133,7 @@ func saveData(doneSave chan bool) {
 			log.Debugf("Successfully save the SLA data to file: %s", file)
 		}
 	}
-
+	save()
 	for {
 		select {
 		case <-doneSave:

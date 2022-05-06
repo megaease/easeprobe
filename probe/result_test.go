@@ -92,9 +92,6 @@ func TestResultMarshalJSON(t *testing.T) {
 		t.Error(err)
 	}
 
-	t.Log(r1)
-	t.Log(r2)
-
 	if !reflect.DeepEqual(r1, r2) {
 		t.Fatalf("%v != %v", r1, r2)
 	}
@@ -114,9 +111,6 @@ func TestResultMarshalYAML(t *testing.T) {
 	if err := yaml.Unmarshal(b, r2); err != nil {
 		t.Error(err)
 	}
-
-	t.Log(r1)
-	t.Log(r2)
 
 	if !reflect.DeepEqual(r1, r2) {
 		t.Fatalf("%v != %v", r1, r2)
