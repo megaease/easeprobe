@@ -56,7 +56,7 @@ func NewResult() *Result {
 	return &Result{
 		Name:             "",
 		Endpoint:         "",
-		StartTime:        time.Now(),
+		StartTime:        time.Now().UTC(),
 		StartTimestamp:   0,
 		RoundTripTime:    0,
 		Status:           StatusInit,
@@ -65,7 +65,7 @@ func NewResult() *Result {
 		LatestDownTime:   time.Time{},
 		RecoveryDuration: 0,
 		Stat: Stat{
-			Since:    time.Now(),
+			Since:    time.Now().UTC(),
 			Total:    0,
 			Status:   map[Status]int64{},
 			UpTime:   0,

@@ -57,7 +57,7 @@ func CreateTestResult() *Result {
 
 func TestStatClone(t *testing.T) {
 	s := Stat{
-		Since: time.Now().Round(time.Millisecond),
+		Since: time.Now().UTC().Round(time.Millisecond),
 		Total: 40,
 		Status: map[Status]int64{
 			StatusUp:   10,

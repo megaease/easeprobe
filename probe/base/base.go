@@ -99,7 +99,7 @@ func (d *DefaultOptions) Probe() probe.Result {
 		return *d.ProbeResult
 	}
 
-	now := time.Now()
+	now := time.Now().UTC()
 	d.ProbeResult.StartTime = now
 	d.ProbeResult.StartTimestamp = now.UnixMilli()
 
@@ -136,7 +136,7 @@ func (d *DefaultOptions) DownTimeCalculation(status probe.Status) {
 
 	// Status from UP to DOWN - Failure
 	if d.ProbeResult.PreStatus != probe.StatusDown && status == probe.StatusDown {
-		d.ProbeResult.LatestDownTime = time.Now()
+		d.ProbeResult.LatestDownTime = time.Now().UTC()
 	}
 
 	// Status from DOWN to UP - Recovery
