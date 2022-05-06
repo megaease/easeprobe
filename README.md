@@ -34,6 +34,10 @@ EaseProbe would do 3 kinds of work - **Probe**, **Notify**, and **Report**.
 
 Ease Probe supports the following probing methods: **HTTP**, **TCP**, **Shell Command**, **SSH Command**,  **Host Resource Usage**, and **Native Client**.
 
+> **Notes**:
+>
+> The prober name is a unique ID, DO NOT use the same name for a different prober.
+
 - **HTTP**. Checking the HTTP status code, Support mTLS, HTTP Basic Auth, and can set the Request Header/Body. ( [HTTP Probe Configuration](#31-http-probe-configuration) )
 
   ```YAML
@@ -192,11 +196,28 @@ Check the  [Notification Configuration](#37-notification-configuration) to see h
 
 - **SLA Live Report**. You can query the SLA Live Report
 
-The EaseProbe would listen on `0.0.0.0:8181` port by default. And you can access the Live SLA report by the following URL:
+  The EaseProbe would listen on `0.0.0.0:8181` port by default. And you can access the Live SLA report by the following URL:
 
   - HTML: `http://localhost:8181/`
   - JSON: `http://localhost:8181/api/v1/sla`
 
+- **SLA Data Persistence**. The SLA data will be persisted on disk.
+
+  The SLA data would be persisted in `$CWD/data/data.yaml` by default. If you want to configure the path, you can do it in the `settings` section.
+
+  Every time when EaseProbe starts, it would be loaded, and EaseProbe would remove the probe data that are not configured.
+
+  > **Note**:
+  >
+  > **The prober's name is unique ID, so if you have two probers with the same name, the data would be stored together. The behavior is unknown.**
+
+  ```YAML
+  settings:
+    sla:
+      # SLA data persistence file path.
+      # The default location is `$CWD/data/data.yaml`
+      data: /path/to/data/file.yaml
+  ```
 
 For more information, please check the [Global Setting Configuration](#38-global-setting-configuration)
 
@@ -587,6 +608,9 @@ settings:
     # - true: send the SLA report every minute
     # - false: send the SLA report in schedule
     debug: false
+    # SLA data persistence file path.
+    # The default location is `$CWD/data/data.yaml`
+    data: /path/to/data/file.yaml
 
   notify:
     # dry: true # Global settings for dry run
