@@ -37,14 +37,14 @@ func ToText(r probe.Result) string {
 
 // resultDTO only for JSON format notification
 type resultDTO struct {
-	Name           string               `json:"name"`
-	Endpoint       string               `json:"endpoint"`
-	StartTime      time.Time            `json:"time"`
-	StartTimestamp int64                `json:"timestamp"`
-	RoundTripTime  probe.ConfigDuration `json:"rtt"`
-	Status         probe.Status         `json:"status"`
-	PreStatus      probe.Status         `json:"prestatus"`
-	Message        string               `json:"message"`
+	Name           string        `json:"name"`
+	Endpoint       string        `json:"endpoint"`
+	StartTime      time.Time     `json:"time"`
+	StartTimestamp int64         `json:"timestamp"`
+	RoundTripTime  time.Duration `json:"rtt"`
+	Status         probe.Status  `json:"status"`
+	PreStatus      probe.Status  `json:"prestatus"`
+	Message        string        `json:"message"`
 }
 
 // ToJSON convert the result object to ToJSON

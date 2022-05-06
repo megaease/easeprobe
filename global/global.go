@@ -63,6 +63,8 @@ const (
 	DefaultHTTPServerIP = "0.0.0.0"
 	// DefaultHTTPServerPort is the default port of the HTTP server
 	DefaultHTTPServerPort = "8181"
+	// DefaultDataFile is the default data file name
+	DefaultDataFile = "data.yaml"
 )
 
 // Retry is the settings of retry

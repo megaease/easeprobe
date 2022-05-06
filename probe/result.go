@@ -20,119 +20,35 @@ package probe
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 
 	log "github.com/sirupsen/logrus"
 )
 
-// Status is the status of Probe
-type Status int
-
-// The status of a probe
-const (
-	StatusUp Status = iota
-	StatusDown
-	StatusUnknown
-	StatusInit
-)
-
-// String convert the Status to string
-func (s Status) String() string {
-	switch s {
-	case StatusUp:
-		return "up"
-	case StatusDown:
-		return "down"
-	case StatusUnknown:
-		return "unknown"
-	case StatusInit:
-		return "init"
-	}
-	return "unknown"
-}
-
-//Status convert the string to Status
-func (s *Status) Status(status string) {
-	switch strings.ToLower(status) {
-	case "up":
-		*s = StatusUp
-	case "down":
-		*s = StatusDown
-	case "unknown":
-		*s = StatusUnknown
-	case "init":
-		*s = StatusInit
-	}
-	*s = StatusUnknown
-}
-
-// Emoji convert the status to emoji
-func (s *Status) Emoji() string {
-	switch *s {
-	case StatusUp:
-		return "✅"
-	case StatusDown:
-		return "❌"
-	case StatusUnknown:
-		return "⛔️"
-	case StatusInit:
-		return "🔎"
-	}
-	return "⛔️"
-}
-
-// UnmarshalJSON is Unmarshal the status
-func (s *Status) UnmarshalJSON(b []byte) (err error) {
-	s.Status(strings.ToLower(string(b)))
-	return nil
-}
-
-// MarshalJSON is marshal the status
-func (s *Status) MarshalJSON() (b []byte, err error) {
-	return []byte(fmt.Sprintf(`"%s"`, s.String())), nil
-}
-
-//ConfigDuration is the struct used for custom the time formation
-type ConfigDuration struct {
-	time.Duration
-}
-
-// UnmarshalJSON is Unmarshal the time
-func (d *ConfigDuration) UnmarshalJSON(b []byte) (err error) {
-	d.Duration, err = time.ParseDuration(strings.Trim(string(b), `"`))
-	return
-}
-
-// MarshalJSON is marshal the time
-func (d *ConfigDuration) MarshalJSON() (b []byte, err error) {
-	return []byte(fmt.Sprintf(`"%s"`, d.Round(time.Millisecond))), nil
-}
-
 // Stat is the statistics of probe result
 type Stat struct {
-	Since    time.Time        `json:"since"`
-	Total    int32            `json:"total"`
-	Status   map[Status]int32 `json:"status"`
-	UpTime   time.Duration    `json:"uptime"`
-	DownTime time.Duration    `json:"downtime"`
+	Since    time.Time        `json:"since" yaml:"since"`
+	Total    int64            `json:"total" yaml:"total"`
+	Status   map[Status]int64 `json:"status" yaml:"status"`
+	UpTime   time.Duration    `json:"uptime" yaml:"uptime"`
+	DownTime time.Duration    `json:"downtime" yaml:"downtime"`
 }
 
 // Result is the status of health check
 type Result struct {
-	Name             string         `json:"name"`
-	Endpoint         string         `json:"endpoint"`
-	StartTime        time.Time      `json:"time"`
-	StartTimestamp   int64          `json:"timestamp"`
-	RoundTripTime    ConfigDuration `json:"rtt"`
-	Status           Status         `json:"status"`
-	PreStatus        Status         `json:"prestatus"`
-	Message          string         `json:"message"`
-	LatestDownTime   time.Time      `json:"latestdowntime"`
-	RecoveryDuration time.Duration  `json:"recoverytime"`
-	Stat             Stat           `json:"stat"`
+	Name             string        `json:"name" yaml:"name"`
+	Endpoint         string        `json:"endpoint" yaml:"endpoint"`
+	StartTime        time.Time     `json:"time" yaml:"time"`
+	StartTimestamp   int64         `json:"timestamp" yaml:"timestamp"`
+	RoundTripTime    time.Duration `json:"rtt" yaml:"rtt"`
+	Status           Status        `json:"status" yaml:"status"`
+	PreStatus        Status        `json:"prestatus" yaml:"prestatus"`
+	Message          string        `json:"message" yaml:"message"`
+	LatestDownTime   time.Time     `json:"latestdowntime" yaml:"latestdowntime"`
+	RecoveryDuration time.Duration `json:"recoverytime" yaml:"recoverytime"`
+	Stat             Stat          `json:"stat" yaml:"stat"`
 
-	TimeFormat string `json:"-"`
+	TimeFormat string `json:"timeformat" yaml:"timeformat"`
 }
 
 // NewResult return a Result object
@@ -142,7 +58,7 @@ func NewResult() *Result {
 		Endpoint:         "",
 		StartTime:        time.Now(),
 		StartTimestamp:   0,
-		RoundTripTime:    ConfigDuration{0},
+		RoundTripTime:    0,
 		Status:           StatusInit,
 		PreStatus:        StatusInit,
 		Message:          "",
@@ -151,11 +67,54 @@ func NewResult() *Result {
 		Stat: Stat{
 			Since:    time.Now(),
 			Total:    0,
-			Status:   map[Status]int32{},
+			Status:   map[Status]int64{},
 			UpTime:   0,
 			DownTime: 0,
 		},
 	}
+}
+
+// NewResultWithName return a Result object with name
+func NewResultWithName(name string) *Result {
+	r := GetResult(name)
+	if r != nil {
+		return r
+	}
+	r = NewResult()
+	r.Name = name
+	return r
+}
+
+// Clone return a clone of the Result
+func (r *Result) Clone() Result {
+	dst := Result{}
+	dst.Name = r.Name
+	dst.Endpoint = r.Endpoint
+	dst.StartTime = r.StartTime
+	dst.StartTimestamp = r.StartTimestamp
+	dst.RoundTripTime = r.RoundTripTime
+	dst.Status = r.Status
+	dst.PreStatus = r.PreStatus
+	dst.Message = r.Message
+	dst.LatestDownTime = r.LatestDownTime
+	dst.RecoveryDuration = r.RecoveryDuration
+	dst.Stat = r.Stat.Clone()
+	dst.TimeFormat = r.TimeFormat
+	return dst
+}
+
+// Clone return a clone of the Stat
+func (s *Stat) Clone() Stat {
+	dst := Stat{}
+	dst.Since = s.Since
+	dst.Total = s.Total
+	dst.Status = make(map[Status]int64)
+	for k, v := range s.Status {
+		dst.Status[k] = v
+	}
+	dst.UpTime = s.UpTime
+	dst.DownTime = s.DownTime
+	return dst
 }
 
 // DoStat is the function do the statstics
@@ -172,10 +131,9 @@ func (r *Result) DoStat(d time.Duration) {
 // Title return the title for notification
 func (r *Result) Title() string {
 	t := "%s"
-	if r.PreStatus == StatusInit {
+	if r.PreStatus == StatusInit && r.Status == StatusUp {
 		t = "Monitoring %s"
-	}
-	if r.Status != StatusUp {
+	} else if r.Status != StatusUp {
 		t = "%s Failure"
 	} else {
 		t = "%s Recovery - ( " + r.RecoveryDuration.Round(time.Second).String() + " Downtime )"

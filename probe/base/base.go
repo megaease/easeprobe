@@ -78,11 +78,12 @@ func (d *DefaultOptions) Config(gConf global.ProbeSettings,
 	d.ProbeTimeout = gConf.NormalizeTimeOut(d.ProbeTimeout)
 	d.ProbeTimeInterval = gConf.NormalizeInterval(d.ProbeTimeInterval)
 
-	d.ProbeResult = probe.NewResult()
+	d.ProbeResult = probe.NewResultWithName(name)
 	d.ProbeResult.Name = name
 	d.ProbeResult.Endpoint = endpoint
-	d.ProbeResult.PreStatus = probe.StatusInit
 	d.ProbeResult.TimeFormat = gConf.TimeFormat
+
+	probe.SetResult(name, d.ProbeResult)
 
 	if len(d.ProbeTag) > 0 {
 		log.Infof("Probe [%s / %s] - [%s] base options are configured!", d.ProbeKind, d.ProbeTag, d.ProbeName)
@@ -104,7 +105,7 @@ func (d *DefaultOptions) Probe() probe.Result {
 
 	stat, msg := d.ProbeFunc()
 
-	d.ProbeResult.RoundTripTime.Duration = time.Since(now)
+	d.ProbeResult.RoundTripTime = time.Since(now)
 
 	status := probe.StatusUp
 	title := "Success"

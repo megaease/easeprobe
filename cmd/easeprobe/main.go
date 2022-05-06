@@ -20,6 +20,9 @@ package main
 import (
 	"flag"
 	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 	"time"
 
 	"github.com/megaease/easeprobe/conf"
@@ -45,48 +48,48 @@ func main() {
 	yamlFile := flag.String("f", getEnvOrDefault("PROBE_CONFIG", "config.yaml"), "configuration file")
 	flag.Parse()
 
-	conf, err := conf.New(yamlFile)
+	c, err := conf.New(yamlFile)
 	if err != nil {
 		log.Fatalln("Fatal: Cannot read the YAML configuration file!")
 		os.Exit(-1)
 	}
-	defer conf.CloseLogFile()
+	defer c.CloseLogFile()
 
 	// if dry notification mode is specificed in command line, overwrite the configuration
 	if *dryNotify {
-		conf.Settings.Notify.Dry = *dryNotify
+		c.Settings.Notify.Dry = *dryNotify
 	}
 
-	if conf.Settings.Notify.Dry {
+	if c.Settings.Notify.Dry {
 		log.Infoln("Dry Notification Mode...")
 	}
 
 	// Probers
-	probers := conf.AllProbers()
+	probers := c.AllProbers()
 
 	// Notification
-	notifies := conf.AllNotifiers()
+	notifies := c.AllNotifiers()
 
-	done := make(chan bool)
-	run(probers, notifies, done)
-
-}
-
-// 1) all of probers send the result to notify channel
-// 2) go through all of notification to notify the result.
-// 3) send the SLA report
-func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
-
-	dryNotify := conf.Get().Settings.Notify.Dry
-
+	// wait group for probers
+	var wg sync.WaitGroup
+	// the exit channel for all probers
+	doneProbe := make(chan bool)
+	// the exit channel for saving the data
+	doneSave := make(chan bool)
+	// the exit channel for watching the event
+	doneWatch := make(chan bool)
 	// Create the Notification Channel
 	notifyChan := make(chan probe.Result)
 
 	// Configure the Probes
-	configProbers(probers, notifyChan)
+	configProbers(probers, notifyChan, &wg, doneProbe)
+	probe.CleanData(probers) // remove the data not in probers
+	go saveData(doneSave)    // save the data to file
 
 	// Configure the Notifiers
 	configNotifiers(notifies)
+	// Start the Event Watching
+	go watchEvent(notifyChan, notifies, doneWatch)
 
 	// Start the HTTP Server
 	web.SetProbers(probers)
@@ -99,10 +102,63 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 		log.Info("No SLA Report would be sent!!")
 	}
 
+	// Graceful Shutdown
+	done := make(chan os.Signal)
+	signal.Notify(done, syscall.SIGTERM)
+	signal.Notify(done, syscall.SIGINT)
+
+	select {
+	case <-done:
+		log.Infof("Received the exit signal, exiting...")
+		for i := 0; i < len(probers); i++ {
+			if probers[i].Result().Status != probe.StatusBad {
+				doneProbe <- true
+			}
+		}
+		wg.Wait()
+		doneWatch <- true
+		doneSave <- true
+	}
+
+	log.Info("Graceful Exit Successfully!")
+}
+
+func saveData(doneSave chan bool) {
+	c := conf.Get()
+	file := c.Settings.SLAReport.DataFile
+	save := func() {
+		if err := probe.SaveDataToFile(file); err != nil {
+			log.Errorf("Failed to save the SLA data to file: %v", err)
+		} else {
+			log.Debugf("Successfully save the SLA data to file: %s", file)
+		}
+	}
+
+	for {
+		select {
+		case <-doneSave:
+			save()
+			log.Info("Received the exit signal, Saving data process is exiting...")
+			return
+		case <-time.After(c.Settings.Probe.Interval):
+			save()
+		}
+	}
+
+}
+
+// 1) all of probers send the result to notify channel
+// 2) go through all of notification to notify the result.
+// 3) send the SLA report
+func watchEvent(notifyChan chan probe.Result, notifiers []notify.Notify, doneWatch chan bool) {
+
+	dryNotify := conf.Get().Settings.Notify.Dry
+
 	// Watching the Probe Event...
 	for {
 		select {
-		case <-done:
+		case <-doneWatch:
+			log.Infof("Received the done signal, event watching exiting...")
 			return
 		case result := <-notifyChan:
 			// if the status has no change, no need notify
@@ -118,7 +174,7 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 			}
 			log.Infof("%s (%s) - Status changed [%s] ==> [%s]",
 				result.Name, result.Endpoint, result.PreStatus, result.Status)
-			for _, n := range notifies {
+			for _, n := range notifiers {
 				if dryNotify {
 					n.DryNotify(result)
 				} else {
@@ -130,13 +186,22 @@ func run(probers []probe.Prober, notifies []notify.Notify, done chan bool) {
 
 }
 
-func configProbers(probers []probe.Prober, notifyChan chan probe.Result) {
+func configProbers(probers []probe.Prober, notifyChan chan probe.Result, wg *sync.WaitGroup, done chan bool) {
+
 	probeFn := func(p probe.Prober) {
+		wg.Add(1)
+		defer wg.Done()
 		for {
 			res := p.Probe()
 			log.Debugf("%s: %s", p.Kind(), res.DebugJSON())
 			notifyChan <- res
-			time.Sleep(p.Interval())
+
+			select {
+			case <-done:
+				log.Infof("%s / %s - Received the done signal, exiting...", p.Kind(), p.Name())
+				return
+			case <-time.After(p.Interval()):
+			}
 		}
 	}
 	gProbeConf := global.ProbeSettings{
@@ -148,12 +213,15 @@ func configProbers(probers []probe.Prober, notifyChan chan probe.Result) {
 	for _, p := range probers {
 		err := p.Config(gProbeConf)
 		if err != nil {
+			p.Result().Status = probe.StatusBad
 			p.Result().Message = "Bad Configuration: " + err.Error()
-			log.Errorf("error: %v", err)
+			log.Errorf("Bad Probe Configuration: %v", err)
 			continue
 		}
 
-		p.Result().Message = "Good Configuration!"
+		if len(p.Result().Message) <= 0 {
+			p.Result().Message = "Good Configuration!"
+		}
 		log.Infof("Ready to monitor(%s): %s - %s", p.Kind(), p.Result().Name, p.Result().Endpoint)
 		go probeFn(p)
 	}
