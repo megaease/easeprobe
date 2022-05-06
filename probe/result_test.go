@@ -27,7 +27,7 @@ import (
 )
 
 func CreateTestResult() *Result {
-	now := time.Now().Round(time.Millisecond)
+	now := time.Now().UTC().Round(time.Millisecond)
 	m := map[Status]int64{}
 	m[StatusUp] = 50
 	m[StatusDown] = 10
