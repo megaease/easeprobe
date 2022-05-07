@@ -29,8 +29,8 @@ func TestAll(t *testing.T) {
 	r[1].Name = "Test2 Name"
 	r[2].Name = "Test3 Name"
 
-	SetResults(r)
-	x := GetResult("Test1 Name")
+	SetResultsData(r)
+	x := GetResultData("Test1 Name")
 	if reflect.DeepEqual(x, r[0]) {
 		t.Errorf("GetResult(\"Test1 Name\") = %v, expected %v", x, r[0])
 	}

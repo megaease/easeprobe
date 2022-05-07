@@ -83,8 +83,6 @@ func (d *DefaultOptions) Config(gConf global.ProbeSettings,
 	d.ProbeResult.Endpoint = endpoint
 	d.ProbeResult.TimeFormat = gConf.TimeFormat
 
-	probe.SetResult(name, d.ProbeResult)
-
 	if len(d.ProbeTag) > 0 {
 		log.Infof("Probe [%s / %s] - [%s] base options are configured!", d.ProbeKind, d.ProbeTag, d.ProbeName)
 	} else {

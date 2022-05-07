@@ -76,12 +76,13 @@ func NewResult() *Result {
 
 // NewResultWithName return a Result object with name
 func NewResultWithName(name string) *Result {
-	r := GetResult(name)
+	r := GetResultData(name)
 	if r != nil {
 		return r
 	}
 	r = NewResult()
 	r.Name = name
+	SetResultData(name, r)
 	return r
 }
 

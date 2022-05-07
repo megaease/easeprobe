@@ -28,20 +28,20 @@ import (
 
 var resultData = map[string]*Result{}
 
-// SetResult set the result of probe
-func SetResult(name string, result *Result) {
+// SetResultData set the result of probe
+func SetResultData(name string, result *Result) {
 	resultData[name] = result
 }
 
-// SetResults set the results of probe
-func SetResults(r []Result) {
+// SetResultsData set the results of probe
+func SetResultsData(r []Result) {
 	for i := 0; i < len(r); i++ {
-		SetResult(r[i].Name, &r[i])
+		SetResultData(r[i].Name, &r[i])
 	}
 }
 
-// GetResult get the result of probe
-func GetResult(name string) *Result {
+// GetResultData get the result of probe
+func GetResultData(name string) *Result {
 	if v, ok := resultData[name]; ok {
 		return v
 	}
@@ -53,7 +53,7 @@ func CleanData(p []Prober) {
 	var data = map[string]*Result{}
 	for i := 0; i < len(p); i++ {
 		r := p[i].Result()
-		d := GetResult(r.Name)
+		d := GetResultData(r.Name)
 		if d != nil {
 			data[r.Name] = d
 		} else {
