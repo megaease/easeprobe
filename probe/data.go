@@ -75,12 +75,9 @@ func SaveDataToFile(filename string) error {
 		return err
 	}
 
-	f, err := os.Create(filename)
-	if err != nil {
+	if err := ioutil.WriteFile(filename, buf, 0644); err != nil {
 		return err
 	}
-	defer f.Close()
-	f.Write(buf)
 	return nil
 }
 

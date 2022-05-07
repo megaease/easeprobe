@@ -73,7 +73,7 @@ func main() {
 	// wait group for probers
 	var wg sync.WaitGroup
 	// the exit channel for all probers
-	doneProbe := make(chan bool)
+	doneProbe := make(chan bool, len(probers))
 	// the exit channel for saving the data
 	doneSave := make(chan bool)
 	// the exit channel for watching the event
