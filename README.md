@@ -552,8 +552,8 @@ notify:
     - name: "sms alert service"
       provider: "yunpian"
       key: xxxxxxxxxxxx # yunpian apikey 
-      mobile: 18800000000,18000000000 # mobile phone number, multi phone number joint by ,
-      sign: "【megaease】" # need to register; usually brand name
+      mobile: 123456789,987654321 # mobile phone number, multi phone number joint by `,`
+      sign: "xxxxx" # get this from yunpian
 
 ```
 
