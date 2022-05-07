@@ -178,7 +178,7 @@ notify:
       provider: "yunpian"
       key: xxxxxxxxxxxx # yunpian apikey 
       mobile: 18800000000,18000000000 # mobile phone number, multi phone number joint by ,
-      sign: "【megaease】" # need to register; usually brand name
+      sign: "xxxxxxxx" # need to register; usually brand name
 ```
 
 Check the  [Notification Configuration](#37-notification-configuration) to see how to configure it.
