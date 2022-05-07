@@ -131,7 +131,7 @@ Ease Probe supports the following notifications:
 - **DingTalk**. Support the DingTalk notification.
 - **Lark**. Support the Lark(Feishu) notification.
 - **Log File**. Write the notification into a log file
-- **Sms**. Support Multiple Sms Service Provider
+- **SMS**. Support SMS notification with multiple SMS service providers
 
 **Note**:
 
