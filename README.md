@@ -28,7 +28,7 @@ EaseProbe is a simple, standalone, and lightWeight tool that can do health/statu
 
 ## 1. Overview
 
-EaseProbe would do 3 kinds of work - **Probe**, **Notify**, and **Report**.
+EaseProbe would do three kinds of work - **Probe**, **Notify**, and **Report**.
 
 ### 1.1 Probe
 
@@ -88,7 +88,7 @@ Ease Probe supports the following probing methods: **HTTP**, **TCP**, **Shell Co
         contain: easeprobe
   ```
 
-- **Host**. Run a SSH command on remote host and check the CPU, Memory, and Disk usage. ( [Host Load Probe](#35-host-resource-usage-probe-configuration) )
+- **Host**. Run an SSH command on a remote host and check the CPU, Memory, and Disk usage. ( [Host Load Probe](#35-host-resource-usage-probe-configuration) )
 
   ```yaml
   host:
@@ -196,20 +196,20 @@ Check the  [Notification Configuration](#37-notification-configuration) to see h
 
 - **SLA Live Report**. You can query the SLA Live Report
 
-  The EaseProbe would listen on `0.0.0.0:8181` port by default. And you can access the Live SLA report by the following URL:
+  The EaseProbe would listen on the `0.0.0.0:8181` port by default. And you can access the Live SLA report by the following URL:
 
   - HTML: `http://localhost:8181/`
   - JSON: `http://localhost:8181/api/v1/sla`
 
-- **SLA Data Persistence**. The SLA data will be persisted on disk.
+- **SLA Data Persistence**. Save the SLA stastics data on the disk.
 
   The SLA data would be persisted in `$CWD/data/data.yaml` by default. If you want to configure the path, you can do it in the `settings` section.
 
-  Every time when EaseProbe starts, it would be loaded, and EaseProbe would remove the probe data that are not configured.
+  Whenever EaseProbe starts,  load the data if found, and remove the prober that are not in configuration if the configuration changes.
 
   > **Note**:
   >
-  > **The prober's name is unique ID, so if you have two probers with the same name, the data would be stored together. The behavior is unknown.**
+  > **The prober's name is a unique ID, so if multiple probes with the same name, the data would conflict, and the behavior is unknown.**
 
   ```YAML
   settings:
@@ -240,12 +240,12 @@ Running the following command for the local test
 ```shell
 $ build/bin/easeprobe -f config.yaml
 ```
-* `-f` configuration file or url. Can also be achieved by setting the environment variable `PROBE_CONFIG`
+* `-f` configuration file or URL. Can also be achieved by setting the environment variable `PROBE_CONFIG`
 * `-d` dry run. Can also be achieved by setting the environment variable `PROBE_DRY`
 
 ## 3. Configuration
-Easeprobe can be configured by supplying a yaml file or url to fetch configuration settings from.
-By default easeprobe will look for its `config.yaml` on the current folder, this can be changed by supplying the `-f` parameter.
+EaseProbe can be configured by supplying a yaml file or URL to fetch configuration settings from.
+By default EaseProbe will look for its `config.yaml` on the current folder, this can be changed by supplying the `-f` parameter.
 
 ```shell
 easeprobe -f path/to/config.yaml
@@ -256,7 +256,7 @@ The following environment variables can be used to finetune the request to the c
 * `HTTP_AUTHORIZATION`
 * `HTTP_TIMEOUT`
 
-The following example configurations illustrate the easeprobe supported features.
+The following example configurations illustrate the EaseProbe supported features.
 
 **Notes**: All probes have the following options:
 
@@ -381,7 +381,7 @@ The `host` supports the following configuration
 - `example.com:22`
 - `user@example.com:22`
 
-The following are example of SSH probe configuration.
+The following are examples of SSH probe configuration.
 
 ```YAML
 # SSH Probe Configuration
@@ -431,7 +431,7 @@ Support the host probe, the configuration example as below.
 The feature probe the CPU, Memory, and Disk usage, if one of them exceeds the threshold, then mark the host as status down.
 
 > Note:
-> - The thresholds are **OR** condition, if one of them exceeds the threshold, then mark the host as status down.
+> - The thresholds are **OR** conditions, if one of them exceeds the threshold, then mark the host as status down.
 > - The Host needs remote server have the following command: `top`, `df`, `free`, `awk`, `grep`, `tr`, and `hostname` (check the [source code](./probe/host/host.go) to see how it works).
 > - The disk usage only check the root disk.
 
@@ -580,7 +580,7 @@ notify:
 ```YAML
   dry: true # dry notification, print the Discord JSON in log(STDOUT)
   timeout: 20s # the timeout send out notification, default: 30s
-  retry: # somehow the network is not good needs to retry.
+  retry: # somehow the network is not good and needs to retry.
     times: 3 # default: 3
     interval: 10s # default: 5s
 ```
@@ -653,7 +653,7 @@ settings:
 
 ## 4. Community
 
-- [Join Slack Workspace](https://join.slack.com/t/openmegaease/shared_invite/zt-upo7v306-lYPHvVwKnvwlqR0Zl2vveA) for requirement, issue and development.
+- [Join Slack Workspace](https://join.slack.com/t/openmegaease/shared_invite/zt-upo7v306-lYPHvVwKnvwlqR0Zl2vveA) for requirement, issue, and development.
 - [MegaEase on Twitter](https://twitter.com/megaease)
 
 ## 5. License
