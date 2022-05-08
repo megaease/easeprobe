@@ -6,15 +6,39 @@ env:
   GO_VERSION: 1.18
 
 jobs:
+  
+  lint:
+    name: Code Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Go Environment
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GO_VERSION }}
+        id: go
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+      # https://github.com/reviewdog/reviewdog/issues/1158
+      - name: "Give Permissions" 
+        run: |
+          sudo chown -R root:root $GITHUB_WORKSPACE 
+      - name: Spelling Check
+        uses: reviewdog/action-misspell@v1.10.1
+      - name: Revive Action
+        uses: morphy2k/revive-action@v2.3.1
+      - name: Check formatting
+        run: test -z $(gofmt -l .) || (gofmt -l . && exit 1)
+
+
   test:
     name: Unit Testing
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - name: Setup Go Environment
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: ${{ env.GO_VERSION }}
         id: go
