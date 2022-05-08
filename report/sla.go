@@ -401,3 +401,14 @@ func SLALark(probers []probe.Prober) string {
 	fmt.Printf("SLA: %s\n", s)
 	return s
 }
+
+// SLASummary return a summary stat report
+func SLASummary(probers []probe.Prober) string {
+	sla := 0.0
+	for _, p := range probers {
+		sla += SLAPercent(p.Result())
+	}
+	sla /= float64(len(probers))
+	summary := fmt.Sprintf("Total %d Services, Average %.2f%% SLA", len(probers), sla)
+	return summary
+}

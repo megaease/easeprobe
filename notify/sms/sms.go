@@ -24,6 +24,7 @@ import (
 	"github.com/megaease/easeprobe/notify/sms/nexmo"
 	"github.com/megaease/easeprobe/notify/sms/twilio"
 	"github.com/megaease/easeprobe/notify/sms/yunpian"
+	"github.com/megaease/easeprobe/report"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -42,15 +43,16 @@ func (c *NotifyConfig) Kind() string {
 
 // Config Sms Config Object
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
+	c.Format = report.SMS
 	c.DefaultNotify.Config(gConf)
-	c.configSmsDriver()
+	c.configSMSDriver()
 	c.SendFunc = c.DoNotify
 
-	log.Debugf("[%s] configuration: %+v, %+v", c.NotifyStat, c, c)
+	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.MyKind, c.Name, c)
 	return nil
 }
 
-func (c *NotifyConfig) configSmsDriver() {
+func (c *NotifyConfig) configSMSDriver() {
 	switch c.ProviderType {
 	case conf.Yunpian:
 		c.Provider = yunpian.New(c.Options)
