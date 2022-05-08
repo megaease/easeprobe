@@ -177,7 +177,7 @@ notify:
     - name: "sms alert service"
       provider: "yunpian"
       key: xxxxxxxxxxxx # yunpian apikey 
-      mobile: 18800000000,18000000000 # mobile phone number, multi phone number joint by ,
+      mobile: 123456789,987654321 # mobile phone number, multiple phone number joint by `,`
       sign: "xxxxxxxx" # need to register; usually brand name
 ```
 
@@ -549,7 +549,7 @@ notify:
       dry: true
   # Notify by sms using yunpian  https://www.yunpian.com/official/document/sms/zh_cn/domestic_single_send
   sms:
-    - name: "sms alert service"
+    - name: "sms alert service - yunpian"
       provider: "yunpian"
       key: xxxxxxxxxxxx # yunpian apikey 
       mobile: 123456789,987654321 # mobile phone number, multi phone number joint by `,`
