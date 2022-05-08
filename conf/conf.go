@@ -21,6 +21,7 @@ import (
 	"io/ioutil"
 	httpClient "net/http"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
@@ -124,6 +125,7 @@ type SLAReport struct {
 	Schedule Schedule `yaml:"schedule"`
 	Time     string   `yaml:"time"`
 	Debug    bool     `yaml:"debug"`
+	DataFile string   `yaml:"data"`
 }
 
 // HTTPServer is the settings of http server
@@ -236,6 +238,7 @@ func New(conf *string) (Conf, error) {
 				Schedule: Daily,
 				Time:     "00:00",
 				Debug:    false,
+				DataFile: "",
 			},
 			logfile: nil,
 		},
@@ -255,6 +258,8 @@ func New(conf *string) (Conf, error) {
 	}
 
 	c.initLog()
+	c.initData()
+
 	ssh.BastionMap.ParseAllBastionHost()
 	host.BastionMap.ParseAllBastionHost()
 
@@ -278,19 +283,54 @@ func (conf *Conf) initLog() {
 	if conf == nil {
 		log.SetOutput(os.Stdout)
 		log.SetLevel(log.InfoLevel)
-	} else {
-		// open a file
-		f, err := os.OpenFile(conf.Settings.LogFile, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0660)
-		if err != nil {
-			log.Warnf("Cannot open log file: %v", err)
-			log.Infoln("Using Standard Output as the log output...")
-			log.SetOutput(os.Stdout)
-		} else {
-			conf.Settings.logfile = f
-			log.SetOutput(f)
-		}
-		log.SetLevel(conf.Settings.LogLevel.Level)
+		return
 	}
+
+	// if logfile is not set, use stdout
+	if conf.Settings.LogFile == "" {
+		log.Infoln("Using Standard Output as the log output...")
+		log.SetOutput(os.Stdout)
+		log.SetLevel(conf.Settings.LogLevel.Level)
+		return
+	}
+
+	// open the log file
+	f, err := os.OpenFile(conf.Settings.LogFile, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0660)
+	if err != nil {
+		log.Warnf("Cannot open log file (%s): %v", conf.Settings.LogFile, err)
+		log.Infoln("Using Standard Output as the log output...")
+		log.SetOutput(os.Stdout)
+	} else {
+		conf.Settings.logfile = f
+		log.Infof("Using %s as the log output...", conf.Settings.LogFile)
+		log.SetOutput(f)
+	}
+	log.SetLevel(conf.Settings.LogLevel.Level)
+
+}
+
+func (conf *Conf) initData() {
+
+	filename := conf.Settings.SLAReport.DataFile
+	if filename == "" {
+		dir, err := os.Getwd()
+		if err != nil {
+			log.Warnf("Cannot get the current directory: %v, using /tmp direcotry!", err)
+			dir = "/tmp"
+		}
+		filename = filepath.Join(dir, "data", global.DefaultDataFile)
+		conf.Settings.SLAReport.DataFile = filename
+	}
+
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		log.Infof("The data file %s is not found!", filename)
+		return
+	}
+
+	if err := probe.LoadDataFromFile(filename); err != nil {
+		log.Warnf("Cannot load data from file: %v", err)
+	}
+
 }
 
 // CloseLogFile close the log file

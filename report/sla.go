@@ -37,9 +37,9 @@ type Availability struct {
 
 // Summary is the Summary JSON structure
 type Summary struct {
-	Total int32 `json:"total"`
-	Up    int32 `json:"up"`
-	Down  int32 `json:"down"`
+	Total int64 `json:"total"`
+	Up    int64 `json:"up"`
+	Down  int64 `json:"down"`
 }
 
 // LatestProbe is the LatestProbe JSON structure
