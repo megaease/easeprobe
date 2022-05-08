@@ -246,12 +246,7 @@ func SLASlackSection(r *probe.Result) string {
 
 // SLASlack generate all probes stat message to slack block string
 func SLASlack(probers []probe.Prober) string {
-	sla := 0.0
-	for _, p := range probers {
-		sla += SLAPercent(p.Result())
-	}
-	sla /= float64(len(probers))
-	summary := fmt.Sprintf("Total %d Services, Average %.2f%% SLA", len(probers), sla)
+	summary := SLASummary(probers)
 	json := `{
 		"channel": "Report",
 		"text": "Overall SLA Report - ` + summary + ` ",
