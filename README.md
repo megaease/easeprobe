@@ -131,7 +131,7 @@ Ease Probe supports the following notifications:
 - **DingTalk**. Support the DingTalk notification.
 - **Lark**. Support the Lark(Feishu) notification.
 - **Log File**. Write the notification into a log file
-- **Sms**. Support Multiple Sms Service Provider
+- **SMS**. Support SMS notification with multiple SMS service providers
 
 **Note**:
 
@@ -177,8 +177,8 @@ notify:
     - name: "sms alert service"
       provider: "yunpian"
       key: xxxxxxxxxxxx # yunpian apikey 
-      mobile: 18800000000,18000000000 # mobile phone number, multi phone number joint by ,
-      sign: "【megaease】" # need to register; usually brand name
+      mobile: 123456789,987654321 # mobile phone number, multiple phone number joint by `,`
+      sign: "xxxxxxxx" # need to register; usually brand name
 ```
 
 Check the  [Notification Configuration](#37-notification-configuration) to see how to configure it.
@@ -549,11 +549,11 @@ notify:
       dry: true
   # Notify by sms using yunpian  https://www.yunpian.com/official/document/sms/zh_cn/domestic_single_send
   sms:
-    - name: "sms alert service"
+    - name: "sms alert service - yunpian"
       provider: "yunpian"
       key: xxxxxxxxxxxx # yunpian apikey 
-      mobile: 18800000000,18000000000 # mobile phone number, multi phone number joint by ,
-      sign: "【megaease】" # need to register; usually brand name
+      mobile: 123456789,987654321 # mobile phone number, multi phone number joint by `,`
+      sign: "xxxxx" # get this from yunpian
 
 ```
 

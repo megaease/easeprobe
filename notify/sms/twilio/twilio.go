@@ -59,7 +59,7 @@ func (c Twilio) Notify(title, text string) error {
 		return err
 	}
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("Error response from Sms [%d] - [%s]", resp.StatusCode, string(buf))
+		return fmt.Errorf("Error response from SMS [%d] - [%s]", resp.StatusCode, string(buf))
 	}
 	return nil
 }
