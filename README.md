@@ -1,4 +1,5 @@
 # EaseProbe
+[![Go Report Card](https://goreportcard.com/badge/github.com/megaease/easeprobe)](https://goreportcard.com/report/github.com/megaease/easeprobe)
 
 EaseProbe is a simple, standalone, and lightWeight tool that can do health/status checking, written in Go.
 

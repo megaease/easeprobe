@@ -131,7 +131,7 @@ func (r *Result) DoStat(d time.Duration) {
 
 // Title return the title for notification
 func (r *Result) Title() string {
-	t := "%s"
+	t := ""
 	if r.PreStatus == StatusInit && r.Status == StatusUp {
 		t = "Monitoring %s"
 	} else if r.Status != StatusUp {

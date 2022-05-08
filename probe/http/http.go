@@ -43,7 +43,7 @@ type HTTP struct {
 	User string `yaml:"username,omitempty"`
 	Pass string `yaml:"password,omitempty"`
 
-	// Option - Prefered HTTP response code ranges, only HTTP standard codes(smaller than 500) are supported;
+	// Option - Preferred HTTP response code ranges, only HTTP standard codes(smaller than 500) are supported;
 	// If no set, default is [0, 499].
 	SuccessCode [][]int `yaml:"success_code,omitempty"`
 
