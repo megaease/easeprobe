@@ -18,12 +18,12 @@ jobs:
         id: go
       - name: Checkout Source Code
         uses: actions/checkout@v3
+      - name: Spelling Check
+        uses: reviewdog/action-misspell@v1.10.1
       - name: Revive Action
         uses: morphy2k/revive-action@v2.3.1
       - name: Check formatting
         run: test -z $(gofmt -l .) || (gofmt -l . && exit 1)
-      - name: misspell
-        uses: reviewdog/action-misspell@v1.10.1      
 
 
   test:
