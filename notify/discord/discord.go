@@ -104,6 +104,7 @@ type Discord struct {
 // NotifyConfig is the slack notification configuration
 type NotifyConfig struct {
 	base.DefaultNotify `yaml:",inline"`
+	Username           string `yaml:"username"`
 	WebhookURL         string `yaml:"webhook"`
 	Avatar             string `yaml:"avatar"`
 	Thumbnail          string `yaml:"thumbnail"`
@@ -127,6 +128,10 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 		c.Thumbnail = global.Icon
 	}
 
+	if len(strings.TrimSpace(c.Username)) <= 0 {
+		c.Username = global.Prog
+	}
+
 	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.MyKind, c.Name, c)
 	return nil
 }
@@ -134,7 +139,7 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 // NewDiscord new a discord object from a result
 func (c *NotifyConfig) NewDiscord(result probe.Result) Discord {
 	discord := Discord{
-		Username:  global.Prog,
+		Username:  c.Username,
 		AvatarURL: c.Avatar,
 		Content:   "",
 		Embeds:    []Embed{},
@@ -246,7 +251,7 @@ func (c *NotifyConfig) NewEmbeds(probers []probe.Prober) []Discord {
 
 	for p := 0; p < pages; p++ {
 		discord := Discord{
-			Username:  global.Prog,
+			Username:  c.Username,
 			AvatarURL: c.Avatar,
 			Content:   fmt.Sprintf("**Overall SLA Report (%d/%d)**", p+1, pages),
 			Embeds:    []Embed{},
