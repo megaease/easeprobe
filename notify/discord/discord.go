@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -155,6 +156,11 @@ func (c *NotifyConfig) NewDiscord(result probe.Result) Discord {
 	description := fmt.Sprintf("%s %s - ⏱ %s\n```%s```",
 		result.Status.Emoji(), result.Endpoint, rtt, result.Message)
 
+	myname, err := os.Hostname()
+	if err != nil {
+		myname = "localhost.localdomain"
+	}
+
 	discord.Embeds = append(discord.Embeds, Embed{
 		Author:      Author{},
 		Title:       result.Title(),
@@ -164,7 +170,7 @@ func (c *NotifyConfig) NewDiscord(result probe.Result) Discord {
 		Timestamp:   result.StartTime.UTC().Format(time.RFC3339),
 		Thumbnail:   Thumbnail{URL: c.Thumbnail},
 		Fields:      []Fields{},
-		Footer:      Footer{Text: "Probed at", IconURL: global.Icon},
+		Footer:      Footer{Text: "Probed from " + myname + " at", IconURL: global.Icon},
 	})
 	return discord
 }
