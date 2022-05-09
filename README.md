@@ -181,7 +181,7 @@ notify:
   sms:
     - name: "sms alert service"
       provider: "yunpian"
-      key: xxxxxxxxxxxx # yunpian apikey 
+      key: xxxxxxxxxxxx # yunpian apikey
       mobile: 123456789,987654321 # mobile phone number, multiple phone number joint by `,`
       sign: "xxxxxxxx" # need to register; usually brand name
 ```
@@ -539,6 +539,7 @@ notify:
   # Notify to Discord Text Channel
   discord:
     - name: "Server #Alert"
+      username: EaseProbe #The name you like to appear on your messages
       webhook: "https://discord.com/api/webhooks/...../....../"
       # the avatar and thumbnail setting for notify block
       avatar: "https://img.icons8.com/ios/72/appointment-reminders--v1.png"
@@ -585,7 +586,7 @@ notify:
   sms:
     - name: "sms alert service - yunpian"
       provider: "yunpian"
-      key: xxxxxxxxxxxx # yunpian apikey 
+      key: xxxxxxxxxxxx # yunpian apikey
       mobile: 123456789,987654321 # mobile phone number, multi phone number joint by `,`
       sign: "xxxxx" # get this from yunpian
 
