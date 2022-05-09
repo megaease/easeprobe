@@ -28,6 +28,8 @@ import (
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/report"
 
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -86,10 +88,19 @@ func Server() {
 
 	// Start the http server
 	go func() {
-		http.HandleFunc("/", slaHTML)
-		http.HandleFunc("/api/v1/sla/", slaJSON)
+		r := chi.NewRouter()
+
+		r.Use(middleware.RealIP)
+		r.Use(middleware.Logger)
+		r.Use(middleware.Recoverer)
+
+		r.Get("/", slaHTML)
+
+		r.Route("/api/v1", func(r chi.Router) {
+			r.Get("/sla/", slaJSON)
+		})
 		log.Infof("[Web] HTTP server is listening on %s:%s", host, port)
-		if err := http.ListenAndServe(host+":"+port, nil); err != nil {
+		if err := http.ListenAndServe(host+":"+port, r); err != nil {
 			log.Errorf("[Web] HTTP server error: %s", err)
 		}
 	}()
