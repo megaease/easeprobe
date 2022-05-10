@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/megaease/easeprobe/conf"
@@ -92,16 +91,12 @@ func Server() {
 
 		r := chi.NewRouter()
 
-		if len(c.Settings.HTTPServer.AccessLogFile) > 0 {
-			f, err := os.OpenFile(c.Settings.HTTPServer.AccessLogFile, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0660)
-			if err != nil {
-				log.Errorf("[Web] Failed to open log file: %s", err)
-			} else {
-				log.Infof("[Web] Access Log output file: %s", c.Settings.HTTPServer.AccessLogFile)
-				logger := log.New()
-				logger.SetOutput(f)
-				r.Use(NewStructuredLogger(logger))
-			}
+		filename := c.Settings.HTTPServer.AccessLog.File
+		if len(filename) > 0 {
+			log.Infof("[Web] Access Log output file: %s", filename)
+			logger := log.New()
+			logger.SetOutput(c.Settings.HTTPServer.AccessLog.GetWriter())
+			r.Use(NewStructuredLogger(logger))
 		}
 
 		r.Use(middleware.RealIP)

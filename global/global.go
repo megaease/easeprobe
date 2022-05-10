@@ -66,10 +66,21 @@ const (
 	DefaultHTTPServerIP = "0.0.0.0"
 	// DefaultHTTPServerPort is the default port of the HTTP server
 	DefaultHTTPServerPort = "8181"
-	// DefaultDataFile is the default data file name
-	DefaultDataFile = "data.yaml"
 	// DefaultAccessLogFile is the default access log file name
 	DefaultAccessLogFile = "access.log"
+	// DefaultDataFile is the default data file name
+	DefaultDataFile = "data.yaml"
+)
+
+const (
+	// DefaultMaxLogSize is the default max log size
+	DefaultMaxLogSize = 10 // 10M
+	// DefaultMaxLogAge is the default max log age
+	DefaultMaxLogAge = 30 // 30 days
+	// DefaultMaxBackups is the default backup file number
+	DefaultMaxBackups = 5 // file
+	// DefaultLogCompress is the default compress log
+	DefaultLogCompress = true
 )
 
 // Retry is the settings of retry

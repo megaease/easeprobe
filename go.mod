@@ -12,14 +12,17 @@ require (
 	github.com/go-zookeeper/zk v1.0.2
 	github.com/segmentio/kafka-go v0.4.31
 	github.com/sirupsen/logrus v1.8.1
+	github.com/stretchr/testify v1.7.1
 	github.com/uptrace/bun/driver/pgdriver v1.1.4
 	go.mongodb.org/mongo-driver v1.9.0
 	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4
 	golang.org/x/exp v0.0.0-20220328175248-053ad81199eb
+	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
 require (
+	github.com/BurntSushi/toml v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
@@ -35,7 +38,6 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/rogpeppe/go-internal v1.8.1 // indirect
-	github.com/stretchr/testify v1.7.1 // indirect
 	github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc // indirect
 	github.com/uptrace/bun v1.1.4 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
@@ -49,5 +51,6 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20220411194840-2f41105eb62f // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 	mellium.im/sasl v0.2.1 // indirect
 )

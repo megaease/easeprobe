@@ -36,6 +36,7 @@ import (
 	"github.com/megaease/easeprobe/probe/shell"
 	"github.com/megaease/easeprobe/probe/ssh"
 	"github.com/megaease/easeprobe/probe/tcp"
+
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
@@ -45,34 +46,6 @@ var config *Conf
 // Get return the global configuration
 func Get() *Conf {
 	return config
-}
-
-// LogLevel is the log level
-type LogLevel struct {
-	Level log.Level
-}
-
-// UnmarshalYAML is unmarshal the debug level
-func (l *LogLevel) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var level string
-	if err := unmarshal(&level); err != nil {
-		return err
-	}
-	switch strings.ToLower(level) {
-	case "debug":
-		l.Level = log.DebugLevel
-	case "info":
-		l.Level = log.InfoLevel
-	case "warn":
-		l.Level = log.WarnLevel
-	case "error":
-		l.Level = log.ErrorLevel
-	case "fatal":
-		l.Level = log.FatalLevel
-	case "panic":
-		l.Level = log.PanicLevel
-	}
-	return nil
 }
 
 // Schedule is the schedule.
@@ -133,19 +106,17 @@ type HTTPServer struct {
 	IP              string        `yaml:"ip"`
 	Port            string        `yaml:"port"`
 	AutoRefreshTime time.Duration `yaml:"refresh"`
-	AccessLogFile   string        `yaml:"log"`
+	AccessLog       Log           `yaml:"log"`
 }
 
 // Settings is the EaseProbe configuration
 type Settings struct {
-	LogFile    string     `yaml:"logfile"`
-	LogLevel   LogLevel   `yaml:"loglevel"`
+	Log        Log        `yaml:"log"`
 	TimeFormat string     `yaml:"timeformat"`
 	Probe      Probe      `yaml:"probe"`
 	Notify     Notify     `yaml:"notify"`
 	SLAReport  SLAReport  `yaml:"sla"`
 	HTTPServer HTTPServer `yaml:"http"`
-	logfile    *os.File   `yaml:"-"`
 }
 
 // Conf is Probe configuration
@@ -221,8 +192,7 @@ func New(conf *string) (Conf, error) {
 		},
 		Notify: notify.Config{},
 		Settings: Settings{
-			LogFile:    "",
-			LogLevel:   LogLevel{log.InfoLevel},
+			Log:        NewLog(),
 			TimeFormat: "2006-01-02 15:04:05 UTC",
 			Probe: Probe{
 				Interval: time.Second * 60,
@@ -241,7 +211,11 @@ func New(conf *string) (Conf, error) {
 				Debug:    false,
 				DataFile: "",
 			},
-			logfile: nil,
+			HTTPServer: HTTPServer{
+				IP:        global.DefaultHTTPServerIP,
+				Port:      global.DefaultHTTPServerPort,
+				AccessLog: NewLog(),
+			},
 		},
 	}
 	y, err := getYamlFile(*conf)
@@ -280,12 +254,12 @@ func New(conf *string) (Conf, error) {
 
 // Init initialize the configuration
 func (conf *Conf) Init() {
-	conf.initLog()
-	conf.initData()
+	conf.initAppLog()
 	conf.initAccessLog()
+	conf.initData()
 }
 
-func (conf *Conf) initLog() {
+func (conf *Conf) initAppLog() {
 	log.SetFormatter(&log.TextFormatter{FullTimestamp: true})
 	if conf == nil {
 		log.SetOutput(os.Stdout)
@@ -294,25 +268,26 @@ func (conf *Conf) initLog() {
 	}
 
 	// if logfile is not set, use stdout
-	if conf.Settings.LogFile == "" {
+	if conf.Settings.Log.File == "" {
 		log.Infoln("Using Standard Output as the log output...")
 		log.SetOutput(os.Stdout)
-		log.SetLevel(conf.Settings.LogLevel.Level)
+		log.SetLevel(conf.Settings.Log.Level.GetLevel())
 		return
 	}
 
 	// open the log file
-	f, err := os.OpenFile(conf.Settings.LogFile, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0660)
+	f, err := os.OpenFile(conf.Settings.Log.File, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0660)
 	if err != nil {
-		log.Warnf("Cannot open log file (%s): %v", conf.Settings.LogFile, err)
+		log.Warnf("Cannot open log file (%s): %v", conf.Settings.Log.File, err)
 		log.Infoln("Using Standard Output as the log output...")
 		log.SetOutput(os.Stdout)
 	} else {
-		conf.Settings.logfile = f
-		log.Infof("Using %s as the log output...", conf.Settings.LogFile)
-		log.SetOutput(f)
+		f.Close()
+		conf.Settings.Log.CheckDefault()
+		log.Infof("Using %s as the log output...", conf.Settings.Log.File)
+		log.SetOutput(conf.Settings.Log.GetWriter())
 	}
-	log.SetLevel(conf.Settings.LogLevel.Level)
+	log.SetLevel(conf.Settings.Log.Level.GetLevel())
 
 }
 
@@ -337,18 +312,12 @@ func (conf *Conf) initData() {
 }
 
 func (conf *Conf) initAccessLog() {
-	filename := conf.Settings.HTTPServer.AccessLogFile
+	filename := conf.Settings.HTTPServer.AccessLog.File
 	if filename != "" {
 		filename = global.MakeDirectory(filename)
 		log.Infof("Using %s as the access log output...", filename)
-		conf.Settings.HTTPServer.AccessLogFile = filename
-	}
-}
-
-// CloseLogFile close the log file
-func (conf *Conf) CloseLogFile() {
-	if conf.Settings.logfile != nil {
-		conf.Settings.logfile.Close()
+		conf.Settings.HTTPServer.AccessLog.File = filename
+		conf.Settings.HTTPServer.AccessLog.CheckDefault()
 	}
 }
 

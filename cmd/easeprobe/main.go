@@ -53,7 +53,6 @@ func main() {
 		log.Fatalln("Fatal: Cannot read the YAML configuration file!")
 		os.Exit(-1)
 	}
-	defer c.CloseLogFile()
 
 	// if dry notification mode is specificed in command line, overwrite the configuration
 	if *dryNotify {
