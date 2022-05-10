@@ -103,6 +103,7 @@ func Server() {
 		r.Use(middleware.Logger)
 		r.Use(middleware.Recoverer)
 		r.Use(middleware.RedirectSlashes)
+		r.Use(middleware.StripSlashes)
 
 		r.Get("/", slaHTML)
 

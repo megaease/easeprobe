@@ -158,10 +158,10 @@ func DoRetry(kind, name, tag string, r Retry, fn func() error) error {
 func GetWorkDir() string {
 	dir, err := os.Getwd()
 	if err != nil {
-		log.Warnf("Cannot get the current directory: %v, using $HOME direcotry!", err)
+		log.Warnf("Cannot get the current directory: %v, using $HOME directory!", err)
 		dir, err = os.UserHomeDir()
 		if err != nil {
-			log.Warnf("Cannot get the user home directory: %v, using /tmp direcotry!", err)
+			log.Warnf("Cannot get the user home directory: %v, using /tmp directory!", err)
 			dir = "/tmp"
 		}
 	}
