@@ -12,7 +12,7 @@ import (
 // LogLevel is the log level
 type LogLevel log.Level
 
-var levelToString  = map[LogLevel]string{
+var levelToString = map[LogLevel]string{
 	LogLevel(log.DebugLevel): "debug",
 	LogLevel(log.InfoLevel):  "info",
 	LogLevel(log.WarnLevel):  "warn",
@@ -29,7 +29,6 @@ var stringToLevel = map[string]LogLevel{
 	"fatal": LogLevel(log.FatalLevel),
 	"panic": LogLevel(log.PanicLevel),
 }
-
 
 // MarshalYAML is marshal the format
 func (l *LogLevel) MarshalYAML() ([]byte, error) {
