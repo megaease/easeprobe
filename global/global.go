@@ -162,7 +162,7 @@ func GetWorkDir() string {
 		dir, err = os.UserHomeDir()
 		if err != nil {
 			log.Warnf("Cannot get the user home directory: %v, using /tmp directory!", err)
-			dir = "/tmp"
+			dir = os.TempDir()
 		}
 	}
 	return dir
@@ -178,7 +178,12 @@ func MakeDirectory(filename string) string {
 		return dir
 	}
 	if strings.HasPrefix(dir, "~/") {
-		dir = filepath.Join(os.Getenv("HOME"), dir[2:])
+		home, err := os.UserHomeDir()
+		if err != nil {
+			log.Warnf("Cannot get the user home directory: %v, using /tmp directory as home", err)
+			home = os.TempDir()
+		}
+		dir = filepath.Join(home, dir[2:])
 	}
 	dir, err := filepath.Abs(dir)
 	if err != nil {

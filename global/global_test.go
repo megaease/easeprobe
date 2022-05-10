@@ -25,7 +25,10 @@ func TestGetWritableDir(t *testing.T) {
 	assert.Equal(t, exp, dir)
 
 	filename = "~/none/existed/test.txt"
-	home, _ := os.UserHomeDir()
+	home, err := os.UserHomeDir()
+	if err != nil {
+		home = os.TempDir()
+	}
 	exp = filepath.Join(home, "none/existed/test.txt")
 	dir = MakeDirectory(filename)
 	os.RemoveAll(home + "/none")
