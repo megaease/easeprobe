@@ -76,7 +76,7 @@ const (
 	// DefaultMaxLogSize is the default max log size
 	DefaultMaxLogSize = 10 // 10M
 	// DefaultMaxLogAge is the default max log age
-	DefaultMaxLogAge = 30 // 30 days
+	DefaultMaxLogAge = 7 // 7 days
 	// DefaultMaxBackups is the default backup file number
 	DefaultMaxBackups = 5 // file
 	// DefaultLogCompress is the default compress log

@@ -210,12 +210,8 @@ Check the  [Notification Configuration](#37-notification-configuration) to see h
   - HTML: `http://localhost:8181/`
   - JSON: `http://localhost:8181/api/v1/sla`
 
-  You can configure the access log file as below.
-  ```YAML
-  settings:
-    http:
-      log: /path/to/access.log # default is Stdout
-  ```
+  Refer to the [Global Setting Configuration](#38-global-setting-configuration) to see how to configure the access log.
+
 
 - **SLA Data Persistence**. Save the SLA statistics data on the disk.
 
@@ -626,7 +622,13 @@ settings:
     ip: 127.0.0.1 # the IP address of the server. default:"0.0.0.0"
     port: 8181 # the port of the server. default: 8181
     refresh: 5s # the auto-refresh interval of the server. default: the minimum value of the probes' interval.
-    log: /path/to/access.log # access log file. default: Stdout
+    log: 
+      file: /path/to/access.log # access log file. default: Stdout
+      # Log Rotate Configuration (optional)
+      size: 10 # max of access log file size. default: 10m
+      age: 7 #  max of access log file age. default: 7 days
+      backups: 5 # max of access log file backups. default: 5
+      compress: true # compress the access log file. default: true
 
   # SLA Report schedule
   sla:
@@ -653,10 +655,16 @@ settings:
     interval: 1m # probe every minute for all probes
 
   # easeprobe program running log file.
-  logfile: "/path/to/easeprobe.log" # default: stdout
-  # Log Level Configuration
-  # can be: panic, fatal, error, warn, info, debug.
-  loglevel: "debug"
+  log:
+    file: "/path/to/easeprobe.log" # default: stdout
+    # Log Level Configuration
+    # can be: panic, fatal, error, warn, info, debug.
+    level: "debug"
+    # Log Rotate Configuration (optional) 
+    size: 10 # max of access log file size. default: 10m
+    age: 7 # max of access log file age. default: 7 days
+    backups: 5 # max of access log file backups. default: 5
+    compress: true # compress the access log file. default: true
 
   # Date format
   # Date
