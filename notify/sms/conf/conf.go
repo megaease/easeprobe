@@ -58,7 +58,7 @@ type Options struct {
 	From         string       `yaml:"from"`
 	Key          string       `yaml:"key"`
 	Secret       string       `yaml:"secret"`
-	Url          string       `yaml:"url"`
+	URL          string       `yaml:"url"`
 	Sign         string       `yaml:"sign"`
 }
 

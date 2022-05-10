@@ -22,6 +22,9 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -65,6 +68,8 @@ const (
 	DefaultHTTPServerPort = "8181"
 	// DefaultDataFile is the default data file name
 	DefaultDataFile = "data.yaml"
+	// DefaultAccessLogFile is the default access log file name
+	DefaultAccessLogFile = "access.log"
 )
 
 // Retry is the settings of retry
@@ -136,4 +141,47 @@ func DoRetry(kind, name, tag string, r Retry, fn func() error) error {
 		}
 	}
 	return fmt.Errorf("[%s / %s / %s] failed after %d retries - %v", kind, name, tag, r.Times, err)
+}
+
+// GetWorkDir return the current working directory
+func GetWorkDir() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Warnf("Cannot get the current directory: %v, using $HOME direcotry!", err)
+		dir, err = os.UserHomeDir()
+		if err != nil {
+			log.Warnf("Cannot get the user home directory: %v, using /tmp direcotry!", err)
+			dir = "/tmp"
+		}
+	}
+	return dir
+}
+
+// MakeDirectory return the writeable filename
+func MakeDirectory(filename string) string {
+	dir, file := filepath.Split(filename)
+	if len(dir) <= 0 {
+		dir = GetWorkDir()
+	}
+	if len(file) <= 0 {
+		return dir
+	}
+	if strings.HasPrefix(dir, "~/") {
+		dir = filepath.Join(os.Getenv("HOME"), dir[2:])
+	}
+	dir, err := filepath.Abs(dir)
+	if err != nil {
+		log.Warnf("Cannot get the absolute path: %v", err)
+		dir = GetWorkDir()
+	}
+
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err = os.MkdirAll(dir, os.ModePerm)
+		if err != nil {
+			log.Warnf("Cannot create the directory: %v", err)
+			dir = GetWorkDir()
+		}
+	}
+
+	return filepath.Join(dir, file)
 }

@@ -14,7 +14,8 @@ EaseProbe is a simple, standalone, and lightWeight tool that can do health/statu
     - [1.3 Report](#13-report)
   - [2. Getting Started](#2-getting-started)
     - [2.1 Build](#21-build)
-    - [2.2 Run](#22-run)
+    - [2.2 Configure](#22-configure)
+    - [2.3 Run](#23-run)
   - [3. Configuration](#3-configuration)
     - [3.1 HTTP Probe Configuration](#31-http-probe-configuration)
     - [3.2 TCP Probe Configuration](#32-tcp-probe-configuration)
@@ -209,11 +210,18 @@ Check the  [Notification Configuration](#37-notification-configuration) to see h
   - HTML: `http://localhost:8181/`
   - JSON: `http://localhost:8181/api/v1/sla`
 
-- **SLA Data Persistence**. Save the SLA stastics data on the disk.
+  You can configure the access log file as below.
+  ```YAML
+  settings:
+    http:
+      log: /path/to/access.log # default is Stdout
+  ```
+
+- **SLA Data Persistence**. Save the SLA statistics data on the disk.
 
   The SLA data would be persisted in `$CWD/data/data.yaml` by default. If you want to configure the path, you can do it in the `settings` section.
 
-  Whenever EaseProbe starts,  load the data if found, and remove the prober that are not in configuration if the configuration changes.
+  Whenever EaseProbe starts,  load the data if found, and remove the probers that are not in configuration if the configuration changes.
 
   > **Note**:
   >
@@ -240,8 +248,13 @@ Use `make` to make the binary file. the target is under the `build/bin` director
 ```shell
 $ make
 ```
+### 2.2 Configure
 
-### 2.2 Run
+Read the [Configuration Guide](#3-configuration) to learn how to configure EaseProbe.
+
+Create the configuration file - `$CWD/config.ymal`.
+
+### 2.3 Run
 
 Running the following command for the local test
 
@@ -260,7 +273,7 @@ easeprobe -f path/to/config.yaml
 easeprobe -f https://example.com/config
 ```
 
-The following environment variables can be used to finetune the request to the configuration file
+The following environment variables can be used to fine-tune the request to the configuration file
 * `HTTP_AUTHORIZATION`
 * `HTTP_TIMEOUT`
 
@@ -613,6 +626,7 @@ settings:
     ip: 127.0.0.1 # the IP address of the server. default:"0.0.0.0"
     port: 8181 # the port of the server. default: 8181
     refresh: 5s # the auto-refresh interval of the server. default: the minimum value of the probes' interval.
+    log: /path/to/access.log # access log file. default: Stdout
 
   # SLA Report schedule
   sla:
@@ -637,9 +651,9 @@ settings:
   probe:
     timeout: 30s # the time out for all probes
     interval: 1m # probe every minute for all probes
-  # easeprobe program running log file.
-  logfile: "test.log"
 
+  # easeprobe program running log file.
+  logfile: "/path/to/easeprobe.log" # default: stdout
   # Log Level Configuration
   # can be: panic, fatal, error, warn, info, debug.
   loglevel: "debug"

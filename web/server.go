@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/megaease/easeprobe/conf"
@@ -88,17 +89,34 @@ func Server() {
 
 	// Start the http server
 	go func() {
+
 		r := chi.NewRouter()
+
+		if len(c.Settings.HTTPServer.AccessLogFile) > 0 {
+			f, err := os.OpenFile(c.Settings.HTTPServer.AccessLogFile, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0660)
+			if err != nil {
+				log.Errorf("[Web] Failed to open log file: %s", err)
+			} else {
+				log.Infof("[Web] Access Log output file: %s", c.Settings.HTTPServer.AccessLogFile)
+				logger := log.New()
+				logger.SetOutput(f)
+				r.Use(NewStructuredLogger(logger))
+			}
+		}
 
 		r.Use(middleware.RealIP)
 		r.Use(middleware.Logger)
 		r.Use(middleware.Recoverer)
+		r.Use(middleware.RedirectSlashes)
 
 		r.Get("/", slaHTML)
 
 		r.Route("/api/v1", func(r chi.Router) {
-			r.Get("/sla/", slaJSON)
+			r.Get("/sla", slaJSON)
 		})
+
+		r.NotFound(slaHTML)
+
 		log.Infof("[Web] HTTP server is listening on %s:%s", host, port)
 		if err := http.ListenAndServe(host+":"+port, r); err != nil {
 			log.Errorf("[Web] HTTP server error: %s", err)

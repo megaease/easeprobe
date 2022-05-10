@@ -2,17 +2,19 @@ package nexmo
 
 import (
 	"fmt"
-	"github.com/megaease/easeprobe/notify/sms/conf"
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/megaease/easeprobe/notify/sms/conf"
+	log "github.com/sirupsen/logrus"
 )
 
 // Kind is the type of Provider
 const Kind string = "Nexmo"
 
+// Nexmo is the Nexmo sms provider
 type Nexmo struct {
 	conf.Options `yaml:",inline"`
 }
@@ -32,7 +34,7 @@ func (c Nexmo) Kind() string {
 // Notify return the type of Notify
 func (c Nexmo) Notify(title, text string) error {
 
-	api := c.Url
+	api := c.URL
 
 	form := url.Values{}
 	form.Add("From", c.From)

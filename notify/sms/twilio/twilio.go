@@ -2,17 +2,19 @@ package twilio
 
 import (
 	"fmt"
-	"github.com/megaease/easeprobe/notify/sms/conf"
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/megaease/easeprobe/notify/sms/conf"
+	log "github.com/sirupsen/logrus"
 )
 
 // Kind is the type of provider
 const Kind string = "Twilio"
 
+// Twilio is the Twilio sms provider
 type Twilio struct {
 	conf.Options `yaml:",inline"`
 }
@@ -31,7 +33,7 @@ func (c Twilio) Kind() string {
 
 // Notify return the type of Notify
 func (c Twilio) Notify(title, text string) error {
-	api := c.Url + c.Key + "/Messages.json"
+	api := c.URL + c.Key + "/Messages.json"
 
 	form := url.Values{}
 	form.Add("From", c.From)

@@ -133,6 +133,7 @@ type HTTPServer struct {
 	IP              string        `yaml:"ip"`
 	Port            string        `yaml:"port"`
 	AutoRefreshTime time.Duration `yaml:"refresh"`
+	AccessLogFile   string        `yaml:"log"`
 }
 
 // Settings is the EaseProbe configuration
@@ -257,8 +258,7 @@ func New(conf *string) (Conf, error) {
 		return c, err
 	}
 
-	c.initLog()
-	c.initData()
+	c.Init()
 
 	ssh.BastionMap.ParseAllBastionHost()
 	host.BastionMap.ParseAllBastionHost()
@@ -276,6 +276,13 @@ func New(conf *string) (Conf, error) {
 	}
 
 	return c, err
+}
+
+// Init initialize the configuration
+func (conf *Conf) Init() {
+	conf.initLog()
+	conf.initData()
+	conf.initAccessLog()
 }
 
 func (conf *Conf) initLog() {
@@ -313,11 +320,7 @@ func (conf *Conf) initData() {
 
 	filename := conf.Settings.SLAReport.DataFile
 	if filename == "" {
-		dir, err := os.Getwd()
-		if err != nil {
-			log.Warnf("Cannot get the current directory: %v, using /tmp direcotry!", err)
-			dir = "/tmp"
-		}
+		dir := global.GetWorkDir()
 		filename = filepath.Join(dir, "data", global.DefaultDataFile)
 		conf.Settings.SLAReport.DataFile = filename
 	}
@@ -331,6 +334,15 @@ func (conf *Conf) initData() {
 		log.Warnf("Cannot load data from file: %v", err)
 	}
 
+}
+
+func (conf *Conf) initAccessLog() {
+	filename := conf.Settings.HTTPServer.AccessLogFile
+	if filename != "" {
+		filename = global.MakeDirectory(filename)
+		log.Infof("Using %s as the access log output...", filename)
+		conf.Settings.HTTPServer.AccessLogFile = filename
+	}
 }
 
 // CloseLogFile close the log file

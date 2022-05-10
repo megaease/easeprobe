@@ -2,17 +2,19 @@ package yunpian
 
 import (
 	"fmt"
-	"github.com/megaease/easeprobe/notify/sms/conf"
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/megaease/easeprobe/notify/sms/conf"
+	log "github.com/sirupsen/logrus"
 )
 
 // Kind is the type of driver
 const Kind string = "Yunpian"
 
+// Yunpian is the Yunpian sms provider
 type Yunpian struct {
 	conf.Options `yaml:",inline"`
 }
@@ -31,7 +33,7 @@ func (c Yunpian) Kind() string {
 
 // Notify return the type of Notify
 func (c Yunpian) Notify(title, text string) error {
-	api := c.Url
+	api := c.URL
 
 	form := url.Values{}
 	form.Add("apikey", c.Key)
