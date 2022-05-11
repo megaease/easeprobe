@@ -126,6 +126,25 @@ func main() {
 	signal.Notify(done, syscall.SIGTERM)
 	signal.Notify(done, syscall.SIGINT)
 
+	// Rotate the log file
+	rotateLog := make(chan os.Signal, 1)
+	doneRotate := make(chan bool, 1)
+	signal.Notify(rotateLog, syscall.SIGHUP)
+	go func() {
+		for {
+			select {
+			case <-doneRotate:
+				log.Info("Received the exit signal, Rotating log file process exiting...")
+				return
+			case <-rotateLog:
+				c := conf.Get()
+				log.Info("Received SIGHUP, rotating the log file...")
+				c.Settings.Log.Rotate()
+				c.Settings.HTTPServer.AccessLog.Rotate()
+			}
+		}
+	}()
+
 	select {
 	case <-done:
 		log.Infof("Received the exit signal, exiting...")
@@ -137,6 +156,7 @@ func main() {
 		wg.Wait()
 		doneWatch <- true
 		doneSave <- true
+		doneRotate <- true
 	}
 
 	log.Info("Graceful Exit Successfully!")

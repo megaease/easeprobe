@@ -69,12 +69,13 @@ func (l *LogLevel) GetLevel() log.Level {
 
 // Log is the log settings
 type Log struct {
-	Level      LogLevel `yaml:"level"`
-	File       string   `yaml:"file"`
-	MaxSize    int      `yaml:"size"`
-	MaxAge     int      `yaml:"age"`
-	MaxBackups int      `yaml:"backups"`
-	Compress   bool     `yaml:"compress"`
+	Level      LogLevel           `yaml:"level"`
+	File       string             `yaml:"file"`
+	MaxSize    int                `yaml:"size"`
+	MaxAge     int                `yaml:"age"`
+	MaxBackups int                `yaml:"backups"`
+	Compress   bool               `yaml:"compress"`
+	Logger     *lumberjack.Logger `yaml:"-"`
 }
 
 // NewLog create a new Log
@@ -107,12 +108,23 @@ func (l *Log) CheckDefault() {
 
 // GetWriter return the log writer
 func (l *Log) GetWriter() *lumberjack.Logger {
-	return &lumberjack.Logger{
-		Filename:   l.File,
-		MaxSize:    l.MaxSize, // megabytes
-		MaxBackups: l.MaxBackups,
-		MaxAge:     l.MaxAge, //days
-		Compress:   l.Compress,
+	if l.Logger == nil {
+		l.Logger = &lumberjack.Logger{
+			Filename:   l.File,
+			MaxSize:    l.MaxSize, // megabytes
+			MaxBackups: l.MaxBackups,
+			MaxAge:     l.MaxAge, //days
+			Compress:   l.Compress,
+		}
 	}
+	return l.Logger
+}
 
+//Rotate rotate the log file
+func (l *Log) Rotate() {
+	if l.Logger != nil {
+		if err := l.Logger.Rotate(); err != nil {
+			log.Errorf("Rotate log file failed: %s", err)
+		}
+	}
 }
