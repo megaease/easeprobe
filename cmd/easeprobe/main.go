@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/megaease/easeprobe/conf"
+	"github.com/megaease/easeprobe/daemon"
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify"
 	"github.com/megaease/easeprobe/probe"
@@ -52,6 +53,13 @@ func main() {
 	if err != nil {
 		log.Fatalln("Fatal: Cannot read the YAML configuration file!")
 		os.Exit(-1)
+	}
+
+	d, err := daemon.NewPIDFile()
+	if err != nil {
+		log.Errorf("Error: Cannot create the PID file: %s", err)
+	} else {
+		defer d.RemovePIDFile()
 	}
 
 	// if dry notification mode is specificed in command line, overwrite the configuration
