@@ -617,6 +617,9 @@ notify:
 # Global settings for all probes and notifiers.
 settings:
 
+  # Daemon settings
+  pid: /var/run/easeprobe.pid # pid file path, default: $CWD/easeprobe.pid
+
   # A HTTP Server configuration
   http:
     ip: 127.0.0.1 # the IP address of the server. default:"0.0.0.0"

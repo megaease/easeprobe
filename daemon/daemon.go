@@ -29,29 +29,30 @@ import (
 
 // Config is the daemon config
 type Config struct {
-	PidFile string
+	PIDFile string
 	pidFd   *os.File
 }
 
 // NewPIDFile create a new pid file
-func NewPIDFile() (*Config, error) {
-	c := &Config{}
-	c.PidFile = filepath.Join(global.GetWorkDir(), global.DefaultPIDFile)
+func NewPIDFile(pidfile string) (*Config, error) {
+	c := &Config{
+		PIDFile: pidfile,
+	}
 	_, err := c.CheckPIDFile()
 	if err != nil {
 		return nil, err
 	}
 
-	if err := os.MkdirAll(filepath.Dir(c.PidFile), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(c.PIDFile), 0755); err != nil {
 		return nil, err
 	}
 
 	pidstr := fmt.Sprintf("%d", os.Getpid())
-	if err := os.WriteFile(c.PidFile, []byte(pidstr), 0600); err != nil {
+	if err := os.WriteFile(c.PIDFile, []byte(pidstr), 0600); err != nil {
 		return nil, err
 	}
 
-	c.pidFd, _ = os.OpenFile(c.PidFile, os.O_APPEND|os.O_EXCL, 0600)
+	c.pidFd, _ = os.OpenFile(c.PIDFile, os.O_APPEND|os.O_EXCL, 0600)
 	return c, nil
 }
 
@@ -59,7 +60,7 @@ func NewPIDFile() (*Config, error) {
 // if the PID file exists, return the PID of the process
 // if the PID file does not exist, return -1
 func (c *Config) CheckPIDFile() (int, error) {
-	buf, err := os.ReadFile(c.PidFile)
+	buf, err := os.ReadFile(c.PIDFile)
 	if err != nil {
 		return -1, nil
 	}
@@ -71,7 +72,7 @@ func (c *Config) CheckPIDFile() (int, error) {
 	}
 
 	if processExists(pid) {
-		return pid, fmt.Errorf("pid file(%s) found, ensure %s(%d) is not running", c.PidFile, global.Prog, pid)
+		return pid, fmt.Errorf("pid file(%s) found, ensure %s(%d) is not running", c.PIDFile, global.Prog, pid)
 	}
 
 	return -1, nil
@@ -80,5 +81,5 @@ func (c *Config) CheckPIDFile() (int, error) {
 // RemovePIDFile remove the pid file
 func (c *Config) RemovePIDFile() error {
 	c.pidFd.Close()
-	return os.Remove(c.PidFile)
+	return os.Remove(c.PIDFile)
 }

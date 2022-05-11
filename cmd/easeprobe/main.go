@@ -21,6 +21,7 @@ import (
 	"flag"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"sync"
 	"syscall"
 	"time"
@@ -55,10 +56,21 @@ func main() {
 		os.Exit(-1)
 	}
 
-	d, err := daemon.NewPIDFile()
+	// Create the pid file
+	d, err := daemon.NewPIDFile(c.Settings.PIDFile)
 	if err != nil {
 		log.Errorf("Error: Cannot create the PID file: %s", err)
-	} else {
+		// Try Working Directory
+		pidfile := filepath.Join(global.GetWorkDir(), global.DefaultPIDFile)
+		if pidfile != c.Settings.PIDFile {
+			if d, err = daemon.NewPIDFile(pidfile); err != nil {
+				log.Errorf("Error: Cannot create the PID file: %s", err)
+			}
+		}
+	}
+
+	if d != nil {
+		log.Infof("Successfully create the PID file: %s", d.PIDFile)
 		defer d.RemovePIDFile()
 	}
 

@@ -18,12 +18,16 @@
 package daemon
 
 import (
+	"path/filepath"
 	"testing"
+
+	"github.com/megaease/easeprobe/global"
 )
 
 func TestPIDFile(t *testing.T) {
+	pidfile := filepath.Join(global.GetWorkDir(), global.DefaultPIDFile)
 
-	c, err := NewPIDFile()
+	c, err := NewPIDFile(pidfile)
 	if err != nil {
 		t.Fatalf("Could not create the pid file, %v", err)
 	}
@@ -33,7 +37,7 @@ func TestPIDFile(t *testing.T) {
 		t.Fatalf("Could not found the pid file, %v", err)
 	}
 
-	_, err = NewPIDFile()
+	_, err = NewPIDFile(pidfile)
 	if err == nil {
 		t.Fatalf("PIDFile could be overwritten, %v", err)
 	}

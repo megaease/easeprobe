@@ -111,6 +111,7 @@ type HTTPServer struct {
 
 // Settings is the EaseProbe configuration
 type Settings struct {
+	PIDFile    string     `yaml:"pid"`
 	Log        Log        `yaml:"log"`
 	TimeFormat string     `yaml:"timeformat"`
 	Probe      Probe      `yaml:"probe"`
@@ -192,6 +193,7 @@ func New(conf *string) (Conf, error) {
 		},
 		Notify: notify.Config{},
 		Settings: Settings{
+			PIDFile:    filepath.Join(global.GetWorkDir(), global.DefaultPIDFile),
 			Log:        NewLog(),
 			TimeFormat: "2006-01-02 15:04:05 UTC",
 			Probe: Probe{
