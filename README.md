@@ -618,7 +618,10 @@ notify:
 settings:
 
   # Daemon settings
-  pid: /var/run/easeprobe.pid # pid file path, default: $CWD/easeprobe.pid
+
+  # pid file path,  default: $CWD/easeprobe.pid, 
+  # if set to "", will not create pid file.
+  pid: /var/run/easeprobe.pid 
 
   # A HTTP Server configuration
   http:

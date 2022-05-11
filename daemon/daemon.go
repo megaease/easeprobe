@@ -35,6 +35,10 @@ type Config struct {
 
 // NewPIDFile create a new pid file
 func NewPIDFile(pidfile string) (*Config, error) {
+	if pidfile == "" {
+		return nil, fmt.Errorf("pid file is empty")
+	}
+
 	c := &Config{
 		PIDFile: pidfile,
 	}

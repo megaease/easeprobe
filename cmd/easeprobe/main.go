@@ -21,6 +21,7 @@ import (
 	"flag"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -55,15 +56,18 @@ func main() {
 		os.Exit(-1)
 	}
 
-	// Create the pid file
-	d, err := daemon.NewPIDFile(c.Settings.PIDFile)
-	if err != nil {
-		log.Fatalf("Fatal: Cannot create the PID file: %s!", err)
-		os.Exit(-1)
+	// Create the pid file if the file name is not empty
+	if len(strings.TrimSpace(c.Settings.PIDFile)) > 0 {
+		d, err := daemon.NewPIDFile(c.Settings.PIDFile)
+		if err != nil {
+			log.Fatalf("Fatal: Cannot create the PID file: %s!", err)
+			os.Exit(-1)
+		}
+		log.Infof("Successfully create the PID file: %s", d.PIDFile)
+		defer d.RemovePIDFile()
+	} else {
+		log.Info("No PID file is created.")
 	}
-
-	log.Infof("Successfully create the PID file: %s", d.PIDFile)
-	defer d.RemovePIDFile()
 
 	c.InitLog()
 
