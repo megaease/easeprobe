@@ -18,6 +18,7 @@
 package daemon
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -39,16 +40,27 @@ func NewPIDFile(pidfile string) (*Config, error) {
 		return nil, fmt.Errorf("pid file is empty")
 	}
 
-	c := &Config{
-		PIDFile: pidfile,
-	}
-	_, err := c.CheckPIDFile()
-	if err != nil {
+	fi, err := os.Stat(pidfile)
+
+	if err == nil { // file exists
+		if fi.IsDir() {
+			pidfile = filepath.Join(pidfile, global.DefaultPIDFile)
+		}
+		li, _ := os.Lstat(pidfile)
+		if li != nil && (li.Mode()&os.ModeSymlink == os.ModeSymlink) {
+			os.Remove(pidfile)
+		}
+	} else if errors.Is(err, os.ErrNotExist) { // file not exists
+		// create all of directories
+		if e := os.MkdirAll(filepath.Dir(pidfile), 0755); e != nil {
+			return nil, e
+		}
+	} else {
 		return nil, err
 	}
 
-	if err := os.MkdirAll(filepath.Dir(c.PIDFile), 0755); err != nil {
-		return nil, err
+	c := &Config{
+		PIDFile: pidfile,
 	}
 
 	pidstr := fmt.Sprintf("%d", os.Getpid())
