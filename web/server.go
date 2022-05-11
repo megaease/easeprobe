@@ -88,17 +88,31 @@ func Server() {
 
 	// Start the http server
 	go func() {
+
 		r := chi.NewRouter()
+
+		filename := c.Settings.HTTPServer.AccessLog.File
+		if len(filename) > 0 {
+			log.Infof("[Web] Access Log output file: %s", filename)
+			logger := log.New()
+			logger.SetOutput(c.Settings.HTTPServer.AccessLog.GetWriter())
+			r.Use(NewStructuredLogger(logger))
+		}
 
 		r.Use(middleware.RealIP)
 		r.Use(middleware.Logger)
 		r.Use(middleware.Recoverer)
+		r.Use(middleware.RedirectSlashes)
+		r.Use(middleware.StripSlashes)
 
 		r.Get("/", slaHTML)
 
 		r.Route("/api/v1", func(r chi.Router) {
-			r.Get("/sla/", slaJSON)
+			r.Get("/sla", slaJSON)
 		})
+
+		r.NotFound(slaHTML)
+
 		log.Infof("[Web] HTTP server is listening on %s:%s", host, port)
 		if err := http.ListenAndServe(host+":"+port, r); err != nil {
 			log.Errorf("[Web] HTTP server error: %s", err)

@@ -22,6 +22,9 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -63,8 +66,21 @@ const (
 	DefaultHTTPServerIP = "0.0.0.0"
 	// DefaultHTTPServerPort is the default port of the HTTP server
 	DefaultHTTPServerPort = "8181"
+	// DefaultAccessLogFile is the default access log file name
+	DefaultAccessLogFile = "access.log"
 	// DefaultDataFile is the default data file name
 	DefaultDataFile = "data.yaml"
+)
+
+const (
+	// DefaultMaxLogSize is the default max log size
+	DefaultMaxLogSize = 10 // 10M
+	// DefaultMaxLogAge is the default max log age
+	DefaultMaxLogAge = 7 // 7 days
+	// DefaultMaxBackups is the default backup file number
+	DefaultMaxBackups = 5 // file
+	// DefaultLogCompress is the default compress log
+	DefaultLogCompress = true
 )
 
 // Retry is the settings of retry
@@ -136,4 +152,52 @@ func DoRetry(kind, name, tag string, r Retry, fn func() error) error {
 		}
 	}
 	return fmt.Errorf("[%s / %s / %s] failed after %d retries - %v", kind, name, tag, r.Times, err)
+}
+
+// GetWorkDir return the current working directory
+func GetWorkDir() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Warnf("Cannot get the current directory: %v, using $HOME directory!", err)
+		dir, err = os.UserHomeDir()
+		if err != nil {
+			log.Warnf("Cannot get the user home directory: %v, using /tmp directory!", err)
+			dir = os.TempDir()
+		}
+	}
+	return dir
+}
+
+// MakeDirectory return the writeable filename
+func MakeDirectory(filename string) string {
+	dir, file := filepath.Split(filename)
+	if len(dir) <= 0 {
+		dir = GetWorkDir()
+	}
+	if len(file) <= 0 {
+		return dir
+	}
+	if strings.HasPrefix(dir, "~/") {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			log.Warnf("Cannot get the user home directory: %v, using /tmp directory as home", err)
+			home = os.TempDir()
+		}
+		dir = filepath.Join(home, dir[2:])
+	}
+	dir, err := filepath.Abs(dir)
+	if err != nil {
+		log.Warnf("Cannot get the absolute path: %v", err)
+		dir = GetWorkDir()
+	}
+
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err = os.MkdirAll(dir, os.ModePerm)
+		if err != nil {
+			log.Warnf("Cannot create the directory: %v", err)
+			dir = GetWorkDir()
+		}
+	}
+
+	return filepath.Join(dir, file)
 }
