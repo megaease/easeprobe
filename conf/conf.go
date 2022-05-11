@@ -233,8 +233,7 @@ func New(conf *string) (Conf, error) {
 		log.Errorf("error: %v", err)
 		return c, err
 	}
-
-	c.Init()
+	c.initData()
 
 	ssh.BastionMap.ParseAllBastionHost()
 	host.BastionMap.ParseAllBastionHost()
@@ -254,11 +253,10 @@ func New(conf *string) (Conf, error) {
 	return c, err
 }
 
-// Init initialize the configuration
-func (conf *Conf) Init() {
+// InitLog initialize the configuration
+func (conf *Conf) InitLog() {
 	conf.initAppLog()
 	conf.initAccessLog()
-	conf.initData()
 }
 
 func (conf *Conf) initAppLog() {
