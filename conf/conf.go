@@ -177,7 +177,7 @@ func getYamlFile(path string) ([]byte, error) {
 }
 
 // New read the configuration from yaml
-func New(conf *string) (Conf, error) {
+func New(conf *string) (*Conf, error) {
 	c := Conf{
 		HTTP:   []http.HTTP{},
 		TCP:    []tcp.TCP{},
@@ -223,7 +223,7 @@ func New(conf *string) (Conf, error) {
 	y, err := getYamlFile(*conf)
 	if err != nil {
 		log.Errorf("error: %v ", err)
-		return c, err
+		return &c, err
 	}
 
 	y = []byte(os.ExpandEnv(string(y)))
@@ -231,8 +231,9 @@ func New(conf *string) (Conf, error) {
 	err = yaml.Unmarshal(y, &c)
 	if err != nil {
 		log.Errorf("error: %v", err)
-		return c, err
+		return &c, err
 	}
+
 	c.initData()
 
 	ssh.BastionMap.ParseAllBastionHost()
@@ -250,44 +251,20 @@ func New(conf *string) (Conf, error) {
 		}
 	}
 
-	return c, err
+	return &c, err
 }
 
-// InitLog initialize the configuration
-func (conf *Conf) InitLog() {
-	conf.initAppLog()
-	conf.initAccessLog()
+// InitAllLogs initialize all logs
+func (conf *Conf) InitAllLogs() {
+
+	conf.Settings.Log.InitLog(nil)
+	conf.Settings.Log.LogInfo("Application")
+
+	conf.Settings.HTTPServer.AccessLog.InitLog(log.New())
+	conf.Settings.HTTPServer.AccessLog.LogInfo("Web Access")
 }
 
-func (conf *Conf) initAppLog() {
-	log.SetFormatter(&log.TextFormatter{FullTimestamp: true})
-	if conf == nil {
-		log.SetOutput(os.Stdout)
-		log.SetLevel(log.InfoLevel)
-		return
-	}
-
-	// if logfile is not set, use stdout
-	if conf.Settings.Log.File == "" {
-		log.Infoln("Using Standard Output as the log output...")
-		log.SetOutput(os.Stdout)
-		log.SetLevel(conf.Settings.Log.Level.GetLevel())
-		return
-	}
-
-	// open the log file
-	f, err := os.OpenFile(conf.Settings.Log.File, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0660)
-	if err != nil {
-		log.Warnf("Cannot open log file (%s): %v", conf.Settings.Log.File, err)
-		log.Infoln("Using Standard Output as the log output...")
-		log.SetOutput(os.Stdout)
-	} else {
-		f.Close()
-		conf.Settings.Log.CheckDefault()
-		log.Infof("Using %s as the log output...", conf.Settings.Log.File)
-		log.SetOutput(conf.Settings.Log.GetWriter())
-	}
-	log.SetLevel(conf.Settings.Log.Level.GetLevel())
+func logLogfileInfo(name string, file string) {
 
 }
 
@@ -309,16 +286,6 @@ func (conf *Conf) initData() {
 		log.Warnf("Cannot load data from file: %v", err)
 	}
 
-}
-
-func (conf *Conf) initAccessLog() {
-	filename := conf.Settings.HTTPServer.AccessLog.File
-	if filename != "" {
-		filename = global.MakeDirectory(filename)
-		log.Infof("Using %s as the access log output...", filename)
-		conf.Settings.HTTPServer.AccessLog.File = filename
-		conf.Settings.HTTPServer.AccessLog.CheckDefault()
-	}
 }
 
 // isProbe checks whether a interface is a probe type

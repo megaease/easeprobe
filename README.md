@@ -12,6 +12,7 @@ EaseProbe is a simple, standalone, and lightWeight tool that can do health/statu
     - [1.1 Probe](#11-probe)
     - [1.2 Notification](#12-notification)
     - [1.3 Report](#13-report)
+    - [1.4 Administration](#14-administration)
   - [2. Getting Started](#2-getting-started)
     - [2.1 Build](#21-build)
     - [2.2 Configure](#22-configure)
@@ -232,6 +233,56 @@ Check the  [Notification Configuration](#37-notification-configuration) to see h
   ```
 
 For more information, please check the [Global Setting Configuration](#38-global-setting-configuration)
+
+
+### 1.4 Administration
+
+There are some administration configuration options:
+
+**1) PID file**
+
+  The EaseProbe would create a PID file (default `$CWD/easeprobe.pid`) when it starts. it can be configured by:
+
+  ```YAML
+  settings:
+    pid: /var/run/easeprobe.pid
+  ```
+
+  - If the file already exists, EaseProbe would overwrite it. 
+  - If the file cannot be written, EaseProbe would exit with an error.
+
+  If you want to disable the PID file, you can configure the pid file to "".
+
+  ```YAML
+  settings:
+    pid: "" # EaseProbe won't create a PID file
+  ```
+
+**2) Log file Rotation**
+
+  There are two types of log file: **Application Log** and **HTTP Access Log**. 
+
+  Both Application Log and HTTP Access Log would be StdOut by default.  They all can be configured by:
+
+  ```YAML
+  log:
+    file: /path/to/log/file
+    self_rotate: true # default: false
+  ```
+
+  If `self_rotate` is `true`, EaseProbe would rotate the log automatically, and the following options are available: 
+
+  ```YAML
+    size: 10 # max size of log file. default: 10M
+    age: 7 # max age days of log file. default: 7 days
+    backups: 5 # max backup log files. default: 5
+    compress: true # compress. default: true
+  ```
+
+  If `self_rotate` is `false`, EaseProbe would not rotate the log, and the log file would be rotated by the 3rd-party tool. e.g. `logrotate`.
+
+  EaseProbe accepts the `HUP` signal to rotate the log.
+
 
 ## 2. Getting Started
 
@@ -631,6 +682,9 @@ settings:
     log: 
       file: /path/to/access.log # access log file. default: Stdout
       # Log Rotate Configuration (optional)
+      self_rotate: true # true: self rotate log file. default: true
+                        # false: managed by outside  (e.g logrotate)
+                        #        the blow settings will be ignored.
       size: 10 # max of access log file size. default: 10m
       age: 7 #  max of access log file age. default: 7 days
       backups: 5 # max of access log file backups. default: 5
@@ -666,9 +720,12 @@ settings:
     # Log Level Configuration
     # can be: panic, fatal, error, warn, info, debug.
     level: "debug"
-    # Log Rotate Configuration (optional) 
+    # Log Rotate Configuration (optional)
+    self_rotate: true # true: self rotate log file. default: true
+                        # false: managed by outside  (e.g logrotate)
+                        #        the blow settings will be ignored.
     size: 10 # max of access log file size. default: 10m
-    age: 7 # max of access log file age. default: 7 days
+    age: 7 #  max of access log file age. default: 7 days
     backups: 5 # max of access log file backups. default: 5
     compress: true # compress the access log file. default: true
 

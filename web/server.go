@@ -88,14 +88,12 @@ func Server() {
 
 	// Start the http server
 	go func() {
-
 		r := chi.NewRouter()
 
 		filename := c.Settings.HTTPServer.AccessLog.File
 		if len(filename) > 0 {
 			log.Infof("[Web] Access Log output file: %s", filename)
-			logger := log.New()
-			logger.SetOutput(c.Settings.HTTPServer.AccessLog.GetWriter())
+			logger := c.Settings.HTTPServer.AccessLog.Logger
 			r.Use(NewStructuredLogger(logger))
 		}
 

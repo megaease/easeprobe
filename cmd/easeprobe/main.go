@@ -69,7 +69,7 @@ func main() {
 		log.Info("No PID file is created.")
 	}
 
-	c.InitLog()
+	c.InitAllLogs()
 
 	// if dry notification mode is specificed in command line, overwrite the configuration
 	if *dryNotify {
@@ -129,12 +129,14 @@ func main() {
 	signal.Notify(rotateLog, syscall.SIGHUP)
 	go func() {
 		for {
+			c := conf.Get()
 			select {
 			case <-doneRotate:
 				log.Info("Received the exit signal, Rotating log file process exiting...")
+				c.Settings.Log.Close()
+				c.Settings.HTTPServer.AccessLog.Close()
 				return
 			case <-rotateLog:
-				c := conf.Get()
 				log.Info("Received SIGHUP, rotating the log file...")
 				c.Settings.Log.Rotate()
 				c.Settings.HTTPServer.AccessLog.Rotate()
