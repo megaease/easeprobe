@@ -15,7 +15,7 @@ EaseProbe plans to align closely with the Cloud Native ecosystem in providing se
 ## Product Principles
 EaseProbe tries to do two things but do them extremely well - **Probe** and **Notify**.
 
-1. **Lightweight, Standalone, and KISS**. Aims to be lightweight, with as few as possible external system dependencies and follow KISS ideas.
+1. **Lightweight, Standalone and KISS**. Aims to be lightweight, with as few as possible external system dependencies and follow KISS ideas.
 
 2. **Probe and Notify**. Aims to provide the ability to easily **probe** servers, services and API endpoints reliably and **notify** on status updates.
 
