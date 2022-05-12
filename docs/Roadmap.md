@@ -40,7 +40,7 @@ The project principles, of EaseProbe' features are separated into two main categ
 ### Notify specific
 * Mail notification
 * AWS SNS notification
-* Log files 
+* Log files
 * Slack
 * Discord
 * Telegram
@@ -62,10 +62,10 @@ Some of the features that are planned/considered for 2022 can be broken down int
 * support for common daemon features
   * [x] megaease/easeprobe#75 add `daemon()` & `/var/run/easeprobe.pid` support
   * [x] megaease/easeprobe#75 add SIGHUP, and ensure it closes and re-opens of logfile to allow for `easeprobe.log` rotation
-  * add syslog support eg `logfile: syslog`
+  * add syslog support as an alternative destination instead of `easeprobe.log` eg `logfile: syslog`
 * Support for common `timeformat`, use standard timezone and `strftime` conversions, eg `timezone: [UTC|local|Europe/Athens]`, `timeformat: %F %R:%S UTC`
 * Add opt-out options where appropriate
-  * [x] megaease/easeprobe#75 add opt-out option for `logfile` option 
+  * [x] megaease/easeprobe#75 add opt-out option for `logfile` option
   * Add opt-out option for SLA data persistence `data: false`
   * Make historical data configurable `history: false` and avoid creating backups of statistics
 
