@@ -66,7 +66,7 @@ func main() {
 		log.Infof("Successfully created the PID file: %s", d.PIDFile)
 		defer d.RemovePIDFile()
 	} else {
-		log.Info("No PID file is created.")
+		log.Info("Skipping PID file creation (pidfile empty).")
 	}
 
 	c.InitAllLogs()
