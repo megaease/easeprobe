@@ -185,7 +185,7 @@ func (l *Log) Rotate() {
 			if err := fileLogger.Close(); err != nil {
 				log.Errorf("[Log] Close log file failed: %s", err)
 			}
-			l.Open() // open another writer
+			l.Open()            // open another writer
 			l.ConfigureLogger() // set the new logger writer.
 		}
 	}
@@ -193,7 +193,7 @@ func (l *Log) Rotate() {
 
 // ConfigureLogger configure the logger
 func (l *Log) ConfigureLogger() {
-	if l.Logger != nil { 
+	if l.Logger != nil {
 		l.Logger.SetOutput(l.Writter)
 		l.Logger.SetLevel(l.Level.GetLevel())
 		l.Logger.SetFormatter(&log.TextFormatter{FullTimestamp: true})
