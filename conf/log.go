@@ -207,7 +207,7 @@ func (l *Log) ConfigureLogger() {
 // LogInfo log info
 func (l *Log) LogInfo(name string) {
 	logger := log.New()
-	rotate := "Thrid-Party Rotate (e.g. logrotate)"
+	rotate := "Third-Party Rotate (e.g. logrotate)"
 	if l.SelfRotate {
 		rotate = "Self-Rotate"
 	}
