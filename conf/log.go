@@ -80,6 +80,7 @@ type Log struct {
 	Compress   bool        `yaml:"compress"`
 	Writter    io.Writer   `yaml:"-"`
 	Logger     *log.Logger `yaml:"-"`
+	IsStdout   bool        `yaml:"-"`
 }
 
 // NewLog create a new Log
@@ -94,6 +95,7 @@ func NewLog() Log {
 		Compress:   true,
 		Writter:    nil,
 		Logger:     nil,
+		IsStdout:   true,
 	}
 }
 
@@ -128,12 +130,14 @@ func (l *Log) CheckDefault() {
 func (l *Log) Open() {
 	// using stdout if no log file
 	if l.File == "" {
+		l.IsStdout = true
 		l.Writter = os.Stdout
 		return
 	}
 	// using lumberjack if self rotate
 	if l.SelfRotate == true {
 		log.Debugf("[Log] Self Rotate log file %s", l.File)
+		l.IsStdout = false
 		l.Writter = &lumberjack.Logger{
 			Filename:   l.File,
 			MaxSize:    l.MaxSize, // megabytes
@@ -148,18 +152,21 @@ func (l *Log) Open() {
 	if err != nil {
 		log.Warnf("[Log] Cannot open log file: %v", err)
 		log.Infoln("[Log] Using Standard Output as the log output...")
+		l.IsStdout = true
 		l.Writter = os.Stdout
 		return
 	}
+	l.IsStdout = false
 	l.Writter = f
 }
 
 // Close close the log file
 func (l *Log) Close() {
-	if l.Writter != nil {
-		if f, ok := l.Writter.(*os.File); ok {
-			f.Close()
-		}
+	if l.Writter == nil || l.IsStdout {
+		return
+	}
+	if f, ok := l.Writter.(*os.File); ok {
+		f.Close()
 	}
 }
 
@@ -173,22 +180,24 @@ func (l *Log) GetWriter() io.Writer {
 
 //Rotate rotate the log file
 func (l *Log) Rotate() {
-	if l.Writter != nil {
-		if lumberjackLogger, ok := l.Writter.(*lumberjack.Logger); ok {
-			// self rotate
-			if err := lumberjackLogger.Rotate(); err != nil {
-				log.Errorf("[Log] Rotate log file failed: %s", err)
-			}
-		} else if fileLogger, ok := l.Writter.(*os.File); ok {
-			// rotate managed by outside program (e.g. logrotate)
-			// just close and open current log file
-			if err := fileLogger.Close(); err != nil {
-				log.Errorf("[Log] Close log file failed: %s", err)
-			}
-			l.Open()            // open another writer
-			l.ConfigureLogger() // set the new logger writer.
-		}
+	if l.Writter == nil || l.IsStdout == true {
+		return
 	}
+	if lumberjackLogger, ok := l.Writter.(*lumberjack.Logger); ok {
+		// self rotate
+		if err := lumberjackLogger.Rotate(); err != nil {
+			log.Errorf("[Log] Rotate log file failed: %s", err)
+		}
+	} else if fileLogger, ok := l.Writter.(*os.File); ok {
+		// rotate managed by outside program (e.g. logrotate)
+		// just close and open current log file
+		if err := fileLogger.Close(); err != nil {
+			log.Errorf("[Log] Close log file failed: %s", err)
+		}
+		l.Open()            // open another writer
+		l.ConfigureLogger() // set the new logger writer.
+	}
+
 }
 
 // ConfigureLogger configure the logger
