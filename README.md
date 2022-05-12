@@ -279,7 +279,12 @@ There are some administration configuration options:
     compress: true # compress. default: true
   ```
 
-  If `self_rotate` is `false`, EaseProbe would not rotate the log, and the log file would be rotated by the 3rd-party tool. e.g. `logrotate`.
+  If `self_rotate` is `false`, EaseProbe would not rotate the log, and the log file would be rotated by the 3rd-party tool (such as `logrotate`) or manualy by the administrator. 
+
+  ```shell
+  mv /path/to/easeprobe.log /path/to/easeprobe.log.0 
+  kill -HUP `cat /path/to/easeprobe.pid`
+  ```
 
   EaseProbe accepts the `HUP` signal to rotate the log.
 
