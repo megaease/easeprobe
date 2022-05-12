@@ -15,13 +15,15 @@ EaseProbe plans to align closely with the Cloud Native ecosystem in providing se
 ## Product Principles
 EaseProbe tries to do two things but do them extremely well - **Probe** and **Notify**.
 
-1. **Probe and Notify**. Aims to provide the ability to easily **probe** servers, services and API endpoints reliably and **notify** on status updates.
+1. **Lightweight, Standalone, and KISS**. Aims to be lightweight, with as few as possible external system dependencies and follow KISS ideas.
 
-2. **Open & Extensible**. It aims to be **Open** and follow Open standards that allow it to be integrated into **extensible-development** platforms (such as EaseMesh).
+2. **Probe and Notify**. Aims to provide the ability to easily **probe** servers, services and API endpoints reliably and **notify** on status updates.
 
-3. **Cloud Native**. It is designed to be **cloud-native** compliant. It is scalable, resilient, manageable, and observable and it's easy to integrate with cloud-native architectures of any type.
+3. **Open & Extensible**. It aims to be **Open** and follow Open standards that allow it to be integrated into **extensible-development** platforms (such as EaseMesh).
 
-4. **Predictability & Reliability**. EaseProbe is designed to follow best practices allowing predictable and reliable operations. Even when EaseProbe fails, it aims to fail in a predictable way which allows for easy and speedy troubleshooting of problems.
+4. **Cloud Native**. It is designed to be **cloud-native** compliant. It is scalable, resilient, manageable, and observable and it's easy to integrate with cloud-native architectures of any type.
+
+5. **Predictability & Reliability**. EaseProbe is designed to follow best practices allowing predictable and reliable operations. Even when EaseProbe fails, it aims to fail in a predictable way which allows for easy and speedy troubleshooting of problems.
 
 
 ## Features
