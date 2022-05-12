@@ -89,15 +89,6 @@ name: MyServer
     http:
       url: https://myserver.com
 ```
-
-### Notify
-* export the status and notification data to open formats so it can easily be integrated with 3rd party applications such as Prometheus and Graphana
-* support for notify `triggers` to help on automation operations (eg. not only send a notification message but also call an API or a shell script to assist in service recovery?)
-* Improve on capabilities of discord notify (eg configurable username `Username:  global.Prog,`)
-* work on clear distinction between `host`, `ssh` and `shell` (certain areas seem overlapping):
-  * add support for **`host: local`** keyword to monitor self
-  * check that we are OS agnostic where possible and confirm OS specific operations are abstracted (such as `daemon_linux.go`, `daemon_darwin.go` etc)
-  * split checks into their own functions so that the final commands to be send can be combined based on the `config.yaml`
   * add support for custom metrics and expand thresholds accordingly eg: number of process
 ```yaml
 host:
@@ -112,3 +103,12 @@ host:
         numprocs: 400 # custom metric
         cpu: 0.80  # cpu usage  80%
 ```
+
+### Notify
+* export the status and notification data to open formats so it can easily be integrated with 3rd party applications such as Prometheus and Graphana
+* support for notify `triggers` to help on automation operations (eg. not only send a notification message but also call an API or a shell script to assist in service recovery?)
+* Improve on capabilities of discord notify (eg configurable username `Username:  global.Prog,`)
+* work on clear distinction between `host`, `ssh` and `shell` (certain areas seem overlapping):
+  * add support for **`host: local`** keyword to monitor self
+  * check that we are OS agnostic where possible and confirm OS specific operations are abstracted (such as `daemon_linux.go`, `daemon_darwin.go` etc)
+  * split checks into their own functions so that the final commands to be send can be combined based on the `config.yaml`
