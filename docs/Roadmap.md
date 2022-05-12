@@ -63,7 +63,7 @@ Some of the features that are planned/considered for 2022 can be broken down int
   * add syslog support eg `logfile: syslog`
 * Support for common `timeformat`, use standard timezone and `strftime` conversions, eg `timezone: [UTC|local|Europe/Athens]`, `timeformat: %F %R:%S UTC`
 * Add opt-out options where appropriate
-  * [x] megaease/easeprobe#75 add opt-out poption for `logfile` option 
+  * [x] megaease/easeprobe#75 add opt-out option for `logfile` option 
   * Add opt-out option for SLA data persistence `data: false`
   * Make historical data configurable `history: false` and avoid creating backups of statistics
 
