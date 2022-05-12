@@ -267,7 +267,7 @@ There are some administration configuration options:
   ```YAML
   log:
     file: /path/to/log/file
-    self_rotate: true # default: false
+    self_rotate: true # default: true
   ```
 
   If `self_rotate` is `true`, EaseProbe would rotate the log automatically, and the following options are available: 
