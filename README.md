@@ -248,7 +248,7 @@ $ make
 
 Read the [Configuration Guide](#3-configuration) to learn how to configure EaseProbe.
 
-Create the configuration file - `$CWD/config.ymal`.
+Create the configuration file - `$CWD/config.yaml`.
 
 ### 2.3 Run
 
