@@ -676,6 +676,10 @@ notify:
 # Global settings for all probes and notifiers.
 settings:
 
+  # The customized name and icon
+  name : "Easeprobe" # the name of the probe: default: "EaseProbe"
+  icon : "https://path/to/icon.png" # the icon of the probe. default: "https://megaease.com/favicon.png"
+
   # Daemon settings
 
   # pid file path,  default: $CWD/easeprobe.pid, 

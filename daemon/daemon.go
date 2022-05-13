@@ -88,7 +88,8 @@ func (c *Config) CheckPIDFile() (int, error) {
 	}
 
 	if processExists(pid) {
-		return pid, fmt.Errorf("pid file(%s) found, ensure %s(%d) is not running", c.PIDFile, global.Prog, pid)
+		return pid, fmt.Errorf("pid file(%s) found, ensure %s(%d) is not running",
+			c.PIDFile, global.DefaultProg, pid)
 	}
 
 	return -1, nil

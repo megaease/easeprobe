@@ -111,6 +111,8 @@ type HTTPServer struct {
 
 // Settings is the EaseProbe configuration
 type Settings struct {
+	Name       string     `yaml:"name"`
+	IconURL    string     `yaml:"icon"`
 	PIDFile    string     `yaml:"pid"`
 	Log        Log        `yaml:"log"`
 	TimeFormat string     `yaml:"timeformat"`
@@ -193,6 +195,8 @@ func New(conf *string) (*Conf, error) {
 		},
 		Notify: notify.Config{},
 		Settings: Settings{
+			Name:       global.DefaultProg,
+			IconURL:    global.DefaultIconURL,
 			PIDFile:    filepath.Join(global.GetWorkDir(), global.DefaultPIDFile),
 			Log:        NewLog(),
 			TimeFormat: "2006-01-02 15:04:05 UTC",
@@ -234,6 +238,8 @@ func New(conf *string) (*Conf, error) {
 		return &c, err
 	}
 
+	// Initialization
+	global.InitEaseProbe(c.Settings.Name, c.Settings.IconURL)
 	c.initData()
 
 	ssh.BastionMap.ParseAllBastionHost()

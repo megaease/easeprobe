@@ -29,10 +29,11 @@ import (
 
 // ToText convert the result object to ToText
 func ToText(r probe.Result) string {
-	tpl := "[%s] %s\n%s - ⏱ %s\n%s"
+	tpl := "[%s] %s\n%s - ⏱ %s\n%s\n%s"
 	rtt := r.RoundTripTime.Round(time.Millisecond)
 	return fmt.Sprintf(tpl,
-		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, r.Message)
+		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, r.Message,
+		global.FooterString()+" at "+r.StartTime.Format(r.TimeFormat))
 }
 
 // resultDTO only for JSON format notification
@@ -116,7 +117,7 @@ func ToHTML(r probe.Result) string {
 					<td class="data">%s</td>
 				</tr>
 			</table>
-		` + HTMLFooter()
+		` + HTMLFooter(r.StartTime.Format(r.TimeFormat))
 
 	rtt := r.RoundTripTime.Round(time.Millisecond)
 	return fmt.Sprintf(html, r.Name, r.Endpoint, r.Status.Emoji(), r.Status.String(),
@@ -134,13 +135,14 @@ func ToMarkdownSocial(r probe.Result) string {
 }
 
 func markdown(r probe.Result, f Format) string {
-	tpl := "**%s** %s\n%s - ⏱ %s\n%s"
+	tpl := "**%s** %s\n%s - ⏱ %s\n%s\n> %s"
 	if f == MarkdownSocial {
-		tpl = "*%s* %s\n%s - ⏱ %s\n%s"
+		tpl = "*%s* %s\n%s - ⏱ %s\n%s\n> %s"
 	}
 	rtt := r.RoundTripTime.Round(time.Millisecond)
 	return fmt.Sprintf(tpl,
-		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, r.Message)
+		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, r.Message,
+		global.FooterString()+" at "+r.StartTime.Format(r.TimeFormat))
 }
 
 // ToSlack convert the object to ToSlack notification
@@ -164,12 +166,12 @@ func ToSlack(r probe.Result) string {
 				"elements": [
 					{
 						"type": "image",
-						"image_url": "` + global.Icon + `",
+						"image_url": "` + global.GetEaseProbe().IconURL + `",
 						"alt_text": "` + global.OrgProg + `"
 					},
 					{
 						"type": "mrkdwn",
-						"text": "` + global.Prog + ` %s"
+						"text": "` + global.FooterString() + ` %s"
 					}
 				]
 			}
@@ -217,7 +219,7 @@ func ToLark(r probe.Result) string {
 					"elements": [
 						{
 							"tag": "plain_text",
-							"content": global.Prog 
+							"content": %s 
 						}
 					]
 				}
@@ -240,5 +242,6 @@ func ToLark(r probe.Result) string {
 	title := fmt.Sprintf("%s %s", r.Title(), r.Status.Emoji())
 	rtt := r.RoundTripTime.Round(time.Millisecond)
 	content := fmt.Sprintf("%s - ⏱ %s\\n%s", r.Endpoint, rtt, JSONEscape(r.Message))
-	return fmt.Sprintf(json, headerColor, title, content)
+	footer := global.FooterString() + " probed at " + r.StartTime.Format(r.TimeFormat)
+	return fmt.Sprintf(json, headerColor, title, content, footer)
 }
