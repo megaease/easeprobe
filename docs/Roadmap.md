@@ -64,6 +64,7 @@ Some of the features that are planned/considered for 2022 can be broken down int
   * [x] megaease/easeprobe#75 add SIGHUP, and ensure it closes and re-opens of logfile to allow for `easeprobe.log` rotation
   * add syslog support as an alternative destination instead of `easeprobe.log` eg `logfile: syslog`
 * Support for common `timeformat`, use standard timezone and `strftime` conversions, eg `timezone: [UTC|local|Europe/Athens]`, `timeformat: %F %R:%S UTC`
+* Ability to control the status of a running easyprobe instance and temporarily disable or enable probes and notify endpoints (maybe something like `/var/run/easeprobe.sock` that speaks HTTP? `dockerd` & `supervisord` does something like that). This could later expand to managing other parameters of a live instance as well as get process related status updates (eg how long this instance is running? how much memory it consumes etc)
 * Add opt-out options where appropriate
   * [x] megaease/easeprobe#75 add opt-out option for `logfile` option
   * Add opt-out option for SLA data persistence `data: false`
@@ -115,7 +116,7 @@ http:
     notify: listA
   - name: hostB
     url: http://hostB:2376/containers/json
-    notify: listB
+    notify: listB, telegram, discord
 notify:
   listA:
     discord:
