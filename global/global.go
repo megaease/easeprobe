@@ -34,18 +34,18 @@ import (
 const (
 	// Org is the organization
 	Org = "MegaEase"
-	// Prog is the program name
-	Prog = "EaseProbe"
+	// DefaultProg is the program name
+	DefaultProg = "EaseProbe"
 	// Ver is the program version
-	Ver = "v1.1.2"
+	Ver = "v1.5.0"
 
 	//OrgProg combine organization and program
-	OrgProg = Org + " " + Prog
+	OrgProg = Org + " " + DefaultProg
 	//OrgProgVer combine organization and program and version
-	OrgProgVer = Org + " " + Prog + "/" + Ver
+	OrgProgVer = Org + " " + DefaultProg + "/" + Ver
 
-	// Icon is the default icon which used in Slack or Discord
-	Icon = "https://megaease.cn/favicon.png"
+	// DefaultIconURL is the default icon which used in Slack or Discord
+	DefaultIconURL = "https://megaease.com/favicon.png"
 )
 
 const (
