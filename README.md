@@ -388,7 +388,7 @@ http:
       - [200,206] # the code >=200 and <= 206
       - [300,308] # the code >=300 and <= 308
     # Response Checking
-    contain: "success" # if not contain this string, the server is failed.
+    contain: "success" # response body must contain this string, if not the probe is considered failed.
     not_contain: "failure" # if contain this string, the server is failed.
     # configuration
     timeout: 10s # default is 30 seconds
