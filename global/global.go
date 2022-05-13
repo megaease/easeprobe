@@ -70,6 +70,8 @@ const (
 	DefaultAccessLogFile = "access.log"
 	// DefaultDataFile is the default data file name
 	DefaultDataFile = "data.yaml"
+	// DefaultPIDFile is the default pid file name
+	DefaultPIDFile = "easeprobe.pid"
 )
 
 const (

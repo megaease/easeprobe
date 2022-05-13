@@ -21,11 +21,13 @@ import (
 	"flag"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
 
 	"github.com/megaease/easeprobe/conf"
+	"github.com/megaease/easeprobe/daemon"
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify"
 	"github.com/megaease/easeprobe/probe"
@@ -53,6 +55,21 @@ func main() {
 		log.Fatalln("Fatal: Cannot read the YAML configuration file!")
 		os.Exit(-1)
 	}
+
+	// Create the pid file if the file name is not empty
+	if len(strings.TrimSpace(c.Settings.PIDFile)) > 0 {
+		d, err := daemon.NewPIDFile(c.Settings.PIDFile)
+		if err != nil {
+			log.Fatalf("Fatal: Cannot create the PID file: %s!", err)
+			os.Exit(-1)
+		}
+		log.Infof("Successfully created the PID file: %s", d.PIDFile)
+		defer d.RemovePIDFile()
+	} else {
+		log.Info("Skipping PID file creation (pidfile empty).")
+	}
+
+	c.InitAllLogs()
 
 	// if dry notification mode is specificed in command line, overwrite the configuration
 	if *dryNotify {
@@ -106,6 +123,27 @@ func main() {
 	signal.Notify(done, syscall.SIGTERM)
 	signal.Notify(done, syscall.SIGINT)
 
+	// Rotate the log file
+	rotateLog := make(chan os.Signal, 1)
+	doneRotate := make(chan bool, 1)
+	signal.Notify(rotateLog, syscall.SIGHUP)
+	go func() {
+		for {
+			c := conf.Get()
+			select {
+			case <-doneRotate:
+				log.Info("Received the exit signal, Rotating log file process exiting...")
+				c.Settings.Log.Close()
+				c.Settings.HTTPServer.AccessLog.Close()
+				return
+			case <-rotateLog:
+				log.Info("Received SIGHUP, rotating the log file...")
+				c.Settings.Log.Rotate()
+				c.Settings.HTTPServer.AccessLog.Rotate()
+			}
+		}
+	}()
+
 	select {
 	case <-done:
 		log.Infof("Received the exit signal, exiting...")
@@ -117,6 +155,7 @@ func main() {
 		wg.Wait()
 		doneWatch <- true
 		doneSave <- true
+		doneRotate <- true
 	}
 
 	log.Info("Graceful Exit Successfully!")
