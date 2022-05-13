@@ -389,7 +389,7 @@ http:
       - [300,308] # the code >=300 and <= 308
     # Response Checking
     contain: "success" # response body must contain this string, if not the probe is considered failed.
-    not_contain: "failure" # if contain this string, the server is failed.
+    not_contain: "failure" # response body must NOT contain this string, if it does the probe is considered failed.
     # configuration
     timeout: 10s # default is 30 seconds
 
