@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/base"
 	log "github.com/sirupsen/logrus"
 )
@@ -38,6 +39,8 @@ type HTTP struct {
 	Method              string            `yaml:"method,omitempty"`
 	Headers             map[string]string `yaml:"headers,omitempty"`
 	Body                string            `yaml:"body,omitempty"`
+	Contain             string            `yaml:"contain,omitempty"`
+	NotContain          string            `yaml:"not_contain,omitempty"`
 
 	// Option - HTTP Basic Auth Credentials
 	User string `yaml:"username,omitempty"`
@@ -152,5 +155,12 @@ func (h *HTTP) DoProbe() (bool, string) {
 		return false, fmt.Sprintf("HTTP Status Code is %d. It missed in %v", resp.StatusCode, h.SuccessCode)
 	}
 
-	return true, fmt.Sprintf("HTTP Status Code is %d", resp.StatusCode)
+	message := fmt.Sprintf("HTTP Status Code is %d", resp.StatusCode)
+	if err := probe.CheckOutput(h.Contain, h.NotContain, string(response)); err != nil {
+		log.Errorf("[%s / %s] - %v", h.ProbeKind, h.ProbeName, err)
+		message += fmt.Sprintf(". Error: %v", err)
+		return false, message
+	}
+
+	return true, message
 }

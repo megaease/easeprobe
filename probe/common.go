@@ -37,7 +37,6 @@ func CommandLine(cmd string, args []string) string {
 func CheckOutput(Contain, NotContain string, Output string) error {
 
 	if len(Contain) > 0 && !strings.Contains(Output, Contain) {
-
 		return fmt.Errorf("the output does not contain [%s]", Contain)
 	}
 
