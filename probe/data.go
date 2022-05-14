@@ -97,7 +97,7 @@ func LoadDataFromFile(filename string) error {
 		return err
 	}
 
-	time := time.Now().Format(time.RFC3339)
+	time := time.Now().UTC().Format(time.RFC3339)
 	os.Rename(filename, filename+"-"+time)
 
 	return nil
