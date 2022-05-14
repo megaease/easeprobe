@@ -127,7 +127,7 @@ func CleanDataFile(filename string, backups int) {
 	// remove the oldest backup files
 	sort.Strings(matches)
 
-	for i := 0; i < len(matches) - backups; i++ {
+	for i := 0; i < len(matches)-backups; i++ {
 		if err := os.Remove(matches[i]); err != nil {
 			log.Errorf("Cannot clean data file: %v", err)
 			continue
