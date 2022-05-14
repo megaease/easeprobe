@@ -21,8 +21,10 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
 
@@ -99,4 +101,37 @@ func LoadDataFromFile(filename string) error {
 	os.Rename(filename, filename+"-"+time)
 
 	return nil
+}
+
+// CleanDataFile keeps the max backup of data file
+func CleanDataFile(filename string, backups int) {
+
+	// if backups is negative value, keep all backup files
+	if backups < 0 {
+		return
+	}
+
+	// get all of the backup files
+	pattern := filename + "-*"
+	matches, err := filepath.Glob(pattern)
+	if err != nil {
+		log.Errorf("Cannot clean data file: %v", err)
+		return
+	}
+
+	// if backups is not exceed the max number of backup files, return
+	if len(matches) <= backups {
+		log.Debugf("No need to clean data file (%d - %d) ", backups, len(matches))
+	}
+
+	// remove the oldest backup files
+	sort.Strings(matches)
+
+	for i := 0; i < len(matches) - backups; i++ {
+		if err := os.Remove(matches[i]); err != nil {
+			log.Errorf("Cannot clean data file: %v", err)
+			continue
+		}
+		log.Infof("Clean data file: %s", matches[i])
+	}
 }

@@ -99,6 +99,7 @@ type SLAReport struct {
 	Time     string   `yaml:"time"`
 	Debug    bool     `yaml:"debug"`
 	DataFile string   `yaml:"data"`
+	Backups  int      `yaml:"backups"`
 }
 
 // HTTPServer is the settings of http server
@@ -215,7 +216,8 @@ func New(conf *string) (*Conf, error) {
 				Schedule: Daily,
 				Time:     "00:00",
 				Debug:    false,
-				DataFile: "",
+				DataFile: global.DefaultDataFile,
+				Backups:  global.DefaultMaxBackups,
 			},
 			HTTPServer: HTTPServer{
 				IP:        global.DefaultHTTPServerIP,
@@ -292,6 +294,7 @@ func (conf *Conf) initData() {
 		log.Warnf("Cannot load data from file: %v", err)
 	}
 
+	probe.CleanDataFile(filename, conf.Settings.SLAReport.Backups)
 }
 
 // isProbe checks whether a interface is a probe type
