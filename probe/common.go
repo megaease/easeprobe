@@ -34,7 +34,7 @@ func CommandLine(cmd string, args []string) string {
 // CheckOutput checks the output text,
 // - if it contains a configured string then return nil
 // - if it does not contain a configured string then return nil
-func CheckOutput(Contain, NotContain string, Output string) error {
+func CheckOutput(Contain, NotContain, Output string) error {
 
 	if len(Contain) > 0 && !strings.Contains(Output, Contain) {
 		return fmt.Errorf("the output does not contain [%s]", Contain)
@@ -42,7 +42,6 @@ func CheckOutput(Contain, NotContain string, Output string) error {
 
 	if len(NotContain) > 0 && strings.Contains(Output, NotContain) {
 		return fmt.Errorf("the output contains [%s]", NotContain)
-
 	}
 	return nil
 }
