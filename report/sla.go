@@ -177,6 +177,11 @@ func slaMarkdown(probers []probe.Prober, f Format) string {
 	for _, p := range probers {
 		md += SLAMarkdownSection(p.Result(), f)
 	}
+	timeFmt := "2006-01-02 15:04:05"
+	if len(probers) > 0 {
+		timeFmt = probers[len(probers)-1].Result().TimeFormat
+	}
+	md += "\n> " + global.FooterString() + " at " + time.Now().UTC().Format(timeFmt)
 	return md
 }
 
@@ -214,7 +219,11 @@ func SLAHTML(probers []probe.Prober) string {
 	}
 	html += `</table>`
 
-	html += HTMLFooter()
+	timeFmt := "2006-01-02 15:04:05"
+	if len(probers) > 0 {
+		timeFmt = probers[len(probers)-1].Result().TimeFormat
+	}
+	html += HTMLFooter(time.Now().UTC().Format(timeFmt))
 	return html
 }
 
@@ -294,12 +303,12 @@ func SLASlack(probers []probe.Prober) string {
 		"elements": [
 			{
 				"type": "image",
-				"image_url": "` + global.Icon + `",
+				"image_url": "` + global.GetEaseProbe().IconURL + `",
 				"alt_text": "` + global.OrgProg + `"
 			},
 			{
 				"type": "mrkdwn",
-				"text": "` + global.Prog + ` %s"
+				"text": "` + global.FooterString() + ` %s"
 			}
 		]
 	}`
@@ -405,5 +414,6 @@ func SLASummary(probers []probe.Prober) string {
 	}
 	sla /= float64(len(probers))
 	summary := fmt.Sprintf("Total %d Services, Average %.2f%% SLA", len(probers), sla)
+	summary += "\n" + global.FooterString()
 	return summary
 }
