@@ -278,12 +278,17 @@ func logLogfileInfo(name string, file string) {
 
 func (conf *Conf) initData() {
 
-	filename := conf.Settings.SLAReport.DataFile
-	if filename == "" {
-		dir := global.GetWorkDir()
-		filename = filepath.Join(dir, "data", global.DefaultDataFile)
-		conf.Settings.SLAReport.DataFile = filename
+	dir, file := filepath.Split(conf.Settings.SLAReport.DataFile)
+	// if filename is empty, use default file name
+	if strings.TrimSpace(file) == "" {
+		file = global.DefaultDataFile
 	}
+	// if dir is empty, get the working directory
+	if strings.TrimSpace(dir) == ""  {
+		dir = global.GetWorkDir()
+	}
+	filename := filepath.Join(dir, "data", file)
+	conf.Settings.SLAReport.DataFile = filename
 
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		log.Infof("The data file %s is not found!", filename)
@@ -291,7 +296,7 @@ func (conf *Conf) initData() {
 	}
 
 	if err := probe.LoadDataFromFile(filename); err != nil {
-		log.Warnf("Cannot load data from file: %v", err)
+		log.Warnf("Cannot load data from file(%s): %v", filename, err)
 	}
 
 	probe.CleanDataFile(filename, conf.Settings.SLAReport.Backups)

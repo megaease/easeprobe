@@ -166,7 +166,7 @@ func saveData(doneSave chan bool) {
 	file := c.Settings.SLAReport.DataFile
 	save := func() {
 		if err := probe.SaveDataToFile(file); err != nil {
-			log.Errorf("Failed to save the SLA data to file: %v", err)
+			log.Errorf("Failed to save the SLA data to file(%s): %v", file, err)
 		} else {
 			log.Debugf("Successfully save the SLA data to file: %s", file)
 		}
