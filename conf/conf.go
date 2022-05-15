@@ -284,7 +284,7 @@ func (conf *Conf) initData() {
 		file = global.DefaultDataFile
 	}
 	// if dir is empty, get the working directory
-	if strings.TrimSpace(dir) == ""  {
+	if strings.TrimSpace(dir) == "" {
 		dir = global.GetWorkDir()
 	}
 	filename := filepath.Join(dir, "data", file)
