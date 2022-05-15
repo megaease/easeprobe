@@ -4,7 +4,7 @@
 # 1) run easeprobe without any arguments
 # 2) run easeprobe with easeprobe arguments
 # 3) run the command in easeprobe container
-${PROBE_CONFIG:=/opt/config.yaml}
+PROBE_CONFIG=${PROBE_CONFIG:-/opt/config.yaml}
 
 echo "Using config file: ${PROBE_CONFIG}"
 
