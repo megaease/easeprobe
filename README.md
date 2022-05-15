@@ -715,6 +715,8 @@ settings:
     # SLA data persistence file path.
     # The default location is `$CWD/data/data.yaml`
     data: /path/to/data/file.yaml
+    backups: 5 # max of SLA data file backups. default: 5
+               # if set to a negative value, keep all backup files
 
   notify:
     # dry: true # Global settings for dry run
