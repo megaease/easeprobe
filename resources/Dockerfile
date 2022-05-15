@@ -10,7 +10,7 @@ COPY . .
 
 RUN --mount=type=cache,mode=0777,id=gomodcache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
-    make 
+    make
 
 FROM alpine:latest
 RUN apk update && apk add tini tzdata busybox-extras curl redis
@@ -18,4 +18,5 @@ WORKDIR /opt/
 COPY --from=builder /go/src/github.com/megaease/easeprobe/build/bin/* ./
 COPY --from=builder /go/src/github.com/megaease/easeprobe/resources/scripts/entrypoint.sh /
 ENV PATH /opt/:$PATH
+ENV PROBE_CONFIG /opt/config.yaml
 ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
