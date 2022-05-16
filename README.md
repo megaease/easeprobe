@@ -37,9 +37,10 @@ EaseProbe would do three kinds of work - **Probe**, **Notify**, and **Report**.
 
 Ease Probe supports the following probing methods: **HTTP**, **TCP**, **Shell Command**, **SSH Command**,  **Host Resource Usage**, and **Native Client**.
 
-> **Notes**:
+
+> **Note**:
 >
-> The prober name is a unique ID, DO NOT use the same name for a different prober.
+> **Keep in mind that the prober name must be **unique** among probes. If multiple probes are defined with the same name, it could lead to corruption of the metrics data and the behavior of the application will be non-deterministic.**
 
 - **HTTP**. Checking the HTTP status code, Support mTLS, HTTP Basic Auth, and can set the Request Header/Body. ( [HTTP Probe Configuration](#31-http-probe-configuration) )
 
@@ -183,7 +184,7 @@ notify:
   sms:
     - name: "sms alert service"
       provider: "yunpian"
-      key: xxxxxxxxxxxx # yunpian apikey 
+      key: xxxxxxxxxxxx # yunpian apikey
       mobile: 123456789,987654321 # mobile phone number, multiple phone number joint by `,`
       sign: "xxxxxxxx" # need to register; usually brand name
 ```
@@ -216,13 +217,9 @@ Check the  [Notification Configuration](#37-notification-configuration) to see h
 
 - **SLA Data Persistence**. Save the SLA statistics data on the disk.
 
-  The SLA data would be persisted in `$CWD/data/data.yaml` by default. If you want to configure the path, you can do it in the `settings` section.
+  The SLA data would be persisted in `$CWD/data.yaml` by default. If you want to configure the path, you can do it in the `settings` section.
 
-  Whenever EaseProbe starts,  load the data if found, and remove the probers that are not in configuration if the configuration changes.
-
-  > **Note**:
-  >
-  > **The prober's name is a unique ID, so if multiple probes with the same name, the data would conflict, and the behavior is unknown.**
+  When EaseProbe starts, it loads the data found in `data.yaml` (if found) and removes any probers that are no longer present in the configuration file. Setting a an empty `data:` disables SLA persistence (eg `data: ""`).
 
   ```YAML
   settings:
@@ -248,7 +245,7 @@ There are some administration configuration options:
     pid: /var/run/easeprobe.pid
   ```
 
-  - If the file already exists, EaseProbe would overwrite it. 
+  - If the file already exists, EaseProbe would overwrite it.
   - If the file cannot be written, EaseProbe would exit with an error.
 
   If you want to disable the PID file, you can configure the pid file to "".
@@ -260,7 +257,7 @@ There are some administration configuration options:
 
 **2) Log file Rotation**
 
-  There are two types of log file: **Application Log** and **HTTP Access Log**. 
+  There are two types of log file: **Application Log** and **HTTP Access Log**.
 
   Both Application Log and HTTP Access Log would be StdOut by default.  They all can be configured by:
 
@@ -270,7 +267,7 @@ There are some administration configuration options:
     self_rotate: true # default: true
   ```
 
-  If `self_rotate` is `true`, EaseProbe would rotate the log automatically, and the following options are available: 
+  If `self_rotate` is `true`, EaseProbe would rotate the log automatically, and the following options are available:
 
   ```YAML
     size: 10 # max size of log file. default: 10M
@@ -282,7 +279,7 @@ There are some administration configuration options:
   If `self_rotate` is `false`, EaseProbe will not rotate the log, and the log file will have to be rotated by a 3rd-party tool (such as `logrotate`) or manually by the administrator.
 
   ```shell
-  mv /path/to/easeprobe.log /path/to/easeprobe.log.0 
+  mv /path/to/easeprobe.log /path/to/easeprobe.log.0
   kill -HUP `cat /path/to/easeprobe.pid`
   ```
 
@@ -658,7 +655,7 @@ notify:
   sms:
     - name: "sms alert service - yunpian"
       provider: "yunpian"
-      key: xxxxxxxxxxxx # yunpian apikey 
+      key: xxxxxxxxxxxx # yunpian apikey
       mobile: 123456789,987654321 # mobile phone number, multi phone number joint by `,`
       sign: "xxxxx" # get this from yunpian
 
@@ -687,16 +684,16 @@ settings:
 
   # Daemon settings
 
-  # pid file path,  default: $CWD/easeprobe.pid, 
+  # pid file path,  default: $CWD/easeprobe.pid,
   # if set to "", will not create pid file.
-  pid: /var/run/easeprobe.pid 
+  pid: /var/run/easeprobe.pid
 
   # A HTTP Server configuration
   http:
     ip: 127.0.0.1 # the IP address of the server. default:"0.0.0.0"
     port: 8181 # the port of the server. default: 8181
     refresh: 5s # the auto-refresh interval of the server. default: the minimum value of the probes' interval.
-    log: 
+    log:
       file: /path/to/access.log # access log file. default: Stdout
       # Log Rotate Configuration (optional)
       self_rotate: true # true: self rotate log file. default: true
@@ -720,6 +717,8 @@ settings:
     # SLA data persistence file path.
     # The default location is `$CWD/data/data.yaml`
     data: /path/to/data/file.yaml
+    # Use the following to disable SLA data persistence
+    # data: ""
     backups: 5 # max of SLA data file backups. default: 5
                # if set to a negative value, keep all backup files
 
