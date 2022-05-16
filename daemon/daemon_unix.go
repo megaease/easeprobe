@@ -1,5 +1,5 @@
-//go:build darwin || openbsd
-// +build darwin openbsd
+//go:build darwin || openbsd || dragonfly || freebsd || netbsd || solaris
+// +build darwin openbsd dragonfly freebsd netbsd solaris
 
 /*
  * Copyright (c) 2022, MegaEase
