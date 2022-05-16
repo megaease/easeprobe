@@ -278,6 +278,12 @@ func logLogfileInfo(name string, file string) {
 
 func (conf *Conf) initData() {
 
+	// Check if conf.Settings.SLAReport.DataFile == "" and return
+	if strings.TrimSpace(conf.Settings.SLAReport.DataFile) == "" {
+		log.Infof("SLA data file not set. Skipping SLA data store...")
+		return
+	}
+	//
 	dir, file := filepath.Split(conf.Settings.SLAReport.DataFile)
 	// if filename is empty, use default file name
 	if strings.TrimSpace(file) == "" {
@@ -287,11 +293,11 @@ func (conf *Conf) initData() {
 	if strings.TrimSpace(dir) == "" {
 		dir = global.GetWorkDir()
 	}
-	filename := filepath.Join(dir, "data", file)
+	filename := filepath.Join(dir, file)
 	conf.Settings.SLAReport.DataFile = filename
 
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		log.Infof("The data file %s is not found!", filename)
+		log.Infof("The data file %s, was not found!", filename)
 		return
 	}
 
