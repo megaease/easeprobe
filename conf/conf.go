@@ -283,7 +283,7 @@ func (conf *Conf) initData() {
 		log.Infof("SLA data file not set. Skipping SLA data store...")
 		return
 	}
-	//
+
 	dir, file := filepath.Split(conf.Settings.SLAReport.DataFile)
 	// if filename is empty, use default file name
 	if strings.TrimSpace(file) == "" {
