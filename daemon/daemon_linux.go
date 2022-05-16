@@ -1,5 +1,5 @@
-//go:build !windows && !darwin
-// +build !windows,!darwin
+//go:build linux
+// +build linux
 
 /*
  * Copyright (c) 2022, MegaEase
