@@ -1,5 +1,5 @@
-//go:build darwin || openbsd || dragonfly || freebsd || netbsd || solaris
-// +build darwin openbsd dragonfly freebsd netbsd solaris
+//go:build !linux && !windows
+// +build !linux,!windows
 
 /*
  * Copyright (c) 2022, MegaEase
