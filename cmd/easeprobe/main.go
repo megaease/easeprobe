@@ -123,7 +123,6 @@ func main() {
 	// Graceful Shutdown
 	done := make(chan os.Signal)
 	signal.Notify(done, syscall.SIGTERM)
-	signal.Notify(done, syscall.SIGINT)
 
 	// Rotate the log file
 	rotateLog := make(chan os.Signal, 1)
