@@ -86,34 +86,41 @@ func Server() {
 		log.Debugf("[Web] Auto refresh interval time: %s", interval)
 	}
 
+	// Prepare the router
+	r := chi.NewRouter()
+
+	filename := c.Settings.HTTPServer.AccessLog.File
+	if len(filename) > 0 {
+		log.Infof("[Web] Access Log output file: %s", filename)
+		logger := c.Settings.HTTPServer.AccessLog.Logger
+		r.Use(NewStructuredLogger(logger))
+	}
+
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.RedirectSlashes)
+	r.Use(middleware.StripSlashes)
+
+	r.Get("/", slaHTML)
+
+	r.Route("/api/v1", func(r chi.Router) {
+		r.Get("/sla", slaJSON)
+	})
+
+	r.NotFound(slaHTML)
+
+	server, err := net.Listen("tcp", host+":"+port)
+	if err != nil {
+		log.Fatalf("[Web] Failed to start the http server: %s", err)
+	}
+	log.Infof("[Web] HTTP server is listening on %s:%s", host, port)
+
 	// Start the http server
 	go func() {
-		r := chi.NewRouter()
-
-		filename := c.Settings.HTTPServer.AccessLog.File
-		if len(filename) > 0 {
-			log.Infof("[Web] Access Log output file: %s", filename)
-			logger := c.Settings.HTTPServer.AccessLog.Logger
-			r.Use(NewStructuredLogger(logger))
-		}
-
-		r.Use(middleware.RealIP)
-		r.Use(middleware.Logger)
-		r.Use(middleware.Recoverer)
-		r.Use(middleware.RedirectSlashes)
-		r.Use(middleware.StripSlashes)
-
-		r.Get("/", slaHTML)
-
-		r.Route("/api/v1", func(r chi.Router) {
-			r.Get("/sla", slaJSON)
-		})
-
-		r.NotFound(slaHTML)
-
-		log.Infof("[Web] HTTP server is listening on %s:%s", host, port)
-		if err := http.ListenAndServe(host+":"+port, r); err != nil {
+		if err := http.Serve(server, r); err != nil {
 			log.Errorf("[Web] HTTP server error: %s", err)
 		}
 	}()
+
 }

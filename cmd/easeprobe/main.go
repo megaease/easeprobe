@@ -80,6 +80,9 @@ func main() {
 		log.Infoln("Dry Notification Mode...")
 	}
 
+	// Start the HTTP Server
+	web.Server()
+
 	// Probers
 	probers := c.AllProbers()
 
@@ -107,9 +110,8 @@ func main() {
 	// Start the Event Watching
 	go watchEvent(notifyChan, notifies, doneWatch)
 
-	// Start the HTTP Server
+	// Set probers into web server
 	web.SetProbers(probers)
-	web.Server()
 
 	// Set the Cron Job for SLA Report
 	if conf.Get().Settings.SLAReport.Schedule != conf.None {
