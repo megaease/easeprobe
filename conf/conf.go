@@ -278,34 +278,42 @@ func logLogfileInfo(name string, file string) {
 
 func (conf *Conf) initData() {
 
-	// Check if conf.Settings.SLAReport.DataFile == "" and return
-	if strings.TrimSpace(conf.Settings.SLAReport.DataFile) == "" {
+	// Check if we are explicitly disabled
+	if strings.TrimSpace(conf.Settings.SLAReport.DataFile) == "-" {
 		log.Infof("SLA data file not set. Skipping SLA data store...")
 		return
 	}
 
-	dir, file := filepath.Split(conf.Settings.SLAReport.DataFile)
-	// if filename is empty, use default file name
-	if strings.TrimSpace(file) == "" {
-		file = global.DefaultDataFile
+	// Check if we are empty and use global.DefaultDataFile
+	if strings.TrimSpace(conf.Settings.SLAReport.DataFile) == "" {
+		conf.Settings.SLAReport.DataFile = global.DefaultDataFile
 	}
-	// if dir is empty, get the working directory
-	if strings.TrimSpace(dir) == "" {
-		dir = global.GetWorkDir()
-	}
-	filename := filepath.Join(dir, file)
-	conf.Settings.SLAReport.DataFile = filename
 
-	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		log.Infof("The data file %s, was not found!", filename)
+	dir, _ := filepath.Split(conf.Settings.SLAReport.DataFile)
+	// if dir part is not empty
+	if strings.TrimSpace(dir) != "" {
+		// check for `dir`` existence and create intermediate folders
+		if _, err := os.Stat(dir); os.IsNotExist(err) {
+			log.Infof("Creating base directory for data file!")
+			if err := os.MkdirAll(dir, 0755); err != nil {
+				log.Warnf("Failed to create base directory for data file: %s", err.Error())
+				return
+			}
+		}
+	}
+
+	// check if the data file exists and is a regular file
+	datainfo, err := os.Stat(conf.Settings.SLAReport.DataFile)
+	if os.IsNotExist(err) || !datainfo.Mode().IsRegular() {
+		log.Infof("The data file %s, was not found!", conf.Settings.SLAReport.DataFile)
 		return
 	}
 
-	if err := probe.LoadDataFromFile(filename); err != nil {
-		log.Warnf("Cannot load data from file(%s): %v", filename, err)
+	if err := probe.LoadDataFromFile(conf.Settings.SLAReport.DataFile); err != nil {
+		log.Warnf("Cannot load data from file(%s): %v", conf.Settings.SLAReport.DataFile, err)
 	}
 
-	probe.CleanDataFile(filename, conf.Settings.SLAReport.Backups)
+	probe.CleanDataFile(conf.Settings.SLAReport.DataFile, conf.Settings.SLAReport.Backups)
 }
 
 // isProbe checks whether a interface is a probe type
