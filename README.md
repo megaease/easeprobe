@@ -217,9 +217,9 @@ Check the  [Notification Configuration](#37-notification-configuration) to see h
 
 - **SLA Data Persistence**. Save the SLA statistics data on the disk.
 
-  The SLA data would be persisted in `$CWD/data.yaml` by default. If you want to configure the path, you can do it in the `settings` section.
+  The SLA data would be persisted in `$CWD/data/data.yaml` by default. If you want to configure the path, you can do it in the `settings` section.
 
-  When EaseProbe starts, it loads the data found in `data.yaml` (if found) and removes any probers that are no longer present in the configuration file. Setting a an empty `data:` disables SLA persistence (eg `data: ""`).
+  When EaseProbe starts, it looks for the location of `data.yaml` and if found, load the file and remove any probes that are no longer present in the configuration file. Setting a value of `"-"` for `data:` disables SLA persistence (eg `data: "-"`).
 
   ```YAML
   settings:
@@ -679,9 +679,8 @@ notify:
 settings:
 
   # The customized name and icon
-  name : "Easeprobe" # the name of the probe: default: "EaseProbe"
-  icon : "https://path/to/icon.png" # the icon of the probe. default: "https://megaease.com/favicon.png"
-
+  name: "Easeprobe" # the name of the probe: default: "EaseProbe"
+  icon: "https://path/to/icon.png" # the icon of the probe. default: "https://megaease.com/favicon.png"
   # Daemon settings
 
   # pid file path,  default: $CWD/easeprobe.pid,
@@ -718,7 +717,7 @@ settings:
     # The default location is `$CWD/data/data.yaml`
     data: /path/to/data/file.yaml
     # Use the following to disable SLA data persistence
-    # data: ""
+    # data: "-"
     backups: 5 # max of SLA data file backups. default: 5
                # if set to a negative value, keep all backup files
 
