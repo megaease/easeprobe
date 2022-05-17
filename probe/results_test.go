@@ -45,7 +45,7 @@ func TestAll(t *testing.T) {
 	}
 
 	filename := "/tmp/easeprobe/data.yaml"
-	if err := os.MkdirAll("/tmp/easeprobe", 0755); err != nill {
+	if err := os.MkdirAll("/tmp/easeprobe", 0755); err != nil {
 		t.Errorf("Mkdirall(\"/tmp/easeprobe\") error: %v", err)
 	}
 
