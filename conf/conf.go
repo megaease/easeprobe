@@ -280,7 +280,7 @@ func (conf *Conf) initData() {
 
 	// Check if we are explicitly disabled
 	if strings.TrimSpace(conf.Settings.SLAReport.DataFile) == "-" {
-		log.Infof("SLA data file not set. Skipping SLA data store...")
+		log.Infof("SLA data disabled by configuration. Skipping SLA data store...")
 		return
 	}
 
