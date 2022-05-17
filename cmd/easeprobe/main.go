@@ -164,25 +164,23 @@ func main() {
 
 func saveData(doneSave chan bool) {
 	c := conf.Get()
-	if strings.TrimSpace(c.Settings.SLAReport.DataFile) != "" {
-		file := c.Settings.SLAReport.DataFile
-		save := func() {
-			if err := probe.SaveDataToFile(file); err != nil {
-				log.Errorf("Failed to save the SLA data to file(%s): %v", file, err)
-			} else {
-				log.Debugf("Successfully save the SLA data to file: %s", file)
-			}
+	file := c.Settings.SLAReport.DataFile
+	save := func() {
+		if err := probe.SaveDataToFile(file); err != nil {
+			log.Errorf("Failed to save the SLA data to file(%s): %v", file, err)
+		} else {
+			log.Debugf("Successfully save the SLA data to file: %s", file)
 		}
-		save()
-		for {
-			select {
-			case <-doneSave:
-				save()
-				log.Info("Received the exit signal, Saving data process is exiting...")
-				return
-			case <-time.After(c.Settings.Probe.Interval):
-				save()
-			}
+	}
+	save()
+	for {
+		select {
+		case <-doneSave:
+			save()
+			log.Info("Received the exit signal, Saving data process is exiting...")
+			return
+		case <-time.After(c.Settings.Probe.Interval):
+			save()
 		}
 	}
 }
