@@ -18,6 +18,7 @@
 package probe
 
 import (
+	"io/ioutil"
 	"os"
 	"reflect"
 	"testing"
@@ -44,20 +45,32 @@ func TestAll(t *testing.T) {
 		t.Errorf("LoadFromFile(-) error: %s", err)
 	}
 
-	filename := "/tmp/data.yaml"
-
-	if err := SaveDataToFile(filename); err != nil {
-		t.Errorf("SaveToFile(%s) error: %s", filename, err)
+	tmpdir, err := ioutil.TempDir("/tmp", "easeprobe")
+	if err != nil {
+		t.Errorf("TempDir(%s) error: %s", tmpdir, err)
 	}
-	if err := LoadDataFromFile(filename); err != nil {
-		t.Errorf("LoadFromFile(%s) error: %s", filename, err)
+
+	file, err := ioutil.TempFile(tmpdir, "data.yaml")
+	if err != nil {
+		t.Errorf("TempFile(%s) error: %s", file.Name(), err)
+	}
+
+	if err := SaveDataToFile(file.Name()); err != nil {
+		t.Errorf("SaveToFile(%s) error: %s", file.Name(), err)
+	}
+	if err := LoadDataFromFile(file.Name()); err != nil {
+		t.Errorf("LoadFromFile(%s) error: %s", file.Name(), err)
+	}
+
+	if err := SaveDataToFile(file.Name()); err != nil {
+		t.Errorf("SaveToFile(%s) afterLoad error: %s", file.Name(), err)
 	}
 
 	if reflect.DeepEqual(resultData["Test1 Name"], r[0]) {
-		t.Errorf("LoadFromFile(\"%s\") = %v, expected %v", filename, resultData["Test1 Name"], r[0])
+		t.Errorf("LoadFromFile(\"%s\") = %v, expected %v", file.Name(), resultData["Test1 Name"], r[0])
 	}
 
-	if err := os.RemoveAll("/tmp/data.yaml"); err != nil {
-		t.Errorf("Remove(\"/tmp/data.yaml\") = %v, expected nil", err)
+	if err := os.RemoveAll(tmpdir); err != nil {
+		t.Errorf("RemoveAll(\"%s\") = %v, expected nil", tmpdir, err)
 	}
 }
