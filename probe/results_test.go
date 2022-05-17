@@ -37,11 +37,11 @@ func TestAll(t *testing.T) {
 
 	// ensure we dont save or load from '-'
 	if err := SaveDataToFile("-"); err != nil {
-		t.Errorf("SaveToFile(%s) error: %s", filename, err)
+		t.Errorf("SaveToFile(-) error: %s", err)
 	}
 
 	if err := LoadDataFromFile("-"); err != nil {
-		t.Errorf("LoadFromFile(%s) error: %s", filename, err)
+		t.Errorf("LoadFromFile(-) error: %s", err)
 	}
 
 	filename := "/tmp/data.yaml"
