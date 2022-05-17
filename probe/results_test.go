@@ -35,7 +35,16 @@ func TestAll(t *testing.T) {
 		t.Errorf("GetResult(\"Test1 Name\") = %v, expected %v", x, r[0])
 	}
 
-	filename := "/tmp/easeprobe/data.yaml"
+	// ensure we dont save or load from '-'
+	if err := SaveDataToFile("-"); err != nil {
+		t.Errorf("SaveToFile(%s) error: %s", filename, err)
+	}
+
+	if err := LoadDataFromFile("-"); err != nil {
+		t.Errorf("LoadFromFile(%s) error: %s", filename, err)
+	}
+
+	filename := "/tmp/data.yaml"
 
 	if err := SaveDataToFile(filename); err != nil {
 		t.Errorf("SaveToFile(%s) error: %s", filename, err)
@@ -48,7 +57,7 @@ func TestAll(t *testing.T) {
 		t.Errorf("LoadFromFile(\"%s\") = %v, expected %v", filename, resultData["Test1 Name"], r[0])
 	}
 
-	if err := os.RemoveAll("/tmp/easeprobe"); err != nil {
-		t.Errorf("Remove(\"/tmp/easeprobe\") = %v, expected nil", err)
+	if err := os.RemoveAll("/tmp/data.yaml"); err != nil {
+		t.Errorf("Remove(\"/tmp/data.yaml\") = %v, expected nil", err)
 	}
 }
