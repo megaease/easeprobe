@@ -45,7 +45,7 @@ func TestAll(t *testing.T) {
 		t.Errorf("LoadFromFile(-) error: %s", err)
 	}
 
-	tmpdir, err := ioutil.TempDir("/tmp", "easeprobe")
+	tmpdir, err := ioutil.TempDir("", "easeprobe")
 	if err != nil {
 		t.Errorf("TempDir(%s) error: %s", tmpdir, err)
 	}
