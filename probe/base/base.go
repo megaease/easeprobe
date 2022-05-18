@@ -22,7 +22,9 @@ import (
 	"time"
 
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/metric"
 	"github.com/megaease/easeprobe/probe"
+	"github.com/prometheus/client_golang/prometheus"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -32,13 +34,14 @@ type ProbeFuncType func() (bool, string)
 
 // DefaultOptions is the default options for all probe
 type DefaultOptions struct {
-	ProbeKind         string        `yaml:"-"`
-	ProbeTag          string        `yaml:"-"`
-	ProbeName         string        `yaml:"name"`
-	ProbeTimeout      time.Duration `yaml:"timeout,omitempty"`
-	ProbeTimeInterval time.Duration `yaml:"interval,omitempty"`
-	ProbeFunc         ProbeFuncType `yaml:"-"`
-	ProbeResult       *probe.Result `yaml:"-"`
+	ProbeKind         string          `yaml:"-"`
+	ProbeTag          string          `yaml:"-"`
+	ProbeName         string          `yaml:"name"`
+	ProbeTimeout      time.Duration   `yaml:"timeout,omitempty"`
+	ProbeTimeInterval time.Duration   `yaml:"interval,omitempty"`
+	ProbeFunc         ProbeFuncType   `yaml:"-"`
+	ProbeResult       *probe.Result   `yaml:"-"`
+	metrics           *metric.Metrics `yaml:"-"`
 }
 
 // Kind return the probe kind
@@ -88,6 +91,9 @@ func (d *DefaultOptions) Config(gConf global.ProbeSettings,
 	} else {
 		log.Infof("Probe [%s] - [%s] base options are configured!", d.ProbeKind, d.ProbeName)
 	}
+
+	d.metrics = metric.NewMetrics("EaseProbe", kind, tag)
+
 	return nil
 }
 
@@ -123,10 +129,28 @@ func (d *DefaultOptions) Probe() probe.Result {
 	d.ProbeResult.PreStatus = d.ProbeResult.Status
 	d.ProbeResult.Status = status
 
+	d.ExportMetrics()
+
 	d.DownTimeCalculation(status)
 
 	d.ProbeResult.DoStat(d.Interval())
 	return *d.ProbeResult
+}
+
+// ExportMetrics export the metrics
+func (d *DefaultOptions) ExportMetrics() {
+	d.metrics.Total.With(prometheus.Labels{
+		"probe":  d.ProbeName,
+		"status": d.ProbeResult.Status.String(),
+	}).Inc()
+
+	d.metrics.Duration.With(prometheus.Labels{
+		"probe": d.ProbeName,
+	}).Set(d.ProbeResult.RoundTripTime.Seconds())
+
+	d.metrics.Status.With(prometheus.Labels{
+		"probe": d.ProbeName,
+	}).Set(float64(d.ProbeResult.Status))
 }
 
 // DownTimeCalculation calculate the down time

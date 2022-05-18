@@ -29,6 +29,7 @@ import (
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/report"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -111,6 +112,8 @@ func Server() {
 	r.Use(middleware.StripSlashes)
 
 	r.Get("/", slaHTML)
+
+	r.Get("/metrics", promhttp.Handler().ServeHTTP)
 
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Get("/sla", slaJSON)
