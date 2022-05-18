@@ -37,6 +37,7 @@ type NotifyConfig struct {
 	User               string `yaml:"username"`
 	Pass               string `yaml:"password"`
 	To                 string `yaml:"to"`
+	From               string `yaml:"from"`
 }
 
 // Kind return the type of Notify
@@ -63,6 +64,10 @@ func (c *NotifyConfig) SendMail(subject string, message string) error {
 	}
 
 	email := "Notification" + "<" + c.User + ">"
+	if c.From != "" {
+		email = c.From
+	}
+
 	header := make(map[string]string)
 	header["From"] = email
 	header["To"] = c.To
