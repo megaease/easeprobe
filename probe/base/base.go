@@ -92,7 +92,7 @@ func (d *DefaultOptions) Config(gConf global.ProbeSettings,
 		log.Infof("Probe [%s] - [%s] base options are configured!", d.ProbeKind, d.ProbeName)
 	}
 
-	d.metrics = metric.NewMetrics("EaseProbe", kind, tag)
+	d.metrics = metric.NewMetrics(global.GetEaseProbe().Name, kind, tag)
 
 	return nil
 }

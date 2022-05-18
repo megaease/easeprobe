@@ -23,8 +23,10 @@ import (
 	"strings"
 
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/metric"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/ssh"
+	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -49,7 +51,8 @@ func (t *Threshold) String() string {
 // Server is the server of a host probe
 type Server struct {
 	ssh.Server `yaml:",inline"`
-	Threshold  Threshold `yaml:"threshold"`
+	Threshold  Threshold           `yaml:"threshold"`
+	metrics    *metric.HostMetrics `yaml:"-"`
 }
 
 // Host is the host probe configuration
@@ -95,6 +98,8 @@ func (s *Server) Config(gConf global.ProbeSettings) error {
 		s.Threshold.Disk = DefaultDiskThreshold
 	}
 
+	s.metrics = metric.NewHostMetrics(global.GetEaseProbe().Name, kind, tag)
+
 	endpoint := s.Threshold.String()
 	return s.Configure(gConf, kind, tag, name, endpoint, &BastionMap, s.DoProbe)
 }
@@ -118,6 +123,7 @@ func (s *Server) DoProbe() (bool, string) {
 		return false, fmt.Sprintf("Prase the output failed: %v", err)
 	}
 	log.Debugf("[%s / %s] - %+v", s.ProbeKind, s.ProbeName, info)
+	s.ExportMetrics(info)
 	return s.CheckThreshold(info)
 }
 
@@ -249,4 +255,96 @@ func strFloat(str string) float64 {
 func strInt(str string) int64 {
 	n, _ := strconv.ParseInt(str, 10, 32)
 	return n
+}
+
+// ExportMetrics export the metrics
+func (s *Server) ExportMetrics(info Info) {
+
+	// CPU metrics
+	s.metrics.CPU.With(prometheus.Labels{
+		"host":  s.Name(),
+		"state": "usage",
+	}).Set(100 - info.CPU.Idle)
+
+	s.metrics.CPU.With(prometheus.Labels{
+		"host":  s.Name(),
+		"state": "idle",
+	}).Set(info.CPU.Idle)
+
+	s.metrics.CPU.With(prometheus.Labels{
+		"host":  s.Name(),
+		"state": "user",
+	}).Set(info.CPU.User)
+
+	s.metrics.CPU.With(prometheus.Labels{
+		"host":  s.Name(),
+		"state": "sys",
+	}).Set(info.CPU.Sys)
+
+	s.metrics.CPU.With(prometheus.Labels{
+		"host":  s.Name(),
+		"state": "nice",
+	}).Set(info.CPU.Nice)
+
+	s.metrics.CPU.With(prometheus.Labels{
+		"host":  s.Name(),
+		"state": "wait",
+	}).Set(info.CPU.Wait)
+
+	s.metrics.CPU.With(prometheus.Labels{
+		"host":  s.Name(),
+		"state": "hard",
+	}).Set(info.CPU.Hard)
+
+	s.metrics.CPU.With(prometheus.Labels{
+		"host":  s.Name(),
+		"state": "soft",
+	}).Set(info.CPU.Soft)
+
+	s.metrics.CPU.With(prometheus.Labels{
+		"host":  s.Name(),
+		"state": "steal",
+	}).Set(info.CPU.Steal)
+
+	// Memory metrics
+	s.metrics.Memory.With(prometheus.Labels{
+		"host":  s.Name(),
+		"state": "used",
+	}).Set(float64(info.Memory.Used))
+
+	s.metrics.Memory.With(prometheus.Labels{
+		"host":  s.Name(),
+		"state": "available",
+	}).Set(float64(info.Memory.Total - info.Memory.Used))
+
+	s.metrics.Memory.With(prometheus.Labels{
+		"host":  s.Name(),
+		"state": "total",
+	}).Set(float64(info.Memory.Total))
+
+	s.metrics.Memory.With(prometheus.Labels{
+		"host":  s.Name(),
+		"state": "usage",
+	}).Set(info.Memory.Usage)
+
+	// Disk metrics
+	s.metrics.Disk.With(prometheus.Labels{
+		"host":  s.Name(),
+		"state": "used",
+	}).Set(float64(info.Disk.Used))
+
+	s.metrics.Disk.With(prometheus.Labels{
+		"host":  s.Name(),
+		"state": "available",
+	}).Set(float64(info.Disk.Total - info.Disk.Used))
+
+	s.metrics.Disk.With(prometheus.Labels{
+		"host":  s.Name(),
+		"state": "total",
+	}).Set(float64(info.Disk.Total))
+
+	s.metrics.Disk.With(prometheus.Labels{
+		"host":  s.Name(),
+		"state": "usage",
+	}).Set(info.Disk.Usage)
 }

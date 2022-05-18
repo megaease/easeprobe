@@ -14,22 +14,22 @@ type Metrics struct {
 	Status   *prometheus.GaugeVec
 }
 
+// HostMetrics is the metrics for host probe
+type HostMetrics struct {
+	CPU    *prometheus.GaugeVec
+	Memory *prometheus.GaugeVec
+	Disk   *prometheus.GaugeVec
+}
+
 var metrics = make(map[string]*Metrics)
+var hostMetrics = make(map[string]*HostMetrics)
 
 // NewMetrics create the metrics
 func NewMetrics(namespace, subsystem, name string) *Metrics {
-
-	key := metricName(namespace) + "_" + metricName(subsystem)
-	if name != "" {
-		key = key + "_" + metricName(name)
-	}
-
-	log.Debugf("metric key: %s", key)
-
+	key := getKey(namespace, subsystem, name)
 	if m, find := metrics[key]; find {
 		return m
 	}
-
 	m := &Metrics{
 		Total: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
@@ -63,6 +63,57 @@ func NewMetrics(namespace, subsystem, name string) *Metrics {
 
 	metrics[key] = m
 	return m
+}
+
+// NewHostMetrics create the host metrics
+func NewHostMetrics(namespace, subsystem, name string) *HostMetrics {
+	key := getKey(namespace, subsystem, name)
+	if m, find := hostMetrics[key]; find {
+		return m
+	}
+	m := &HostMetrics{
+		CPU: prometheus.NewGaugeVec(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Name:      key + "_cpu",
+				Help:      "CPU Usage",
+			},
+			[]string{"host", "state"},
+		),
+		Memory: prometheus.NewGaugeVec(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Name:      key + "_memory",
+				Help:      "Memory Usage",
+			},
+			[]string{"host", "state"},
+		),
+		Disk: prometheus.NewGaugeVec(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Name:      key + "_disk",
+				Help:      "Disk Usage",
+			},
+			[]string{"host", "state"},
+		),
+	}
+
+	prometheus.MustRegister(m.CPU)
+	prometheus.MustRegister(m.Memory)
+	prometheus.MustRegister(m.Disk)
+
+	hostMetrics[key] = m
+	return m
+}
+
+func getKey(namespace, subsystem, name string) string {
+	key := metricName(namespace) + "_" + metricName(subsystem)
+	if name != "" {
+		key = key + "_" + metricName(name)
+	}
+
+	log.Debugf("metric key: %s", key)
+	return key
 }
 
 func valid(ch byte) bool {
