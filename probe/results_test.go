@@ -35,11 +35,24 @@ func TestAll(t *testing.T) {
 		t.Errorf("GetResult(\"Test1 Name\") = %v, expected %v", x, r[0])
 	}
 
+	// ensure we dont save or load from '-'
+	if err := SaveDataToFile("-"); err != nil {
+		t.Errorf("SaveToFile(-) error: %s", err)
+	}
+
+	if err := LoadDataFromFile("-"); err != nil {
+		t.Errorf("LoadFromFile(-) error: %s", err)
+	}
+
 	filename := "/tmp/easeprobe/data.yaml"
+	if err := os.MkdirAll("/tmp/easeprobe", 0755); err != nil {
+		t.Errorf("Mkdirall(\"/tmp/easeprobe\") error: %v", err)
+	}
 
 	if err := SaveDataToFile(filename); err != nil {
 		t.Errorf("SaveToFile(%s) error: %s", filename, err)
 	}
+
 	if err := LoadDataFromFile(filename); err != nil {
 		t.Errorf("LoadFromFile(%s) error: %s", filename, err)
 	}
@@ -49,6 +62,6 @@ func TestAll(t *testing.T) {
 	}
 
 	if err := os.RemoveAll("/tmp/easeprobe"); err != nil {
-		t.Errorf("Remove(\"/tmp/easeprobe\") = %v, expected nil", err)
+		t.Errorf("RemoveAll(\"/tmp/easeprobe\") = %v, expected nil", err)
 	}
 }

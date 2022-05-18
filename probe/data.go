@@ -22,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -72,9 +73,8 @@ func SaveDataToFile(filename string) error {
 		return err
 	}
 
-	dir, _ := filepath.Split(filename)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return err
+	if strings.TrimSpace(filename) == "-" {
+		return nil
 	}
 
 	if err := ioutil.WriteFile(filename, buf, 0644); err != nil {
@@ -85,9 +85,14 @@ func SaveDataToFile(filename string) error {
 
 // LoadDataFromFile load the results from file
 func LoadDataFromFile(filename string) error {
+	if strings.TrimSpace(filename) == "-" {
+		return nil
+	}
+
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		return err
 	}
+
 	buf, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return err
@@ -105,6 +110,9 @@ func LoadDataFromFile(filename string) error {
 
 // CleanDataFile keeps the max backup of data file
 func CleanDataFile(filename string, backups int) {
+	if strings.TrimSpace(filename) == "-" {
+		return
+	}
 
 	// if backups is negative value, keep all backup files
 	if backups < 0 {

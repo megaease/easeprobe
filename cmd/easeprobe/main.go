@@ -172,6 +172,12 @@ func saveData(doneSave chan bool) {
 			log.Debugf("Successfully save the SLA data to file: %s", file)
 		}
 	}
+
+	// if datafile is explicitly disabled redefine as empty
+	if c.Settings.SLAReport.DataFile != "-" {
+		save = func() {}
+	}
+
 	save()
 	for {
 		select {
