@@ -148,9 +148,13 @@ func (d *DefaultOptions) ExportMetrics() {
 		"probe": d.ProbeName,
 	}).Set(d.ProbeResult.RoundTripTime.Seconds())
 
+	status := 1 // up
+	if d.ProbeResult.Status != probe.StatusUp {
+		status = 0
+	}
 	d.metrics.Status.With(prometheus.Labels{
 		"probe": d.ProbeName,
-	}).Set(float64(d.ProbeResult.Status))
+	}).Set(float64(status))
 }
 
 // DownTimeCalculation calculate the down time
