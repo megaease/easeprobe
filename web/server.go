@@ -22,6 +22,8 @@ import (
 	"net"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/megaease/easeprobe/conf"
 	"github.com/megaease/easeprobe/global"
@@ -35,8 +37,21 @@ import (
 
 var probers *[]probe.Prober
 
-func slaHTML(w http.ResponseWriter, req *http.Request) {
+func getRefreshInterval(refersh string) time.Duration {
 	interval := conf.Get().Settings.HTTPServer.AutoRefreshTime
+	if strings.TrimSpace(refersh) == "" {
+		return interval
+	}
+	r, err := time.ParseDuration(refersh)
+	if err != nil {
+		log.Errorf("[Web] Invalid refresh time: %s", err)
+		return interval
+	}
+	return r
+}
+
+func slaHTML(w http.ResponseWriter, req *http.Request) {
+	interval := getRefreshInterval(req.URL.Query().Get("refresh"))
 	refresh := fmt.Sprintf("%d", interval.Milliseconds())
 	html := []byte(report.SLAHTML(*probers) + report.AutoRefreshJS(refresh))
 
@@ -75,16 +90,9 @@ func Server() {
 
 	// Configure the auto refresh time of the SLA page
 	if c.Settings.HTTPServer.AutoRefreshTime == 0 {
-		interval := global.DefaultProbeInterval
-		// find the minimum probe interval
-		for p := range *probers {
-			if interval > (*probers)[p].Interval() {
-				interval = (*probers)[p].Interval()
-			}
-		}
-		c.Settings.HTTPServer.AutoRefreshTime = interval
-		log.Debugf("[Web] Auto refresh interval time: %s", interval)
+		c.Settings.HTTPServer.AutoRefreshTime = global.DefaultProbeInterval
 	}
+	log.Debugf("[Web] Auto refresh interval time: %s", c.Settings.HTTPServer.AutoRefreshTime)
 
 	// Prepare the router
 	r := chi.NewRouter()
