@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package http
+package ssh
 
 import (
 	"github.com/megaease/easeprobe/global"
@@ -23,19 +23,19 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-// Metrics is the metrics for http probe
+// Metrics is the metrics for shell probe
 type Metrics struct {
-	StatusCode *prometheus.CounterVec
-	ContentLen *prometheus.GaugeVec
+	ExitCode  *prometheus.CounterVec
+	OutputLen *prometheus.GaugeVec
 }
 
-// NewMetrics create the HTTP metrics
+// NewMetrics create the shell metrics
 func NewMetrics(subsystem, name string) *Metrics {
 	namespace := global.GetEaseProbe().Name
 	return &Metrics{
-		StatusCode: metric.NewCounter(namespace, subsystem, name, "status_code",
-			"HTTP Status Code", []string{"name", "status"}),
-		ContentLen: metric.NewGauge(namespace, subsystem, name, "content_len",
-			"HTTP Content Length", []string{"name", "status"}),
+		ExitCode: metric.NewCounter(namespace, subsystem, name, "exit_code",
+			"Exit Code", []string{"name", "exit"}),
+		OutputLen: metric.NewGauge(namespace, subsystem, name, "output_len",
+			"Output Length", []string{"name", "exit"}),
 	}
 }
