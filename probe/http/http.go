@@ -28,6 +28,7 @@ import (
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/base"
+	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -54,6 +55,8 @@ type HTTP struct {
 	global.TLS `yaml:",inline"`
 
 	client *http.Client `yaml:"-"`
+
+	metrics *Metrics `yaml:"-"`
 }
 
 func checkHTTPMethod(m string) bool {
@@ -107,6 +110,8 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 	}
 	h.SuccessCode = codeRange
 
+	h.metrics = NewMetrics(kind, tag)
+
 	log.Debugf("[%s] configuration: %+v, %+v", h.ProbeKind, h, h.Result())
 	return nil
 }
@@ -155,6 +160,7 @@ func (h *HTTP) DoProbe() (bool, string) {
 		return false, fmt.Sprintf("HTTP Status Code is %d. It missed in %v", resp.StatusCode, h.SuccessCode)
 	}
 
+	h.ExportMetrics(resp)
 	message := fmt.Sprintf("HTTP Status Code is %d", resp.StatusCode)
 	if err := probe.CheckOutput(h.Contain, h.NotContain, string(response)); err != nil {
 		log.Errorf("[%s / %s] - %v", h.ProbeKind, h.ProbeName, err)
@@ -163,4 +169,17 @@ func (h *HTTP) DoProbe() (bool, string) {
 	}
 
 	return true, message
+}
+
+// ExportMetrics export HTTP metrics
+func (h *HTTP) ExportMetrics(resp *http.Response) {
+	h.metrics.StatusCode.With(prometheus.Labels{
+		"name":   h.ProbeName,
+		"status": fmt.Sprintf("%d", resp.StatusCode),
+	}).Inc()
+
+	h.metrics.ContentLen.With(prometheus.Labels{
+		"name":   h.ProbeName,
+		"status": fmt.Sprintf("%d", resp.StatusCode),
+	}).Set(float64(resp.ContentLength))
 }

@@ -5,16 +5,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// // Metrics is the metrics type
-// type Metrics int
-
-// // ProbeMetrics metrics type
-// const (
-// 	Counter Metrics = iota
-// 	Gauge
-// 	Histogram
-// 	Summary
-// )
+const module = "Metric"
 
 // MetricsType is the generic type of metrics
 type MetricsType interface {
@@ -42,6 +33,7 @@ func NewCounter(namespace, subsystem, name, metric string,
 
 	metricName := GetName(namespace, subsystem, name, metric)
 	if m, find := counterMap[metricName]; find {
+		log.Debugf("[%s] Counter <%s> already created!", module, metricName)
 		return m
 	}
 
@@ -53,6 +45,8 @@ func NewCounter(namespace, subsystem, name, metric string,
 		labels,
 	)
 	prometheus.MustRegister()
+
+	log.Infof("[%s] Counter <%s> is created!", module, metricName)
 	return counterMap[metricName]
 }
 
@@ -62,6 +56,7 @@ func NewGauge(namespace, subsystem, name, metric string,
 
 	metricName := GetName(namespace, subsystem, name, metric)
 	if m, find := gaugeMap[metricName]; find {
+		log.Debugf("[%s] Gauge <%s> already created!", module, metricName)
 		return m
 	}
 
@@ -73,24 +68,26 @@ func NewGauge(namespace, subsystem, name, metric string,
 		labels,
 	)
 	prometheus.MustRegister(gaugeMap[metricName])
+
+	log.Infof("[%s] Gauge <%s> is created!", module, metricName)
 	return gaugeMap[metricName]
 }
 
 // GetName generate the metric key by a number of strings
 func GetName(fields ...string) string {
-	key := ""
+	name := ""
 	for _, v := range fields {
 		if len(v) > 0 {
-			key += RemoveInvalidChars(v) + "_"
+			name += RemoveInvalidChars(v) + "_"
 		}
 	}
 
-	if len(key) > 0 && key[len(key)-1] == '_' {
-		key = key[:len(key)-1]
+	if len(name) > 0 && name[len(name)-1] == '_' {
+		name = name[:len(name)-1]
 	}
 
-	log.Debugf("metric key: %s", key)
-	return key
+	log.Debugf("[%s] get the name: %s", module, name)
+	return name
 }
 
 // ValidName check if the char is valid

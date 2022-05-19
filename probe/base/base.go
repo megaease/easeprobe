@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/metric"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -40,14 +39,14 @@ type ProbeFuncType func() (bool, string)
 
 // DefaultOptions is the default options for all probe
 type DefaultOptions struct {
-	ProbeKind         string               `yaml:"-"`
-	ProbeTag          string               `yaml:"-"`
-	ProbeName         string               `yaml:"name"`
-	ProbeTimeout      time.Duration        `yaml:"timeout,omitempty"`
-	ProbeTimeInterval time.Duration        `yaml:"interval,omitempty"`
-	ProbeFunc         ProbeFuncType        `yaml:"-"`
-	ProbeResult       *probe.Result        `yaml:"-"`
-	metrics           *metric.ProbeMetrics `yaml:"-"`
+	ProbeKind         string        `yaml:"-"`
+	ProbeTag          string        `yaml:"-"`
+	ProbeName         string        `yaml:"name"`
+	ProbeTimeout      time.Duration `yaml:"timeout,omitempty"`
+	ProbeTimeInterval time.Duration `yaml:"interval,omitempty"`
+	ProbeFunc         ProbeFuncType `yaml:"-"`
+	ProbeResult       *probe.Result `yaml:"-"`
+	metrics           *Metrics      `yaml:"-"`
 }
 
 // Kind return the probe kind
@@ -98,7 +97,7 @@ func (d *DefaultOptions) Config(gConf global.ProbeSettings,
 		log.Infof("Probe [%s] - [%s] base options are configured!", d.ProbeKind, d.ProbeName)
 	}
 
-	d.metrics = metric.NewProbeMetrics(global.GetEaseProbe().Name, kind, tag)
+	d.metrics = NewMetrics(kind, tag)
 
 	return nil
 }

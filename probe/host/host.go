@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/metric"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/ssh"
 	"github.com/prometheus/client_golang/prometheus"
@@ -51,8 +50,8 @@ func (t *Threshold) String() string {
 // Server is the server of a host probe
 type Server struct {
 	ssh.Server `yaml:",inline"`
-	Threshold  Threshold           `yaml:"threshold"`
-	metrics    *metric.HostMetrics `yaml:"-"`
+	Threshold  Threshold `yaml:"threshold"`
+	metrics    *Metrics  `yaml:"-"`
 }
 
 // Host is the host probe configuration
@@ -98,7 +97,7 @@ func (s *Server) Config(gConf global.ProbeSettings) error {
 		s.Threshold.Disk = DefaultDiskThreshold
 	}
 
-	s.metrics = metric.NewHostMetrics(global.GetEaseProbe().Name, kind, tag)
+	s.metrics = NewMetrics(kind, tag)
 
 	endpoint := s.Threshold.String()
 	return s.Configure(gConf, kind, tag, name, endpoint, &BastionMap, s.DoProbe)
