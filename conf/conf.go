@@ -139,11 +139,13 @@ type Conf struct {
 // Check if string is a url
 func isExternalURL(url string) bool {
 	if _, err := netUrl.ParseRequestURI(url); err != nil {
+		log.Debugf("ParseRequestedURI: %s failed to parse with error %v", url, err)
 		return false
 	}
 
 	parts, err := netUrl.Parse(url)
 	if err != nil || parts.Host == "" || !strings.HasPrefix(parts.Scheme, "http") {
+		log.Debugf("Parse: %s failed Scheme: %s, Host: %s (err: %v)", url, parts.Scheme, parts.Host, err)
 		return false
 	}
 
