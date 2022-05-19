@@ -44,7 +44,7 @@ func NewCounter(namespace, subsystem, name, metric string,
 		},
 		labels,
 	)
-	prometheus.MustRegister()
+	prometheus.MustRegister(counterMap[metricName])
 
 	log.Infof("[%s] Counter <%s> is created!", module, metricName)
 	return counterMap[metricName]
