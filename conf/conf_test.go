@@ -45,8 +45,6 @@ func TestPathAndURL(t *testing.T) {
 }
 
 func TestGetYamlFileFromFile(t *testing.T) {
-	//content := []byte("temporary file's content")
-
 	if _, err := getYamlFileFromFile("/tmp/nonexistent"); err == nil {
 		t.Errorf("getYamlFileFromFile(\"/tmp/nonexistent\") = nil, expected error")
 	}
@@ -63,6 +61,8 @@ func TestGetYamlFileFromFile(t *testing.T) {
 	if err != nil {
 		t.Errorf("getYamlFileFromFile(\"%s\") = %v, expected nil", tmpfile.Name(), err)
 	}
+
+	//confirm we read empty data
 	if string(data) != "" {
 		t.Errorf("getYamlFileFromFile(\"%s\") got data %s, expected nil", tmpfile.Name(), data)
 	}
