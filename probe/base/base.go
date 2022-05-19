@@ -29,19 +29,25 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Probe Simple Status
+const (
+	UP   int = 1
+	DOWN int = 0
+)
+
 // ProbeFuncType is the probe function type
 type ProbeFuncType func() (bool, string)
 
 // DefaultOptions is the default options for all probe
 type DefaultOptions struct {
-	ProbeKind         string          `yaml:"-"`
-	ProbeTag          string          `yaml:"-"`
-	ProbeName         string          `yaml:"name"`
-	ProbeTimeout      time.Duration   `yaml:"timeout,omitempty"`
-	ProbeTimeInterval time.Duration   `yaml:"interval,omitempty"`
-	ProbeFunc         ProbeFuncType   `yaml:"-"`
-	ProbeResult       *probe.Result   `yaml:"-"`
-	metrics           *metric.Metrics `yaml:"-"`
+	ProbeKind         string               `yaml:"-"`
+	ProbeTag          string               `yaml:"-"`
+	ProbeName         string               `yaml:"name"`
+	ProbeTimeout      time.Duration        `yaml:"timeout,omitempty"`
+	ProbeTimeInterval time.Duration        `yaml:"interval,omitempty"`
+	ProbeFunc         ProbeFuncType        `yaml:"-"`
+	ProbeResult       *probe.Result        `yaml:"-"`
+	metrics           *metric.ProbeMetrics `yaml:"-"`
 }
 
 // Kind return the probe kind
@@ -92,7 +98,7 @@ func (d *DefaultOptions) Config(gConf global.ProbeSettings,
 		log.Infof("Probe [%s] - [%s] base options are configured!", d.ProbeKind, d.ProbeName)
 	}
 
-	d.metrics = metric.NewMetrics(global.GetEaseProbe().Name, kind, tag)
+	d.metrics = metric.NewProbeMetrics(global.GetEaseProbe().Name, kind, tag)
 
 	return nil
 }
@@ -140,20 +146,21 @@ func (d *DefaultOptions) Probe() probe.Result {
 // ExportMetrics export the metrics
 func (d *DefaultOptions) ExportMetrics() {
 	d.metrics.Total.With(prometheus.Labels{
-		"probe":  d.ProbeName,
+		"name":   d.ProbeName,
 		"status": d.ProbeResult.Status.String(),
 	}).Inc()
 
 	d.metrics.Duration.With(prometheus.Labels{
-		"probe": d.ProbeName,
-	}).Set(d.ProbeResult.RoundTripTime.Seconds())
+		"name":   d.ProbeName,
+		"status": d.ProbeResult.Status.String(),
+	}).Set(float64(d.ProbeResult.RoundTripTime.Milliseconds()))
 
-	status := 1 // up
+	status := UP // up
 	if d.ProbeResult.Status != probe.StatusUp {
-		status = 0
+		status = DOWN // down
 	}
 	d.metrics.Status.With(prometheus.Labels{
-		"probe": d.ProbeName,
+		"name": d.ProbeName,
 	}).Set(float64(status))
 }
 

@@ -1,133 +1,111 @@
 package metric
 
 import (
-	"strings"
-
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 )
 
-// Metrics is the probe metrics
-type Metrics struct {
-	Total    *prometheus.CounterVec
-	Duration *prometheus.GaugeVec
-	Status   *prometheus.GaugeVec
+// // Metrics is the metrics type
+// type Metrics int
+
+// // ProbeMetrics metrics type
+// const (
+// 	Counter Metrics = iota
+// 	Gauge
+// 	Histogram
+// 	Summary
+// )
+
+// MetricsType is the generic type of metrics
+type MetricsType interface {
+	*prometheus.CounterVec | *prometheus.GaugeVec | *prometheus.HistogramVec | *prometheus.SummaryVec
 }
 
-// HostMetrics is the metrics for host probe
-type HostMetrics struct {
-	CPU    *prometheus.GaugeVec
-	Memory *prometheus.GaugeVec
-	Disk   *prometheus.GaugeVec
+var counterMap = make(map[string]*prometheus.CounterVec)
+var gaugeMap = make(map[string]*prometheus.GaugeVec)
+var histogramMap = make(map[string]*prometheus.HistogramVec)
+var summaryMap = make(map[string]*prometheus.SummaryVec)
+
+// Counter get the counter metric by key
+func Counter(key string) *prometheus.CounterVec {
+	return counterMap[key]
 }
 
-var metrics = make(map[string]*Metrics)
-var hostMetrics = make(map[string]*HostMetrics)
+// Gauge get the gauge metric by key
+func Gauge(key string) *prometheus.GaugeVec {
+	return gaugeMap[key]
+}
 
-// NewMetrics create the metrics
-func NewMetrics(namespace, subsystem, name string) *Metrics {
-	key := getKey(namespace, subsystem, name)
-	if m, find := metrics[key]; find {
+// NewCounter create the counter metric
+func NewCounter(namespace, subsystem, name, metric string,
+	help string, labels []string) *prometheus.CounterVec {
+
+	metricName := GetName(namespace, subsystem, name, metric)
+	if m, find := counterMap[metricName]; find {
 		return m
 	}
-	m := &Metrics{
-		Total: prometheus.NewCounterVec(
-			prometheus.CounterOpts{
-				Name:        key + "_total",
-				Help:        "Total Probe Number",
-				ConstLabels: map[string]string{},
-			},
-			[]string{"probe", "status"},
-		),
-		Duration: prometheus.NewGaugeVec(
-			prometheus.GaugeOpts{
-				Namespace: namespace,
-				Name:      key + "_duration",
-				Help:      "Duration of Probe",
-			},
-			[]string{"probe"},
-		),
-		Status: prometheus.NewGaugeVec(
-			prometheus.GaugeOpts{
-				Namespace: namespace,
-				Name:      key + "_status",
-				Help:      "Status of Probe",
-			},
-			[]string{"probe"},
-		),
-	}
 
-	prometheus.MustRegister(m.Total)
-	prometheus.MustRegister(m.Duration)
-	prometheus.MustRegister(m.Status)
-
-	metrics[key] = m
-	return m
+	counterMap[metricName] = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: metricName,
+			Help: help,
+		},
+		labels,
+	)
+	prometheus.MustRegister()
+	return counterMap[metricName]
 }
 
-// NewHostMetrics create the host metrics
-func NewHostMetrics(namespace, subsystem, name string) *HostMetrics {
-	key := getKey(namespace, subsystem, name)
-	if m, find := hostMetrics[key]; find {
+// NewGauge create the gauge metric
+func NewGauge(namespace, subsystem, name, metric string,
+	help string, labels []string) *prometheus.GaugeVec {
+
+	metricName := GetName(namespace, subsystem, name, metric)
+	if m, find := gaugeMap[metricName]; find {
 		return m
 	}
-	m := &HostMetrics{
-		CPU: prometheus.NewGaugeVec(
-			prometheus.GaugeOpts{
-				Namespace: namespace,
-				Name:      key + "_cpu",
-				Help:      "CPU Usage",
-			},
-			[]string{"host", "state"},
-		),
-		Memory: prometheus.NewGaugeVec(
-			prometheus.GaugeOpts{
-				Namespace: namespace,
-				Name:      key + "_memory",
-				Help:      "Memory Usage",
-			},
-			[]string{"host", "state"},
-		),
-		Disk: prometheus.NewGaugeVec(
-			prometheus.GaugeOpts{
-				Namespace: namespace,
-				Name:      key + "_disk",
-				Help:      "Disk Usage",
-			},
-			[]string{"host", "state"},
-		),
-	}
 
-	prometheus.MustRegister(m.CPU)
-	prometheus.MustRegister(m.Memory)
-	prometheus.MustRegister(m.Disk)
-
-	hostMetrics[key] = m
-	return m
+	gaugeMap[metricName] = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: metricName,
+			Help: help,
+		},
+		labels,
+	)
+	prometheus.MustRegister(gaugeMap[metricName])
+	return gaugeMap[metricName]
 }
 
-func getKey(namespace, subsystem, name string) string {
-	key := metricName(namespace) + "_" + metricName(subsystem)
-	if name != "" {
-		key = key + "_" + metricName(name)
+// GetName generate the metric key by a number of strings
+func GetName(fields ...string) string {
+	key := ""
+	for _, v := range fields {
+		if len(v) > 0 {
+			key += RemoveInvalidChars(v) + "_"
+		}
+	}
+
+	if len(key) > 0 && key[len(key)-1] == '_' {
+		key = key[:len(key)-1]
 	}
 
 	log.Debugf("metric key: %s", key)
 	return key
 }
 
-func valid(ch byte) bool {
+// ValidName check if the char is valid
+func ValidName(ch byte) bool {
 	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_' || ch == '-'
 }
 
-func metricName(name string) string {
-	metricName := []byte(strings.TrimSpace(name))
+// RemoveInvalidChars remove invalid chars
+func RemoveInvalidChars(name string) string {
+	var result []byte
 	for i := 0; i < len(name); i++ {
-		if valid(name[i]) {
-			continue
+		if ValidName(name[i]) {
+			result = append(result, name[i])
 		}
-		metricName[i] = ' '
+
 	}
-	words := strings.Fields(string(metricName))
-	return strings.Join(words, "_")
+	return string(result)
 }

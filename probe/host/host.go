@@ -123,7 +123,7 @@ func (s *Server) DoProbe() (bool, string) {
 		return false, fmt.Sprintf("Prase the output failed: %v", err)
 	}
 	log.Debugf("[%s / %s] - %+v", s.ProbeKind, s.ProbeName, info)
-	s.ExportMetrics(info)
+	s.ExportMetrics(&info)
 	return s.CheckThreshold(info)
 }
 
@@ -258,8 +258,14 @@ func strInt(str string) int64 {
 }
 
 // ExportMetrics export the metrics
-func (s *Server) ExportMetrics(info Info) {
+func (s *Server) ExportMetrics(info *Info) {
+	s.ExportCPUMetrics(info)
+	s.ExportMemoryMetrics(info)
+	s.ExportDiskMetrics(info)
+}
 
+// ExportCPUMetrics export the cpu metrics
+func (s *Server) ExportCPUMetrics(info *Info) {
 	// CPU metrics
 	s.metrics.CPU.With(prometheus.Labels{
 		"host":  s.Name(),
@@ -305,8 +311,10 @@ func (s *Server) ExportMetrics(info Info) {
 		"host":  s.Name(),
 		"state": "steal",
 	}).Set(info.CPU.Steal)
+}
 
-	// Memory metrics
+// ExportMemoryMetrics export the memory metrics
+func (s *Server) ExportMemoryMetrics(info *Info) {
 	s.metrics.Memory.With(prometheus.Labels{
 		"host":  s.Name(),
 		"state": "used",
@@ -326,8 +334,10 @@ func (s *Server) ExportMetrics(info Info) {
 		"host":  s.Name(),
 		"state": "usage",
 	}).Set(info.Memory.Usage)
+}
 
-	// Disk metrics
+// ExportDiskMetrics export the disk metrics
+func (s *Server) ExportDiskMetrics(info *Info) {
 	s.metrics.Disk.With(prometheus.Labels{
 		"host":  s.Name(),
 		"state": "used",
