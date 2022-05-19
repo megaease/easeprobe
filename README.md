@@ -209,7 +209,7 @@ Check the  [Notification Configuration](#37-notification-configuration) to see h
 
   The EaseProbe would listen on the `0.0.0.0:8181` port by default. And you can access the Live SLA report by the following URL:
 
-  - HTML: `http://localhost:8181/` or `http://localhost:8181/?refersh=30s`
+  - HTML: `http://localhost:8181/` or `http://localhost:8181/?refresh=30s`
   - JSON: `http://localhost:8181/api/v1/sla`
 
   Refer to the [Global Setting Configuration](#38-global-setting-configuration) to see how to configure the access log.
@@ -624,6 +624,7 @@ notify:
       username: user@example.com
       password: ********
       to: "user1@example.com;user2@example.com"
+      from: "from@example.com" # Optional
       # dry: true # dry notification, print the Email HTML in log(STDOUT)
   # Notify to AWS Simple Notification Service
   aws_sns:
