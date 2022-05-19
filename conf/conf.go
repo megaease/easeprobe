@@ -20,6 +20,7 @@ package conf
 import (
 	"io/ioutil"
 	httpClient "net/http"
+	netUrl "net/url"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -135,8 +136,20 @@ type Conf struct {
 	Settings Settings        `yaml:"settings"`
 }
 
+// Check if string is a url
 func isExternalURL(url string) bool {
-	return strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://")
+	if _, err := netUrl.ParseRequestURI(url); err != nil {
+		log.Debugf("ParseRequestedURI: %s failed to parse with error %v", url, err)
+		return false
+	}
+
+	parts, err := netUrl.Parse(url)
+	if err != nil || parts.Host == "" || !strings.HasPrefix(parts.Scheme, "http") {
+		log.Debugf("Parse: %s failed Scheme: %s, Host: %s (err: %v)", url, parts.Scheme, parts.Host, err)
+		return false
+	}
+
+	return true
 }
 
 func getYamlFileFromInternet(url string) ([]byte, error) {
