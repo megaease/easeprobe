@@ -13,6 +13,7 @@ EaseProbe is a simple, standalone, and lightWeight tool that can do health/statu
     - [1.2 Notification](#12-notification)
     - [1.3 Report](#13-report)
     - [1.4 Administration](#14-administration)
+    - [1.5 Prometheus Metrics](#15-prometheus-metrics)
   - [2. Getting Started](#2-getting-started)
     - [2.1 Build](#21-build)
     - [2.2 Configure](#22-configure)
@@ -23,7 +24,7 @@ EaseProbe is a simple, standalone, and lightWeight tool that can do health/statu
     - [3.3 Shell Command Probe Configuration](#33-shell-command-probe-configuration)
     - [3.4 SSH Command Probe Configuration](#34-ssh-command-probe-configuration)
     - [3.5 Host Resource Usage Probe Configuration](#35-host-resource-usage-probe-configuration)
-    - [3.6 Native Client Probe](#36-native-client-probe)
+    - [3.6 Native Client Probe Configuration](#36-native-client-probe-configuration)
     - [3.7 Notification Configuration](#37-notification-configuration)
     - [3.8 Global Setting Configuration](#38-global-setting-configuration)
   - [4. Community](#4-community)
@@ -106,7 +107,7 @@ Ease Probe supports the following probing methods: **HTTP**, **TCP**, **Shell Co
           disk: 0.90  # disk usage 90%
   ```
 
-- **Client**. Currently, support the following native client. Support the mTLS. ( [Native Client Probe](#36-native-client-probe) )
+- **Client**. Currently, support the following native client. Support the mTLS. (refer to: [Native Client Probe Configuration](#36-native-client-probe-configuration) )
   - **MySQL**. Connect to the MySQL server and run the `SHOW STATUS` SQL.
   - **Redis**. Connect to the Redis server and run the `PING` command.
   - **MongoDB**. Connect to MongoDB server and just ping server.
@@ -285,6 +286,15 @@ There are some administration configuration options:
 
   EaseProbe accepts the `HUP` signal to rotate the log.
 
+### 1.5 Prometheus Metrics
+
+EaseProbe supports Prometheus metrics.  The Prometheus endpoint is `http://localhost:8181/metrics` by default.
+
+The following snapshot is the Grafana panel for host CPU metrics
+
+![](https://user-images.githubusercontent.com/1014558/169022285-1533797d-860e-41bb-bf0e-4e842f0f72c2.png)
+
+Refer to the [Global Setting Configuration](#38-global-setting-configuration) to see how to configure the HTTP server.
 
 ## 2. Getting Started
 
@@ -537,7 +547,7 @@ host:
       key: /Users/user/.ssh/id_rsa
 ```
 
-### 3.6 Native Client Probe
+### 3.6 Native Client Probe Configuration
 
 ```YAML
 # Native Client Probe
