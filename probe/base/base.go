@@ -31,8 +31,8 @@ import (
 
 // Probe Simple Status
 const (
-	UP   int = 1
-	DOWN int = 0
+	ServiceUp   int = 1
+	ServiceDown int = 0
 )
 
 // ProbeFuncType is the probe function type
@@ -47,7 +47,7 @@ type DefaultOptions struct {
 	ProbeTimeInterval time.Duration `yaml:"interval,omitempty"`
 	ProbeFunc         ProbeFuncType `yaml:"-"`
 	ProbeResult       *probe.Result `yaml:"-"`
-	metrics           *Metrics      `yaml:"-"`
+	metrics           *metrics      `yaml:"-"`
 }
 
 // Kind return the probe kind
@@ -98,7 +98,7 @@ func (d *DefaultOptions) Config(gConf global.ProbeSettings,
 		log.Infof("Probe [%s] - [%s] base options are configured!", d.ProbeKind, d.ProbeName)
 	}
 
-	d.metrics = NewMetrics(kind, tag)
+	d.metrics = newMetrics(kind, tag)
 
 	return nil
 }
@@ -155,9 +155,9 @@ func (d *DefaultOptions) ExportMetrics() {
 		"status": d.ProbeResult.Status.String(),
 	}).Set(float64(d.ProbeResult.RoundTripTime.Milliseconds()))
 
-	status := UP // up
+	status := ServiceUp // up
 	if d.ProbeResult.Status != probe.StatusUp {
-		status = DOWN // down
+		status = ServiceDown // down
 	}
 	d.metrics.Status.With(prometheus.Labels{
 		"name": d.ProbeName,

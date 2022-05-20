@@ -23,16 +23,16 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-// Metrics is the metrics for http probe
-type Metrics struct {
+// metrics is the metrics for http probe
+type metrics struct {
 	StatusCode *prometheus.CounterVec
 	ContentLen *prometheus.GaugeVec
 }
 
-// NewMetrics create the HTTP metrics
-func NewMetrics(subsystem, name string) *Metrics {
+// newMetrics create the HTTP metrics
+func newMetrics(subsystem, name string) *metrics {
 	namespace := global.GetEaseProbe().Name
-	return &Metrics{
+	return &metrics{
 		StatusCode: metric.NewCounter(namespace, subsystem, name, "status_code",
 			"HTTP Status Code", []string{"name", "status"}),
 		ContentLen: metric.NewGauge(namespace, subsystem, name, "content_len",

@@ -56,7 +56,7 @@ type HTTP struct {
 
 	client *http.Client `yaml:"-"`
 
-	metrics *Metrics `yaml:"-"`
+	metrics *metrics `yaml:"-"`
 }
 
 func checkHTTPMethod(m string) bool {
@@ -110,7 +110,7 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 	}
 	h.SuccessCode = codeRange
 
-	h.metrics = NewMetrics(kind, tag)
+	h.metrics = newMetrics(kind, tag)
 
 	log.Debugf("[%s] configuration: %+v, %+v", h.ProbeKind, h, h.Result())
 	return nil
@@ -137,6 +137,7 @@ func (h *HTTP) DoProbe() (bool, string) {
 
 	req.Header.Set("User-Agent", global.OrgProgVer)
 	resp, err := h.client.Do(req)
+	h.ExportMetrics(resp)
 	if err != nil {
 		log.Errorf("error making get request: %v", err)
 		return false, fmt.Sprintf("Error: %v", err)
@@ -160,7 +161,6 @@ func (h *HTTP) DoProbe() (bool, string) {
 		return false, fmt.Sprintf("HTTP Status Code is %d. It missed in %v", resp.StatusCode, h.SuccessCode)
 	}
 
-	h.ExportMetrics(resp)
 	message := fmt.Sprintf("HTTP Status Code is %d", resp.StatusCode)
 	if err := probe.CheckOutput(h.Contain, h.NotContain, string(response)); err != nil {
 		log.Errorf("[%s / %s] - %v", h.ProbeKind, h.ProbeName, err)
@@ -173,13 +173,19 @@ func (h *HTTP) DoProbe() (bool, string) {
 
 // ExportMetrics export HTTP metrics
 func (h *HTTP) ExportMetrics(resp *http.Response) {
+	code := 0 // no response
+	len := 0
+	if resp != nil {
+		code = resp.StatusCode
+		len = int(resp.ContentLength)
+	}
 	h.metrics.StatusCode.With(prometheus.Labels{
 		"name":   h.ProbeName,
-		"status": fmt.Sprintf("%d", resp.StatusCode),
+		"status": fmt.Sprintf("%d", code),
 	}).Inc()
 
 	h.metrics.ContentLen.With(prometheus.Labels{
 		"name":   h.ProbeName,
-		"status": fmt.Sprintf("%d", resp.StatusCode),
-	}).Set(float64(resp.ContentLength))
+		"status": fmt.Sprintf("%d", code),
+	}).Set(float64(len))
 }

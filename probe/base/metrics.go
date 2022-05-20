@@ -23,18 +23,18 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-// Metrics is the probe metrics
-type Metrics struct {
+// metrics is the probe metrics
+type metrics struct {
 	Total    *prometheus.CounterVec
 	Duration *prometheus.GaugeVec
 	Status   *prometheus.GaugeVec
 	SLA      *prometheus.GaugeVec
 }
 
-// NewMetrics create the metrics
-func NewMetrics(subsystem, name string) *Metrics {
+// newMetrics create the metrics
+func newMetrics(subsystem, name string) *metrics {
 	namespace := global.GetEaseProbe().Name
-	return &Metrics{
+	return &metrics{
 		Total: metric.NewCounter(namespace, subsystem, name, "total",
 			"Total Probe Number", []string{"name", "status"}),
 		Duration: metric.NewGauge(namespace, subsystem, name, "duration",

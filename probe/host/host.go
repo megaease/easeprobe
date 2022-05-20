@@ -51,7 +51,7 @@ func (t *Threshold) String() string {
 type Server struct {
 	ssh.Server `yaml:",inline"`
 	Threshold  Threshold `yaml:"threshold"`
-	metrics    *Metrics  `yaml:"-"`
+	metrics    *metrics  `yaml:"-"`
 }
 
 // Host is the host probe configuration
@@ -97,7 +97,7 @@ func (s *Server) Config(gConf global.ProbeSettings) error {
 		s.Threshold.Disk = DefaultDiskThreshold
 	}
 
-	s.metrics = NewMetrics(kind, tag)
+	s.metrics = newMetrics(kind, tag)
 
 	endpoint := s.Threshold.String()
 	return s.Configure(gConf, kind, tag, name, endpoint, &BastionMap, s.DoProbe)

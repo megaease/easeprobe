@@ -43,7 +43,7 @@ type Shell struct {
 	ExitCode  int `yaml:"-"`
 	OutputLen int `yaml:"-"`
 
-	metrics *Metrics `yaml:"-"`
+	metrics *metrics `yaml:"-"`
 }
 
 // Config Shell Config Object
@@ -54,7 +54,7 @@ func (s *Shell) Config(gConf global.ProbeSettings) error {
 	s.DefaultOptions.Config(gConf, kind, tag, name,
 		probe.CommandLine(s.Command, s.Args), s.DoProbe)
 
-	s.metrics = NewMetrics(kind, tag)
+	s.metrics = newMetrics(kind, tag)
 
 	log.Debugf("[%s] configuration: %+v, %+v", s.ProbeKind, s, s.Result())
 	return nil

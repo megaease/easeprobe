@@ -23,16 +23,16 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-// Metrics is the metrics for shell probe
-type Metrics struct {
+// metrics is the metrics for shell probe
+type metrics struct {
 	ExitCode  *prometheus.CounterVec
 	OutputLen *prometheus.GaugeVec
 }
 
-// NewMetrics create the shell metrics
-func NewMetrics(subsystem, name string) *Metrics {
+// newMetrics create the shell metrics
+func newMetrics(subsystem, name string) *metrics {
 	namespace := global.GetEaseProbe().Name
-	return &Metrics{
+	return &metrics{
 		ExitCode: metric.NewCounter(namespace, subsystem, name, "exit_code",
 			"Exit Code", []string{"name", "exit"}),
 		OutputLen: metric.NewGauge(namespace, subsystem, name, "output_len",

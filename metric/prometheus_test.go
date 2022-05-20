@@ -27,27 +27,37 @@ func TestGetName(t *testing.T) {
 	var expected, result string
 
 	expected = ""
-	result = GetName("", "", "")
+	result = GetName(" ", "\n", "")
 	assert.Equal(t, expected, result)
+	assert.Equal(t, ValidMetricName(result), false)
 
 	expected = "namespace_name_metric"
 	result = GetName("namespace", "", "name", "metric")
 	assert.Equal(t, expected, result)
+	assert.Equal(t, ValidMetricName(result), true)
 
 	expected = "name_metric"
 	result = GetName("", "", "name", "metric")
 	assert.Equal(t, expected, result)
+	assert.Equal(t, ValidMetricName(result), true)
 
 	expected = "namespace_subsystem_name"
 	result = GetName("namespace", "subsystem", "name", "")
 	assert.Equal(t, expected, result)
+	assert.Equal(t, ValidMetricName(result), true)
 
 	expected = "namespace_subsystem_name_metric"
 	result = GetName("namespace", "subsystem", "name", "metric")
 	assert.Equal(t, expected, result)
+	assert.Equal(t, ValidMetricName(result), true)
 
 	expected = "namespace_subsystemtest_name_metric"
 	result = GetName("name@!$space", "subsystem(test)", "name", "metric")
 	assert.Equal(t, expected, result)
+	assert.Equal(t, ValidMetricName(result), true)
 
+	expected = "namespace_subsystem:test_name_metric3"
+	result = GetName("namespace", "subsystem:test", "123name", "metric3")
+	assert.Equal(t, expected, result)
+	assert.Equal(t, ValidMetricName(result), true)
 }

@@ -49,7 +49,7 @@ type Server struct {
 	ExitCode  int `yaml:"-"`
 	OutputLen int `yaml:"-"`
 
-	metrics *Metrics `yaml:"-"`
+	metrics *metrics `yaml:"-"`
 }
 
 // SSH is the SSH probe Configuration
@@ -85,7 +85,7 @@ func (s *Server) Config(gConf global.ProbeSettings) error {
 	name := s.ProbeName
 	endpoint := probe.CommandLine(s.Command, s.Args)
 
-	s.metrics = NewMetrics(kind, tag)
+	s.metrics = newMetrics(kind, tag)
 
 	return s.Configure(gConf, kind, tag, name, endpoint, &BastionMap, s.DoProbe)
 
@@ -122,7 +122,7 @@ func (s *Server) Configure(gConf global.ProbeSettings,
 // DoProbe return the checking result
 func (s *Server) DoProbe() (bool, string) {
 
-	const UNKNOWN int = 255
+	const UnknownExitCode int = 255
 
 	output, err := s.RunSSHCmd()
 
@@ -133,7 +133,7 @@ func (s *Server) DoProbe() (bool, string) {
 
 	if err != nil {
 		if _, ok := err.(*ssh.ExitMissingError); ok {
-			s.ExitCode = UNKNOWN // Errorand remote server does not send an exit status
+			s.ExitCode = UnknownExitCode // Errorand remote server does not send an exit status
 		} else if e, ok := err.(*ssh.ExitError); ok {
 			s.ExitCode = e.ExitStatus()
 		}
