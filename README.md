@@ -292,7 +292,7 @@ EaseProbe supports Prometheus metrics.  The Prometheus endpoint is `http://local
 
 The following snapshot is the Grafana panel for host CPU metrics
 
-![](https://user-images.githubusercontent.com/1014558/169022285-1533797d-860e-41bb-bf0e-4e842f0f72c2.png)
+![](./docs/grafana.demo.png)
 
 Refer to the [Global Setting Configuration](#38-global-setting-configuration) to see how to configure the HTTP server.
 
