@@ -126,6 +126,7 @@ type Settings struct {
 
 // Conf is Probe configuration
 type Conf struct {
+	Version  string          `yaml:"version"`
 	HTTP     []http.HTTP     `yaml:"http"`
 	TCP      []tcp.TCP       `yaml:"tcp"`
 	Shell    []shell.Shell   `yaml:"shell"`

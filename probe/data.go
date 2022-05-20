@@ -18,6 +18,8 @@
 package probe
 
 import (
+	"bytes"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -25,11 +27,23 @@ import (
 	"strings"
 	"time"
 
+	"github.com/megaease/easeprobe/global"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
 
-var resultData = map[string]*Result{}
+type meta struct {
+	Name string `yaml:"name"`
+	Ver  string `yaml:"version"`
+}
+
+var (
+	resultData = map[string]*Result{}
+	metaData   meta
+	metaBuf    []byte
+)
+
+const split = "---\n"
 
 // SetResultData set the result of probe
 func SetResultData(name string, result *Result) {
@@ -68,16 +82,18 @@ func CleanData(p []Prober) {
 
 // SaveDataToFile save the results to file
 func SaveDataToFile(filename string) error {
-	buf, err := yaml.Marshal(resultData)
-	if err != nil {
-		return err
-	}
-
 	if strings.TrimSpace(filename) == "-" {
 		return nil
 	}
 
-	if err := ioutil.WriteFile(filename, buf, 0644); err != nil {
+	dataBuf, err := yaml.Marshal(resultData)
+	if err != nil {
+		return err
+	}
+
+	buf := append(metaBuf, dataBuf...)
+
+	if err := ioutil.WriteFile(filename, []byte(buf), 0644); err != nil {
 		return err
 	}
 	return nil
@@ -97,11 +113,45 @@ func LoadDataFromFile(filename string) error {
 	if err != nil {
 		return err
 	}
-	err = yaml.Unmarshal(buf, &resultData)
-	if err != nil {
-		return err
+
+	// Multiple YAML Documents reading
+	dec := yaml.NewDecoder(bytes.NewReader(buf))
+	for {
+		var value interface{}
+		err := dec.Decode(&value)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+
+		if v, ok := value.(map[string]interface{}); ok {
+			valueBytes, _ := yaml.Marshal(value)
+			if v["version"] != nil {
+				if err := yaml.Unmarshal(valueBytes, &metaData); err != nil {
+					log.Warnf("Load meta data error: %v", err)
+				} else {
+					log.Debug("Load meta data: %s", metaData.Name, metaData.Ver)
+				}
+			} else {
+				if err := yaml.Unmarshal(valueBytes, &resultData); err != nil {
+					return err
+				}
+			}
+		}
 	}
 
+	// prepare the meta buf for save to data
+	if metaData.Name == "" {
+		metaData.Name = global.DefaultProg
+	}
+	metaData.Ver = global.Ver // write the current version to meta data
+	metaBuf, _ = yaml.Marshal(metaData)
+	metaBuf = append([]byte(split), metaBuf...)
+	metaBuf = append(metaBuf, []byte(split)...)
+
+	// backup the current data file
 	time := time.Now().UTC().Format(time.RFC3339)
 	os.Rename(filename, filename+"-"+time)
 
