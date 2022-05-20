@@ -28,6 +28,7 @@ type Metrics struct {
 	Total    *prometheus.CounterVec
 	Duration *prometheus.GaugeVec
 	Status   *prometheus.GaugeVec
+	SLA      *prometheus.GaugeVec
 }
 
 // NewMetrics create the metrics
@@ -40,5 +41,7 @@ func NewMetrics(subsystem, name string) *Metrics {
 			"Probe Duration", []string{"name", "status"}),
 		Status: metric.NewGauge(namespace, subsystem, name, "status",
 			"Probe Status", []string{"name"}),
+		SLA: metric.NewGauge(namespace, subsystem, name, "sla",
+			"Probe SLA", []string{"name"}),
 	}
 }

@@ -23,6 +23,7 @@ import (
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
+	"github.com/megaease/easeprobe/report"
 	"github.com/prometheus/client_golang/prometheus"
 
 	log "github.com/sirupsen/logrus"
@@ -161,6 +162,10 @@ func (d *DefaultOptions) ExportMetrics() {
 	d.metrics.Status.With(prometheus.Labels{
 		"name": d.ProbeName,
 	}).Set(float64(status))
+
+	d.metrics.SLA.With(prometheus.Labels{
+		"name": d.ProbeName,
+	}).Set(float64(report.SLAPercent(d.ProbeResult)))
 }
 
 // DownTimeCalculation calculate the down time
