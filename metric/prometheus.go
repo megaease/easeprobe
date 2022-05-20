@@ -156,7 +156,7 @@ func ValidLabelName(label string) bool {
 // ValidMetricChar check if the char is valid for metric name
 func ValidMetricChar(ch byte) bool {
 	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') ||
-		(ch >= '0' && ch <= '9') || ch == '_' || ch == '-' || ch == ':'
+		(ch >= '0' && ch <= '9') || ch == '_' || ch == ':'
 }
 
 // RemoveInvalidChars remove invalid chars

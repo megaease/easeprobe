@@ -52,7 +52,7 @@ func TestGetName(t *testing.T) {
 	assert.Equal(t, ValidMetricName(result), true)
 
 	expected = "namespace_subsystemtest_name_metric"
-	result = GetName("name@!$space", "subsystem(test)", "name", "metric")
+	result = GetName("name@!$space", "sub-system(test)", "name", "metric")
 	assert.Equal(t, expected, result)
 	assert.Equal(t, ValidMetricName(result), true)
 
