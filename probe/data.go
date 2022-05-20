@@ -132,7 +132,7 @@ func LoadDataFromFile(filename string) error {
 				if err := yaml.Unmarshal(valueBytes, &metaData); err != nil {
 					log.Warnf("Load meta data error: %v", err)
 				} else {
-					log.Debug("Load meta data: %s", metaData.Name, metaData.Ver)
+					log.Debugf("Load meta data: name[%s], version[%s]", metaData.Name, metaData.Ver)
 				}
 			} else {
 				if err := yaml.Unmarshal(valueBytes, &resultData); err != nil {
