@@ -40,8 +40,8 @@ type Shell struct {
 	Contain             string   `yaml:"contain,omitempty"`
 	NotContain          string   `yaml:"not_contain,omitempty"`
 
-	ExitCode  int `yaml:"-"`
-	OutputLen int `yaml:"-"`
+	exitCode  int `yaml:"-"`
+	outputLen int `yaml:"-"`
 
 	metrics *metrics `yaml:"-"`
 }
@@ -77,15 +77,15 @@ func (s *Shell) DoProbe() (bool, string) {
 	status := true
 	message := "Shell Command has been Run Successfully!"
 
-	s.ExitCode = 0
-	s.OutputLen = len(output)
+	s.exitCode = 0
+	s.outputLen = len(output)
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
-			s.ExitCode = exitError.ExitCode()
+			s.exitCode = exitError.ExitCode()
 		}
 
 		message = fmt.Sprintf("Error: %v, ExitCode(%d), Output:%s",
-			err, s.ExitCode, probe.CheckEmpty(string(output)))
+			err, s.exitCode, probe.CheckEmpty(string(output)))
 		log.Errorf(message)
 		status = false
 	}
@@ -107,11 +107,11 @@ func (s *Shell) DoProbe() (bool, string) {
 func (s *Shell) ExportMetrics() {
 	s.metrics.ExitCode.With(prometheus.Labels{
 		"name": s.ProbeName,
-		"exit": fmt.Sprintf("%d", s.ExitCode),
+		"exit": fmt.Sprintf("%d", s.exitCode),
 	}).Inc()
 
 	s.metrics.OutputLen.With(prometheus.Labels{
 		"name": s.ProbeName,
-		"exit": fmt.Sprintf("%d", s.ExitCode),
-	}).Set(float64(s.OutputLen))
+		"exit": fmt.Sprintf("%d", s.exitCode),
+	}).Set(float64(s.outputLen))
 }

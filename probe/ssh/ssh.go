@@ -46,8 +46,8 @@ type Server struct {
 	BastionID string    `yaml:"bastion"`
 	bastion   *Endpoint `yaml:"-"`
 
-	ExitCode  int `yaml:"-"`
-	OutputLen int `yaml:"-"`
+	exitCode  int `yaml:"-"`
+	outputLen int `yaml:"-"`
 
 	metrics *metrics `yaml:"-"`
 }
@@ -126,16 +126,16 @@ func (s *Server) DoProbe() (bool, string) {
 
 	output, err := s.RunSSHCmd()
 
-	s.OutputLen = len(output)
+	s.outputLen = len(output)
 
 	status := true
 	message := "SSH Command has been Run Successfully!"
 
 	if err != nil {
 		if _, ok := err.(*ssh.ExitMissingError); ok {
-			s.ExitCode = UnknownExitCode // Errorand remote server does not send an exit status
+			s.exitCode = UnknownExitCode // Error: remote server does not send an exit status
 		} else if e, ok := err.(*ssh.ExitError); ok {
-			s.ExitCode = e.ExitStatus()
+			s.exitCode = e.ExitStatus()
 		}
 		log.Errorf("[%s / %s] %v", s.ProbeKind, s.ProbeName, err)
 		status = false
@@ -258,11 +258,11 @@ func (s *Server) RunSSHCmd() (string, error) {
 func (s *Server) ExportMetrics() {
 	s.metrics.ExitCode.With(prometheus.Labels{
 		"name": s.ProbeName,
-		"exit": fmt.Sprintf("%d", s.ExitCode),
+		"exit": fmt.Sprintf("%d", s.exitCode),
 	}).Inc()
 
 	s.metrics.OutputLen.With(prometheus.Labels{
 		"name": s.ProbeName,
-		"exit": fmt.Sprintf("%d", s.ExitCode),
-	}).Set(float64(s.OutputLen))
+		"exit": fmt.Sprintf("%d", s.exitCode),
+	}).Set(float64(s.outputLen))
 }
