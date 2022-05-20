@@ -174,7 +174,7 @@ func saveData(doneSave chan bool) {
 	}
 
 	// if datafile is explicitly disabled redefine as empty
-	if c.Settings.SLAReport.DataFile != "-" {
+	if c.Settings.SLAReport.DataFile == "-" {
 		save = func() {}
 	}
 
