@@ -59,7 +59,6 @@ func (c *NotifyConfig) SendWecom(title, msg string) error {
 // some text and the Wecom robot will send it in group.
 // https://developer.work.weixin.qq.com/document/path/91770
 func (c *NotifyConfig) SendWecomNotification(msg string) error {
-
 	// It will be better to escape the msg.
 	msgContent := fmt.Sprintf(`
 	{
@@ -68,7 +67,7 @@ func (c *NotifyConfig) SendWecomNotification(msg string) error {
 			"content": "%s" 
 		}
 	}
-	`, msg)
+	`, report.JSONEscape(msg))
 	req, err := http.NewRequest(http.MethodPost, c.WebhookURL, bytes.NewBuffer([]byte(msgContent)))
 	if err != nil {
 		return err
