@@ -130,6 +130,7 @@ func CleanDataFile(filename string, backups int) {
 	// if backups is not exceed the max number of backup files, return
 	if len(matches) <= backups {
 		log.Debugf("No need to clean data file (%d - %d) ", backups, len(matches))
+		return
 	}
 
 	// remove the oldest backup files
