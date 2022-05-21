@@ -33,8 +33,10 @@ import (
 )
 
 type meta struct {
-	Name string `yaml:"name"`
-	Ver  string `yaml:"version"`
+	Name   string `yaml:"name"`
+	Ver    string `yaml:"version"`
+	file   string `yaml:"-"` // the current file name
+	backup string `yaml:"-"` // the backup file name
 }
 
 var (
@@ -44,6 +46,14 @@ var (
 )
 
 const split = "---\n"
+
+// Init initializes the data
+func Init(filename string) {
+	// initializes the meta data
+	SetMetaData(global.DefaultProg, global.Ver)
+	// set the data file
+	metaData.file = filename
+}
 
 // SetResultData set the result of probe
 func SetResultData(name string, result *Result) {
@@ -82,6 +92,7 @@ func CleanData(p []Prober) {
 
 // SaveDataToFile save the results to file
 func SaveDataToFile(filename string) error {
+	metaData.file = filename
 	if strings.TrimSpace(filename) == "-" {
 		return nil
 	}
@@ -91,6 +102,7 @@ func SaveDataToFile(filename string) error {
 		return err
 	}
 
+	genMetaBuf()
 	buf := append(metaBuf, dataBuf...)
 
 	if err := ioutil.WriteFile(filename, []byte(buf), 0644); err != nil {
@@ -101,10 +113,16 @@ func SaveDataToFile(filename string) error {
 
 // LoadDataFromFile load the results from file
 func LoadDataFromFile(filename string) error {
+
+	// if the data file is disabled, return
 	if strings.TrimSpace(filename) == "-" {
 		return nil
 	}
 
+	// initializes the data
+	Init(filename)
+
+	// if the data file is not exist, return
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		return err
 	}
@@ -142,18 +160,15 @@ func LoadDataFromFile(filename string) error {
 		}
 	}
 
-	// prepare the meta buf for save to data
-	if metaData.Name == "" {
-		metaData.Name = global.DefaultProg
-	}
-	metaData.Ver = global.Ver // write the current version to meta data
-	metaBuf, _ = yaml.Marshal(metaData)
-	metaBuf = append([]byte(split), metaBuf...)
-	metaBuf = append(metaBuf, []byte(split)...)
+	// set the meta name and version
+	// - if the Name is found in the data file, use it, otherwise use the default
+	// - always use the program version for the data file.
+	SetMetaData(metaData.Name, global.Ver)
 
 	// backup the current data file
 	time := time.Now().UTC().Format(time.RFC3339)
-	os.Rename(filename, filename+"-"+time)
+	metaData.backup = filename + "-" + time
+	os.Rename(filename, metaData.backup)
 
 	return nil
 }
@@ -192,4 +207,28 @@ func CleanDataFile(filename string, backups int) {
 		}
 		log.Infof("Clean data file: %s", matches[i])
 	}
+}
+
+// SetMetaData set the meta data
+func SetMetaData(name string, ver string) {
+
+	metaData.Name = name
+	metaData.Ver = ver
+
+	// if the meta data is not exist in current data file, using the default.
+	if metaData.Name == "" {
+		metaData.Name = global.DefaultProg
+	}
+	if metaData.Ver == "" {
+		metaData.Ver = global.Ver
+	}
+
+	// reconstructure the meta buf
+	genMetaBuf()
+}
+
+func genMetaBuf() {
+	metaBuf, _ = yaml.Marshal(metaData)
+	metaBuf = append([]byte(split), metaBuf...)
+	metaBuf = append(metaBuf, []byte(split)...)
 }

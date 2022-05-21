@@ -336,7 +336,7 @@ The following environment variables can be used to fine-tune the request to the 
 And the configuration file should be versioned, the version should be aligned with the EaseProbe binary version.
 
 ```yaml
-version: v1.4.0
+version: v1.5.0
 ```
 
 The following example configurations illustrate the EaseProbe supported features.
