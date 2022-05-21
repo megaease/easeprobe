@@ -180,23 +180,35 @@ func TestCleanDataFile(t *testing.T) {
 }
 
 func TestMetaData(t *testing.T) {
-	// no meta
 	file := "data/data.yaml"
+	// case one: first time to write the data
+	newDataFile(file)
+	if err := LoadDataFromFile(file); err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, metaData.Name, global.DefaultProg)
+	assert.Equal(t, global.Ver, metaData.Ver)
+	removeAll("data/")
+
+	// case two: the data file has no meta
+	file = "data/data.yaml"
 	newDataFileWithOutMeta(file)
 	if err := LoadDataFromFile(file); err != nil {
 		t.Error(err)
 	}
 	assert.Equal(t, metaData.Name, global.DefaultProg)
 	assert.Equal(t, metaData.Ver, global.Ver)
+	removeAll("data/")
 
-	// with meta
-	SetMetaData("myprog", "1.0.0")
-	SaveDataToFile(file)
+	// case three: the data file has meta
+	SetMetaData("myprog", "v1.0.0")
+	newDataFile(file)
 	if err := LoadDataFromFile(file); err != nil {
 		t.Error(err)
 	}
 	assert.Equal(t, metaData.Name, "myprog")
 	assert.Equal(t, metaData.Ver, global.Ver)
+	assert.Equal(t, metaData.ver, "v1.0.0")
 
 	removeAll("data/")
 }

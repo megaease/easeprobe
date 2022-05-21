@@ -32,27 +32,29 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type meta struct {
+// MetaData the meta data of data file
+type MetaData struct {
 	Name   string `yaml:"name"`
 	Ver    string `yaml:"version"`
+	ver    string `yaml:"-"` // the version in data file
 	file   string `yaml:"-"` // the current file name
 	backup string `yaml:"-"` // the backup file name
 }
 
 var (
 	resultData = map[string]*Result{}
-	metaData   meta
-	metaBuf    []byte
+	metaData   = MetaData{
+		Name: global.DefaultProg,
+		Ver:  global.Ver,
+	}
+	metaBuf []byte
 )
 
 const split = "---\n"
 
-// Init initializes the data
-func Init(filename string) {
-	// initializes the meta data
-	SetMetaData(global.DefaultProg, global.Ver)
-	// set the data file
-	metaData.file = filename
+// GetMetaData get the meta data
+func GetMetaData() *MetaData {
+	return &metaData
 }
 
 // SetResultData set the result of probe
@@ -119,9 +121,6 @@ func LoadDataFromFile(filename string) error {
 		return nil
 	}
 
-	// initializes the data
-	Init(filename)
-
 	// if the data file is not exist, return
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		return err
@@ -163,6 +162,7 @@ func LoadDataFromFile(filename string) error {
 	// set the meta name and version
 	// - if the Name is found in the data file, use it, otherwise use the default
 	// - always use the program version for the data file.
+	metaData.ver = metaData.Ver // save the file's verstion
 	SetMetaData(metaData.Name, global.Ver)
 
 	// backup the current data file
@@ -219,6 +219,11 @@ func SetMetaData(name string, ver string) {
 	metaData.Name = name
 	metaData.Ver = ver
 
+	// reconstructure the meta buf
+	genMetaBuf()
+}
+
+func genMetaBuf() {
 	// if the meta data is not exist in current data file, using the default.
 	if metaData.Name == "" {
 		metaData.Name = global.DefaultProg
@@ -226,12 +231,6 @@ func SetMetaData(name string, ver string) {
 	if metaData.Ver == "" {
 		metaData.Ver = global.Ver
 	}
-
-	// reconstructure the meta buf
-	genMetaBuf()
-}
-
-func genMetaBuf() {
 	metaBuf, _ = yaml.Marshal(metaData)
 	metaBuf = append([]byte(split), metaBuf...)
 	metaBuf = append(metaBuf, []byte(split)...)
