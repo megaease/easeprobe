@@ -241,7 +241,7 @@ func ToLark(r probe.Result) string {
 
 	title := fmt.Sprintf("%s %s", r.Title(), r.Status.Emoji())
 	rtt := r.RoundTripTime.Round(time.Millisecond)
-	content := fmt.Sprintf("%s - ⏱ %s\\n%s", r.Endpoint, rtt, JSONEscape(r.Message))
+	content := fmt.Sprintf("%s - ⏱ %s\\n%s", r.Endpoint, rtt, r.Message)
 	footer := global.FooterString() + " probed at " + r.StartTime.Format(r.TimeFormat)
 	return fmt.Sprintf(json, headerColor, title, content, footer)
 }
