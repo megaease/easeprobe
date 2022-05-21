@@ -166,9 +166,13 @@ func LoadDataFromFile(filename string) error {
 	SetMetaData(metaData.Name, global.Ver)
 
 	// backup the current data file
-	time := time.Now().UTC().Format(time.RFC3339)
+	time := time.Now().UTC().Format(time.RFC3339Nano)
+	// replace ":" to "_" for windows platform compliance
+	time = strings.Replace(time, ":", "_", -1)
 	metaData.backup = filename + "-" + time
-	os.Rename(filename, metaData.backup)
+	if err := os.Rename(filename, metaData.backup); err != nil {
+		return err
+	}
 
 	return nil
 }

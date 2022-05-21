@@ -139,7 +139,7 @@ func TestLoadDataFile(t *testing.T) {
 	// create data file
 	newDataFile(file)
 	if err := LoadDataFromFile(file); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	assert.True(t, isDataFileExisted(metaData.backup))
@@ -162,9 +162,8 @@ func TestCleanDataFile(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		newDataFile(file)
 		if err := LoadDataFromFile(file); err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
-		time.Sleep(time.Second)
 	}
 	assert.Equal(t, n, numOfBackup(file))
 
