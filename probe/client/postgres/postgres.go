@@ -30,11 +30,14 @@ import (
 // Kind is the type of driver
 const Kind string = "PostgreSQL"
 
+// revive:disable
 // PostgreSQL is the PostgreSQL client
 type PostgreSQL struct {
 	conf.Options  `yaml:",inline"`
 	ClientOptions []pgdriver.Option `yaml:"-"`
 }
+
+// revive:enable
 
 // New create a PostgreSQL client
 func New(opt conf.Options) PostgreSQL {
