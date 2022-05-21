@@ -24,6 +24,7 @@ import (
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/base"
+	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/crypto/ssh"
 
 	log "github.com/sirupsen/logrus"
@@ -44,6 +45,11 @@ type Server struct {
 
 	BastionID string    `yaml:"bastion"`
 	bastion   *Endpoint `yaml:"-"`
+
+	exitCode  int `yaml:"-"`
+	outputLen int `yaml:"-"`
+
+	metrics *metrics `yaml:"-"`
 }
 
 // SSH is the SSH probe Configuration
@@ -78,6 +84,8 @@ func (s *Server) Config(gConf global.ProbeSettings) error {
 	tag := ""
 	name := s.ProbeName
 	endpoint := probe.CommandLine(s.Command, s.Args)
+
+	s.metrics = newMetrics(kind, tag)
 
 	return s.Configure(gConf, kind, tag, name, endpoint, &BastionMap, s.DoProbe)
 
@@ -114,12 +122,21 @@ func (s *Server) Configure(gConf global.ProbeSettings,
 // DoProbe return the checking result
 func (s *Server) DoProbe() (bool, string) {
 
+	const UnknownExitCode int = 255
+
 	output, err := s.RunSSHCmd()
+
+	s.outputLen = len(output)
 
 	status := true
 	message := "SSH Command has been Run Successfully!"
 
 	if err != nil {
+		if _, ok := err.(*ssh.ExitMissingError); ok {
+			s.exitCode = UnknownExitCode // Error: remote server does not send an exit status
+		} else if e, ok := err.(*ssh.ExitError); ok {
+			s.exitCode = e.ExitStatus()
+		}
 		log.Errorf("[%s / %s] %v", s.ProbeKind, s.ProbeName, err)
 		status = false
 		message = err.Error() + " - " + output
@@ -127,6 +144,8 @@ func (s *Server) DoProbe() (bool, string) {
 
 	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, probe.CommandLine(s.Command, s.Args))
 	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, probe.CheckEmpty(string(output)))
+
+	s.ExportMetrics()
 
 	if err := probe.CheckOutput(s.Contain, s.NotContain, string(output)); err != nil {
 		log.Errorf("[%s / %s] - %v", s.ProbeKind, s.ProbeName, err)
@@ -233,5 +252,17 @@ func (s *Server) RunSSHCmd() (string, error) {
 	}
 
 	return stdoutBuf.String(), nil
+}
 
+// ExportMetrics export shell metrics
+func (s *Server) ExportMetrics() {
+	s.metrics.ExitCode.With(prometheus.Labels{
+		"name": s.ProbeName,
+		"exit": fmt.Sprintf("%d", s.exitCode),
+	}).Inc()
+
+	s.metrics.OutputLen.With(prometheus.Labels{
+		"name": s.ProbeName,
+		"exit": fmt.Sprintf("%d", s.exitCode),
+	}).Set(float64(s.outputLen))
 }

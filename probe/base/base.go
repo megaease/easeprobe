@@ -23,8 +23,16 @@ import (
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
+	"github.com/megaease/easeprobe/report"
+	"github.com/prometheus/client_golang/prometheus"
 
 	log "github.com/sirupsen/logrus"
+)
+
+// Probe Simple Status
+const (
+	ServiceUp   int = 1
+	ServiceDown int = 0
 )
 
 // ProbeFuncType is the probe function type
@@ -39,6 +47,7 @@ type DefaultOptions struct {
 	ProbeTimeInterval time.Duration `yaml:"interval,omitempty"`
 	ProbeFunc         ProbeFuncType `yaml:"-"`
 	ProbeResult       *probe.Result `yaml:"-"`
+	metrics           *metrics      `yaml:"-"`
 }
 
 // Kind return the probe kind
@@ -88,6 +97,9 @@ func (d *DefaultOptions) Config(gConf global.ProbeSettings,
 	} else {
 		log.Infof("Probe [%s] - [%s] base options are configured!", d.ProbeKind, d.ProbeName)
 	}
+
+	d.metrics = newMetrics(kind, tag)
+
 	return nil
 }
 
@@ -123,10 +135,37 @@ func (d *DefaultOptions) Probe() probe.Result {
 	d.ProbeResult.PreStatus = d.ProbeResult.Status
 	d.ProbeResult.Status = status
 
+	d.ExportMetrics()
+
 	d.DownTimeCalculation(status)
 
 	d.ProbeResult.DoStat(d.Interval())
 	return *d.ProbeResult
+}
+
+// ExportMetrics export the metrics
+func (d *DefaultOptions) ExportMetrics() {
+	d.metrics.Total.With(prometheus.Labels{
+		"name":   d.ProbeName,
+		"status": d.ProbeResult.Status.String(),
+	}).Inc()
+
+	d.metrics.Duration.With(prometheus.Labels{
+		"name":   d.ProbeName,
+		"status": d.ProbeResult.Status.String(),
+	}).Set(float64(d.ProbeResult.RoundTripTime.Milliseconds()))
+
+	status := ServiceUp // up
+	if d.ProbeResult.Status != probe.StatusUp {
+		status = ServiceDown // down
+	}
+	d.metrics.Status.With(prometheus.Labels{
+		"name": d.ProbeName,
+	}).Set(float64(status))
+
+	d.metrics.SLA.With(prometheus.Labels{
+		"name": d.ProbeName,
+	}).Set(float64(report.SLAPercent(d.ProbeResult)))
 }
 
 // DownTimeCalculation calculate the down time

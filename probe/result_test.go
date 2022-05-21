@@ -19,6 +19,7 @@ package probe
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -165,7 +166,10 @@ func TestDebug(t *testing.T) {
 	r.TimeFormat = "2006-01-02 15:04:05 UTC"
 	r.DoStat(30 * time.Minute)
 
-	expected := `{"name":"Test Name","endpoint":"http://example.com","time":"2022-01-01T00:00:00Z","timestamp":1640995200,"rtt":30000000000,"status":"up","prestatus":"down","message":"This is a test message","latestdowntime":"2021-12-31T04:00:00Z","recoverytime":300000000000,"stat":{"since":"2022-01-01T00:00:00Z","total":1001,"status":{"0":51,"1":10},"uptime":1850000000000,"downtime":10000000000},"timeformat":"2006-01-02 15:04:05 UTC"}`
+	up := fmt.Sprintf("%d", StatusUp)
+	down := fmt.Sprintf("%d", StatusDown)
+
+	expected := `{"name":"Test Name","endpoint":"http://example.com","time":"2022-01-01T00:00:00Z","timestamp":1640995200,"rtt":30000000000,"status":"up","prestatus":"down","message":"This is a test message","latestdowntime":"2021-12-31T04:00:00Z","recoverytime":300000000000,"stat":{"since":"2022-01-01T00:00:00Z","total":1001,"status":{"` + up + `":51,"` + down + `":10},"uptime":1850000000000,"downtime":10000000000},"timeformat":"2006-01-02 15:04:05 UTC"}`
 	if r.DebugJSON() != expected {
 		t.Errorf("%s != %s", r.DebugJSON(), expected)
 	}
@@ -185,8 +189,8 @@ func TestDebug(t *testing.T) {
         "since": "2022-01-01T00:00:00Z",
         "total": 1001,
         "status": {
-            "0": 51,
-            "1": 10
+            "` + up + `": 51,
+            "` + down + `": 10
         },
         "uptime": 1850000000000,
         "downtime": 10000000000

@@ -27,33 +27,33 @@ type Status int
 
 // The status of a probe
 const (
-	StatusUp Status = iota
+	StatusInit Status = iota
+	StatusUp
 	StatusDown
 	StatusUnknown
-	StatusInit
 	StatusBad
 )
 
 var (
 	toString = map[Status]string{
+		StatusInit:    "init",
 		StatusUp:      "up",
 		StatusDown:    "down",
 		StatusUnknown: "unknown",
-		StatusInit:    "init",
 		StatusBad:     "bad",
 	}
 	toStatus = map[string]Status{
+		"init":    StatusInit,
 		"up":      StatusUp,
 		"down":    StatusDown,
 		"unknown": StatusUnknown,
-		"init":    StatusInit,
 		"bad":     StatusBad,
 	}
 	toEmoji = map[Status]string{
+		StatusInit:    "🔎",
 		StatusUp:      "✅",
 		StatusDown:    "❌",
 		StatusUnknown: "⛔️",
-		StatusInit:    "🔎",
 		StatusBad:     "🚫",
 	}
 )
