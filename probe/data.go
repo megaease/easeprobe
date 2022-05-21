@@ -171,7 +171,7 @@ func LoadDataFromFile(filename string) error {
 	time = strings.Replace(time, ":", "_", -1)
 	metaData.backup = filename + "-" + time
 	if err := os.Rename(filename, metaData.backup); err != nil {
-		return err
+		log.Warnf("Backup data file error: %v", err)
 	}
 
 	return nil
