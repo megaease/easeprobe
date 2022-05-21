@@ -301,7 +301,7 @@ Refer to the [Global Setting Configuration](#38-global-setting-configuration) to
 You can get started with EaseProbe, by any of the following methods:
 * download the release for your platform from https://github.com/megaease/easeprobe/releases
 * use the available EaseProbe docker image `docker run -it megaease/easeprobe`
-* build easeprobe from sources
+* build `easeprobe` from sources
 
 ### 2.1 Build
 
@@ -329,6 +329,7 @@ $ build/bin/easeprobe -f config.yaml
 * `-d` dry run. Can also be achieved by setting the environment variable `PROBE_DRY`
 
 ## 3. Configuration
+
 EaseProbe can be configured by supplying a yaml file or URL to fetch configuration settings from.
 By default EaseProbe will look for its `config.yaml` on the current folder, this can be changed by supplying the `-f` parameter.
 
@@ -338,14 +339,21 @@ easeprobe -f https://example.com/config
 ```
 
 The following environment variables can be used to fine-tune the request to the configuration file
+
 * `HTTP_AUTHORIZATION`
 * `HTTP_TIMEOUT`
+
+And the configuration file should be versioned, the version should be aligned with the EaseProbe binary version.
+
+```yaml
+version: v1.5.0
+```
 
 The following example configurations illustrate the EaseProbe supported features.
 
 **Notes**: All probes have the following options:
 
-- `timeout` - the maximum time to wait for the probe to complete. default : `30s`.
+- `timeout` - the maximum time to wait for the probe to complete. default: `30s`.
 - `interval` - the interval time to run the probe. default: `1m`.
 
 

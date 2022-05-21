@@ -19,6 +19,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"os/signal"
 	"strings"
@@ -48,7 +49,13 @@ func main() {
 
 	dryNotify := flag.Bool("d", os.Getenv("PROBE_DRY") == "true", "dry notification mode")
 	yamlFile := flag.String("f", getEnvOrDefault("PROBE_CONFIG", "config.yaml"), "configuration file")
+	version := flag.Bool("v", false, "prints version")
 	flag.Parse()
+
+	if *version {
+		fmt.Println(global.DefaultProg, global.Ver)
+		os.Exit(0)
+	}
 
 	c, err := conf.New(yamlFile)
 	if err != nil {

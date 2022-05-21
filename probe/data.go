@@ -18,6 +18,8 @@
 package probe
 
 import (
+	"bytes"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -25,11 +27,35 @@ import (
 	"strings"
 	"time"
 
+	"github.com/megaease/easeprobe/global"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
 
-var resultData = map[string]*Result{}
+// MetaData the meta data of data file
+type MetaData struct {
+	Name   string `yaml:"name"`
+	Ver    string `yaml:"version"`
+	ver    string `yaml:"-"` // the version in data file
+	file   string `yaml:"-"` // the current file name
+	backup string `yaml:"-"` // the backup file name
+}
+
+var (
+	resultData = map[string]*Result{}
+	metaData   = MetaData{
+		Name: global.DefaultProg,
+		Ver:  global.Ver,
+	}
+	metaBuf []byte
+)
+
+const split = "---\n"
+
+// GetMetaData get the meta data
+func GetMetaData() *MetaData {
+	return &metaData
+}
 
 // SetResultData set the result of probe
 func SetResultData(name string, result *Result) {
@@ -68,16 +94,20 @@ func CleanData(p []Prober) {
 
 // SaveDataToFile save the results to file
 func SaveDataToFile(filename string) error {
-	buf, err := yaml.Marshal(resultData)
-	if err != nil {
-		return err
-	}
-
+	metaData.file = filename
 	if strings.TrimSpace(filename) == "-" {
 		return nil
 	}
 
-	if err := ioutil.WriteFile(filename, buf, 0644); err != nil {
+	dataBuf, err := yaml.Marshal(resultData)
+	if err != nil {
+		return err
+	}
+
+	genMetaBuf()
+	buf := append(metaBuf, dataBuf...)
+
+	if err := ioutil.WriteFile(filename, []byte(buf), 0644); err != nil {
 		return err
 	}
 	return nil
@@ -85,10 +115,13 @@ func SaveDataToFile(filename string) error {
 
 // LoadDataFromFile load the results from file
 func LoadDataFromFile(filename string) error {
+
+	// if the data file is disabled, return
 	if strings.TrimSpace(filename) == "-" {
 		return nil
 	}
 
+	// if the data file is not exist, return
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		return err
 	}
@@ -97,13 +130,49 @@ func LoadDataFromFile(filename string) error {
 	if err != nil {
 		return err
 	}
-	err = yaml.Unmarshal(buf, &resultData)
-	if err != nil {
-		return err
+
+	// Multiple YAML Documents reading
+	dec := yaml.NewDecoder(bytes.NewReader(buf))
+	for {
+		var value interface{}
+		err := dec.Decode(&value)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+
+		if v, ok := value.(map[string]interface{}); ok {
+			valueBytes, _ := yaml.Marshal(value)
+			if v["version"] != nil {
+				if err := yaml.Unmarshal(valueBytes, &metaData); err != nil {
+					log.Warnf("Load meta data error: %v", err)
+				} else {
+					log.Debugf("Load meta data: name[%s], version[%s]", metaData.Name, metaData.Ver)
+				}
+			} else {
+				if err := yaml.Unmarshal(valueBytes, &resultData); err != nil {
+					return err
+				}
+			}
+		}
 	}
 
-	time := time.Now().UTC().Format(time.RFC3339)
-	os.Rename(filename, filename+"-"+time)
+	// set the meta name and version
+	// - if the Name is found in the data file, use it, otherwise use the default
+	// - always use the program version for the data file.
+	metaData.ver = metaData.Ver // save the file's verstion
+	SetMetaData(metaData.Name, global.Ver)
+
+	// backup the current data file
+	time := time.Now().UTC().Format(time.RFC3339Nano)
+	// replace ":" to "_" for windows platform compliance
+	time = strings.Replace(time, ":", "_", -1)
+	metaData.backup = filename + "-" + time
+	if err := os.Rename(filename, metaData.backup); err != nil {
+		log.Warnf("Backup data file error: %v", err)
+	}
 
 	return nil
 }
@@ -143,4 +212,27 @@ func CleanDataFile(filename string, backups int) {
 		}
 		log.Infof("Clean data file: %s", matches[i])
 	}
+}
+
+// SetMetaData set the meta data
+func SetMetaData(name string, ver string) {
+
+	metaData.Name = name
+	metaData.Ver = ver
+
+	// reconstructure the meta buf
+	genMetaBuf()
+}
+
+func genMetaBuf() {
+	// if the meta data is not exist in current data file, using the default.
+	if metaData.Name == "" {
+		metaData.Name = global.DefaultProg
+	}
+	if metaData.Ver == "" {
+		metaData.Ver = global.Ver
+	}
+	metaBuf, _ = yaml.Marshal(metaData)
+	metaBuf = append([]byte(split), metaBuf...)
+	metaBuf = append(metaBuf, []byte(split)...)
 }
