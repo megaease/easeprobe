@@ -6,7 +6,7 @@ env:
   GO_VERSION: 1.18
 
 jobs:
-  
+
   lint:
     name: Code Lint
     runs-on: ubuntu-latest
@@ -19,13 +19,17 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v3
       # https://github.com/reviewdog/reviewdog/issues/1158
-      - name: "Give Permissions" 
+      # Permissions need to match container user
+      - name: "Give Permissions"
         run: |
-          sudo chown -R root:root $GITHUB_WORKSPACE 
+          sudo chown -R root $GITHUB_WORKSPACE
       - name: Spelling Check
         uses: reviewdog/action-misspell@v1.10.1
       - name: Revive Action
         uses: morphy2k/revive-action@v2.3.1
+      - name: "Restore Permissions"
+        run: |
+          sudo chown -R $(id -u) $GITHUB_WORKSPACE
       - name: Check formatting
         run: test -z $(gofmt -l .) || (gofmt -l . && exit 1)
 
