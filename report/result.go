@@ -141,7 +141,7 @@ func markdown(r probe.Result, f Format) string {
 	}
 	rtt := r.RoundTripTime.Round(time.Millisecond)
 	return fmt.Sprintf(tpl,
-		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, JSONEscape(r.Message),
+		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, r.Message,
 		global.FooterString()+" at "+r.StartTime.Format(r.TimeFormat))
 }
 
@@ -241,7 +241,7 @@ func ToLark(r probe.Result) string {
 
 	title := fmt.Sprintf("%s %s", r.Title(), r.Status.Emoji())
 	rtt := r.RoundTripTime.Round(time.Millisecond)
-	content := fmt.Sprintf("%s - ⏱ %s\\n%s", r.Endpoint, rtt, r.Message)
+	content := fmt.Sprintf("%s - ⏱ %s\\n%s", r.Endpoint, rtt, JSONEscape(r.Message))
 	footer := global.FooterString() + " probed at " + r.StartTime.Format(r.TimeFormat)
 	return fmt.Sprintf(json, headerColor, title, content, footer)
 }
