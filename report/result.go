@@ -141,7 +141,7 @@ func markdown(r probe.Result, f Format) string {
 	}
 	rtt := r.RoundTripTime.Round(time.Millisecond)
 	return fmt.Sprintf(tpl,
-		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, r.Message,
+		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, JSONEscape(r.Message),
 		global.FooterString()+" at "+r.StartTime.Format(r.TimeFormat))
 }
 
