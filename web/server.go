@@ -108,6 +108,8 @@ func Server() {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(middleware.RedirectSlashes)
+	r.Use(middleware.StripSlashes)
 	r.Mount("/debug", middleware.Profiler())
 
 	r.Get("/", slaHTML)
