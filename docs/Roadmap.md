@@ -56,32 +56,32 @@ The project principles, of EaseProbe' features are separated into two main categ
 ## Roadmap 2022
 Some of the features that are planned/considered for 2022 can be broken down into three categories: *General*, *Probe*, *Notify*
 
-
 ### General
-* Work on detailed documentation
-* support for common daemon features
+* [ ] Work on detailed documentation
+* [ ] Improve test coverage
+* [ ] Improve 3rd party integrations and supports
+  * [x] megaease/easeprobe#95 Prometheus compatible metrics
+* Support for common daemon features
+  * [ ] ability to send daemon to background without stdout logs
+  * [ ] add syslog support as an alternative destination instead of `easeprobe.log` eg `log: syslog`
+  * [ ] introduce a control socket for running easyprobe instance with disable or enable probes and notify endpoints (maybe something like `/var/run/easeprobe.sock` that speaks HTTP (`dockerd` & `supervisord` does something like that).
   * [x] megaease/easeprobe#75 add `daemon()` & `/var/run/easeprobe.pid` support
-  * [x] megaease/easeprobe#75 add SIGHUP, and ensure it closes and re-opens of logfile to allow for `easeprobe.log` rotation
-  * add syslog support as an alternative destination instead of `easeprobe.log` eg `logfile: syslog`
-* Support for common `timeformat`, use standard timezone and `strftime` conversions, eg `timezone: [UTC|local|Europe/Athens]`, `timeformat: %F %R:%S UTC`
-* Ability to control the status of a running easyprobe instance and temporarily disable or enable probes and notify endpoints (maybe something like `/var/run/easeprobe.sock` that speaks HTTP? `dockerd` & `supervisord` does something like that). This could later expand to managing other parameters of a live instance as well as get process related status updates (eg how long this instance is running? how much memory it consumes etc)
+  * [x] megaease/easeprobe#75 add SIGHUP, and ensure it closes and re-opens of logfile to allow for `easeprobe.log` rotation* [ ] Support for common `timeformat`, use standard timezone and `strftime` conversions, eg `timezone: [UTC|local|Europe/Athens]`, `timeformat: %F %R:%S UTC`
 * Add opt-out options where appropriate
-  * [x] megaease/easeprobe#75 add opt-out option for `logfile` option
-  * Add opt-out option for SLA data persistence `data: false`
-  * Make historical data configurable `history: false` and avoid creating backups of statistics
+  * [x] megaease/easeprobe#75 add opt-out option for `log` option
+  * [x] megaease/easeprobe#92 Add opt-out option for SLA data persistence `data: false`
+  * [x] megaease/easeprobe#81 Make historical data configurable `history: false` and avoid creating backups of statistics
 
 ### Probes
-* integrate automatic service discovery which includes probing details
-* add plain old icmp ping probe (or read next)
-* shell probe command must allow allocation or not of `stdout`/`stderr` or redirection of them (eg right now we are forced to create wrapper scripts to achieve this) This will also make ping by shell usable
-* Add support to define desired notification on probes???
-```yaml
-tcp:
-  - name: Memcached
-    host: 10.7.0.253:11211
-    notify: "Server #Alert" # notify.discord.name
-```
-* Add support for host group probes (eg 1 host definition with 4 services)
+* [ ] add automatic service discovery which includes probing details
+* [ ] add plain old `icmp` ping probe
+* [ ] `shell` probe command improvements in handling stdout/stderr
+* [ ] add support to define destination notification channels for probe (see https://github.com/megaease/easeprobe/discussions/82)
+* [ ] work on cleaner distinction between `host`, `ssh` and `shell` (certain areas seem overlapping):
+  * add support for **`host: local`** keyword to monitor self
+  * check that we are OS agnostic where possible and confirm OS specific operations are abstracted (such as `daemon_linux.go`, `daemon_darwin.go` etc)
+  * split hardcoded commands into their own configurable functions so that the final commands to be send can be combined based on `config.yaml` settings later on
+* [ ] Add support for host group probes (eg 1 host definition with 4 services)
 ```yaml
 name: MyServer
   probes:
@@ -106,27 +106,6 @@ host:
 ```
 
 ### Notify
-* export the status and notification data to open formats so it can easily be integrated with 3rd party applications such as Prometheus and Graphana
-* support for notify `triggers` to help on automation operations (eg. not only send a notification message but also call an API or a shell script to assist in service recovery?)
-* support for notification groups or lists eg:
-```yaml
-http:
-  - name: hostA
-    url: https://hostA
-    notify: listA
-  - name: hostB
-    url: http://hostB:2376/containers/json
-    notify: listB, telegram, discord
-notify:
-  listA:
-    discord:
-    slack:
-  listB:
-    twilio:
-    telegram:
-```
-* Improve on capabilities of discord notify (eg configurable username `Username:  global.Prog,`)
-* work on clear distinction between `host`, `ssh` and `shell` (certain areas seem overlapping):
-  * add support for **`host: local`** keyword to monitor self
-  * check that we are OS agnostic where possible and confirm OS specific operations are abstracted (such as `daemon_linux.go`, `daemon_darwin.go` etc)
-  * split checks into their own functions so that the final commands to be send can be combined based on the `config.yaml`
+* [ ] extend notify to help on automation operations (eg. not only send a notification message but also call an API or a shell script to assist in service recovery)
+* [ ] support for notification groups or lists (see https://github.com/megaease/easeprobe/discussions/82)
+* [ ] megaease/easeprobe#79 Improve on capabilities of discord and other similar notify (such as configurable username)
