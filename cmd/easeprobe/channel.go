@@ -55,7 +55,7 @@ func configChannels(probers []probe.Prober, notifiers []notify.Notify) {
 }
 
 func checkChannels() {
-	log.Debug("--------- Channel Configuraiton --------- ")
+	log.Debug("--------- Channel Configuration --------- ")
 	// check the channel configuration
 	for cName, ch := range channel.GetAllChannels() {
 		if len(ch.Notifiers) <= 0 {
