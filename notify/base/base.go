@@ -32,10 +32,11 @@ type DefaultNotify struct {
 	Format   report.Format              `yaml:"-"`
 	SendFunc func(string, string) error `yaml:"-"`
 
-	Name    string        `yaml:"name"`
-	Dry     bool          `yaml:"dry"`
-	Timeout time.Duration `yaml:"timeout"`
-	Retry   global.Retry  `yaml:"retry"`
+	Name     string        `yaml:"name"`
+	Channels []string      `yaml:"channels"`
+	Dry      bool          `yaml:"dry"`
+	Timeout  time.Duration `yaml:"timeout"`
+	Retry    global.Retry  `yaml:"retry"`
 }
 
 // Config is the default configuration for notification
@@ -48,8 +49,22 @@ func (c *DefaultNotify) Config(gConf global.NotifySettings) error {
 	c.Timeout = gConf.NormalizeTimeOut(c.Timeout)
 	c.Retry = gConf.NormalizeRetry(c.Retry)
 
+	if len(c.Channels) == 0 {
+		c.Channels = append(c.Channels, global.DefaultChannelName)
+	}
+
 	log.Infof("Notification [%s] - [%s] is configured!", c.MyKind, c.Name)
 	return nil
+}
+
+// GetName returns the name of the notification
+func (c *DefaultNotify) GetName() string {
+	return c.Name
+}
+
+// GetChannels returns the channels of the notification
+func (c *DefaultNotify) GetChannels() []string {
+	return c.Channels
 }
 
 // Notify send the result message to the email

@@ -59,6 +59,8 @@ const (
 	DefaultProbeInterval = time.Second * 60
 	// DefaultTimeOut is 30 seconds
 	DefaultTimeOut = time.Second * 30
+	// DefaultChannelName  is the default wide channel name
+	DefaultChannelName = "__EaseProbe_Channel__"
 )
 
 const (

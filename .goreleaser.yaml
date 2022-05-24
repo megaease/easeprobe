@@ -14,7 +14,7 @@ changelog:
 
 builds:
   - id: build
-    main: cmd/easeprobe/main.go
+    main: ./cmd/easeprobe/
     binary: bin/easeprobe
     env:
       - CGO_ENABLED=0
