@@ -60,9 +60,10 @@ func runProbers(probers []probe.Prober, wg *sync.WaitGroup, done chan bool) {
 		for {
 			res := p.Probe()
 			log.Debugf("%s: %s", p.Kind(), res.DebugJSON())
+			// send the notification to all channels
 			for _, cName := range p.Channels() {
 				if ch := channel.GetChannel(cName); ch != nil {
-					ch.Channel() <- res
+					ch.Send(res)
 				}
 			}
 

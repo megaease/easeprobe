@@ -29,7 +29,6 @@ const kind = "channel"
 // Channel implements a config for Channel
 type Channel struct {
 	Name      string                    `yaml:"name"`      // unique name
-	Buffer    int                       `yaml:"buffer"`    // buffer size
 	Probers   map[string]*probe.Prober  `yaml:"probers"`   // probers
 	Notifiers map[string]*notify.Notify `yaml:"notifiers"` // notifiers
 	isWatch   int32                     `yaml:"-"`         // is watch
@@ -38,17 +37,23 @@ type Channel struct {
 
 }
 
-// NewChannel creates a new Channel object
-func NewChannel(name string, buffer int) *Channel {
+// NewEmpty creates a new empty Channel object with nil channel
+// After setup the probers, You have to call Config() to create the channel
+func NewEmpty(name string) *Channel {
 	return &Channel{
 		Name:      name,
-		Buffer:    buffer,
 		Probers:   map[string]*probe.Prober{},
 		Notifiers: map[string]*notify.Notify{},
 		isWatch:   0,
-		done:      make(chan bool),
-		channel:   make(chan probe.Result, buffer),
+		done:      nil,
+		channel:   nil,
 	}
+}
+
+// Config configures the channel
+func (c *Channel) Config() {
+	c.done = make(chan bool)
+	c.channel = make(chan probe.Result, len(c.Probers))
 }
 
 // Done returns the done channel
@@ -59,6 +64,11 @@ func (c *Channel) Done() chan bool {
 // Channel returns the notification channel
 func (c *Channel) Channel() chan probe.Result {
 	return c.channel
+}
+
+// Send sends the result to the channel
+func (c *Channel) Send(result probe.Result) {
+	c.channel <- result
 }
 
 // GetProber returns the Notify object
@@ -143,11 +153,12 @@ func (c *Channel) WatchEvent() {
 			}
 			log.Infof("[%s / %s]: %s (%s) - Status changed [%s] ==> [%s]",
 				kind, c.Name, result.Name, result.Endpoint, result.PreStatus, result.Status)
-			for _, n := range c.Notifiers {
+			for _, nRef := range c.Notifiers {
+				n := *nRef
 				if dryNotify {
-					(*n).DryNotify(result)
+					n.DryNotify(result)
 				} else {
-					go (*n).Notify(result)
+					go n.Notify(result)
 				}
 			}
 		}

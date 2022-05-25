@@ -45,6 +45,10 @@ func getEnvOrDefault(key, defaultValue string) string {
 
 func main() {
 
+	////////////////////////////////////////////////////////////////////////////
+	//          Parse command line arguments and config file settings         //
+	////////////////////////////////////////////////////////////////////////////
+
 	dryNotify := flag.Bool("d", os.Getenv("PROBE_DRY") == "true", "dry notification mode")
 	yamlFile := flag.String("f", getEnvOrDefault("PROBE_CONFIG", "config.yaml"), "configuration file")
 	version := flag.Bool("v", false, "prints version")
@@ -85,8 +89,15 @@ func main() {
 		log.Infoln("Dry Notification Mode...")
 	}
 
-	// Start the HTTP Server
+	////////////////////////////////////////////////////////////////////////////
+	//                          Start the HTTP Server                         //
+	////////////////////////////////////////////////////////////////////////////
+	// if error happens, the EaseProbe will exit
 	web.Server()
+
+	////////////////////////////////////////////////////////////////////////////
+	//                  Configure all of Probers and Notifiers                //
+	////////////////////////////////////////////////////////////////////////////
 
 	// Probers
 	probers := c.AllProbers()
@@ -100,6 +111,10 @@ func main() {
 	// configure channels
 	configChannels(probers, notifies)
 
+	////////////////////////////////////////////////////////////////////////////
+	//                          Start the EaseProbe                           //
+	////////////////////////////////////////////////////////////////////////////
+
 	// wait group for probers
 	var wg sync.WaitGroup
 	// the exit channel for all probers
@@ -107,29 +122,28 @@ func main() {
 	// the exit channel for saving the data
 	doneSave := make(chan bool)
 
+	// 1) SLA Data Save process
 	probe.CleanData(probers) // remove the data not in probers
 	go saveData(doneSave)    // save the data to file
 
-	// Start the Probers
+	// 2) Start the Probers
 	runProbers(probers, &wg, doneProbe)
-	// Start the Event Watching
+	// 3) Start the Event Watching
 	channel.WatchForAllEvents()
 
-	// Set probers into web server
+	// 4) Set probers into web server
 	web.SetProbers(probers)
 
-	// Set the Cron Job for SLA Report
+	// 5) Set the Cron Job for SLA Report
 	if conf.Get().Settings.SLAReport.Schedule != conf.None {
 		scheduleSLA(probers)
 	} else {
 		log.Info("No SLA Report would be sent!!")
 	}
 
-	// Graceful Shutdown
-	done := make(chan os.Signal)
-	signal.Notify(done, syscall.SIGTERM)
-
-	// Rotate the log file
+	////////////////////////////////////////////////////////////////////////////
+	//                          Rotate the log file                           //
+	////////////////////////////////////////////////////////////////////////////
 	rotateLog := make(chan os.Signal, 1)
 	doneRotate := make(chan bool, 1)
 	signal.Notify(rotateLog, syscall.SIGHUP)
@@ -150,6 +164,11 @@ func main() {
 		}
 	}()
 
+	////////////////////////////////////////////////////////////////////////////
+	//                              Graceful Shutdown                         //
+	////////////////////////////////////////////////////////////////////////////
+	done := make(chan os.Signal)
+	signal.Notify(done, syscall.SIGTERM)
 	select {
 	case <-done:
 		log.Infof("Received the exit signal, exiting...")

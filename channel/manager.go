@@ -35,10 +35,10 @@ func GetChannel(name string) *Channel {
 }
 
 // SetChannel sets the channel
-func SetChannel(name string, buffer int) {
+func SetChannel(name string) {
 	ch := GetChannel(name)
 	if ch == nil {
-		channel[name] = NewChannel(name, buffer)
+		channel[name] = NewEmpty(name)
 	}
 }
 
@@ -53,7 +53,7 @@ func SetProbers(channel string, probers []*probe.Prober) {
 func SetProber(channel string, p *probe.Prober) {
 	ch := GetChannel(channel)
 	if ch == nil {
-		SetChannel(channel, 0)
+		SetChannel(channel)
 		ch = GetChannel(channel)
 	}
 	ch.SetProber(p)
@@ -70,7 +70,7 @@ func SetNotifiers(channel string, notifiers []*notify.Notify) {
 func SetNotify(channel string, n *notify.Notify) {
 	ch := GetChannel(channel)
 	if ch == nil {
-		SetChannel(channel, 0)
+		SetChannel(channel)
 		ch = GetChannel(channel)
 	}
 	ch.SetNotify(n)
@@ -90,6 +90,13 @@ func GetNotifiers(channel []string) map[string]*notify.Notify {
 		}
 	}
 	return notifiers
+}
+
+// ConfigAllChannels config all channels
+func ConfigAllChannels() {
+	for _, c := range channel {
+		c.Config()
+	}
 }
 
 // WatchForAllEvents watch the event for all channels

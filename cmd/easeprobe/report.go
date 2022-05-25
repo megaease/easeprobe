@@ -75,12 +75,13 @@ func scheduleSLA(probers []probe.Prober) {
 
 	SLAFn := func() {
 
-		for _, n := range notifies {
+		for _, nRef := range notifies {
+			n := *nRef
 			if dryNotify {
-				(*n).DryNotifyStat(probers)
+				n.DryNotifyStat(probers)
 			} else {
-				log.Debugf("[%s] notifying the SLA...", (*n).Kind())
-				go (*n).NotifyStat(probers)
+				log.Debugf("[%s] notifying the SLA...", n.Kind())
+				go n.NotifyStat(probers)
 			}
 		}
 		_, t := cron.NextRun()
