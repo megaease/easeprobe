@@ -244,7 +244,7 @@ This feature could help you group the Probers and Notifiers into a logical group
 > 
 > 1) If you don't define the Channel, the default channel will be used for these probers and notifiers. The default channel name is `__EaseProbe_Channel__` 
 > 
-> 2) Before  v1.5.0, it doesn't support the channel
+> 2) Versions of EaseProbe prior to  v1.5.0, do not support the `channel` feature
 
 ```YAML
 
