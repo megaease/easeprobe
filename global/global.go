@@ -37,7 +37,7 @@ const (
 	// DefaultProg is the program name
 	DefaultProg = "EaseProbe"
 	// Ver is the program version
-	Ver = "v1.5.0"
+	Ver = "v1.6.0"
 
 	//OrgProg combine organization and program
 	OrgProg = Org + " " + DefaultProg
