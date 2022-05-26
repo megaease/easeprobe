@@ -46,7 +46,7 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 	c.Format = report.MarkdownSocial
 	c.SendFunc = c.SendTeamsMessage
 	c.DefaultNotify.Config(gConf)
-	
+
 	c.client = goteamsnotify.NewClient()
 	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.MyKind, c.Name, c)
 	return nil
