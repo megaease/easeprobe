@@ -38,7 +38,7 @@ type TLS struct {
 	InsecureSkipVerify  bool   `yaml:"insecure_skip_verify"`
 
 	RootCAPemPath string `yaml:"root_ca_pem_path"`
-	RootCaPem     []byte `yaml:"root_ca_pem"`
+	RootCaPem     string `yaml:"root_ca_pem"`
 	rootCAs       *x509.CertPool
 
 	ExpireSkipVerify bool `yaml:"expire_skip_verify"`
@@ -51,9 +51,9 @@ func (t *TLS) Config(gConf global.ProbeSettings) error {
 	name := t.ProbeName
 	t.DefaultOptions.Config(gConf, kind, tag, name, t.Host, t.DoProbe)
 
-	rootCaPem := t.RootCaPem
+	rootCaPem := []byte(t.RootCaPem)
 
-	if rootCaPem == nil && t.RootCAPemPath != "" {
+	if len(rootCaPem) == 0 && t.RootCAPemPath != "" {
 		var err error
 		rootCaPem, err = ioutil.ReadFile(t.RootCAPemPath)
 		if err != nil {
@@ -61,7 +61,7 @@ func (t *TLS) Config(gConf global.ProbeSettings) error {
 		}
 	}
 
-	if rootCaPem != nil {
+	if len(rootCaPem) > 0 {
 		t.rootCAs = x509.NewCertPool()
 		if !(t.rootCAs.AppendCertsFromPEM(rootCaPem)) {
 			return fmt.Errorf("cannot parse root ca pem")
