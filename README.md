@@ -261,7 +261,7 @@ notify:
    - discord: Discord
      channels: [ Dev_Channel, Ops_Channel ]
    - email: Gmail
-     channels: [Mgmt_Channel]
+     channels: [ Mgmt_Channel ]
 ```
 
 Then, we will have the following diagram
