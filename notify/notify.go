@@ -18,6 +18,8 @@
 package notify
 
 import (
+	"context"
+
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify/aws"
 	"github.com/megaease/easeprobe/notify/dingtalk"
@@ -48,12 +50,24 @@ type Config struct {
 	Teams    []teams.NotifyConfig    `yaml:"teams"`
 }
 
+var _ Notify = (*log.NotifyConfig)(nil)
+var _ Notify = (*email.NotifyConfig)(nil)
+var _ Notify = (*slack.NotifyConfig)(nil)
+var _ Notify = (*discord.NotifyConfig)(nil)
+var _ Notify = (*telegram.NotifyConfig)(nil)
+var _ Notify = (*aws.SNSNotifyConfig)(nil)
+var _ Notify = (*wecom.NotifyConfig)(nil)
+var _ Notify = (*dingtalk.NotifyConfig)(nil)
+var _ Notify = (*lark.NotifyConfig)(nil)
+var _ Notify = (*sms.NotifyConfig)(nil)
+var _ Notify = (*teams.NotifyConfig)(nil)
+
 // Notify is the configuration of the Notify
 type Notify interface {
 	Kind() string
 	Config(global.NotifySettings) error
-	Notify(probe.Result)
-	NotifyStat([]probe.Prober)
+	Notify(context.Context, probe.Result)
+	NotifyStat(context.Context, []probe.Prober)
 
 	DryNotify(probe.Result)
 	DryNotifyStat([]probe.Prober)

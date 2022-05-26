@@ -62,7 +62,7 @@ func (c *SNSNotifyConfig) Config(gConf global.NotifySettings) error {
 }
 
 // SendSNS is the warp function of SendSNSNotification
-func (c *SNSNotifyConfig) SendSNS(title, msg string) error {
+func (c *SNSNotifyConfig) SendSNS(ctx context.Context, title, msg string) error {
 	return c.SendSNSNotification(msg)
 }
 

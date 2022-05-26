@@ -19,6 +19,7 @@ package wecom
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -51,7 +52,7 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 }
 
 // SendWecom is the wrapper of SendWecomNotification
-func (c *NotifyConfig) SendWecom(title, msg string) error {
+func (c *NotifyConfig) SendWecom(ctx context.Context, title, msg string) error {
 	return c.SendWecomNotification(msg)
 }
 

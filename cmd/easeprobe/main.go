@@ -18,6 +18,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -230,7 +231,7 @@ func watchEvent(notifyChan chan probe.Result, notifiers []notify.Notify, doneWat
 				if dryNotify {
 					n.DryNotify(result)
 				} else {
-					go n.Notify(result)
+					go n.Notify(context.TODO(), result)
 				}
 			}
 		}
@@ -305,7 +306,7 @@ func scheduleSLA(probers []probe.Prober, notifies []notify.Notify) {
 				n.DryNotifyStat(probers)
 			} else {
 				log.Debugf("[%s] notifying the SLA...", n.Kind())
-				go n.NotifyStat(probers)
+				go n.NotifyStat(context.TODO(), probers)
 			}
 		}
 		_, t := cron.NextRun()

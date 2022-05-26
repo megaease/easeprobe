@@ -18,6 +18,7 @@
 package telegram
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -52,7 +53,7 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 }
 
 // SendTelegram is the wrapper for SendTelegramNotification
-func (c *NotifyConfig) SendTelegram(title, text string) error {
+func (c *NotifyConfig) SendTelegram(ctx context.Context, title, text string) error {
 	return c.SendTelegramNotification(text)
 }
 

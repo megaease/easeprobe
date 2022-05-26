@@ -18,6 +18,7 @@
 package log
 
 import (
+	"context"
 	"log"
 	"os"
 
@@ -61,7 +62,7 @@ func (c *NotifyConfig) Config(global global.NotifySettings) error {
 }
 
 // Notify write the message into the file
-func (c *NotifyConfig) Notify(result probe.Result) {
+func (c *NotifyConfig) Notify(ctx context.Context, result probe.Result) {
 	if c.Dry {
 		c.DryNotify(result)
 		return
@@ -71,7 +72,7 @@ func (c *NotifyConfig) Notify(result probe.Result) {
 }
 
 // NotifyStat write the stat message into the file
-func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
+func (c *NotifyConfig) NotifyStat(ctx context.Context, probers []probe.Prober) {
 	if c.Dry {
 		c.DryNotifyStat(probers)
 		return

@@ -19,6 +19,7 @@ package slack
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -52,7 +53,7 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 }
 
 // SendSlack is the wrapper for SendSlackNotification
-func (c *NotifyConfig) SendSlack(title, msg string) error {
+func (c *NotifyConfig) SendSlack(ctx context.Context, title, msg string) error {
 	return c.SendSlackNotification(msg)
 }
 

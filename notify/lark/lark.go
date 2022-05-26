@@ -19,6 +19,7 @@ package lark
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -52,7 +53,7 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 }
 
 // SendLark is the wrapper for SendLarkNotification
-func (c *NotifyConfig) SendLark(title, msg string) error {
+func (c *NotifyConfig) SendLark(ctx context.Context, title, msg string) error {
 	return c.SendLarkNotification(msg)
 }
 

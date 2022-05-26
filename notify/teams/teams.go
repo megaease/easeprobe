@@ -18,6 +18,8 @@
 package teams
 
 import (
+	"context"
+
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify/base"
 	"github.com/megaease/easeprobe/report"
@@ -53,7 +55,7 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 }
 
 // SendTeamsMessage sends the message to the teams channel
-func (c *NotifyConfig) SendTeamsMessage(title, msg string) error {
+func (c *NotifyConfig) SendTeamsMessage(ctx context.Context, title, msg string) error {
 	msgCard := goteamsnotify.NewMessageCard()
 	msgCard.Title = title
 	msgCard.Text = msg

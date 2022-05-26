@@ -18,7 +18,9 @@
 package sms
 
 import (
+	"context"
 	"errors"
+
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify/sms/conf"
 	"github.com/megaease/easeprobe/notify/sms/nexmo"
@@ -67,7 +69,7 @@ func (c *NotifyConfig) configSMSDriver() {
 }
 
 // DoNotify return the notify function
-func (c *NotifyConfig) DoNotify(title, text string) error {
+func (c *NotifyConfig) DoNotify(ctx context.Context, title, text string) error {
 	if c.ProviderType == conf.Unknown {
 		return errors.New("wrong Provider type")
 	}

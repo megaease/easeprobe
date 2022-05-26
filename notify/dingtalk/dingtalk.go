@@ -19,6 +19,7 @@ package dingtalk
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -53,7 +54,7 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 
 // SendDingtalkNotification will post to an 'Robot Webhook' url in Dingtalk Apps. It accepts
 // some text and the Dingtalk robot will send it in group.
-func (c *NotifyConfig) SendDingtalkNotification(title, msg string) error {
+func (c *NotifyConfig) SendDingtalkNotification(ctx context.Context, title, msg string) error {
 
 	title = "**" + title + "**"
 	// It will be better to escape the msg.

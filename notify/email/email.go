@@ -18,6 +18,7 @@
 package email
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"net"
@@ -56,7 +57,7 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 }
 
 // SendMail sends the email
-func (c *NotifyConfig) SendMail(subject string, message string) error {
+func (c *NotifyConfig) SendMail(ctx context.Context, subject string, message string) error {
 
 	host, _, err := net.SplitHostPort(c.Server)
 	if err != nil {

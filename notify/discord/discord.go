@@ -19,6 +19,7 @@ package discord
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -173,7 +174,7 @@ func (c *NotifyConfig) NewDiscord(result probe.Result) Discord {
 }
 
 // Notify write the message into the slack
-func (c *NotifyConfig) Notify(result probe.Result) {
+func (c *NotifyConfig) Notify(ctx context.Context, result probe.Result) {
 	if c.Dry {
 		c.DryNotify(result)
 		return
@@ -280,7 +281,7 @@ func (c *NotifyConfig) NewEmbeds(probers []probe.Prober) []Discord {
 }
 
 // NotifyStat write the all probe stat message to slack
-func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
+func (c *NotifyConfig) NotifyStat(ctx context.Context, probers []probe.Prober) {
 	if c.Dry {
 		c.DryNotifyStat(probers)
 		return

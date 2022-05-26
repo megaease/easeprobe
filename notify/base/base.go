@@ -18,6 +18,7 @@
 package base
 
 import (
+	"context"
 	"time"
 
 	"github.com/megaease/easeprobe/global"
@@ -28,9 +29,9 @@ import (
 
 // DefaultNotify is the base struct of the Notify
 type DefaultNotify struct {
-	MyKind   string                     `yaml:"-"`
-	Format   report.Format              `yaml:"-"`
-	SendFunc func(string, string) error `yaml:"-"`
+	MyKind   string                                      `yaml:"-"`
+	Format   report.Format                               `yaml:"-"`
+	SendFunc func(context.Context, string, string) error `yaml:"-"`
 
 	Name    string        `yaml:"name"`
 	Dry     bool          `yaml:"dry"`
@@ -53,7 +54,7 @@ func (c *DefaultNotify) Config(gConf global.NotifySettings) error {
 }
 
 // Notify send the result message to the email
-func (c *DefaultNotify) Notify(result probe.Result) {
+func (c *DefaultNotify) Notify(ctx context.Context, result probe.Result) {
 	if c.Dry {
 		c.DryNotify(result)
 		return
@@ -61,28 +62,28 @@ func (c *DefaultNotify) Notify(result probe.Result) {
 	title := result.Title()
 	message := report.FormatFuncs[c.Format].ResultFn(result)
 
-	c.SendWithRetry(title, message, "Notification")
+	c.SendWithRetry(ctx, title, message, "Notification")
 }
 
 // NotifyStat send the stat message into the email
-func (c *DefaultNotify) NotifyStat(probers []probe.Prober) {
+func (c *DefaultNotify) NotifyStat(ctx context.Context, probers []probe.Prober) {
 	if c.Dry {
 		c.DryNotifyStat(probers)
 		return
 	}
 	title := "Overall SLA Report"
 	message := report.FormatFuncs[c.Format].StatFn(probers)
-	c.SendWithRetry(title, message, "SLA")
+	c.SendWithRetry(ctx, title, message, "SLA")
 }
 
 // SendWithRetry sends the notification with retry if got error
-func (c *DefaultNotify) SendWithRetry(title string, message string, tag string) {
+func (c *DefaultNotify) SendWithRetry(ctx context.Context, title string, message string, tag string) {
 	fn := func() error {
 		log.Debugf("[%s / %s / %s] - %s", c.MyKind, c.Name, tag, title)
 		if c.SendFunc == nil {
 			log.Errorf("[%s / %s / %s] - %s SendFunc is nil", c.MyKind, c.Name, tag, title)
 		}
-		return c.SendFunc(title, message)
+		return c.SendFunc(ctx, title, message)
 	}
 	err := global.DoRetry(c.MyKind, c.Name, tag, c.Retry, fn)
 	report.LogSend(c.MyKind, c.Name, tag, title, err)
