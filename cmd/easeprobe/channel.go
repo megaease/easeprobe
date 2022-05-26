@@ -26,7 +26,6 @@ import (
 )
 
 func configChannels(probers []probe.Prober, notifiers []notify.Notify) {
-
 	// set the probe channels
 	for i := 0; i < len(probers); i++ {
 		p := probers[i]
