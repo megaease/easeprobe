@@ -256,7 +256,7 @@ http:
      channels : [ Dev_Channel, Manager_Channel ]
 shell:
    - name: probe B
-     channels: [ Ops_Channel]
+     channels: [ Ops_Channel ]
 notify:
    - discord: Discord
      channels: [ Dev_Channel, Ops_Channel ]
