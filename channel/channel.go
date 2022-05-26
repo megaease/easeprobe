@@ -121,7 +121,6 @@ func SetDryNotify(dry bool) {
 // WatchEvent watches the notification event
 // Go through all of notification to notify the result.
 func (c *Channel) WatchEvent() {
-
 	// check if the channel is watching
 	if atomic.CompareAndSwapInt32(&(c.isWatch), 0, 1) == false {
 		log.Warnf("[%s/ %s]: Channel is already watching!", kind, c.Name)

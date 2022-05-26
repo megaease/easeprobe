@@ -43,18 +43,23 @@ func saveData(doneSave chan bool) {
 		save = func() {}
 	}
 
+	// save data to file when start the EaseProbe
 	save()
+
+	interval := time.NewTimer(c.Settings.Probe.Interval)
+	defer interval.Stop()
 	for {
 		select {
 		case <-doneSave:
 			save()
 			log.Info("Received the exit signal, Saving data process is exiting...")
 			return
-		case <-time.After(c.Settings.Probe.Interval):
+		case <-interval.C:
+			log.Debugf("SaveData - %s Interval is up, Saving data to file...", c.Settings.Probe.Interval)
 			save()
+			interval.Reset(c.Settings.Probe.Interval)
 		}
 	}
-
 }
 
 func scheduleSLA(probers []probe.Prober) {
@@ -74,7 +79,6 @@ func scheduleSLA(probers []probe.Prober) {
 	}
 
 	SLAFn := func() {
-
 		for _, nRef := range notifies {
 			n := *nRef
 			if dryNotify {

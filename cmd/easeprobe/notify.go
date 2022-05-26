@@ -30,8 +30,7 @@ func configNotifiers(notifies []notify.Notify) {
 		Retry:      conf.Get().Settings.Notify.Retry,
 	}
 	for _, n := range notifies {
-		err := n.Config(gNotifyConf)
-		if err != nil {
+		if err := n.Config(gNotifyConf); err != nil {
 			log.Errorf("error: %v", err)
 			continue
 		}

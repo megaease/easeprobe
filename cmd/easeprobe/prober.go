@@ -29,7 +29,6 @@ import (
 )
 
 func configProbers(probers []probe.Prober) {
-
 	gProbeConf := global.ProbeSettings{
 		TimeFormat: conf.Get().Settings.TimeFormat,
 		Interval:   conf.Get().Settings.Probe.Interval,
@@ -38,8 +37,7 @@ func configProbers(probers []probe.Prober) {
 	log.Debugf("Global Probe Configuration: %+v", gProbeConf)
 	for i := 0; i < len(probers); i++ {
 		p := probers[i]
-		err := p.Config(gProbeConf)
-		if err != nil {
+		if err := p.Config(gProbeConf); err != nil {
 			p.Result().Status = probe.StatusBad
 			p.Result().Message = "Bad Configuration: " + err.Error()
 			log.Errorf("Bad Probe Configuration: %v", err)
@@ -53,10 +51,12 @@ func configProbers(probers []probe.Prober) {
 }
 
 func runProbers(probers []probe.Prober, wg *sync.WaitGroup, done chan bool) {
-
 	probeFn := func(p probe.Prober) {
 		wg.Add(1)
 		defer wg.Done()
+
+		interval := time.NewTimer(p.Interval())
+		defer interval.Stop()
 		for {
 			res := p.Probe()
 			log.Debugf("%s: %s", p.Kind(), res.DebugJSON())
@@ -71,7 +71,9 @@ func runProbers(probers []probe.Prober, wg *sync.WaitGroup, done chan bool) {
 			case <-done:
 				log.Infof("%s / %s - Received the done signal, exiting...", p.Kind(), p.Name())
 				return
-			case <-time.After(p.Interval()):
+			case <-interval.C:
+				interval.Reset(p.Interval())
+				log.Debugf("%s / %s - %s Interval is up, continue...", p.Kind(), p.Name(), p.Interval())
 			}
 		}
 	}

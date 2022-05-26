@@ -55,7 +55,6 @@ func configChannels(probers []probe.Prober, notifiers []notify.Notify) {
 
 	// check the channel configuration
 	checkChannels()
-
 }
 
 func checkChannels() {
