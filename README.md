@@ -259,7 +259,7 @@ shell:
      channels: [ Ops_Channel]
 notify:
    - discord: Discord
-     channels: [Dev_Channel, Ops_Channel]
+     channels: [ Dev_Channel, Ops_Channel ]
    - email: Gmail
      channels: [Mgmt_Channel]
 ```
