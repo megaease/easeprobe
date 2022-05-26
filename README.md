@@ -24,10 +24,11 @@ EaseProbe is a simple, standalone, and lightWeight tool that can do health/statu
     - [3.2 TCP Probe Configuration](#32-tcp-probe-configuration)
     - [3.3 Shell Command Probe Configuration](#33-shell-command-probe-configuration)
     - [3.4 SSH Command Probe Configuration](#34-ssh-command-probe-configuration)
-    - [3.5 Host Resource Usage Probe Configuration](#35-host-resource-usage-probe-configuration)
-    - [3.6 Native Client Probe Configuration](#36-native-client-probe-configuration)
-    - [3.7 Notification Configuration](#37-notification-configuration)
-    - [3.8 Global Setting Configuration](#38-global-setting-configuration)
+    - [3.5 TLS Probe Configuration](#35-tls-probe-configuration)
+    - [3.6 Host Resource Usage Probe Configuration](#36-host-resource-usage-probe-configuration)
+    - [3.7 Native Client Probe Configuration](#37-native-client-probe-configuration)
+    - [3.8 Notification Configuration](#38-notification-configuration)
+    - [3.9 Global Setting Configuration](#39-global-setting-configuration)
   - [4. Community](#4-community)
   - [5. License](#5-license)
 
@@ -92,6 +93,14 @@ Ease Probe supports the following probing methods: **HTTP**, **TCP**, **Shell Co
         key: /Users/user/.ssh/id_rsa
         cmd: "ps auxwe | grep easeprobe | grep -v grep"
         contain: easeprobe
+  ```
+
+- **TLS**. TLS ping to remote endpoint, can probe for revoked or expired certificates ( [TLS Probe Configuration](#35-tls-probe-configuration) )
+
+  ```YAML
+  tls:
+    - name: expired test
+      host: expired.badssl.com:443
   ```
 
 - **Host**. Run an SSH command on a remote host and check the CPU, Memory, and Disk usage. ( [Host Load Probe](#35-host-resource-usage-probe-configuration) )
@@ -574,7 +583,29 @@ ssh:
       cmd: "ps -ef | grep kafka"
 ```
 
-### 3.5 Host Resource Usage Probe Configuration
+### 3.5 TLS Probe Configuration
+
+TLS ping to remote endpoint, can probe for revoked or expired certificates
+
+  ```YAML
+  tls:
+    - name: expired test
+      host: expired.badssl.com:443
+      insecure_skip_verify: true # dont check cert validity
+      expire_skip_verify: true # dont check cert expire date
+      # root_ca_pem_path: /path/to/root/ca.pem # ignore if root_ca_pem is present
+      # root_ca_pem: |
+      #   -----BEGIN CERTIFICATE-----
+    - name: untrust test
+      host: untrusted-root.badssl.com:443
+      # insecure_skip_verify: true # dont check cert validity
+      # expire_skip_verify: true # dont check cert expire date
+      # root_ca_pem_path: /path/to/root/ca.pem # ignore if root_ca_pem is present
+      # root_ca_pem: |
+      #   -----BEGIN CERTIFICATE-----    
+  ```
+
+### 3.6 Host Resource Usage Probe Configuration
 
 Support the host probe, the configuration example as below.
 
@@ -609,7 +640,7 @@ host:
       key: /Users/user/.ssh/id_rsa
 ```
 
-### 3.6 Native Client Probe Configuration
+### 3.7 Native Client Probe Configuration
 
 ```YAML
 # Native Client Probe
@@ -661,7 +692,7 @@ client:
 ```
 
 
-### 3.7 Notification Configuration
+### 3.8 Notification Configuration
 
 ```YAML
 # Notification Configuration
@@ -745,7 +776,7 @@ notify:
 ```
 
 
-### 3.8 Global Setting Configuration
+### 3.9 Global Setting Configuration
 
 ```YAML
 # Global settings for all probes and notifiers.
