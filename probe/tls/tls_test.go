@@ -131,7 +131,7 @@ func TestTlsSimple(t *testing.T) {
 
 	tls := &TLS{
 		Host:      mock.hostname,
-		RootCaPem: cabytes,
+		RootCaPem: string(cabytes),
 	}
 
 	tls.Config(global.ProbeSettings{
