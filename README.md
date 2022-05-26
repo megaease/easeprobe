@@ -141,6 +141,7 @@ Ease Probe supports the following notifications:
 - **Lark**. Support the Lark(Feishu) notification.
 - **Log File**. Write the notification into a log file
 - **SMS**. Support SMS notification with multiple SMS service providers - [Twilio](https://www.twilio.com/sms), [Vonage(Nexmo)](https://developer.vonage.com/messaging/sms/overview), [YunPain](https://www.yunpian.com/doc/en/domestic/list.html)
+- **Teams**. Support the [Microsoft Teams](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using?tabs=cURL#setting-up-a-custom-incoming-webhook) notification.
 
 **Note**:
 
@@ -188,6 +189,9 @@ notify:
       key: xxxxxxxxxxxx # yunpian apikey
       mobile: 123456789,987654321 # mobile phone number, multiple phone number joint by `,`
       sign: "xxxxxxxx" # need to register; usually brand name
+  teams:
+      - name: "teams alert service"
+        webhook: "https://outlook.office365.com/webhook/a1269812-6d10-44b1-abc5-b84f93580ba0@9e7b80c7-d1eb-4b52-8582-76f921e416d9/IncomingWebhook/3fdd6767bae44ac58e5995547d66a4e4/f332c8d9-3397-4ac5-957b-b8e3fc465a8c" # see https://docs.microsoft.com/en-us/outlook/actionable-messages/send-via-connectors
 ```
 
 Check the  [Notification Configuration](#37-notification-configuration) to see how to configure it.
