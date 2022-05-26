@@ -28,12 +28,12 @@ const kind = "channel"
 
 // Channel implements a config for Channel
 type Channel struct {
-	Name      string                    `yaml:"name"`      // unique name
-	Probers   map[string]*probe.Prober  `yaml:"probers"`   // probers
-	Notifiers map[string]*notify.Notify `yaml:"notifiers"` // notifiers
-	isWatch   int32                     `yaml:"-"`         // is watch
-	done      chan bool                 `yaml:"-"`         // done channel
-	channel   chan probe.Result         `yaml:"-"`         // notify channel
+	Name      string                   `yaml:"name"`      // unique name
+	Probers   map[string]probe.Prober  `yaml:"probers"`   // probers
+	Notifiers map[string]notify.Notify `yaml:"notifiers"` // notifiers
+	isWatch   int32                    `yaml:"-"`         // is watch
+	done      chan bool                `yaml:"-"`         // done channel
+	channel   chan probe.Result        `yaml:"-"`         // notify channel
 
 }
 
@@ -42,8 +42,8 @@ type Channel struct {
 func NewEmpty(name string) *Channel {
 	return &Channel{
 		Name:      name,
-		Probers:   map[string]*probe.Prober{},
-		Notifiers: map[string]*notify.Notify{},
+		Probers:   map[string]probe.Prober{},
+		Notifiers: map[string]notify.Notify{},
 		isWatch:   0,
 		done:      nil,
 		channel:   nil,
@@ -72,43 +72,43 @@ func (c *Channel) Send(result probe.Result) {
 }
 
 // GetProber returns the Notify object
-func (c *Channel) GetProber(name string) *probe.Prober {
+func (c *Channel) GetProber(name string) probe.Prober {
 	return c.Probers[name]
 }
 
 // SetProbers sets the Notify objects
-func (c *Channel) SetProbers(probers []*probe.Prober) {
+func (c *Channel) SetProbers(probers []probe.Prober) {
 	for _, p := range probers {
 		c.SetProber(p)
 	}
 }
 
 // SetProber sets the Notify object
-func (c *Channel) SetProber(p *probe.Prober) {
+func (c *Channel) SetProber(p probe.Prober) {
 	if p == nil {
 		return
 	}
-	c.Probers[(*p).Name()] = p
+	c.Probers[p.Name()] = p
 }
 
 // GetNotify returns the Notify object
-func (c *Channel) GetNotify(name string) *notify.Notify {
+func (c *Channel) GetNotify(name string) notify.Notify {
 	return c.Notifiers[name]
 }
 
 // SetNotifiers sets the Notify objects
-func (c *Channel) SetNotifiers(notifiers []*notify.Notify) {
+func (c *Channel) SetNotifiers(notifiers []notify.Notify) {
 	for _, n := range notifiers {
 		c.SetNotify(n)
 	}
 }
 
 // SetNotify sets the Notify object
-func (c *Channel) SetNotify(n *notify.Notify) {
+func (c *Channel) SetNotify(n notify.Notify) {
 	if n == nil {
 		return
 	}
-	c.Notifiers[(*n).GetName()] = n
+	c.Notifiers[n.GetName()] = n
 }
 
 var dryNotify bool
@@ -152,8 +152,7 @@ func (c *Channel) WatchEvent() {
 			}
 			log.Infof("[%s / %s]: %s (%s) - Status changed [%s] ==> [%s]",
 				kind, c.Name, result.Name, result.Endpoint, result.PreStatus, result.Status)
-			for _, nRef := range c.Notifiers {
-				n := *nRef
+			for _, n := range c.Notifiers {
 				if dryNotify {
 					n.DryNotify(result)
 				} else {

@@ -75,12 +75,11 @@ func scheduleSLA(probers []probe.Prober) {
 
 	log.Debugf("--------- SLA Report Notifies ---------")
 	for _, n := range notifies {
-		log.Debugf("  - %s : %s", (*n).Kind(), (*n).GetName())
+		log.Debugf("  - %s : %s", n.Kind(), n.GetName())
 	}
 
 	SLAFn := func() {
-		for _, nRef := range notifies {
-			n := *nRef
+		for _, n := range notifies {
 			if dryNotify {
 				n.DryNotifyStat(probers)
 			} else {

@@ -43,14 +43,14 @@ func SetChannel(name string) {
 }
 
 // SetProbers sets the probers
-func SetProbers(channel string, probers []*probe.Prober) {
+func SetProbers(channel string, probers []probe.Prober) {
 	for _, p := range probers {
 		SetProber(channel, p)
 	}
 }
 
 // SetProber sets the prober
-func SetProber(channel string, p *probe.Prober) {
+func SetProber(channel string, p probe.Prober) {
 	ch := GetChannel(channel)
 	if ch == nil {
 		SetChannel(channel)
@@ -60,14 +60,14 @@ func SetProber(channel string, p *probe.Prober) {
 }
 
 // SetNotifiers set a notify to the channel
-func SetNotifiers(channel string, notifiers []*notify.Notify) {
+func SetNotifiers(channel string, notifiers []notify.Notify) {
 	for _, n := range notifiers {
 		SetNotify(channel, n)
 	}
 }
 
 // SetNotify set a notify to the channel
-func SetNotify(channel string, n *notify.Notify) {
+func SetNotify(channel string, n notify.Notify) {
 	ch := GetChannel(channel)
 	if ch == nil {
 		SetChannel(channel)
@@ -77,8 +77,8 @@ func SetNotify(channel string, n *notify.Notify) {
 }
 
 // GetNotifiers returns all of the notifiers by a list of channel names
-func GetNotifiers(channel []string) map[string]*notify.Notify {
-	notifiers := make(map[string]*notify.Notify)
+func GetNotifiers(channel []string) map[string]notify.Notify {
+	notifiers := make(map[string]notify.Notify)
 
 	for _, c := range channel {
 		ch := GetChannel(c)
@@ -86,7 +86,7 @@ func GetNotifiers(channel []string) map[string]*notify.Notify {
 			continue
 		}
 		for _, n := range ch.Notifiers {
-			notifiers[(*n).GetName()] = n
+			notifiers[n.GetName()] = n
 		}
 	}
 	return notifiers
