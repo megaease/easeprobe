@@ -38,6 +38,7 @@ import (
 	"github.com/megaease/easeprobe/probe/shell"
 	"github.com/megaease/easeprobe/probe/ssh"
 	"github.com/megaease/easeprobe/probe/tcp"
+	"github.com/megaease/easeprobe/probe/tls"
 
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
@@ -134,6 +135,7 @@ type Conf struct {
 	Shell    []shell.Shell   `yaml:"shell"`
 	Client   []client.Client `yaml:"client"`
 	SSH      ssh.SSH         `yaml:"ssh"`
+	TLS      []tls.TLS       `yaml:"tls"`
 	Host     host.Host       `yaml:"host"`
 	Notify   notify.Config   `yaml:"notify"`
 	Settings Settings        `yaml:"settings"`
@@ -206,6 +208,7 @@ func New(conf *string) (*Conf, error) {
 			Bastion: &ssh.BastionMap,
 			Servers: []ssh.Server{},
 		},
+		TLS: []tls.TLS{},
 		Host: host.Host{
 			Bastion: &host.BastionMap,
 			Servers: []host.Server{},
