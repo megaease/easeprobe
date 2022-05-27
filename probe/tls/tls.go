@@ -34,6 +34,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// TLS implements a config for TLS
 type TLS struct {
 	base.DefaultOptions `yaml:",inline"`
 	Host                string `yaml:"host"`
