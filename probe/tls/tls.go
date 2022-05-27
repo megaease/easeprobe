@@ -79,21 +79,9 @@ func (t *TLS) Config(gConf global.ProbeSettings) error {
 
 // DoProbe return the checking result
 func (t *TLS) DoProbe() (bool, string) {
-	var start = time.Now()
-	result := "success"
-
-	defer func() {
-		lateny := time.Since(start)
-		t.metrics.Latency.With(prometheus.Labels{
-			"name":   t.ProbeName,
-			"status": result,
-		}).Set(float64(lateny.Milliseconds()))
-	}()
-
 	addr := t.Host
 	conn, err := net.DialTimeout("tcp", addr, t.Timeout())
 	if err != nil {
-		result = "tcp_connect_fail"
 		log.Errorf("tcp dial error: %v", err)
 		return false, fmt.Sprintf("tcp dial error: %v", err)
 	}
@@ -115,25 +103,27 @@ func (t *TLS) DoProbe() (bool, string) {
 	defer cancel()
 	err = tconn.HandshakeContext(ctx)
 	if err != nil {
-		result = "tls_handshake_fail"
 		log.Errorf("tls handshake error: %v", err)
 		return false, fmt.Sprintf("tls handshake error: %v", err)
 	}
 
 	if !t.ExpireSkipVerify {
-
 		for _, cert := range tconn.ConnectionState().PeerCertificates {
 			valid := true
 			valid = valid && !time.Now().After(cert.NotAfter)
 			valid = valid && !time.Now().Before(cert.NotBefore)
 
 			if !valid {
-				result = "tls_cert_expire"
 				log.Errorf("host %v cert expired", t.Host)
 				return false, "certificate is expired or not yet valid"
 			}
 		}
 	}
+
+	state := tconn.ConnectionState()
+
+	t.metrics.EarliestCertExpiry.With(prometheus.Labels{}).Set(float64(getEarliestCertExpiry(&state).Unix()))
+	t.metrics.LastChainExpiryTimestampSeconds.With(prometheus.Labels{}).Set(float64(getLastChainExpiry(&state).Unix()))
 
 	return true, "TLS Endpoint Verified Successfully!"
 }
