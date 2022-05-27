@@ -28,8 +28,9 @@ EaseProbe is a simple, standalone, and lightWeight tool that can do health/statu
     - [3.6 Native Client Probe Configuration](#36-native-client-probe-configuration)
     - [3.7 Notification Configuration](#37-notification-configuration)
     - [3.8 Global Setting Configuration](#38-global-setting-configuration)
-  - [4. Community](#4-community)
-  - [5. License](#5-license)
+  - [4. Contributing](#4-contributing)
+  - [5. Community](#5-community)
+  - [6. License](#6-license)
 
 ## 1. Overview
 
@@ -145,7 +146,7 @@ Ease Probe supports the following notifications:
 - **Teams**. Support the [Microsoft Teams](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using?tabs=cURL#setting-up-a-custom-incoming-webhook) notification.
 
 > **Note**:
-> 
+>
 > The notification is **Edge-Triggered Mode**, only notified while the status is changed.
 
 ```YAML
@@ -245,9 +246,9 @@ The Channel is used for connecting the Probers and the Notifiers. It can be conf
 This feature could help you group the Probers and Notifiers into a logical group.
 
 > **Note**:
-> 
-> 1) If you don't define the Channel, the default channel will be used for these probers and notifiers. The default channel name is `__EaseProbe_Channel__` 
-> 
+>
+> 1) If you don't define the Channel, the default channel will be used for these probers and notifiers. The default channel name is `__EaseProbe_Channel__`
+>
 > 2) Versions of EaseProbe prior to  v1.5.0, do not support the `channel` feature
 
 ```YAML
@@ -255,7 +256,7 @@ This feature could help you group the Probers and Notifiers into a logical group
 For example:
 
 ```YAML
-http: 
+http:
    - name: probe A
      channels : [ Dev_Channel, Manager_Channel ]
 shell:
@@ -842,11 +843,15 @@ settings:
 
 ```
 
-## 4. Community
+## 4. Contributing
+If you're instered in contributing to the project, please spare a moment to read our [CONTRIBUTING Guide](./docs/CONTRIBUTING.md)
+
+
+## 5. Community
 
 - [Join Slack Workspace](https://join.slack.com/t/openmegaease/shared_invite/zt-upo7v306-lYPHvVwKnvwlqR0Zl2vveA) for requirement, issue, and development.
 - [MegaEase on Twitter](https://twitter.com/megaease)
 
-## 5. License
+## 6. License
 
 EaseProbe is under the Apache 2.0 license. See the [LICENSE](./LICENSE) file for details.
