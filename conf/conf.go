@@ -28,6 +28,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/megaease/easeprobe/channel"
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify"
 	"github.com/megaease/easeprobe/probe"
@@ -101,6 +102,7 @@ type SLAReport struct {
 	Debug    bool     `yaml:"debug"`
 	DataFile string   `yaml:"data"`
 	Backups  int      `yaml:"backups"`
+	Channels []string `yaml:"channels"`
 }
 
 // HTTPServer is the settings of http server
@@ -232,6 +234,7 @@ func New(conf *string) (*Conf, error) {
 				Debug:    false,
 				DataFile: global.DefaultDataFile,
 				Backups:  global.DefaultMaxBackups,
+				Channels: []string{global.DefaultChannelName},
 			},
 			HTTPServer: HTTPServer{
 				IP:        global.DefaultHTTPServerIP,
@@ -260,6 +263,9 @@ func New(conf *string) (*Conf, error) {
 
 	ssh.BastionMap.ParseAllBastionHost()
 	host.BastionMap.ParseAllBastionHost()
+
+	// pass the dry run to the channel
+	channel.SetDryNotify(c.Settings.Notify.Dry)
 
 	config = &c
 
@@ -317,8 +323,8 @@ func (conf *Conf) initData() {
 	}
 
 	// check if the data file exists and is a regular file
-	datainfo, err := os.Stat(conf.Settings.SLAReport.DataFile)
-	if os.IsNotExist(err) || !datainfo.Mode().IsRegular() {
+	dataInfo, err := os.Stat(conf.Settings.SLAReport.DataFile)
+	if os.IsNotExist(err) || !dataInfo.Mode().IsRegular() {
 		log.Infof("The data file %s, was not found!", conf.Settings.SLAReport.DataFile)
 		return
 	}

@@ -65,6 +65,8 @@ var _ Notify = (*teams.NotifyConfig)(nil)
 // Notify is the configuration of the Notify
 type Notify interface {
 	Kind() string
+	GetName() string
+	GetChannels() []string
 	Config(global.NotifySettings) error
 	Notify(context.Context, probe.Result)
 	NotifyStat(context.Context, []probe.Prober)
