@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"time"
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify/base"
@@ -67,7 +66,7 @@ func (c *NotifyConfig) SendSlackNotification(msg string) error {
 	req.Header.Add("Content-Type", "application/json")
 	req.Close = true
 
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Timeout: c.Timeout}
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
