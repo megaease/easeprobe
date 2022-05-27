@@ -43,6 +43,7 @@ type DefaultOptions struct {
 	ProbeKind         string        `yaml:"-"`
 	ProbeTag          string        `yaml:"-"`
 	ProbeName         string        `yaml:"name"`
+	ProbeChannels     []string      `yaml:"channels"`
 	ProbeTimeout      time.Duration `yaml:"timeout,omitempty"`
 	ProbeTimeInterval time.Duration `yaml:"interval,omitempty"`
 	ProbeFunc         ProbeFuncType `yaml:"-"`
@@ -58,6 +59,11 @@ func (d *DefaultOptions) Kind() string {
 // Name return the probe name
 func (d *DefaultOptions) Name() string {
 	return d.ProbeName
+}
+
+// Channels return the probe channels
+func (d *DefaultOptions) Channels() []string {
+	return d.ProbeChannels
 }
 
 // Timeout get the probe timeout
@@ -91,6 +97,10 @@ func (d *DefaultOptions) Config(gConf global.ProbeSettings,
 	d.ProbeResult.Name = name
 	d.ProbeResult.Endpoint = endpoint
 	d.ProbeResult.TimeFormat = gConf.TimeFormat
+
+	if len(d.ProbeChannels) == 0 {
+		d.ProbeChannels = append(d.ProbeChannels, global.DefaultChannelName)
+	}
 
 	if len(d.ProbeTag) > 0 {
 		log.Infof("Probe [%s / %s] - [%s] base options are configured!", d.ProbeKind, d.ProbeTag, d.ProbeName)

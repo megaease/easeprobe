@@ -51,6 +51,8 @@ type Config struct {
 // Notify is the configuration of the Notify
 type Notify interface {
 	Kind() string
+	GetName() string
+	GetChannels() []string
 	Config(global.NotifySettings) error
 	Notify(probe.Result)
 	NotifyStat([]probe.Prober)

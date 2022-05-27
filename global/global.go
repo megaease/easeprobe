@@ -37,7 +37,7 @@ const (
 	// DefaultProg is the program name
 	DefaultProg = "EaseProbe"
 	// Ver is the program version
-	Ver = "v1.5.0"
+	Ver = "v1.6.0"
 
 	//OrgProg combine organization and program
 	OrgProg = Org + " " + DefaultProg
@@ -59,6 +59,8 @@ const (
 	DefaultProbeInterval = time.Second * 60
 	// DefaultTimeOut is 30 seconds
 	DefaultTimeOut = time.Second * 30
+	// DefaultChannelName  is the default wide channel name
+	DefaultChannelName = "__EaseProbe_Channel__"
 )
 
 const (

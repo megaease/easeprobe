@@ -15,22 +15,25 @@
  * limitations under the License.
  */
 
-package probe
+package main
 
 import (
-	"time"
-
+	"github.com/megaease/easeprobe/conf"
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/notify"
+	log "github.com/sirupsen/logrus"
 )
 
-// Prober Interface
-type Prober interface {
-	Kind() string
-	Name() string
-	Channels() []string
-	Timeout() time.Duration
-	Interval() time.Duration
-	Result() *Result
-	Config(global.ProbeSettings) error
-	Probe() Result
+func configNotifiers(notifies []notify.Notify) {
+	gNotifyConf := global.NotifySettings{
+		TimeFormat: conf.Get().Settings.TimeFormat,
+		Retry:      conf.Get().Settings.Notify.Retry,
+	}
+	for _, n := range notifies {
+		if err := n.Config(gNotifyConf); err != nil {
+			log.Errorf("error: %v", err)
+			continue
+		}
+		log.Infof("Successfully setup the notify channel: %s", n.Kind())
+	}
 }

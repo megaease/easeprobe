@@ -12,8 +12,9 @@ EaseProbe is a simple, standalone, and lightWeight tool that can do health/statu
     - [1.1 Probe](#11-probe)
     - [1.2 Notification](#12-notification)
     - [1.3 Report](#13-report)
-    - [1.4 Administration](#14-administration)
-    - [1.5 Prometheus Metrics](#15-prometheus-metrics)
+    - [1.4 Channel](#14-channel)
+    - [1.5 Administration](#15-administration)
+    - [1.6 Prometheus Metrics](#16-prometheus-metrics)
   - [2. Getting Started](#2-getting-started)
     - [2.1 Build](#21-build)
     - [2.2 Configure](#22-configure)
@@ -143,9 +144,9 @@ Ease Probe supports the following notifications:
 - **SMS**. Support SMS notification with multiple SMS service providers - [Twilio](https://www.twilio.com/sms), [Vonage(Nexmo)](https://developer.vonage.com/messaging/sms/overview), [YunPain](https://www.yunpian.com/doc/en/domestic/list.html)
 - **Teams**. Support the [Microsoft Teams](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using?tabs=cURL#setting-up-a-custom-incoming-webhook) notification.
 
-**Note**:
-
-- The notification is **Edge-Triggered Mode**, only notified while the status is changed.
+> **Note**:
+> 
+> The notification is **Edge-Triggered Mode**, only notified while the status is changed.
 
 ```YAML
 # Notification Configuration
@@ -237,7 +238,56 @@ Check the  [Notification Configuration](#37-notification-configuration) to see h
 For more information, please check the [Global Setting Configuration](#38-global-setting-configuration)
 
 
-### 1.4 Administration
+### 1.4 Channel
+
+The Channel is used for connecting the Probers and the Notifiers. It can be configured for every Prober and Notifier.
+
+This feature could help you group the Probers and Notifiers into a logical group.
+
+> **Note**:
+> 
+> 1) If you don't define the Channel, the default channel will be used for these probers and notifiers. The default channel name is `__EaseProbe_Channel__` 
+> 
+> 2) Versions of EaseProbe prior to  v1.5.0, do not support the `channel` feature
+
+```YAML
+
+For example:
+
+```YAML
+http: 
+   - name: probe A
+     channels : [ Dev_Channel, Manager_Channel ]
+shell:
+   - name: probe B
+     channels: [ Ops_Channel ]
+notify:
+   - discord: Discord
+     channels: [ Dev_Channel, Ops_Channel ]
+   - email: Gmail
+     channels: [ Mgmt_Channel ]
+```
+
+Then, we will have the following diagram
+
+```
+┌───────┐          ┌──────────────┐
+│Probe B├─────────►│ Mgmt_Channel ├────┐
+└───────┘          └──────────────┘    │
+                                       │
+                                       │
+                   ┌─────────────┐     │   ┌─────────┐
+            ┌─────►│ Dev_Channel ├─────▼───► Discord │
+            │      └─────────────┘         └─────────┘
+┌───────┐   │
+│Probe A├───┤
+└───────┘   │
+            │      ┌────────────┐          ┌─────────┐
+            └─────►│ QA_Channel ├──────────►  Gmail  │
+                   └────────────┘          └─────────┘
+```
+
+### 1.5 Administration
 
 There are some administration configuration options:
 
@@ -290,7 +340,7 @@ There are some administration configuration options:
 
   EaseProbe accepts the `HUP` signal to rotate the log.
 
-### 1.5 Prometheus Metrics
+### 1.6 Prometheus Metrics
 
 EaseProbe supports Prometheus metrics.  The Prometheus endpoint is `http://localhost:8181/metrics` by default.
 
@@ -355,7 +405,7 @@ version: v1.5.0
 
 The following example configurations illustrate the EaseProbe supported features.
 
-**Notes**: All probes have the following options:
+**Note**:   All probes have the following options:
 
 - `timeout` - the maximum time to wait for the probe to complete. default: `30s`.
 - `interval` - the interval time to run the probe. default: `1m`.
@@ -530,7 +580,7 @@ Support the host probe, the configuration example as below.
 
 The feature probe the CPU, Memory, and Disk usage, if one of them exceeds the threshold, then mark the host as status down.
 
-> Note:
+> **Note**:
 > - The thresholds are **OR** conditions, if one of them exceeds the threshold, then mark the host as status down.
 > - The Host needs remote server have the following command: `top`, `df`, `free`, `awk`, `grep`, `tr`, and `hostname` (check the [source code](./probe/host/host.go) to see how it works).
 > - The disk usage only check the root disk.
@@ -684,7 +734,7 @@ notify:
 
 ```
 
-**Notes**: All of the notifications can have the following optional configuration.
+**Note**: All of the notifications can have the following optional configuration.
 
 ```YAML
   dry: true # dry notification, print the Discord JSON in log(STDOUT)
