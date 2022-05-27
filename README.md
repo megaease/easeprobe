@@ -844,7 +844,7 @@ settings:
 ```
 
 ## 4. Contributing
-If you're instered in contributing to the project, please spare a moment to read our [CONTRIBUTING Guide](./docs/CONTRIBUTING.md)
+If you're interested in contributing to the project, please spare a moment to read our [CONTRIBUTING Guide](./docs/CONTRIBUTING.md)
 
 
 ## 5. Community
