@@ -24,10 +24,11 @@ EaseProbe is a simple, standalone, and lightWeight tool that can do health/statu
     - [3.2 TCP Probe Configuration](#32-tcp-probe-configuration)
     - [3.3 Shell Command Probe Configuration](#33-shell-command-probe-configuration)
     - [3.4 SSH Command Probe Configuration](#34-ssh-command-probe-configuration)
-    - [3.5 Host Resource Usage Probe Configuration](#35-host-resource-usage-probe-configuration)
-    - [3.6 Native Client Probe Configuration](#36-native-client-probe-configuration)
-    - [3.7 Notification Configuration](#37-notification-configuration)
-    - [3.8 Global Setting Configuration](#38-global-setting-configuration)
+    - [3.5 TLS Probe Configuration](#35-tls-probe-configuration)
+    - [3.6 Host Resource Usage Probe Configuration](#36-host-resource-usage-probe-configuration)
+    - [3.7 Native Client Probe Configuration](#37-native-client-probe-configuration)
+    - [3.8 Notification Configuration](#38-notification-configuration)
+    - [3.9 Global Setting Configuration](#39-global-setting-configuration)
   - [4. Community](#4-community)
   - [5. License](#5-license)
 
@@ -94,7 +95,15 @@ Ease Probe supports the following probing methods: **HTTP**, **TCP**, **Shell Co
         contain: easeprobe
   ```
 
-- **Host**. Run an SSH command on a remote host and check the CPU, Memory, and Disk usage. ( [Host Load Probe](#35-host-resource-usage-probe-configuration) )
+- **TLS**. Ping the remote endpoint, can probe for revoked or expired certificates ( [TLS Probe Configuration](#35-tls-probe-configuration) )
+
+  ```YAML
+  tls:
+    - name: expired test
+      host: expired.badssl.com:443
+  ```
+
+- **Host**. Run an SSH command on a remote host and check the CPU, Memory, and Disk usage. ( [Host Load Probe](#36-host-resource-usage-probe-configuration) )
 
   ```yaml
   host:
@@ -108,7 +117,7 @@ Ease Probe supports the following probing methods: **HTTP**, **TCP**, **Shell Co
           disk: 0.90  # disk usage 90%
   ```
 
-- **Client**. Currently, support the following native client. Support the mTLS. (refer to: [Native Client Probe Configuration](#36-native-client-probe-configuration) )
+- **Client**. Currently, support the following native client. Support the mTLS. (refer to: [Native Client Probe Configuration](#37-native-client-probe-configuration) )
   - **MySQL**. Connect to the MySQL server and run the `SHOW STATUS` SQL.
   - **Redis**. Connect to the Redis server and run the `PING` command.
   - **MongoDB**. Connect to MongoDB server and just ping server.
@@ -195,7 +204,7 @@ notify:
         webhook: "https://outlook.office365.com/webhook/a1269812-6d10-44b1-abc5-b84f93580ba0@9e7b80c7-d1eb-4b52-8582-76f921e416d9/IncomingWebhook/3fdd6767bae44ac58e5995547d66a4e4/f332c8d9-3397-4ac5-957b-b8e3fc465a8c" # see https://docs.microsoft.com/en-us/outlook/actionable-messages/send-via-connectors
 ```
 
-Check the  [Notification Configuration](#37-notification-configuration) to see how to configure it.
+Check the  [Notification Configuration](#38-notification-configuration) to see how to configure it.
 
 ### 1.3 Report
 
@@ -218,14 +227,14 @@ Check the  [Notification Configuration](#37-notification-configuration) to see h
   - HTML: `http://localhost:8181/` or `http://localhost:8181/?refresh=30s`
   - JSON: `http://localhost:8181/api/v1/sla`
 
-  Refer to the [Global Setting Configuration](#38-global-setting-configuration) to see how to configure the access log.
+  Refer to the [Global Setting Configuration](#39-global-setting-configuration) to see how to configure the access log.
 
 
 - **SLA Data Persistence**. Save the SLA statistics data on the disk.
 
   The SLA data would be persisted in `$CWD/data/data.yaml` by default. If you want to configure the path, you can do it in the `settings` section.
 
-  When EaseProbe starts, it looks for the location of `data.yaml` and if found, load the file and remove any probes that are no longer present in the configuration file. Setting a value of `"-"` for `data:` disables SLA persistence (eg `data: "-"`).
+  When EaseProbe starts, it looks for the location of `data.yaml` and if found, loads the file and removes any probes that are no longer present in the configuration file. Setting a value of `"-"` for `data:` disables SLA persistence (eg `data: "-"`).
 
   ```YAML
   settings:
@@ -312,7 +321,7 @@ There are some administration configuration options:
 
 **2) Log file Rotation**
 
-  There are two types of log file: **Application Log** and **HTTP Access Log**.
+  There are two types of the log files: **Application Log** and **HTTP Access Log**.
 
   Both Application Log and HTTP Access Log would be StdOut by default.  They all can be configured by:
 
@@ -353,9 +362,9 @@ Refer to the [Global Setting Configuration](#38-global-setting-configuration) to
 ## 2. Getting Started
 
 You can get started with EaseProbe, by any of the following methods:
-* download the release for your platform from https://github.com/megaease/easeprobe/releases
-* use the available EaseProbe docker image `docker run -it megaease/easeprobe`
-* build `easeprobe` from sources
+* Download the release for your platform from https://github.com/megaease/easeprobe/releases
+* Use the available EaseProbe docker image `docker run -it megaease/easeprobe`
+* Build `easeprobe` from sources
 
 ### 2.1 Build
 
@@ -574,7 +583,29 @@ ssh:
       cmd: "ps -ef | grep kafka"
 ```
 
-### 3.5 Host Resource Usage Probe Configuration
+### 3.5 TLS Probe Configuration
+
+TLS ping to remote endpoint, can probe for revoked or expired certificates
+
+  ```YAML
+  tls:
+    - name: expired test
+      host: expired.badssl.com:443
+      insecure_skip_verify: true # dont check cert validity
+      expire_skip_verify: true # dont check cert expire date
+      # root_ca_pem_path: /path/to/root/ca.pem # ignore if root_ca_pem is present
+      # root_ca_pem: |
+      #   -----BEGIN CERTIFICATE-----
+    - name: untrust test
+      host: untrusted-root.badssl.com:443
+      # insecure_skip_verify: true # dont check cert validity
+      # expire_skip_verify: true # dont check cert expire date
+      # root_ca_pem_path: /path/to/root/ca.pem # ignore if root_ca_pem is present
+      # root_ca_pem: |
+      #   -----BEGIN CERTIFICATE-----    
+  ```
+
+### 3.6 Host Resource Usage Probe Configuration
 
 Support the host probe, the configuration example as below.
 
@@ -609,7 +640,7 @@ host:
       key: /Users/user/.ssh/id_rsa
 ```
 
-### 3.6 Native Client Probe Configuration
+### 3.7 Native Client Probe Configuration
 
 ```YAML
 # Native Client Probe
@@ -661,7 +692,7 @@ client:
 ```
 
 
-### 3.7 Notification Configuration
+### 3.8 Notification Configuration
 
 ```YAML
 # Notification Configuration
@@ -745,7 +776,7 @@ notify:
 ```
 
 
-### 3.8 Global Setting Configuration
+### 3.9 Global Setting Configuration
 
 ```YAML
 # Global settings for all probes and notifiers.
@@ -850,3 +881,4 @@ settings:
 ## 5. License
 
 EaseProbe is under the Apache 2.0 license. See the [LICENSE](./LICENSE) file for details.
+
