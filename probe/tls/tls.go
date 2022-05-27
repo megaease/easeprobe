@@ -28,6 +28,7 @@ import (
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe/base"
+	"github.com/prometheus/client_golang/prometheus"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -42,6 +43,8 @@ type TLS struct {
 	rootCAs       *x509.CertPool
 
 	ExpireSkipVerify bool `yaml:"expire_skip_verify"`
+
+	metrics *metrics
 }
 
 // Config HTTP Config Object
@@ -68,15 +71,29 @@ func (t *TLS) Config(gConf global.ProbeSettings) error {
 		}
 	}
 
+	t.metrics = newMetrics(kind, tag)
+
 	log.Debugf("[%s] configuration: %+v, %+v", t.ProbeKind, t, t.Result())
 	return nil
 }
 
 // DoProbe return the checking result
 func (t *TLS) DoProbe() (bool, string) {
+	var start = time.Now()
+	result := "success"
+
+	defer func() {
+		lateny := time.Since(start)
+		t.metrics.Latency.With(prometheus.Labels{
+			"name":   t.ProbeName,
+			"status": result,
+		}).Set(float64(lateny.Milliseconds()))
+	}()
+
 	addr := t.Host
 	conn, err := net.DialTimeout("tcp", addr, t.Timeout())
 	if err != nil {
+		result = "tcp_connect_fail"
 		log.Errorf("tcp dial error: %v", err)
 		return false, fmt.Sprintf("tcp dial error: %v", err)
 	}
@@ -98,6 +115,7 @@ func (t *TLS) DoProbe() (bool, string) {
 	defer cancel()
 	err = tconn.HandshakeContext(ctx)
 	if err != nil {
+		result = "tls_handshake_fail"
 		log.Errorf("tls handshake error: %v", err)
 		return false, fmt.Sprintf("tls handshake error: %v", err)
 	}
@@ -110,6 +128,7 @@ func (t *TLS) DoProbe() (bool, string) {
 			valid = valid && !time.Now().Before(cert.NotBefore)
 
 			if !valid {
+				result = "tls_cert_expire"
 				log.Errorf("host %v cert expired", t.Host)
 				return false, "certificate is expired or not yet valid"
 			}
