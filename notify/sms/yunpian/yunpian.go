@@ -28,9 +28,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Kind is the type of driver
-const Kind string = "Yunpian"
-
 // Yunpian is the Yunpian sms provider
 type Yunpian struct {
 	conf.Options `yaml:",inline"`
@@ -41,11 +38,6 @@ func New(opt conf.Options) *Yunpian {
 	return &Yunpian{
 		Options: opt,
 	}
-}
-
-// Kind return the type of Notify
-func (c Yunpian) Kind() string {
-	return Kind
 }
 
 // Notify return the type of Notify

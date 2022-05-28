@@ -26,7 +26,6 @@ import (
 
 // Provider Interface
 type Provider interface {
-	Kind() string
 	Notify(string, string) error
 }
 

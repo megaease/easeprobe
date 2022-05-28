@@ -28,9 +28,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Kind is the type of Provider
-const Kind string = "Nexmo"
-
 // Nexmo is the Nexmo sms provider
 type Nexmo struct {
 	conf.Options `yaml:",inline"`
@@ -41,11 +38,6 @@ func New(opt conf.Options) *Nexmo {
 	return &Nexmo{
 		Options: opt,
 	}
-}
-
-// Kind return the type of Notify
-func (c Nexmo) Kind() string {
-	return Kind
 }
 
 // Notify return the type of Notify

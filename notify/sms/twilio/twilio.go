@@ -28,9 +28,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Kind is the type of provider
-const Kind string = "Twilio"
-
 // Twilio is the Twilio sms provider
 type Twilio struct {
 	conf.Options `yaml:",inline"`
@@ -41,11 +38,6 @@ func New(opt conf.Options) *Twilio {
 	return &Twilio{
 		Options: opt,
 	}
-}
-
-// Kind return the type of Notify
-func (c Twilio) Kind() string {
-	return Kind
 }
 
 // Notify return the type of Notify

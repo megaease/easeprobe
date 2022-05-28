@@ -34,17 +34,12 @@ type NotifyConfig struct {
 	File               string `yaml:"file"`
 }
 
-// Kind return the type of Notify
-func (c *NotifyConfig) Kind() string {
-	return c.MyKind
-}
-
 // Config configures the log files
 func (c *NotifyConfig) Config(global global.NotifySettings) error {
-	c.MyKind = "log"
-	c.Format = report.Text
+	c.NotifyKind = "log"
+	c.NotifyFormat = report.Text
 	if c.Dry {
-		logrus.Infof("Notification [%s] - [%s] is running on Dry mode!", c.MyKind, c.Name)
+		logrus.Infof("Notification [%s] - [%s] is running on Dry mode!", c.NotifyKind, c.NotifyName)
 		log.SetOutput(os.Stdout)
 		return nil
 	}
@@ -55,8 +50,8 @@ func (c *NotifyConfig) Config(global global.NotifySettings) error {
 	}
 	log.SetOutput(file)
 
-	logrus.Infof("Notification [%s] - [%s] is configured!", c.Kind(), c.Name)
-	logrus.Debugf("Notification [%s] - [%s] configuration: %+v", c.Kind(), c.Name, c)
+	logrus.Infof("Notification [%s] - [%s] is configured!", c.Kind(), c.NotifyName)
+	logrus.Debugf("Notification [%s] - [%s] configuration: %+v", c.Kind(), c.NotifyName, c)
 	return nil
 }
 

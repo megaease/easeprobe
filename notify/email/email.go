@@ -40,18 +40,13 @@ type NotifyConfig struct {
 	From               string `yaml:"from"`
 }
 
-// Kind return the type of Notify
-func (c *NotifyConfig) Kind() string {
-	return c.MyKind
-}
-
 // Config configures the log files
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
-	c.MyKind = "email"
-	c.Format = report.HTML
-	c.SendFunc = c.SendMail
+	c.NotifyKind = "email"
+	c.NotifyFormat = report.HTML
+	c.NotifySendFunc = c.SendMail
 	c.DefaultNotify.Config(gConf)
-	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.MyKind, c.Name, c)
+	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.NotifyKind, c.NotifyName, c)
 	return nil
 }
 

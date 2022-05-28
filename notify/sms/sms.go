@@ -19,6 +19,7 @@ package sms
 
 import (
 	"errors"
+
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify/sms/conf"
 	"github.com/megaease/easeprobe/notify/sms/nexmo"
@@ -36,19 +37,15 @@ type NotifyConfig struct {
 	Provider conf.Provider `yaml:"-"`
 }
 
-// Kind return the probe kind
-func (c *NotifyConfig) Kind() string {
-	return c.MyKind
-}
-
 // Config Sms Config Object
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
-	c.Format = report.SMS
+	c.NotifyKind = conf.ProviderMap[c.ProviderType]
+	c.NotifyFormat = report.SMS
 	c.DefaultNotify.Config(gConf)
 	c.configSMSDriver()
-	c.SendFunc = c.DoNotify
+	c.NotifySendFunc = c.DoNotify
 
-	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.MyKind, c.Name, c)
+	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.NotifyKind, c.NotifyName, c)
 	return nil
 }
 

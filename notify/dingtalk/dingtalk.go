@@ -36,18 +36,13 @@ type NotifyConfig struct {
 	WebhookURL         string `yaml:"webhook"`
 }
 
-// Kind return the type of Notify
-func (c *NotifyConfig) Kind() string {
-	return c.MyKind
-}
-
 // Config configures the dingtalk notification
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
-	c.MyKind = "dingtalk"
-	c.Format = report.Markdown
-	c.SendFunc = c.SendDingtalkNotification
+	c.NotifyKind = "dingtalk"
+	c.NotifyFormat = report.Markdown
+	c.NotifySendFunc = c.SendDingtalkNotification
 	c.DefaultNotify.Config(gConf)
-	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.MyKind, c.Name, c)
+	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.NotifyKind, c.NotifyName, c)
 	return nil
 }
 
@@ -62,7 +57,7 @@ func (c *NotifyConfig) SendDingtalkNotification(title, msg string) error {
 		"msgtype": "markdown",
 		"markdown": {
 			"title": "%s",
-			"text": "%s" 
+			"text": "%s"
 		}
 	}
 	`, title, msg)

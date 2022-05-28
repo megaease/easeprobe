@@ -28,15 +28,19 @@ import (
 
 // DefaultNotify is the base struct of the Notify
 type DefaultNotify struct {
-	MyKind   string                     `yaml:"-"`
-	Format   report.Format              `yaml:"-"`
-	SendFunc func(string, string) error `yaml:"-"`
+	NotifyKind     string                     `yaml:"-"`
+	NotifyFormat   report.Format              `yaml:"-"`
+	NotifySendFunc func(string, string) error `yaml:"-"`
+	NotifyName     string                     `yaml:"name"`
+	NotifyChannels []string                   `yaml:"channels"`
+	Dry            bool                       `yaml:"dry"`
+	Timeout        time.Duration              `yaml:"timeout"`
+	Retry          global.Retry               `yaml:"retry"`
+}
 
-	Name     string        `yaml:"name"`
-	Channels []string      `yaml:"channels"`
-	Dry      bool          `yaml:"dry"`
-	Timeout  time.Duration `yaml:"timeout"`
-	Retry    global.Retry  `yaml:"retry"`
+// Kind returns the kind of the notification
+func (c *DefaultNotify) Kind() string {
+	return c.NotifyKind
 }
 
 // Config is the default configuration for notification
@@ -45,26 +49,26 @@ func (c *DefaultNotify) Config(gConf global.NotifySettings) error {
 	if c.Dry {
 		mode = "Dry"
 	}
-	log.Infof("Notification [%s] - [%s] is running on %s mode!", c.MyKind, c.Name, mode)
+	log.Infof("Notification [%s] - [%s] is running on %s mode!", c.NotifyKind, c.NotifyName, mode)
 	c.Timeout = gConf.NormalizeTimeOut(c.Timeout)
 	c.Retry = gConf.NormalizeRetry(c.Retry)
 
-	if len(c.Channels) == 0 {
-		c.Channels = append(c.Channels, global.DefaultChannelName)
+	if len(c.NotifyChannels) == 0 {
+		c.NotifyChannels = append(c.NotifyChannels, global.DefaultChannelName)
 	}
 
-	log.Infof("Notification [%s] - [%s] is configured!", c.MyKind, c.Name)
+	log.Infof("Notification [%s] - [%s] is configured!", c.NotifyKind, c.NotifyName)
 	return nil
 }
 
-// GetName returns the name of the notification
-func (c *DefaultNotify) GetName() string {
-	return c.Name
+// Name returns the name of the notification
+func (c *DefaultNotify) Name() string {
+	return c.NotifyName
 }
 
-// GetChannels returns the channels of the notification
-func (c *DefaultNotify) GetChannels() []string {
-	return c.Channels
+// Channels returns the channels of the notification
+func (c *DefaultNotify) Channels() []string {
+	return c.NotifyChannels
 }
 
 // Notify send the result message to the email
@@ -74,7 +78,7 @@ func (c *DefaultNotify) Notify(result probe.Result) {
 		return
 	}
 	title := result.Title()
-	message := report.FormatFuncs[c.Format].ResultFn(result)
+	message := report.FormatFuncs[c.NotifyFormat].ResultFn(result)
 
 	c.SendWithRetry(title, message, "Notification")
 }
@@ -86,31 +90,31 @@ func (c *DefaultNotify) NotifyStat(probers []probe.Prober) {
 		return
 	}
 	title := "Overall SLA Report"
-	message := report.FormatFuncs[c.Format].StatFn(probers)
+	message := report.FormatFuncs[c.NotifyFormat].StatFn(probers)
 	c.SendWithRetry(title, message, "SLA")
 }
 
 // SendWithRetry sends the notification with retry if got error
 func (c *DefaultNotify) SendWithRetry(title string, message string, tag string) {
 	fn := func() error {
-		log.Debugf("[%s / %s / %s] - %s", c.MyKind, c.Name, tag, title)
-		if c.SendFunc == nil {
-			log.Errorf("[%s / %s / %s] - %s SendFunc is nil", c.MyKind, c.Name, tag, title)
+		log.Debugf("[%s / %s / %s] - %s", c.NotifyKind, c.NotifyName, tag, title)
+		if c.NotifySendFunc == nil {
+			log.Errorf("[%s / %s / %s] - %s SendFunc is nil", c.NotifyKind, c.NotifyName, tag, title)
 		}
-		return c.SendFunc(title, message)
+		return c.NotifySendFunc(title, message)
 	}
-	err := global.DoRetry(c.MyKind, c.Name, tag, c.Retry, fn)
-	report.LogSend(c.MyKind, c.Name, tag, title, err)
+	err := global.DoRetry(c.NotifyKind, c.NotifyName, tag, c.Retry, fn)
+	report.LogSend(c.NotifyKind, c.NotifyName, tag, title, err)
 }
 
 // DryNotify just log the notification message
 func (c *DefaultNotify) DryNotify(result probe.Result) {
-	log.Infof("[%s / %s] - %s", c.MyKind, c.Name,
-		report.FormatFuncs[c.Format].ResultFn(result))
+	log.Infof("[%s / %s] - %s", c.NotifyKind, c.NotifyName,
+		report.FormatFuncs[c.NotifyFormat].ResultFn(result))
 }
 
 // DryNotifyStat just log the notification message
 func (c *DefaultNotify) DryNotifyStat(probers []probe.Prober) {
-	log.Infof("[%s / %s] - %s", c.MyKind, c.Name,
-		report.FormatFuncs[c.Format].StatFn(probers))
+	log.Infof("[%s / %s] - %s", c.NotifyKind, c.NotifyName,
+		report.FormatFuncs[c.NotifyFormat].StatFn(probers))
 }

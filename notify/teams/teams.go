@@ -35,20 +35,15 @@ type NotifyConfig struct {
 	client goteamsnotify.API
 }
 
-// Kind return the type of Notify
-func (c *NotifyConfig) Kind() string {
-	return c.MyKind
-}
-
 // Config configures the teams notification
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
-	c.MyKind = "teams"
-	c.Format = report.MarkdownSocial
-	c.SendFunc = c.SendTeamsMessage
+	c.NotifyKind = "teams"
+	c.NotifyFormat = report.MarkdownSocial
+	c.NotifySendFunc = c.SendTeamsMessage
 	c.DefaultNotify.Config(gConf)
 
 	c.client = goteamsnotify.NewClient()
-	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.MyKind, c.Name, c)
+	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.NotifyKind, c.NotifyName, c)
 	return nil
 }
 

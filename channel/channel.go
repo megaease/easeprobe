@@ -108,7 +108,7 @@ func (c *Channel) SetNotify(n notify.Notify) {
 	if n == nil {
 		return
 	}
-	c.Notifiers[n.GetName()] = n
+	c.Notifiers[n.Name()] = n
 }
 
 var dryNotify bool
