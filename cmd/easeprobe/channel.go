@@ -40,11 +40,11 @@ func configChannels(probers []probe.Prober, notifiers []notify.Notify) {
 	// set the notify to channels
 	for i := 0; i < len(notifiers); i++ {
 		n := notifiers[i]
-		if len(n.GetChannels()) <= 0 {
+		if len(n.Channels()) <= 0 {
 			channel.SetNotify(global.DefaultChannelName, n)
 			continue
 		}
-		for _, cName := range n.GetChannels() {
+		for _, cName := range n.Channels() {
 			channel.SetNotify(cName, n)
 		}
 	}
@@ -72,7 +72,7 @@ func checkChannels() {
 
 		log.Debugf("   Notifiers:\n")
 		for _, n := range ch.Notifiers {
-			log.Debugf("     - %s: %s\n", n.Kind(), n.GetName())
+			log.Debugf("     - %s: %s\n", n.Kind(), n.Name())
 		}
 		if len(ch.Notifiers) <= 0 {
 			log.Warnf("Channel(%s) has no notifiers!", cName)

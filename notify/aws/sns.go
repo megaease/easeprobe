@@ -38,17 +38,17 @@ type SNSNotifyConfig struct {
 
 // Kind return the type of Notify
 func (c *SNSNotifyConfig) Kind() string {
-	return c.MyKind
+	return c.NotifyKind
 }
 
 // Config configures the slack notification
 func (c *SNSNotifyConfig) Config(gConf global.NotifySettings) error {
-	c.MyKind = "AWS-SNS"
+	c.NotifyKind = "AWS-SNS"
 	if c.Format == report.Unknown {
 		c.Format = report.Text
 	}
-	c.DefaultNotify.Format = c.Format
-	c.SendFunc = c.SendSNS
+	c.DefaultNotify.NotifyFormat = c.Format
+	c.NotifySendFunc = c.SendSNS
 
 	if err := c.Options.Config(gConf); err != nil {
 		return err
@@ -57,7 +57,7 @@ func (c *SNSNotifyConfig) Config(gConf global.NotifySettings) error {
 	c.client = sns.New(c.session)
 	c.context = context.Background()
 
-	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.MyKind, c.Name, c)
+	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.NotifyKind, c.NotifyName, c)
 	return nil
 }
 
@@ -78,6 +78,6 @@ func (c *SNSNotifyConfig) SendSNSNotification(msg string) error {
 	if err != nil {
 		return err
 	}
-	log.Debugf("[%s / %s] Message ID = %s", c.Kind(), c.Name, *res.MessageId)
+	log.Debugf("[%s / %s] Message ID = %s", c.Kind(), c.NotifyName, *res.MessageId)
 	return nil
 }

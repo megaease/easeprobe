@@ -36,18 +36,13 @@ type NotifyConfig struct {
 	ChatID             string `yaml:"chat_id"`
 }
 
-// Kind return the type of Notify
-func (c *NotifyConfig) Kind() string {
-	return c.MyKind
-}
-
 // Config configures the telegram configuration
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
-	c.MyKind = "telegram"
-	c.Format = report.Markdown
-	c.SendFunc = c.SendTelegram
+	c.NotifyKind = "telegram"
+	c.NotifyFormat = report.Markdown
+	c.NotifySendFunc = c.SendTelegram
 	c.DefaultNotify.Config(gConf)
-	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.MyKind, c.Name, c)
+	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.NotifyKind, c.NotifyName, c)
 	return nil
 }
 

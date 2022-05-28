@@ -35,18 +35,13 @@ type NotifyConfig struct {
 	WebhookURL         string `yaml:"webhook"`
 }
 
-// Kind return the type of Notify
-func (c *NotifyConfig) Kind() string {
-	return c.MyKind
-}
-
 // Config configures the slack notification
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
-	c.MyKind = "wecom"
-	c.Format = report.Markdown
-	c.SendFunc = c.SendWecom
+	c.NotifyKind = "wecom"
+	c.NotifyFormat = report.Markdown
+	c.NotifySendFunc = c.SendWecom
 	c.DefaultNotify.Config(gConf)
-	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.MyKind, c.Name, c)
+	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.NotifyKind, c.NotifyName, c)
 	return nil
 }
 
@@ -64,7 +59,7 @@ func (c *NotifyConfig) SendWecomNotification(msg string) error {
 	{
 		"msgtype": "markdown",
 		"markdown": {
-			"content": "%s" 
+			"content": "%s"
 		}
 	}
 	`, report.JSONEscape(msg))

@@ -75,7 +75,7 @@ func scheduleSLA(probers []probe.Prober) {
 
 	log.Debugf("--------- SLA Report Notifies ---------")
 	for _, n := range notifies {
-		log.Debugf("  - %s : %s", n.Kind(), n.GetName())
+		log.Debugf("  - %s : %s", n.Kind(), n.Name())
 	}
 
 	SLAFn := func() {

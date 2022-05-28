@@ -110,14 +110,9 @@ type NotifyConfig struct {
 	Thumbnail          string `yaml:"thumbnail"`
 }
 
-// Kind return the type of Notify
-func (c *NotifyConfig) Kind() string {
-	return c.MyKind
-}
-
 // Config configures the log files
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
-	c.MyKind = "discord"
+	c.NotifyKind = "discord"
 	c.DefaultNotify.Config(gConf)
 
 	if len(strings.TrimSpace(c.Username)) <= 0 {
@@ -132,7 +127,7 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 		c.Thumbnail = global.GetEaseProbe().IconURL
 	}
 
-	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.MyKind, c.Name, c)
+	log.Debugf("Notification [%s] - [%s] configuration: %+v", c.NotifyKind, c.NotifyName, c)
 	return nil
 }
 
@@ -192,8 +187,8 @@ func (c *NotifyConfig) Notify(result probe.Result) {
 		return c.SendDiscordNotification(discord)
 	}
 
-	err := global.DoRetry(c.Kind(), c.Name, tag, c.Retry, fn)
-	report.LogSend(c.Kind(), c.Name, tag, result.Name, err)
+	err := global.DoRetry(c.Kind(), c.NotifyName, tag, c.Retry, fn)
+	report.LogSend(c.Kind(), c.NotifyName, tag, result.Name, err)
 }
 
 // NewEmbed new a embed object from a result
@@ -300,11 +295,11 @@ func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
 			return c.SendDiscordNotification(discord)
 		}
 
-		err := global.DoRetry(c.Kind(), c.Name, tag, c.Retry, fn)
+		err := global.DoRetry(c.Kind(), c.NotifyName, tag, c.Retry, fn)
 		if err != nil {
-			log.Errorf("[%s / %s / %s] - failed to send part [%d/%d]! (%v)", c.Kind(), c.Name, tag, idx+1, total, err)
+			log.Errorf("[%s / %s / %s] - failed to send part [%d/%d]! (%v)", c.Kind(), c.NotifyName, tag, idx+1, total, err)
 		} else {
-			log.Infof("[%s / %s / %s] - successfully sent part [%d/%d]!", c.Kind(), c.Name, tag, idx+1, total)
+			log.Infof("[%s / %s / %s] - successfully sent part [%d/%d]!", c.Kind(), c.NotifyName, tag, idx+1, total)
 		}
 
 	}
@@ -318,7 +313,7 @@ func (c *NotifyConfig) DryNotify(result probe.Result) {
 		log.Errorf("error : %v", err)
 		return
 	}
-	log.Infof("[%s / %s ] Dry notify - %s", c.Kind(), c.Name, string(json))
+	log.Infof("[%s / %s ] Dry notify - %s", c.Kind(), c.NotifyName, string(json))
 }
 
 // DryNotifyStat just log the notification message
@@ -329,7 +324,7 @@ func (c *NotifyConfig) DryNotifyStat(probers []probe.Prober) {
 		log.Errorf("error : %v", err)
 		return
 	}
-	log.Infof("[%s / %s ] Dry notify - %s", c.Kind(), c.Name, string(json))
+	log.Infof("[%s / %s ] Dry notify - %s", c.Kind(), c.NotifyName, string(json))
 }
 
 // SendDiscordNotification will post to an 'Incoming Webhook' url setup in Discrod Apps.
