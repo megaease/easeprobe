@@ -24,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 )
 
@@ -54,6 +55,17 @@ func CreateTestResult() *Result {
 		TimeFormat: "2006-01-02 15:04:05 UTC",
 	}
 	return r
+}
+
+func TestResult(t *testing.T) {
+	name := "Test Name"
+	NewResultWithName(name)
+	r := GetResultData(name)
+	assert.Equal(t, name, r.Name)
+	r1 := NewResultWithName(name)
+	assert.Equal(t, r, r1)
+	d := r.Clone()
+	assert.Equal(t, name, d.Name)
 }
 
 func TestStatClone(t *testing.T) {

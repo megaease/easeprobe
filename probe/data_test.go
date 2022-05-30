@@ -230,14 +230,14 @@ func TestMetaData(t *testing.T) {
 	removeAll("data/")
 }
 
-
 type DummyProbe struct {
-	MyName string
-	MyResult *Result
+	MyName     string
+	MyResult   *Result
 	MyChannels []string
-	MyTimeout time.Duration
+	MyTimeout  time.Duration
 	MyInterval time.Duration
 }
+
 func (d *DummyProbe) Kind() string {
 	return "dummy"
 }
@@ -265,21 +265,20 @@ func (d *DummyProbe) Probe() Result {
 
 func TestCleanData(t *testing.T) {
 	name := "dummy1"
-	SetResultData(name, &Result{Name:name,})
+	SetResultData(name, &Result{Name: name})
 	name = "dummy2"
-	SetResultData(name, &Result{Name:name,})
+	SetResultData(name, &Result{Name: name})
 	SetResultsData(testResults)
 	assert.Equal(t, len(resultData), 4)
 
-
 	p := []Prober{
 		&DummyProbe{
-			MyName: testResults[0].Name,
-			MyResult: &Result{Name:testResults[0].Name},
+			MyName:   testResults[0].Name,
+			MyResult: &Result{Name: testResults[0].Name},
 		},
 		&DummyProbe{
-			MyName: testResults[1].Name,
-			MyResult: &Result{Name:testResults[1].Name},
+			MyName:   testResults[1].Name,
+			MyResult: &Result{Name: testResults[1].Name},
 		},
 	}
 	CleanData(p)
