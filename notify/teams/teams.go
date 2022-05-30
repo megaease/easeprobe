@@ -62,7 +62,7 @@ func (c *NotifyConfig) SendTeamsMessage(title, msg string) error {
 		Type:    "MessageCard",
 		Context: "https://schema.org/extensions",
 		Title:   title,
-		Text:    msg,
+		Text:    report.JSONEscape(msg),
 	})
 
 	if err != nil {
