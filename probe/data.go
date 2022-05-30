@@ -77,7 +77,7 @@ func GetResultData(name string) *Result {
 	return nil
 }
 
-// CleanData removes the items in resultData not in r[]
+// CleanData removes the items in resultData not in []Prober
 func CleanData(p []Prober) {
 	var data = map[string]*Result{}
 	for i := 0; i < len(p); i++ {

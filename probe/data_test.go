@@ -229,3 +229,59 @@ func TestMetaData(t *testing.T) {
 
 	removeAll("data/")
 }
+
+
+type DummyProbe struct {
+	MyName string
+	MyResult *Result
+	MyChannels []string
+	MyTimeout time.Duration
+	MyInterval time.Duration
+}
+func (d *DummyProbe) Kind() string {
+	return "dummy"
+}
+func (d *DummyProbe) Name() string {
+	return d.MyName
+}
+func (d *DummyProbe) Channels() []string {
+	return d.MyChannels
+}
+func (d *DummyProbe) Timeout() time.Duration {
+	return d.MyTimeout
+}
+func (d *DummyProbe) Interval() time.Duration {
+	return d.MyInterval
+}
+func (d *DummyProbe) Result() *Result {
+	return d.MyResult
+}
+func (d *DummyProbe) Config(gConf global.ProbeSettings) error {
+	return nil
+}
+func (d *DummyProbe) Probe() Result {
+	return *d.MyResult
+}
+
+func TestCleanData(t *testing.T) {
+	name := "dummy1"
+	SetResultData(name, &Result{Name:name,})
+	name = "dummy2"
+	SetResultData(name, &Result{Name:name,})
+	SetResultsData(testResults)
+	assert.Equal(t, len(resultData), 4)
+
+
+	p := []Prober{
+		&DummyProbe{
+			MyName: testResults[0].Name,
+			MyResult: &Result{Name:testResults[0].Name},
+		},
+		&DummyProbe{
+			MyName: testResults[1].Name,
+			MyResult: &Result{Name:testResults[1].Name},
+		},
+	}
+	CleanData(p)
+	assert.Equal(t, len(resultData), 2)
+}
