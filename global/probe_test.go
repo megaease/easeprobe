@@ -37,7 +37,6 @@ func TestProbe(t *testing.T) {
 	r = p.NormalizeTimeOut(0)
 	assert.Equal(t, time.Duration(20), r)
 
-
 	r = p.NormalizeInterval(0)
 	assert.Equal(t, DefaultProbeInterval, r)
 

@@ -61,3 +61,15 @@ func TestGetName(t *testing.T) {
 	assert.Equal(t, expected, result)
 	assert.Equal(t, ValidMetricName(result), true)
 }
+
+func TestNewMetrics(t *testing.T) {
+	NewCounter("namespace", "subsystem", "counter", "metric",
+		"help", []string{"label1", "label2"})
+	assert.NotNil(t, GetName("namespace_subsystem_counter_metric"))
+	assert.NotNil(t, Counter("namespace_subsystem_counter_metric"))
+
+	NewGauge("namespace", "subsystem", "gauge", "metric",
+		"help", []string{"label1", "label2"})
+	assert.NotNil(t, GetName("namespace_subsystem_gauge_metric"))
+	assert.NotNil(t, Gauge("namespace_subsystem_gauge_metric"))
+}
