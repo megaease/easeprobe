@@ -3,7 +3,6 @@ module github.com/megaease/easeprobe
 go 1.18
 
 require (
-	github.com/atc0005/go-teams-notify/v2 v2.6.1
 	github.com/aws/aws-sdk-go v1.44.4
 	github.com/go-chi/chi v1.5.4
 	github.com/go-chi/chi/v5 v5.0.7
