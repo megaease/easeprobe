@@ -167,7 +167,7 @@ func TestChannel(t *testing.T) {
 	WatchForAllEvents()
 	nGoroutine := runtime.NumGoroutine()
 	go test.WatchEvent()
-	time.Sleep(200*time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 	assert.Equal(t, nGoroutine, 5)
 
 	AllDone()
