@@ -92,7 +92,7 @@ type mockServer struct {
 	hostname string
 }
 
-func newTlsMockServer(template *x509.Certificate) (*mockServer, error) {
+func newTLSMockServer(template *x509.Certificate) (*mockServer, error) {
 	cert, err := createCert(template)
 	if err != nil {
 		return nil, err
@@ -130,7 +130,7 @@ func (m *mockServer) Close() error {
 }
 
 func TestTlsSimple(t *testing.T) {
-	mock, err := newTlsMockServer(&x509.Certificate{
+	mock, err := newTLSMockServer(&x509.Certificate{
 		DNSNames:              []string{"0.0.0.0"},
 		IPAddresses:           []net.IP{net.IPv4zero, net.IPv6loopback, net.IPv6unspecified},
 		SerialNumber:          big.NewInt(1),
@@ -162,7 +162,7 @@ func TestTlsSimple(t *testing.T) {
 }
 
 func TestTlsUntrust(t *testing.T) {
-	mock, err := newTlsMockServer(&x509.Certificate{
+	mock, err := newTLSMockServer(&x509.Certificate{
 		DNSNames:              []string{"0.0.0.0"},
 		IPAddresses:           []net.IP{net.IPv4zero, net.IPv6loopback, net.IPv6unspecified},
 		SerialNumber:          big.NewInt(1),
@@ -211,7 +211,7 @@ func TestTlsUntrust(t *testing.T) {
 }
 
 func TestTlsExpired(t *testing.T) {
-	mock, err := newTlsMockServer(&x509.Certificate{
+	mock, err := newTLSMockServer(&x509.Certificate{
 		DNSNames:              []string{"0.0.0.0"},
 		IPAddresses:           []net.IP{net.IPv4zero, net.IPv6loopback, net.IPv6unspecified},
 		SerialNumber:          big.NewInt(1),
