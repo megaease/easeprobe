@@ -50,8 +50,8 @@ var stringToLevel = map[string]LogLevel{
 }
 
 // MarshalYAML is marshal the format
-func (l *LogLevel) MarshalYAML() ([]byte, error) {
-	return []byte(levelToString[*l]), nil
+func (l LogLevel) MarshalYAML() (interface{}, error) {
+	return levelToString[l], nil
 }
 
 // UnmarshalYAML is unmarshal the debug level
@@ -78,7 +78,7 @@ type Log struct {
 	MaxAge     int         `yaml:"age"`
 	MaxBackups int         `yaml:"backups"`
 	Compress   bool        `yaml:"compress"`
-	Writter    io.Writer   `yaml:"-"`
+	Writer     io.Writer   `yaml:"-"`
 	Logger     *log.Logger `yaml:"-"`
 	IsStdout   bool        `yaml:"-"`
 }
@@ -93,7 +93,7 @@ func NewLog() Log {
 		MaxAge:     global.DefaultMaxLogAge,
 		MaxBackups: global.DefaultMaxBackups,
 		Compress:   true,
-		Writter:    nil,
+		Writer:     nil,
 		Logger:     nil,
 		IsStdout:   true,
 	}
@@ -104,7 +104,7 @@ func (l *Log) InitLog(logger *log.Logger) {
 	l.Logger = logger
 	l.CheckDefault()
 	if l.File != "" {
-		global.MakeDirectory(l.File)
+		l.File = global.MakeDirectory(l.File)
 	}
 	l.Open()
 	l.ConfigureLogger()
@@ -131,14 +131,14 @@ func (l *Log) Open() {
 	// using stdout if no log file
 	if l.File == "" {
 		l.IsStdout = true
-		l.Writter = os.Stdout
+		l.Writer = os.Stdout
 		return
 	}
 	// using lumberjack if self rotate
 	if l.SelfRotate == true {
 		log.Debugf("[Log] Self Rotate log file %s", l.File)
 		l.IsStdout = false
-		l.Writter = &lumberjack.Logger{
+		l.Writer = &lumberjack.Logger{
 			Filename:   l.File,
 			MaxSize:    l.MaxSize, // megabytes
 			MaxBackups: l.MaxBackups,
@@ -153,42 +153,42 @@ func (l *Log) Open() {
 		log.Warnf("[Log] Cannot open log file: %v", err)
 		log.Infoln("[Log] Using Standard Output as the log output...")
 		l.IsStdout = true
-		l.Writter = os.Stdout
+		l.Writer = os.Stdout
 		return
 	}
 	l.IsStdout = false
-	l.Writter = f
+	l.Writer = f
 }
 
 // Close close the log file
 func (l *Log) Close() {
-	if l.Writter == nil || l.IsStdout {
+	if l.Writer == nil || l.IsStdout {
 		return
 	}
-	if f, ok := l.Writter.(*os.File); ok {
+	if f, ok := l.Writer.(*os.File); ok {
 		f.Close()
 	}
 }
 
 // GetWriter return the log writer
 func (l *Log) GetWriter() io.Writer {
-	if l.Writter == nil {
+	if l.Writer == nil {
 		l.Open()
 	}
-	return (io.Writer)(l.Writter)
+	return (io.Writer)(l.Writer)
 }
 
 //Rotate rotate the log file
 func (l *Log) Rotate() {
-	if l.Writter == nil || l.IsStdout == true {
+	if l.Writer == nil || l.IsStdout == true {
 		return
 	}
-	if lumberjackLogger, ok := l.Writter.(*lumberjack.Logger); ok {
+	if lumberjackLogger, ok := l.Writer.(*lumberjack.Logger); ok {
 		// self rotate
 		if err := lumberjackLogger.Rotate(); err != nil {
 			log.Errorf("[Log] Rotate log file failed: %s", err)
 		}
-	} else if fileLogger, ok := l.Writter.(*os.File); ok {
+	} else if fileLogger, ok := l.Writer.(*os.File); ok {
 		// rotate managed by outside program (e.g. logrotate)
 		// just close and open current log file
 		if err := fileLogger.Close(); err != nil {
@@ -203,11 +203,11 @@ func (l *Log) Rotate() {
 // ConfigureLogger configure the logger
 func (l *Log) ConfigureLogger() {
 	if l.Logger != nil {
-		l.Logger.SetOutput(l.Writter)
+		l.Logger.SetOutput(l.Writer)
 		l.Logger.SetLevel(l.Level.GetLevel())
 		l.Logger.SetFormatter(&log.TextFormatter{FullTimestamp: true})
 	} else { //system-wide log
-		log.SetOutput(l.Writter)
+		log.SetOutput(l.Writer)
 		log.SetLevel(l.Level.GetLevel())
 		log.SetFormatter(&log.TextFormatter{FullTimestamp: true})
 	}
