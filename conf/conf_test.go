@@ -36,6 +36,7 @@ import (
 	"github.com/megaease/easeprobe/probe/shell"
 	"github.com/megaease/easeprobe/probe/ssh"
 	"github.com/megaease/easeprobe/probe/tcp"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -510,10 +511,30 @@ settings:
   log:
     level: debug
     size: 1
-  #backups: 10
-  debug: true
   timeformat: "2006-01-02 15:04:05 UTC"
 `
+
+func checkSettings(t *testing.T, s Settings) {
+	assert.Equal(t, s.Name, "EaseProbeBot")
+	assert.Equal(t, s.IconURL, "https://upload.wikimedia.org/wikipedia/commons/2/2d/Etcher-icon.png")
+	assert.Equal(t, s.HTTPServer.IP, "127.0.0.1")
+	assert.Equal(t, s.HTTPServer.Port, "8181")
+	assert.Equal(t, s.HTTPServer.AutoRefreshTime, 5*time.Second)
+	assert.Equal(t, s.HTTPServer.AccessLog.File, "/tmp/log/easeprobe.access.log")
+	assert.Equal(t, s.HTTPServer.AccessLog.SelfRotate, true)
+	assert.Equal(t, s.SLAReport.Schedule, Weekly)
+	assert.Equal(t, s.SLAReport.Time, "23:59")
+	assert.Equal(t, s.SLAReport.Debug, true)
+	assert.Equal(t, s.SLAReport.Backups, 20)
+	assert.Equal(t, s.SLAReport.Channels, []string{"general"})
+	assert.Equal(t, s.Notify.Dry, true)
+	assert.Equal(t, s.Notify.Retry.Times, 5)
+	assert.Equal(t, s.Notify.Retry.Interval, 10*time.Second)
+	assert.Equal(t, s.Probe.Interval, 15*time.Second)
+	assert.Equal(t, s.Log.Level, LogLevel(log.DebugLevel))
+	assert.Equal(t, s.Log.MaxSize, 1)
+	assert.Equal(t, s.TimeFormat, "2006-01-02 15:04:05 UTC")
+}
 
 const confYAML = confVer + confHTTP + confSSH + confHost + confClient + confNotify + confSettings
 
@@ -555,6 +576,7 @@ func TestConfig(t *testing.T) {
 	checkHostProbe(t, conf.Host)
 
 	checkNotify(t, conf.Notify)
+	checkSettings(t, conf.Settings)
 
 	conf.InitAllLogs()
 	probers := conf.AllProbers()
