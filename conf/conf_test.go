@@ -24,6 +24,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/megaease/easeprobe/notify"
+	"github.com/megaease/easeprobe/notify/discord"
+	"github.com/megaease/easeprobe/notify/email"
+	"github.com/megaease/easeprobe/notify/slack"
+	"github.com/megaease/easeprobe/notify/telegram"
 	"github.com/megaease/easeprobe/probe/client"
 	clientConf "github.com/megaease/easeprobe/probe/client/conf"
 	"github.com/megaease/easeprobe/probe/host"
@@ -391,9 +396,91 @@ notify:
       server: smtp.email.com:465
       username: noreply@megaease.com
       password: xxx
+      from: "send@email.com"
       to: "test@email.com"
       dry: true
 `
+
+func checkNotify(t *testing.T, n notify.Config) {
+	for _, s := range n.Slack {
+		checkSlackNotify(t, s)
+	}
+	for _, d := range n.Discord {
+		checkDiscordNotify(t, d)
+	}
+	for _, tg := range n.Telegram {
+		checkTelegramNotify(t, tg)
+	}
+	for _, e := range n.Email {
+		checkEmailNotify(t, e)
+	}
+}
+
+func checkSlackNotify(t *testing.T, n slack.NotifyConfig) {
+	switch n.NotifyName {
+	case "Slack":
+		assert.Equal(t, n.WebhookURL, "https://hooks.slack.com/services/xxx")
+		assert.Equal(t, n.Channels(), []string{"slack", "general"})
+		assert.Equal(t, n.Dry, false)
+	default:
+		t.Errorf("unexpected notify name %s", n.NotifyName)
+	}
+}
+
+func checkDiscordNotify(t *testing.T, n discord.NotifyConfig) {
+	switch n.NotifyName {
+	case "Discord":
+		assert.Equal(t, n.WebhookURL, "https://discord.com/api/webhooks/xxx")
+		assert.Equal(t, n.Avatar, "https://img.icons8.com/ios/72/appointment-reminders--v1.png")
+		assert.Equal(t, n.Thumbnail, "https://freeiconshop.com/wp-content/uploads/edd/notification-flat.png")
+		assert.Equal(t, n.Dry, true)
+		assert.Equal(t, n.Retry.Times, 3)
+		assert.Equal(t, n.Retry.Interval, 10*time.Second)
+	case "Test":
+		assert.Equal(t, n.WebhookURL, "https://discord.com/api/webhooks/xxx")
+		assert.Equal(t, n.Avatar, "https://img.icons8.com/ios/72/appointment-reminders--v1.png")
+		assert.Equal(t, n.Thumbnail, "https://freeiconshop.com/wp-content/uploads/edd/notification-flat.png")
+		assert.Equal(t, n.Dry, false)
+		assert.Equal(t, n.Retry.Times, 3)
+		assert.Equal(t, n.Retry.Interval, 10*time.Second)
+		assert.Equal(t, n.Channels(), []string{"general"})
+
+	default:
+		t.Errorf("unexpected notify name %s", n.NotifyName)
+	}
+}
+
+func checkTelegramNotify(t *testing.T, n telegram.NotifyConfig) {
+	switch n.NotifyName {
+	case "Dev Channel":
+		assert.Equal(t, n.Token, "123456:xxxxx")
+		assert.Equal(t, n.ChatID, "-1001343458903")
+		assert.Equal(t, n.Channels(), []string{"telegram#Dev", "test"})
+		assert.Equal(t, n.Dry, false)
+	case "Ops Group":
+		assert.Equal(t, n.Token, "123456:yyyyyy")
+		assert.Equal(t, n.ChatID, "-12310934")
+		assert.Equal(t, n.Dry, true)
+		assert.Equal(t, n.Retry.Times, 3)
+		assert.Equal(t, n.Retry.Interval, 8*time.Second)
+	default:
+		t.Errorf("unexpected notify name %s", n.NotifyName)
+	}
+}
+
+func checkEmailNotify(t *testing.T, n email.NotifyConfig) {
+	switch n.NotifyName {
+	case "email":
+		assert.Equal(t, n.Server, "smtp.email.com:465")
+		assert.Equal(t, n.User, "noreply@megaease.com")
+		assert.Equal(t, n.Pass, "xxx")
+		assert.Equal(t, n.From, "send@email.com")
+		assert.Equal(t, n.To, "test@email.com")
+		assert.Equal(t, n.Dry, true)
+	default:
+		t.Errorf("unexpected notify name %s", n.NotifyName)
+	}
+}
 
 const confSettings = `
 settings:
@@ -466,6 +553,8 @@ func TestConfig(t *testing.T) {
 	}
 	checkSSHProbe(t, conf.SSH)
 	checkHostProbe(t, conf.Host)
+
+	checkNotify(t, conf.Notify)
 
 	conf.InitAllLogs()
 	probers := conf.AllProbers()
