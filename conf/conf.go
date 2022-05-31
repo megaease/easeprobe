@@ -295,10 +295,6 @@ func (conf *Conf) InitAllLogs() {
 	conf.Settings.HTTPServer.AccessLog.LogInfo("Web Access")
 }
 
-func logLogfileInfo(name string, file string) {
-
-}
-
 func (conf *Conf) initData() {
 
 	// Check if we are explicitly disabled
@@ -377,7 +373,7 @@ func allProbersHelper(i interface{}) []probe.Prober {
 				continue
 			}
 
-			log.Debugf("--> %s / %s / %v", t.Field(i).Name, t.Field(i).Type.Kind(), vField.Index(j))
+			log.Debugf("--> %s / %s / %+v", t.Field(i).Name, t.Field(i).Type.Kind(), vField.Index(j))
 			probers = append(probers, vField.Index(j).Addr().Interface().(probe.Prober))
 		}
 	}
@@ -407,7 +403,7 @@ func (conf *Conf) AllNotifiers() []notify.Notify {
 				log.Debugf("%s is not a notify type", v.Index(j).Type())
 				continue
 			}
-			log.Debugf("--> %s - %s - %v", t.Field(i).Name, t.Field(i).Type.Kind(), v.Index(j))
+			log.Debugf("--> %s - %s - %+v", t.Field(i).Name, t.Field(i).Type.Kind(), v.Index(j))
 			notifies = append(notifies, v.Index(j).Addr().Interface().(notify.Notify))
 		}
 	}
