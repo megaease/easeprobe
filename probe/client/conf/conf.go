@@ -18,6 +18,7 @@
 package conf
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -97,8 +98,8 @@ func (d *DriverType) DriverType(name string) DriverType {
 }
 
 // MarshalYAML is marshal the driver type
-func (d *DriverType) MarshalYAML() ([]byte, error) {
-	return []byte(d.String()), nil
+func (d DriverType) MarshalYAML() (interface{}, error) {
+	return d.String(), nil
 }
 
 // UnmarshalYAML is unmarshal the driver type
@@ -113,11 +114,15 @@ func (d *DriverType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // UnmarshalJSON is Unmarshal the driver type
 func (d *DriverType) UnmarshalJSON(b []byte) (err error) {
-	*d = d.DriverType(strings.ToLower(string(b)))
+	var s string
+	if err = json.Unmarshal(b, &s); err != nil {
+		return err
+	}
+	*d = d.DriverType(strings.ToLower(s))
 	return nil
 }
 
 // MarshalJSON is marshal the driver
-func (d *DriverType) MarshalJSON() (b []byte, err error) {
+func (d DriverType) MarshalJSON() (b []byte, err error) {
 	return []byte(fmt.Sprintf(`"%s"`, d.String())), nil
 }
