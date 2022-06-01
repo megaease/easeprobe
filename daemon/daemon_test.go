@@ -108,6 +108,7 @@ func TestPIDFileFailed(t *testing.T) {
 	file = "dir/easedprobe.pid"
 	conf, err = NewPIDFile(file)
 	assert.FileExists(t, file)
+	conf.RemovePIDFile()
 	os.RemoveAll("dir")
 
 	monkey.Patch(os.WriteFile, func(string, []byte, os.FileMode) error {
