@@ -3,6 +3,7 @@ module github.com/megaease/easeprobe
 go 1.18
 
 require (
+	bou.ke/monkey v1.0.2
 	github.com/aws/aws-sdk-go v1.44.4
 	github.com/go-chi/chi v1.5.4
 	github.com/go-chi/chi/v5 v5.0.7
@@ -14,9 +15,9 @@ require (
 	github.com/segmentio/kafka-go v0.4.31
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.1
-	github.com/uptrace/bun/driver/pgdriver v1.1.4
+	github.com/uptrace/bun/driver/pgdriver v1.1.5
 	go.mongodb.org/mongo-driver v1.9.0
-	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4
+	golang.org/x/crypto v0.0.0-20220511200225-c6db032c6c88
 	golang.org/x/exp v0.0.0-20220328175248-053ad81199eb
 	golang.org/x/sys v0.0.0-20220503163025-988cb79eb6c6
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
@@ -24,7 +25,6 @@ require (
 )
 
 require (
-	bou.ke/monkey v1.0.2 // indirect
 	github.com/BurntSushi/toml v1.1.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
@@ -48,7 +48,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/rogpeppe/go-internal v1.8.1 // indirect
 	github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc // indirect
-	github.com/uptrace/bun v1.1.4 // indirect
+	github.com/uptrace/bun v1.1.5 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
