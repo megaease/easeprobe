@@ -47,11 +47,20 @@ func (e *Endpoint) ParseHost() error {
 		e.User = e.Host[:userIdx]
 		e.Host = e.Host[userIdx+1:]
 	}
-	_, _, err := net.SplitHostPort(e.Host)
+	host, port, err := net.SplitHostPort(e.Host)
 
 	if err != nil {
 		return err
 	}
+
+	if host == "" {
+		host = "localhost"
+	}
+
+	if port == "" {
+		port = "22"
+	}
+	e.Host = host + ":" + port
 	return nil
 }
 
