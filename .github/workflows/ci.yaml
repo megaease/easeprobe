@@ -33,7 +33,7 @@ jobs:
         run: |
           sudo chown -R root $GITHUB_WORKSPACE
       - name: Spelling Check
-        uses: reviewdog/action-misspell@v1.10.1
+        uses: reviewdog/action-misspell@v1.12.2
       - name: Revive Action
         uses: morphy2k/revive-action@v2.3.1
       - name: "Restore Permissions"
