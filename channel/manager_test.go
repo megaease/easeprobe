@@ -86,7 +86,7 @@ func newDummyNotify(kind, name string, channels []string) *dummyNotify {
 	}
 }
 
-func TestChannel(t *testing.T) {
+func TestManager(t *testing.T) {
 
 	name := "test"
 	SetProber(name, newDummyProber("http", "", "dummy", []string{"test"}))
