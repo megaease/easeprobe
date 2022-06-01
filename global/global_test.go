@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
@@ -32,6 +33,7 @@ import (
 	"testing"
 	"time"
 
+	"bou.ke/monkey"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -124,17 +126,21 @@ func makeCert(path string, caCert *x509.Certificate, caKey *rsa.PrivateKey, subj
 }
 
 func TestTLS(t *testing.T) {
+	_tls := TLS{}
+	conn, e := _tls.Config()
+	assert.Nil(t, conn)
+	assert.Nil(t, e)
 
 	path := GetWorkDir() + "/certs/"
 	os.MkdirAll(path, 0755)
 	defer os.RemoveAll(path)
 
-	tls := TLS{
+	_tls = TLS{
 		CA:   filepath.Join(path, "./ca.crt"),
 		Cert: filepath.Join(path, "./test.crt"),
 		Key:  filepath.Join(path, "./test.key"),
 	}
-	conn, e := tls.Config()
+	conn, e = _tls.Config()
 	assert.Nil(t, conn)
 	assert.NotNil(t, e)
 
@@ -164,9 +170,18 @@ func TestTLS(t *testing.T) {
 	}
 	t.Log("Create and Sign the Server certificate successfully.")
 
-	conn, e = tls.Config()
+	conn, e = _tls.Config()
 	assert.Nil(t, e)
 	assert.NotNil(t, conn)
+
+	monkey.Patch(tls.LoadX509KeyPair, func(certFile, keyFile string) (tls.Certificate, error) {
+		return tls.Certificate{}, fmt.Errorf("load x509 key pair error")
+	})
+
+	conn, e = _tls.Config()
+	assert.NotNil(t, e)
+	assert.Nil(t, conn)
+	monkey.UnpatchAll()
 }
 
 func TestNormalize(t *testing.T) {
@@ -236,4 +251,57 @@ func TestGetWritableDir(t *testing.T) {
 	dir = MakeDirectory(filename)
 	os.RemoveAll(home + "/none")
 	assert.Equal(t, exp, dir)
+}
+
+func TestGetWorkDirFail(t *testing.T) {
+	defer monkey.UnpatchAll()
+	monkey.Patch(os.Getwd, func() (string, error) {
+		return "", fmt.Errorf("error")
+	})
+
+	path := GetWorkDir()
+	home, err := os.UserHomeDir()
+	assert.Nil(t, err)
+	assert.Equal(t, path, home)
+
+	monkey.Patch(os.UserHomeDir, func() (string, error) {
+		return "", fmt.Errorf("error")
+	})
+
+	path = GetWorkDir()
+	assert.Equal(t, path, os.TempDir())
+
+}
+
+func TestMakeDirectoryFail(t *testing.T) {
+	defer monkey.UnpatchAll()
+	monkey.Patch(os.UserHomeDir, func() (string, error) {
+		return "", fmt.Errorf("error")
+	})
+
+	filename := "~/test.txt"
+	result := MakeDirectory(filename)
+	assert.Equal(t, result, filepath.Join(os.TempDir(), filename[2:]))
+
+	monkey.Unpatch(os.UserHomeDir)
+
+	monkey.Patch(filepath.Abs, func(path string) (string, error) {
+		return "", fmt.Errorf("error")
+	})
+	filename = "../test.txt"
+	result = MakeDirectory(filename)
+	assert.Equal(t, result, filepath.Join(GetWorkDir(), "test.txt"))
+
+	monkey.Unpatch(filepath.Abs)
+
+	monkey.Patch(os.MkdirAll, func(string, os.FileMode) error {
+		return fmt.Errorf("error")
+	})
+
+	filename = "/not/existed/test.txt"
+	result = MakeDirectory(filename)
+	assert.Equal(t, result, filepath.Join(GetWorkDir(), "test.txt"))
+
+	monkey.Unpatch(os.MkdirAll)
+
 }

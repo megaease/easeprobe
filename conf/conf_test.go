@@ -18,12 +18,15 @@
 package conf
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"testing"
 	"time"
 
+	"bou.ke/monkey"
+	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify"
 	"github.com/megaease/easeprobe/notify/discord"
 	"github.com/megaease/easeprobe/notify/email"
@@ -586,6 +589,8 @@ func TestConfig(t *testing.T) {
 
 	go httpServer()
 	url := "http://localhost:8080"
+	os.Setenv("HTTP_AUTHORIZATION", "Basic dXNlcm5hbWU6cGFzc3dvcmQ=")
+	os.Setenv("HTTP_TIMEOUT", "10")
 	httpConf, err := New(&url)
 	assert.Nil(t, err)
 	assert.Equal(t, "EaseProbeBot", httpConf.Settings.Name)
@@ -598,4 +603,37 @@ func TestConfig(t *testing.T) {
 
 	os.RemoveAll(file)
 	os.RemoveAll("data")
+}
+
+func TestInitData(t *testing.T) {
+	c := Conf{}
+
+	// data file disabled
+	c.Settings.SLAReport.DataFile = "-"
+	c.initData()
+	assert.NoFileExists(t, c.Settings.SLAReport.DataFile)
+
+	// default data file will be used
+	c.Settings.SLAReport.DataFile = ""
+	c.initData()
+	assert.Equal(t, global.DefaultDataFile, c.Settings.SLAReport.DataFile)
+	assert.DirExists(t, "data")
+	os.RemoveAll("data")
+
+	c.Settings.SLAReport.DataFile = "mydata/sla.yaml"
+	c.initData()
+	assert.Equal(t, "mydata/sla.yaml", c.Settings.SLAReport.DataFile)
+	assert.DirExists(t, "mydata")
+
+	os.WriteFile("mydata/sla.yaml", []byte(""), 0644)
+	c.initData()
+	os.RemoveAll("mydata")
+
+	monkey.Patch(os.MkdirAll, func(path string, perm os.FileMode) error {
+		return fmt.Errorf("MkdirAll")
+	})
+	c.initData()
+	assert.NoDirExists(t, "mydata")
+	monkey.Unpatch(os.MkdirAll)
+
 }

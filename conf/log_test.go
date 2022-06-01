@@ -18,10 +18,12 @@
 package conf
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"bou.ke/monkey"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -93,4 +95,18 @@ func TestLog(t *testing.T) {
 
 func TestNonSelfRotateLog(t *testing.T) {
 	testLogs(t, "my", false, false, false)
+}
+
+func TestOpenLogFail(t *testing.T) {
+	monkey.Patch(os.OpenFile, func(name string, flag int, perm os.FileMode) (*os.File, error) {
+		return nil, fmt.Errorf("error")
+	})
+	defer monkey.UnpatchAll()
+
+	l := NewLog()
+	l.File = "test.log"
+	l.SelfRotate = false
+	l.InitLog(nil)
+	assert.Equal(t, true, l.IsStdout)
+	assert.Equal(t, os.Stdout, l.GetWriter())
 }

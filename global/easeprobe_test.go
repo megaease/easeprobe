@@ -18,9 +18,11 @@
 package global
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
+	"bou.ke/monkey"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -39,4 +41,19 @@ func TestEaseProbe(t *testing.T) {
 
 	str := "test " + Ver + " @ " + h
 	assert.Equal(t, str, FooterString())
+
+}
+
+// If you use VSCode run the test,
+// make sure add the following test flag in settings.json
+//	    "go.testFlags": ["-gcflags=-l"],
+func TestEaseProbeFail(t *testing.T) {
+	monkey.Patch(os.Hostname, func() (string, error) {
+		return "", fmt.Errorf("error")
+	})
+	InitEaseProbe("test", "icon")
+	e := GetEaseProbe()
+	assert.Equal(t, "unknown", e.Host)
+
+	monkey.Unpatch(os.Hostname)
 }
