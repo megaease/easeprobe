@@ -18,11 +18,13 @@
 package daemon
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/global"
 
 	"github.com/stretchr/testify/assert"
@@ -90,4 +92,53 @@ func TestPIDFileSymLink(t *testing.T) {
 	}
 
 	os.RemoveAll(path)
+}
+
+func TestPIDFileFailed(t *testing.T) {
+	file := ""
+	conf, err := NewPIDFile(file)
+	assert.Nil(t, conf)
+	assert.NotNil(t, err)
+
+	file = "./"
+	conf, err = NewPIDFile(file)
+	assert.FileExists(t, global.DefaultPIDFile)
+	os.RemoveAll(global.DefaultPIDFile)
+
+	file = "dir/easedprobe.pid"
+	conf, err = NewPIDFile(file)
+	assert.FileExists(t, file)
+	conf.RemovePIDFile()
+	os.RemoveAll("dir")
+
+	monkey.Patch(os.WriteFile, func(string, []byte, os.FileMode) error {
+		return fmt.Errorf("error")
+	})
+
+	conf, err = NewPIDFile(file)
+	assert.Nil(t, conf)
+	assert.NotNil(t, err)
+	assert.DirExists(t, "dir")
+	assert.NoFileExists(t, file)
+	os.RemoveAll("dir")
+
+	monkey.Patch(os.MkdirAll, func(string, os.FileMode) error {
+		return fmt.Errorf("error")
+	})
+	conf, err = NewPIDFile(file)
+	assert.Nil(t, conf)
+	assert.NotNil(t, err)
+	assert.NoFileExists(t, file)
+	assert.NoDirExists(t, "dir")
+
+	monkey.Patch(os.Stat, func(string) (os.FileInfo, error) {
+		return nil, fmt.Errorf("error")
+	})
+	conf, err = NewPIDFile(file)
+	assert.Nil(t, conf)
+	assert.NotNil(t, err)
+	assert.NoFileExists(t, file)
+	assert.NoDirExists(t, "dir")
+
+	monkey.UnpatchAll()
 }

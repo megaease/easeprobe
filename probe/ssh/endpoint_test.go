@@ -17,7 +17,14 @@
 
 package ssh
 
-import "testing"
+import (
+	"io/ioutil"
+	"testing"
+	"time"
+
+	"bou.ke/monkey"
+	"github.com/stretchr/testify/assert"
+)
 
 func check(t *testing.T, fname string, err error, result, expected string) {
 	if err != nil {
@@ -44,4 +51,38 @@ func TestParseHost(t *testing.T) {
 	e.Host = "user@example.com"
 	check(t, fname, e.ParseHost(), e.Host, "example.com:22")
 	check(t, fname, nil, e.User, "user")
+
+	e.Host = "xx.com:"
+	check(t, fname, e.ParseHost(), e.Host, "xx.com:22")
+
+	e.Host = ":22"
+	check(t, fname, e.ParseHost(), e.Host, "localhost:22")
+}
+
+func TestSSHConfig(t *testing.T) {
+	e := Endpoint{}
+	e.Host = "example.com:22"
+	e.User = "user"
+	e.Password = "password"
+	e.PrivateKey = "key"
+
+	config, err := e.SSHConfig("ssh", "test", 30*time.Second)
+	assert.Nil(t, config)
+	assert.NotNil(t, err)
+
+	monkey.Patch(ioutil.ReadFile, func(filename string) ([]byte, error) {
+		return []byte(`
+-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAaAAAABNlY2RzYS
+1zaGEyLW5pc3RwMjU2AAAACG5pc3RwMjU2AAAAQQR9WZPeBSvixkhjQOh9yCXXlEx5CN9M
+yh94CJJ1rigf8693gc90HmahIR5oMGHwlqMoS7kKrRw+4KpxqsF7LGvxAAAAqJZtgRuWbY
+EbAAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBH1Zk94FK+LGSGNA
+6H3IJdeUTHkI30zKH3gIknWuKB/zr3eBz3QeZqEhHmgwYfCWoyhLuQqtHD7gqnGqwXssa/
+EAAAAgBzKpRmMyXZ4jnSt3ARz0ul6R79AXAr5gQqDAmoFeEKwAAAAOYWpAYm93aWUubG9j
+YWwBAg==
+-----END OPENSSH PRIVATE KEY-----`), nil
+	})
+	config, err = e.SSHConfig("ssh", "test", 30*time.Second)
+	assert.Nil(t, err)
+	assert.NotNil(t, config)
 }
