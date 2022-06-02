@@ -18,11 +18,14 @@
 package channel
 
 import (
+	"sync"
+
 	"github.com/megaease/easeprobe/notify"
 	"github.com/megaease/easeprobe/probe"
 )
 
 var channel = make(map[string]*Channel)
+var wg sync.WaitGroup
 
 // GetAllChannels returns all channels
 func GetAllChannels() map[string]*Channel {
@@ -106,7 +109,7 @@ func ConfigAllChannels() {
 // WatchForAllEvents watch the event for all channels
 func WatchForAllEvents() {
 	for _, c := range channel {
-		go c.WatchEvent()
+		go c.WatchEvent(&wg)
 	}
 }
 
@@ -115,4 +118,5 @@ func AllDone() {
 	for _, c := range channel {
 		c.Done() <- true
 	}
+	wg.Wait()
 }

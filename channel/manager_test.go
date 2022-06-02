@@ -20,7 +20,6 @@ package channel
 import (
 	"fmt"
 	"runtime"
-	"sync/atomic"
 	"testing"
 	"time"
 
@@ -181,17 +180,11 @@ func TestManager(t *testing.T) {
 	}
 
 	WatchForAllEvents()
+	time.Sleep(200 * time.Millisecond)
 	nGoroutine := runtime.NumGoroutine()
 	WatchForAllEvents() // only one watch goroutine for each channel
-
-	// check the goroutine is watching
-	for _, c := range channel {
-		for atomic.LoadInt32(&c.isWatch) == 0 {
-			time.Sleep(10 * time.Millisecond)
-		}
-	}
+	time.Sleep(200 * time.Millisecond)
 	assert.Equal(t, nGoroutine, runtime.NumGoroutine())
 
 	AllDone()
-
 }
