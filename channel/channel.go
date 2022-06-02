@@ -18,10 +18,12 @@
 package channel
 
 import (
+	"sync"
+	"sync/atomic"
+
 	"github.com/megaease/easeprobe/notify"
 	"github.com/megaease/easeprobe/probe"
 	log "github.com/sirupsen/logrus"
-	"sync/atomic"
 )
 
 const kind = "channel"
@@ -120,7 +122,10 @@ func SetDryNotify(dry bool) {
 
 // WatchEvent watches the notification event
 // Go through all of notification to notify the result.
-func (c *Channel) WatchEvent() {
+func (c *Channel) WatchEvent(wg *sync.WaitGroup) {
+	wg.Add(1)
+	defer wg.Done()
+
 	// check if the channel is watching
 	if atomic.CompareAndSwapInt32(&(c.isWatch), 0, 1) == false {
 		log.Warnf("[%s/ %s]: Channel is already watching!", kind, c.Name)

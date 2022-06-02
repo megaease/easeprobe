@@ -19,7 +19,6 @@ package channel
 
 import (
 	"fmt"
-	"math/rand"
 	"runtime"
 	"testing"
 	"time"
@@ -40,13 +39,16 @@ type dummyProber struct {
 func (d *dummyProber) Config(gConf global.ProbeSettings) error {
 	d.ProbeTimeout = gConf.Timeout
 	d.ProbeTimeInterval = gConf.Interval
+	status := true
 	d.DefaultOptions.Config(gConf, d.ProbeKind, d.ProbeTag, d.ProbeName, d.ProbeName,
 		func() (bool, string) {
-			r := rand.Int()
-			if r%2 > 0 {
-				return true, fmt.Sprintf("%s - %d", d.ProbeName, r)
+			switch d.ProbeName {
+			case "dummy-X":
+				return true, "OK"
+			default:
+				status = !status
+				return status, fmt.Sprintf("%s - %v", d.ProbeName, status)
 			}
-			return false, fmt.Sprintf("%s - %d", d.ProbeName, r)
 		})
 	return nil
 }
@@ -89,15 +91,22 @@ func newDummyNotify(kind, name string, channels []string) *dummyNotify {
 func TestManager(t *testing.T) {
 
 	name := "test"
+	SetNotify(name, newDummyNotify("email", "dummy", []string{"test"}))
+	nm := GetNotifiers([]string{"nil-channel"})
+	assert.Equal(t, len(nm), 0)
+	nm = GetNotifiers([]string{"test"})
+	assert.Equal(t, len(nm), 1)
+	assert.Equal(t, nm["dummy"].Name(), "dummy")
+
 	SetProber(name, newDummyProber("http", "", "dummy", []string{"test"}))
 	test := GetChannel(name)
 	assert.NotNil(t, test)
-	SetNotify(name, newDummyNotify("email", "dummy", []string{"test"}))
-	assert.NotNil(t, GetNotifiers([]string{"dummy"}))
 
 	probers := []probe.Prober{
 		newDummyProber("http", "XY", "dummy-XY", []string{"X", "Y"}),
 		newDummyProber("http", "X", "dummy-X", []string{"X"}),
+		newDummyProber("http", "Y", "dummy-Y", []string{"Y"}),
+		newDummyProber("http", "ALL", "dummy-ALL", []string{"X", "Y", "test"}),
 	}
 	SetProbers(probers)
 	x := GetChannel("X")
@@ -106,13 +115,18 @@ func TestManager(t *testing.T) {
 	assert.NotNil(t, x.GetProber("dummy-XY"))
 	assert.Equal(t, "dummy-X", x.GetProber("dummy-X").Name())
 	assert.Equal(t, "dummy-XY", x.GetProber("dummy-XY").Name())
+	assert.Equal(t, "dummy-ALL", x.GetProber("dummy-ALL").Name())
 
 	y := GetChannel("Y")
 	assert.NotNil(t, y)
 	assert.Nil(t, y.GetProber("dummy-X"))
+	assert.NotNil(t, y.GetProber("dummy-Y"))
 	assert.NotNil(t, y.GetProber("dummy-XY"))
+	assert.Equal(t, "dummy-Y", y.GetProber("dummy-Y").Name())
 	assert.Equal(t, "dummy-XY", y.GetProber("dummy-XY").Name())
-	assert.Nil(t, y.GetProber("dummy-X"))
+	assert.Equal(t, "dummy-ALL", y.GetProber("dummy-ALL").Name())
+
+	assert.Equal(t, "dummy-ALL", test.GetProber("dummy-ALL").Name())
 
 	notifiers := []notify.Notify{
 		newDummyNotify("email", "dummy-XY", []string{"X", "Y"}),
@@ -139,7 +153,8 @@ func TestManager(t *testing.T) {
 	gProbeConf := global.ProbeSettings{}
 	test.GetProber("dummy").Config(gProbeConf)
 	x.GetProber("dummy-X").Config(gProbeConf)
-	y.GetProber("dummy-XY").Config(gProbeConf)
+	x.GetProber("dummy-XY").Config(gProbeConf)
+	y.GetProber("dummy-Y").Config(gProbeConf)
 
 	gNotifyConf := global.NotifySettings{}
 	test.GetNotify("dummy").Config(gNotifyConf)
@@ -165,11 +180,11 @@ func TestManager(t *testing.T) {
 	}
 
 	WatchForAllEvents()
+	time.Sleep(200 * time.Millisecond)
 	nGoroutine := runtime.NumGoroutine()
-	go test.WatchEvent()
+	WatchForAllEvents() // only one watch goroutine for each channel
 	time.Sleep(200 * time.Millisecond)
 	assert.Equal(t, nGoroutine, runtime.NumGoroutine())
 
 	AllDone()
-
 }
