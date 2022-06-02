@@ -1,0 +1,50 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**/*.go"
+     - "go.mod"
+     - "go.sum"
+     - "Makefile"
+     - ".github/workflows/test.yaml"
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches:
+      - main
+    paths:
+     - "**/*.go"
+     - "go.mod"
+     - "go.sum"
+     - "Makefile"
+     - ".github/workflows/test.yaml"
+
+
+env:
+  GO_VERSION: 1.18
+
+jobs:
+  test:
+    name: Unit Testing
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - name: Setup Go Environment
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GO_VERSION }}
+        id: go
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+      - name: Go Get dependencies
+        run: go get -v -t -d ./...
+      - name: Go Test
+        run: make test TEST_FLAGS="-coverprofile=coverage.txt -covermode=atomic"
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3.1.0
+        with:
+          file: ./coverage.txt
