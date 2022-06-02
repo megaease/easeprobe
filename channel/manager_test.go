@@ -103,7 +103,6 @@ func TestManager(t *testing.T) {
 	test := GetChannel(name)
 	assert.NotNil(t, test)
 
-
 	probers := []probe.Prober{
 		newDummyProber("http", "XY", "dummy-XY", []string{"X", "Y"}),
 		newDummyProber("http", "X", "dummy-X", []string{"X"}),
@@ -188,7 +187,7 @@ func TestManager(t *testing.T) {
 	// check the goroutine is watching
 	for _, c := range channel {
 		for atomic.LoadInt32(&c.isWatch) == 0 {
-			time.Sleep(10*time.Millisecond)
+			time.Sleep(10 * time.Millisecond)
 		}
 	}
 	assert.Equal(t, nGoroutine, runtime.NumGoroutine())
