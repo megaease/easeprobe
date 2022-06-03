@@ -223,9 +223,10 @@ func TestMetaData(t *testing.T) {
 	if err := LoadDataFromFile(file); err != nil {
 		t.Error(err)
 	}
-	assert.Equal(t, metaData.Name, "myprog")
-	assert.Equal(t, metaData.Ver, global.Ver)
-	assert.Equal(t, metaData.ver, "v1.0.0")
+	m := GetMetaData()
+	assert.Equal(t, m.Name, "myprog")
+	assert.Equal(t, m.Ver, global.Ver)
+	assert.Equal(t, m.ver, "v1.0.0")
 
 	removeAll("data/")
 }

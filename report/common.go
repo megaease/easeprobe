@@ -65,7 +65,6 @@ func HTMLHeader(title string) string {
 			color: #ff9;
 			text-decoration: none;
 		  }
-		  
 		  .head a:hover, .head a:active {
 			text-decoration: underline;
 		  }

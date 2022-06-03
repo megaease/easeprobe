@@ -161,3 +161,16 @@ func (r *Result) DebugJSONIndent() string {
 	}
 	return string(j)
 }
+
+// SLAPercent calculate the SLAPercent
+func (r *Result) SLAPercent() float64 {
+	uptime := r.Stat.UpTime.Seconds()
+	downtime := r.Stat.DownTime.Seconds()
+	if uptime+downtime <= 0 {
+		if r.Status == StatusUp {
+			return 100
+		}
+		return 0
+	}
+	return uptime / (uptime + downtime) * 100
+}

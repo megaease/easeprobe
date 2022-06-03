@@ -37,6 +37,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestReverseMap(t *testing.T) {
+	m := map[int]string{
+		1: "a",
+		2: "b",
+		3: "c",
+	}
+	n := ReverseMap(m)
+	assert.Equal(t, 1, n["a"])
+	assert.Equal(t, 2, n["b"])
+	assert.Equal(t, 3, n["c"])
+}
+
 func makeCA(path string, subject *pkix.Name) (*x509.Certificate, *rsa.PrivateKey, error) {
 	// creating a CA which will be used to sign all of our certificates using the x509 package from the Go Standard Library
 	caCert := &x509.Certificate{

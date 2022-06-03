@@ -20,6 +20,8 @@ package probe
 import (
 	"encoding/json"
 	"strings"
+
+	"github.com/megaease/easeprobe/global"
 )
 
 // Status is the status of Probe
@@ -42,13 +44,9 @@ var (
 		StatusUnknown: "unknown",
 		StatusBad:     "bad",
 	}
-	toStatus = map[string]Status{
-		"init":    StatusInit,
-		"up":      StatusUp,
-		"down":    StatusDown,
-		"unknown": StatusUnknown,
-		"bad":     StatusBad,
-	}
+
+	toStatus = global.ReverseMap(toString)
+
 	toEmoji = map[Status]string{
 		StatusInit:    "🔎",
 		StatusUp:      "✅",

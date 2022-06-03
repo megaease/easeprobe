@@ -117,6 +117,15 @@ func normalize[T constraints.Ordered](global, local, valid, _default T) T {
 	return local
 }
 
+// ReverseMap just reverse the map from [key, value] to [value, key]
+func ReverseMap[K comparable, V comparable](m map[K]V) map[V]K {
+	n := make(map[V]K, len(m))
+	for k, v := range m {
+		n[v] = k
+	}
+	return n
+}
+
 // Config return a tls.Config object
 func (t *TLS) Config() (*tls.Config, error) {
 	if len(t.CA) <= 0 || len(t.Cert) <= 0 || len(t.Key) <= 0 {

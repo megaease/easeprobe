@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify/base"
 )
 
@@ -62,15 +63,7 @@ type Options struct {
 }
 
 // ProviderTypeMap is the map of provider [name, provider]
-var ProviderTypeMap = reverseMap(ProviderMap)
-
-func reverseMap(m map[ProviderType]string) map[string]ProviderType {
-	n := make(map[string]ProviderType, len(m))
-	for k, v := range m {
-		n[v] = k
-	}
-	return n
-}
+var ProviderTypeMap = global.ReverseMap(ProviderMap)
 
 // String convert the DriverType to string
 func (d ProviderType) String() string {
