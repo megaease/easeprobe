@@ -31,11 +31,11 @@ import (
 type ProbeFuncType func() (bool, string)
 
 type dummyProber struct {
-	base.DefaultOptions
+	base.DefaultProbe
 }
 
 func (d *dummyProber) Config(g global.ProbeSettings) error {
-	d.DefaultOptions.Config(g, d.ProbeKind, d.ProbeTag, d.ProbeName, "endpoint", d.DoProbe)
+	d.DefaultProbe.Config(g, d.ProbeKind, d.ProbeTag, d.ProbeName, "endpoint", d.DoProbe)
 	return nil
 }
 func (d *dummyProber) DoProbe() (bool, string) {
@@ -52,7 +52,7 @@ var probes = []probe.Prober{
 func newDummyProber(name string) probe.Prober {
 	r := newDummyResult(name)
 	return &dummyProber{
-		DefaultOptions: base.DefaultOptions{
+		DefaultProbe: base.DefaultProbe{
 			ProbeKind:   "dummy",
 			ProbeTag:    "tag",
 			ProbeName:   name,

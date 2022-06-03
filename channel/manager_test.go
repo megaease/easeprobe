@@ -33,14 +33,14 @@ import (
 )
 
 type dummyProber struct {
-	baseProbe.DefaultOptions
+	baseProbe.DefaultProbe
 }
 
 func (d *dummyProber) Config(gConf global.ProbeSettings) error {
 	d.ProbeTimeout = gConf.Timeout
 	d.ProbeTimeInterval = gConf.Interval
 	status := true
-	d.DefaultOptions.Config(gConf, d.ProbeKind, d.ProbeTag, d.ProbeName, d.ProbeName,
+	d.DefaultProbe.Config(gConf, d.ProbeKind, d.ProbeTag, d.ProbeName, d.ProbeName,
 		func() (bool, string) {
 			switch d.ProbeName {
 			case "dummy-X":
@@ -55,7 +55,7 @@ func (d *dummyProber) Config(gConf global.ProbeSettings) error {
 
 func newDummyProber(kind, tag, name string, channels []string) *dummyProber {
 	return &dummyProber{
-		DefaultOptions: baseProbe.DefaultOptions{
+		DefaultProbe: baseProbe.DefaultProbe{
 			ProbeKind:         kind,
 			ProbeTag:          tag,
 			ProbeName:         name,

@@ -35,13 +35,13 @@ const Kind string = "ssh"
 
 // Server implements a config for ssh command
 type Server struct {
-	base.DefaultOptions `yaml:",inline"`
-	Endpoint            `yaml:",inline"`
-	Command             string   `yaml:"cmd"`
-	Args                []string `yaml:"args,omitempty"`
-	Env                 []string `yaml:"env,omitempty"`
-	Contain             string   `yaml:"contain,omitempty"`
-	NotContain          string   `yaml:"not_contain,omitempty"`
+	base.DefaultProbe `yaml:",inline"`
+	Endpoint          `yaml:",inline"`
+	Command           string   `yaml:"cmd"`
+	Args              []string `yaml:"args,omitempty"`
+	Env               []string `yaml:"env,omitempty"`
+	Contain           string   `yaml:"contain,omitempty"`
+	NotContain        string   `yaml:"not_contain,omitempty"`
 
 	BastionID string    `yaml:"bastion"`
 	bastion   *Endpoint `yaml:"-"`
@@ -96,7 +96,7 @@ func (s *Server) Configure(gConf global.ProbeSettings,
 	kind, tag, name, endpoint string,
 	bastionMap *BastionMapType, fn base.ProbeFuncType) error {
 
-	s.DefaultOptions.Config(gConf, kind, tag, name, endpoint, fn)
+	s.DefaultProbe.Config(gConf, kind, tag, name, endpoint, fn)
 
 	if len(s.Password) <= 0 && len(s.PrivateKey) <= 0 {
 		return fmt.Errorf("password or private key is required")

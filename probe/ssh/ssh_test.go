@@ -53,7 +53,7 @@ func createSSHConfig() *SSH {
 		Bastion: &BastionMap,
 		Servers: []Server{
 			{
-				DefaultOptions: base.DefaultOptions{
+				DefaultProbe: base.DefaultProbe{
 					ProbeName: "Server One",
 				},
 				Endpoint: Endpoint{
@@ -71,7 +71,7 @@ func createSSHConfig() *SSH {
 				BastionID:  "aws",
 			},
 			{
-				DefaultOptions: base.DefaultOptions{
+				DefaultProbe: base.DefaultProbe{
 					ProbeName: "Server Two",
 				},
 				Endpoint: Endpoint{

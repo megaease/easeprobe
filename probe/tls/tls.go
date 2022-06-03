@@ -36,9 +36,9 @@ import (
 
 // TLS implements a config for TLS
 type TLS struct {
-	base.DefaultOptions `yaml:",inline"`
-	Host                string `yaml:"host"`
-	InsecureSkipVerify  bool   `yaml:"insecure_skip_verify"`
+	base.DefaultProbe  `yaml:",inline"`
+	Host               string `yaml:"host"`
+	InsecureSkipVerify bool   `yaml:"insecure_skip_verify"`
 
 	RootCAPemPath string `yaml:"root_ca_pem_path"`
 	RootCaPem     string `yaml:"root_ca_pem"`
@@ -54,7 +54,7 @@ func (t *TLS) Config(gConf global.ProbeSettings) error {
 	kind := "tls"
 	tag := ""
 	name := t.ProbeName
-	t.DefaultOptions.Config(gConf, kind, tag, name, t.Host, t.DoProbe)
+	t.DefaultProbe.Config(gConf, kind, tag, name, t.Host, t.DoProbe)
 
 	rootCaPem := []byte(t.RootCaPem)
 

@@ -43,7 +43,7 @@ func (c *Client) Config(gConf global.ProbeSettings) error {
 	kind := "client"
 	tag := c.DriverType.String()
 	name := c.ProbeName
-	c.DefaultOptions.Config(gConf, kind, tag, name, c.Host, c.DoProbe)
+	c.DefaultProbe.Config(gConf, kind, tag, name, c.Host, c.DoProbe)
 	c.configClientDriver()
 
 	log.Debugf("[%s] configuration: %+v, %+v", c.ProbeKind, c, c.Result())

@@ -59,7 +59,7 @@ var DriverMap = map[DriverType]string{
 
 // Options implements the configuration for native client
 type Options struct {
-	base.DefaultOptions `yaml:",inline"`
+	base.DefaultProbe `yaml:",inline"`
 
 	Host       string     `yaml:"host"`
 	DriverType DriverType `yaml:"driver"`
