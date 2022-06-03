@@ -28,7 +28,7 @@ import (
 )
 
 // Kind is the type of driver
-const Kind string = "Zookeeper"
+const Kind string = "ZooKeeper"
 
 // Zookeeper is the Zookeeper client
 type Zookeeper struct {
@@ -63,12 +63,8 @@ func (z Zookeeper) Probe() (bool, string) {
 		err  error
 	)
 
-	if dialer := getDialer(z); dialer != nil {
-		conn, _, err = zk.Connect([]string{z.Host}, z.Timeout(), zk.WithLogInfo(false), zk.WithDialer(dialer))
-	} else {
-		conn, _, err = zk.Connect([]string{z.Host}, z.Timeout(), zk.WithLogInfo(false))
-	}
-
+	dialer := getDialer(z)
+	conn, _, err = zk.ConnectWithDialer([]string{z.Host}, z.Timeout(), dialer)
 	if err != nil {
 		return false, err.Error()
 	}
@@ -84,7 +80,7 @@ func (z Zookeeper) Probe() (bool, string) {
 
 func getDialer(z Zookeeper) func(network string, address string, _ time.Duration) (net.Conn, error) {
 	if z.tls == nil {
-		return nil
+		return net.DialTimeout
 	}
 
 	return func(network, address string, _ time.Duration) (net.Conn, error) {

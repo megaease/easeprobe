@@ -75,6 +75,9 @@ func (r PostgreSQL) Kind() string {
 // Probe do the health check
 func (r PostgreSQL) Probe() (bool, string) {
 	db := sql.OpenDB(pgdriver.NewConnector(r.ClientOptions...))
+	if db == nil {
+		return false, "OpenDB error"
+	}
 	defer db.Close()
 
 	if err := db.Ping(); err != nil {
@@ -82,9 +85,11 @@ func (r PostgreSQL) Probe() (bool, string) {
 	}
 
 	// run a SQL to test
-	if _, err := db.Query(`SELECT 1`); err != nil {
+	row, err := db.Query(`SELECT 1`)
+	if err != nil {
 		return false, err.Error()
 	}
+	row.Close()
 
 	return true, "Check PostgreSQL Server Successfully!"
 }
