@@ -54,7 +54,6 @@ func TestHTTPConfig(t *testing.T) {
 	h := createHTTP()
 	err := h.Config(global.ProbeSettings{})
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "no such file or directory")
 
 	//TLS config success
 	var gtls *global.TLS
