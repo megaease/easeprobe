@@ -18,10 +18,12 @@
 package ssh
 
 import (
+	"errors"
 	"io/ioutil"
 	"net"
 	"reflect"
 	"testing"
+	"time"
 
 	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/global"
@@ -99,6 +101,24 @@ func TestSSH(t *testing.T) {
 	assert.Equal(t, "bastion.gcp.com:2222", BastionMap["gcp"].Host)
 	assert.Equal(t, "localhost:22", BastionMap["empty"].Host)
 
+	bastion := Endpoint{
+		PrivateKey: "my.key",
+		Host:       "bastion.my.com",
+		User:       "ubuntu",
+		Password:   "pass",
+	}
+	_ssh.Servers[0].SetBastion(&bastion)
+	assert.Equal(t, "bastion.my.com:22", _ssh.Servers[0].bastion.Host)
+	assert.Equal(t, "my.key", _ssh.Servers[0].bastion.PrivateKey)
+	assert.Equal(t, "ubuntu", _ssh.Servers[0].bastion.User)
+	assert.Equal(t, "pass", _ssh.Servers[0].bastion.Password)
+
+	bastion1 := Endpoint{
+		Host: "test:12:23",
+	}
+	_ssh.Servers[0].SetBastion(&bastion1)
+	assert.Equal(t, "bastion.my.com:22", _ssh.Servers[0].bastion.Host)
+
 	global.InitEaseProbe("EaseProbeTest", "none")
 	gConf := global.ProbeSettings{}
 	for i := 0; i < len(_ssh.Servers); i++ {
@@ -164,6 +184,51 @@ YWwBAg==
 		case "Server Two":
 			assert.Equal(t, true, status)
 		}
+	}
+
+	// NewClientConn failed
+	monkey.Patch(ssh.NewClientConn, func(c net.Conn, addr string, config *ssh.ClientConfig) (ssh.Conn, <-chan ssh.NewChannel, <-chan *ssh.Request, error) {
+		return &ssh.Client{}, nil, nil, errors.New("NewClientConn failed")
+	})
+	for _, s := range _ssh.Servers {
+		if s.bastion != nil {
+			status, message := s.DoProbe()
+			assert.Equal(t, false, status)
+			assert.Contains(t, message, "NewClientConn failed")
+		}
+	}
+
+	// ssh Client Dial failed
+	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Dial", func(c *ssh.Client, n, a string) (net.Conn, error) {
+		return nil, errors.New("ssh Client Dial failed")
+	})
+	for _, s := range _ssh.Servers {
+		if s.bastion != nil {
+			status, message := s.DoProbe()
+			assert.Equal(t, false, status)
+			assert.Contains(t, message, "ssh Client Dial failed")
+		}
+	}
+
+	// ssh Dial failed
+	monkey.Patch(ssh.Dial, func(network, addr string, config *ssh.ClientConfig) (*ssh.Client, error) {
+		return nil, errors.New("ssh Dial failed")
+	})
+	for _, s := range _ssh.Servers {
+		status, message := s.DoProbe()
+		assert.Equal(t, false, status)
+		assert.Contains(t, message, "ssh Dial failed")
+	}
+
+	// SSHConfig failed
+	var ed *Endpoint
+	monkey.PatchInstanceMethod(reflect.TypeOf(ed), "SSHConfig", func(e *Endpoint, _, _ string, _ time.Duration) (*ssh.ClientConfig, error) {
+		return nil, errors.New("SSHConfig failed")
+	})
+	for _, s := range _ssh.Servers {
+		status, message := s.DoProbe()
+		assert.Equal(t, false, status)
+		assert.Contains(t, message, "SSHConfig failed")
 	}
 
 	monkey.UnpatchAll()

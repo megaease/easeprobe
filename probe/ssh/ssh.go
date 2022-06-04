@@ -140,19 +140,18 @@ func (s *Server) DoProbe() (bool, string) {
 		log.Errorf("[%s / %s] %v", s.ProbeKind, s.ProbeName, err)
 		status = false
 		message = err.Error() + " - " + output
+	} else {
+		if err := probe.CheckOutput(s.Contain, s.NotContain, string(output)); err != nil {
+			log.Errorf("[%s / %s] - %v", s.ProbeKind, s.ProbeName, err)
+			message = fmt.Sprintf("Error: %v", err)
+			status = false
+		}
 	}
 
 	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, probe.CommandLine(s.Command, s.Args))
 	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, probe.CheckEmpty(string(output)))
 
 	s.ExportMetrics()
-
-	if err := probe.CheckOutput(s.Contain, s.NotContain, string(output)); err != nil {
-		log.Errorf("[%s / %s] - %v", s.ProbeKind, s.ProbeName, err)
-		message = fmt.Sprintf("Error: %v", err)
-		status = false
-	}
-
 	return status, message
 }
 
