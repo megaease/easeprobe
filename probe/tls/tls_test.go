@@ -18,19 +18,26 @@
 package tls
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"math/big"
 	"net"
+	"reflect"
 	"testing"
 	"time"
 
+	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/probe/base"
+	"github.com/stretchr/testify/assert"
 )
 
 var ca *x509.Certificate = &x509.Certificate{
@@ -263,4 +270,57 @@ func TestTlsExpired(t *testing.T) {
 			t.Errorf("tls probe failed %v", msg)
 		}
 	})
+}
+
+func TestTLSFail(t *testing.T) {
+	tlsConf := &TLS{
+		DefaultProbe:       base.DefaultProbe{ProbeName: "dummy tls"},
+		Host:               "example.com",
+		InsecureSkipVerify: false,
+		RootCAPemPath:      "/tmp/ca.pem",
+		RootCaPem:          "ca.pem",
+	}
+	err := tlsConf.Config(global.ProbeSettings{})
+	assert.Contains(t, err.Error(), "cannot parse root ca pem")
+	assert.Equal(t, "tls", tlsConf.Kind())
+
+	tlsConf.RootCaPem = ""
+	err = tlsConf.Config(global.ProbeSettings{})
+	assert.NotNil(t, err)
+
+	monkey.Patch(ioutil.ReadFile, func(filename string) ([]byte, error) {
+		return []byte("CA file Contents"), nil
+	})
+
+	var rootCAs *x509.CertPool
+	monkey.PatchInstanceMethod(reflect.TypeOf(rootCAs), "AppendCertsFromPEM", func(*x509.CertPool, []byte) bool {
+		return true
+	})
+
+	err = tlsConf.Config(global.ProbeSettings{})
+	assert.Nil(t, err)
+
+	monkey.Patch(net.DialTimeout, func(network, address string, timeout time.Duration) (net.Conn, error) {
+		return &net.TCPConn{}, nil
+	})
+	var conn *net.TCPConn
+	monkey.PatchInstanceMethod(reflect.TypeOf(conn), "Close", func(_ *net.TCPConn) error {
+		return nil
+	})
+	var tconn *tls.Conn
+	monkey.PatchInstanceMethod(reflect.TypeOf(tconn), "HandshakeContext", func(_ *tls.Conn, _ context.Context) error {
+		return errors.New("handshake error")
+	})
+
+	s, m := tlsConf.DoProbe()
+	assert.False(t, s)
+	assert.Contains(t, m, "handshake error")
+
+	monkey.Patch(net.DialTimeout, func(network, address string, timeout time.Duration) (net.Conn, error) {
+		return nil, errors.New("dial error")
+	})
+
+	s, m = tlsConf.DoProbe()
+	assert.False(t, s)
+	assert.Contains(t, m, "dial error")
 }
