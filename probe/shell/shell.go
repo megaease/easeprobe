@@ -82,10 +82,12 @@ func (s *Shell) DoProbe() (bool, string) {
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
 			s.exitCode = exitError.ExitCode()
+			message = fmt.Sprintf("Error: %v, ExitCode(%d), Output:%s",
+				err, s.exitCode, probe.CheckEmpty(string(output)))
+		} else {
+			message = fmt.Sprintf("Error: %v, ExitCode(null), Output:%s",
+				err, probe.CheckEmpty(string(output)))
 		}
-
-		message = fmt.Sprintf("Error: %v, ExitCode(%d), Output:%s",
-			err, s.exitCode, probe.CheckEmpty(string(output)))
 		log.Errorf(message)
 		status = false
 	}
@@ -96,7 +98,7 @@ func (s *Shell) DoProbe() (bool, string) {
 
 	if err := probe.CheckOutput(s.Contain, s.NotContain, string(output)); err != nil {
 		log.Errorf("[%s / %s] - %v", s.ProbeKind, s.ProbeName, err)
-		s.ProbeResult.Message = fmt.Sprintf("Error: %v", err)
+		message = fmt.Sprintf("Error: %v", err)
 		status = false
 	}
 
