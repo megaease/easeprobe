@@ -93,7 +93,6 @@ func TestBase(t *testing.T) {
 		assert.Equal(t, pStatus[status], p.Result().Status)
 	}
 
-
 	p.ProbeFunc = nil
 	r := p.Probe()
 	assert.Equal(t, *p.ProbeResult, r)
