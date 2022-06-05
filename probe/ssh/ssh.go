@@ -35,13 +35,13 @@ const Kind string = "ssh"
 
 // Server implements a config for ssh command
 type Server struct {
-	base.DefaultOptions `yaml:",inline"`
-	Endpoint            `yaml:",inline"`
-	Command             string   `yaml:"cmd"`
-	Args                []string `yaml:"args,omitempty"`
-	Env                 []string `yaml:"env,omitempty"`
-	Contain             string   `yaml:"contain,omitempty"`
-	NotContain          string   `yaml:"not_contain,omitempty"`
+	base.DefaultProbe `yaml:",inline"`
+	Endpoint          `yaml:",inline"`
+	Command           string   `yaml:"cmd"`
+	Args              []string `yaml:"args,omitempty"`
+	Env               []string `yaml:"env,omitempty"`
+	Contain           string   `yaml:"contain,omitempty"`
+	NotContain        string   `yaml:"not_contain,omitempty"`
 
 	BastionID string    `yaml:"bastion"`
 	bastion   *Endpoint `yaml:"-"`
@@ -96,7 +96,7 @@ func (s *Server) Configure(gConf global.ProbeSettings,
 	kind, tag, name, endpoint string,
 	bastionMap *BastionMapType, fn base.ProbeFuncType) error {
 
-	s.DefaultOptions.Config(gConf, kind, tag, name, endpoint, fn)
+	s.DefaultProbe.Config(gConf, kind, tag, name, endpoint, fn)
 
 	if len(s.Password) <= 0 && len(s.PrivateKey) <= 0 {
 		return fmt.Errorf("password or private key is required")
@@ -140,19 +140,18 @@ func (s *Server) DoProbe() (bool, string) {
 		log.Errorf("[%s / %s] %v", s.ProbeKind, s.ProbeName, err)
 		status = false
 		message = err.Error() + " - " + output
+	} else {
+		if err := probe.CheckOutput(s.Contain, s.NotContain, string(output)); err != nil {
+			log.Errorf("[%s / %s] - %v", s.ProbeKind, s.ProbeName, err)
+			message = fmt.Sprintf("Error: %v", err)
+			status = false
+		}
 	}
 
 	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, probe.CommandLine(s.Command, s.Args))
 	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, probe.CheckEmpty(string(output)))
 
 	s.ExportMetrics()
-
-	if err := probe.CheckOutput(s.Contain, s.NotContain, string(output)); err != nil {
-		log.Errorf("[%s / %s] - %v", s.ProbeKind, s.ProbeName, err)
-		message = fmt.Sprintf("Error: %v", err)
-		status = false
-	}
-
 	return status, message
 }
 

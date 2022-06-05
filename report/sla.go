@@ -66,7 +66,7 @@ func SLAObject(r *probe.Result) SLA {
 		Availability: Availability{
 			UpTime:   r.Stat.UpTime,
 			DownTime: r.Stat.DownTime,
-			SLA:      SLAPercent(r),
+			SLA:      r.SLAPercent(),
 		},
 		ProbeTimes: Summary{
 			Total: r.Stat.Total,
@@ -80,19 +80,6 @@ func SLAObject(r *probe.Result) SLA {
 		},
 	}
 
-}
-
-// SLAPercent calculate the SLAPercent
-func SLAPercent(r *probe.Result) float64 {
-	uptime := r.Stat.UpTime.Seconds()
-	downtime := r.Stat.DownTime.Seconds()
-	if uptime+downtime <= 0 {
-		if r.Status == probe.StatusUp {
-			return 100
-		}
-		return 0
-	}
-	return uptime / (uptime + downtime) * 100
 }
 
 // SLAJSONSection return the JSON format string to stat
@@ -124,7 +111,7 @@ func SLAJSON(probers []probe.Prober) string {
 func SLATextSection(r *probe.Result) string {
 	text := "Name: %s - %s, \n\tAvailability: Up - %s, Down - %s, SLA: %.2f%%\n\tProbe-Times: Total: %d ( %s ), \n\tLatest-Probe:%s - %s, Message:%s"
 	return fmt.Sprintf(text, r.Name, r.Endpoint,
-		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), SLAPercent(r),
+		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLAPercent(),
 		r.Stat.Total, SLAStatusText(r.Stat, Text),
 		time.Now().UTC().Format(r.TimeFormat),
 		r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
@@ -153,7 +140,7 @@ func SLAMarkdownSection(r *probe.Result, f Format) string {
 		"  ```%s```\n"
 
 	return fmt.Sprintf(text, r.Name, r.Endpoint,
-		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), SLAPercent(r),
+		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLAPercent(),
 		r.Stat.Total, SLAStatusText(r.Stat, MarkdownSocial),
 		time.Now().UTC().Format(r.TimeFormat),
 		r.Status.Emoji()+" "+r.Status.String(), r.Message)
@@ -203,7 +190,7 @@ func SLAHTMLSection(r *probe.Result) string {
 	`
 	return fmt.Sprintf(html, r.Name, r.Endpoint,
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime),
-		SLAPercent(r),
+		r.SLAPercent(),
 		r.Stat.Total, SLAStatusText(r.Stat, HTML),
 		time.Now().UTC().Format(r.TimeFormat),
 		r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
@@ -248,7 +235,7 @@ func SLASlackSection(r *probe.Result) string {
 	}
 
 	return fmt.Sprintf(json, r.Name, JSONEscape(r.Endpoint),
-		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), SLAPercent(r),
+		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLAPercent(),
 		r.Stat.Total, SLAStatusText(r.Stat, MarkdownSocial),
 		t, r.Status.Emoji()+" "+r.Status.String(), message)
 }
@@ -356,7 +343,7 @@ func SLALarkSection(r *probe.Result) string {
 		}
 	},`
 	return fmt.Sprintf(text, r.Name, r.Endpoint,
-		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), SLAPercent(r),
+		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLAPercent(),
 		r.Stat.Total, SLAStatusText(r.Stat, Lark),
 		time.Now().UTC().Format(r.TimeFormat),
 		r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
@@ -386,7 +373,7 @@ func SLALark(probers []probe.Prober) string {
 					"elements": [
 						{
 							"tag": "plain_text",
-							"content": global.Prog 
+							"content": global.Prog
 						}
 					]
 				}
@@ -410,7 +397,7 @@ func SLALark(probers []probe.Prober) string {
 func SLASummary(probers []probe.Prober) string {
 	sla := 0.0
 	for _, p := range probers {
-		sla += SLAPercent(p.Result())
+		sla += p.Result().SLAPercent()
 	}
 	sla /= float64(len(probers))
 	summary := fmt.Sprintf("Total %d Services, Average %.2f%% SLA", len(probers), sla)

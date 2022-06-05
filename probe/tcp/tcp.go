@@ -28,8 +28,8 @@ import (
 
 // TCP implements a config for TCP
 type TCP struct {
-	base.DefaultOptions `yaml:",inline"`
-	Host                string `yaml:"host"`
+	base.DefaultProbe `yaml:",inline"`
+	Host              string `yaml:"host"`
 }
 
 // Config HTTP Config Object
@@ -37,7 +37,7 @@ func (t *TCP) Config(gConf global.ProbeSettings) error {
 	kind := "tcp"
 	tag := ""
 	name := t.ProbeName
-	t.DefaultOptions.Config(gConf, kind, tag, name, t.Host, t.DoProbe)
+	t.DefaultProbe.Config(gConf, kind, tag, name, t.Host, t.DoProbe)
 
 	log.Debugf("[%s] configuration: %+v, %+v", t.ProbeKind, t, t.Result())
 	return nil

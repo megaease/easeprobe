@@ -27,8 +27,12 @@ import (
 )
 
 func TestEaseProbe(t *testing.T) {
-	InitEaseProbe("test", "icon")
 	e := GetEaseProbe()
+	assert.Equal(t, DefaultProg, e.Name)
+	assert.Equal(t, DefaultIconURL, e.IconURL)
+
+	InitEaseProbe("test", "icon")
+	e = GetEaseProbe()
 	assert.Equal(t, "test", e.Name)
 	assert.Equal(t, "icon", e.IconURL)
 	assert.Equal(t, Ver, e.Version)

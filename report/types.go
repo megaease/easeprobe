@@ -20,6 +20,7 @@ package report
 import (
 	"strings"
 
+	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
 )
 
@@ -40,57 +41,34 @@ const (
 	SMS
 )
 
+var fmtToStr = map[Format]string{
+	Unknown:        "unknown",
+	MarkdownSocial: "markdown-social",
+	Markdown:       "markdown",
+	HTML:           "html",
+	JSON:           "json",
+	Text:           "text",
+	Slack:          "slack",
+	Discord:        "discord",
+	Lark:           "lark",
+	SMS:            "sms",
+}
+
+var strToFmt = global.ReverseMap(fmtToStr)
+
 // String covert the Format to string
 func (f Format) String() string {
-	switch f {
-	case MarkdownSocial:
-		return "markdown-social"
-	case Markdown:
-		return "markdown"
-	case HTML:
-		return "html"
-	case JSON:
-		return "json"
-	case Slack:
-		return "slack"
-	case Discord:
-		return "discord"
-	case Lark:
-		return "lark"
-	case SMS:
-		return "sms"
-	default:
-		return "unknown"
-	}
+	return fmtToStr[f]
 }
 
 // Format covert the string to Format
 func (f *Format) Format(s string) {
-	switch strings.ToLower(s) {
-	case "markdown":
-		*f = Markdown
-	case "markdown-social":
-		*f = MarkdownSocial
-	case "html":
-		*f = HTML
-	case "json":
-		*f = JSON
-	case "slack":
-		*f = Slack
-	case "discrod":
-		*f = Discord
-	case "lark":
-		*f = Lark
-	case "sms":
-		*f = SMS
-	default:
-		*f = Unknown
-	}
+	*f = strToFmt[strings.ToLower(s)]
 }
 
 // MarshalYAML is marshal the format
-func (f *Format) MarshalYAML() ([]byte, error) {
-	return []byte(f.String()), nil
+func (f Format) MarshalYAML() (interface{}, error) {
+	return f.String(), nil
 }
 
 // UnmarshalYAML is unmarshal the format

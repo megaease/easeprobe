@@ -50,6 +50,9 @@ func InitEaseProbe(name, icon string) {
 
 // GetEaseProbe return the EaseProbe
 func GetEaseProbe() *EaseProbe {
+	if easeProbe == nil {
+		InitEaseProbe(DefaultProg, DefaultIconURL)
+	}
 	return easeProbe
 }
 

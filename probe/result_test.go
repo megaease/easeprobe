@@ -215,3 +215,25 @@ func TestDebug(t *testing.T) {
 		t.Errorf("%s != %s", str, expected)
 	}
 }
+
+func TestSLAPercent(t *testing.T) {
+	r := NewResult()
+	r.Stat.UpTime = 10 * time.Second
+	r.Stat.DownTime = 10 * time.Second
+	assert.Equal(t, float64(50), r.SLAPercent())
+
+	r.Stat.UpTime = 0
+	r.Stat.DownTime = 10 * time.Second
+	assert.Equal(t, float64(0), r.SLAPercent())
+
+	r.Stat.UpTime = 10 * time.Second
+	r.Stat.DownTime = 0
+	assert.Equal(t, float64(100), r.SLAPercent())
+
+	r.Stat.UpTime = 0
+	r.Stat.DownTime = 0
+	r.Status = StatusDown
+	assert.Equal(t, float64(0), r.SLAPercent())
+	r.Status = StatusUp
+	assert.Equal(t, float64(100), r.SLAPercent())
+}

@@ -33,12 +33,12 @@ import (
 
 // Shell implements a config for shell command (os.Exec)
 type Shell struct {
-	base.DefaultOptions `yaml:",inline"`
-	Command             string   `yaml:"cmd"`
-	Args                []string `yaml:"args,omitempty"`
-	Env                 []string `yaml:"env,omitempty"`
-	Contain             string   `yaml:"contain,omitempty"`
-	NotContain          string   `yaml:"not_contain,omitempty"`
+	base.DefaultProbe `yaml:",inline"`
+	Command           string   `yaml:"cmd"`
+	Args              []string `yaml:"args,omitempty"`
+	Env               []string `yaml:"env,omitempty"`
+	Contain           string   `yaml:"contain,omitempty"`
+	NotContain        string   `yaml:"not_contain,omitempty"`
 
 	exitCode  int `yaml:"-"`
 	outputLen int `yaml:"-"`
@@ -51,7 +51,7 @@ func (s *Shell) Config(gConf global.ProbeSettings) error {
 	kind := "shell"
 	tag := ""
 	name := s.ProbeName
-	s.DefaultOptions.Config(gConf, kind, tag, name,
+	s.DefaultProbe.Config(gConf, kind, tag, name,
 		probe.CommandLine(s.Command, s.Args), s.DoProbe)
 
 	s.metrics = newMetrics(kind, tag)
@@ -82,10 +82,12 @@ func (s *Shell) DoProbe() (bool, string) {
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
 			s.exitCode = exitError.ExitCode()
+			message = fmt.Sprintf("Error: %v, ExitCode(%d), Output:%s",
+				err, s.exitCode, probe.CheckEmpty(string(output)))
+		} else {
+			message = fmt.Sprintf("Error: %v, ExitCode(null), Output:%s",
+				err, probe.CheckEmpty(string(output)))
 		}
-
-		message = fmt.Sprintf("Error: %v, ExitCode(%d), Output:%s",
-			err, s.exitCode, probe.CheckEmpty(string(output)))
 		log.Errorf(message)
 		status = false
 	}
@@ -96,7 +98,7 @@ func (s *Shell) DoProbe() (bool, string) {
 
 	if err := probe.CheckOutput(s.Contain, s.NotContain, string(output)); err != nil {
 		log.Errorf("[%s / %s] - %v", s.ProbeKind, s.ProbeName, err)
-		s.ProbeResult.Message = fmt.Sprintf("Error: %v", err)
+		message = fmt.Sprintf("Error: %v", err)
 		status = false
 	}
 

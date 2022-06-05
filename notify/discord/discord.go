@@ -215,7 +215,7 @@ func (c *NotifyConfig) NewField(result probe.Result, inline bool) Fields {
 		"\n>\t`%s ` \n\n"
 
 	desc := fmt.Sprintf(message, result.Endpoint,
-		result.Stat.UpTime.Round(time.Second), result.Stat.DownTime.Round(time.Second), report.SLAPercent(&result),
+		result.Stat.UpTime.Round(time.Second), result.Stat.DownTime.Round(time.Second), result.SLAPercent(),
 		result.Stat.Total, report.SLAStatusText(result.Stat, report.Markdown),
 		result.StartTime.UTC().Format(result.TimeFormat), result.Status.Emoji()+" "+result.Status.String(),
 		result.Message)

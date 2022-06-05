@@ -34,14 +34,14 @@ import (
 
 // HTTP implements a config for HTTP.
 type HTTP struct {
-	base.DefaultOptions `yaml:",inline"`
-	URL                 string            `yaml:"url"`
-	ContentEncoding     string            `yaml:"content_encoding,omitempty"`
-	Method              string            `yaml:"method,omitempty"`
-	Headers             map[string]string `yaml:"headers,omitempty"`
-	Body                string            `yaml:"body,omitempty"`
-	Contain             string            `yaml:"contain,omitempty"`
-	NotContain          string            `yaml:"not_contain,omitempty"`
+	base.DefaultProbe `yaml:",inline"`
+	URL               string            `yaml:"url"`
+	ContentEncoding   string            `yaml:"content_encoding,omitempty"`
+	Method            string            `yaml:"method,omitempty"`
+	Headers           map[string]string `yaml:"headers,omitempty"`
+	Body              string            `yaml:"body,omitempty"`
+	Contain           string            `yaml:"contain,omitempty"`
+	NotContain        string            `yaml:"not_contain,omitempty"`
 
 	// Option - HTTP Basic Auth Credentials
 	User string `yaml:"username,omitempty"`
@@ -74,7 +74,7 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 	kind := "http"
 	tag := ""
 	name := h.ProbeName
-	h.DefaultOptions.Config(gConf, kind, tag, name, h.URL, h.DoProbe)
+	h.DefaultProbe.Config(gConf, kind, tag, name, h.URL, h.DoProbe)
 
 	if _, err := url.ParseRequestURI(h.URL); err != nil {
 		log.Errorf("URL is not valid - %+v url=%+v", err, h.URL)

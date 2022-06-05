@@ -23,7 +23,6 @@ import (
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
-	"github.com/megaease/easeprobe/report"
 	"github.com/prometheus/client_golang/prometheus"
 
 	log "github.com/sirupsen/logrus"
@@ -38,8 +37,8 @@ const (
 // ProbeFuncType is the probe function type
 type ProbeFuncType func() (bool, string)
 
-// DefaultOptions is the default options for all probe
-type DefaultOptions struct {
+// DefaultProbe is the default options for all probe
+type DefaultProbe struct {
 	ProbeKind         string        `yaml:"-"`
 	ProbeTag          string        `yaml:"-"`
 	ProbeName         string        `yaml:"name"`
@@ -52,37 +51,37 @@ type DefaultOptions struct {
 }
 
 // Kind return the probe kind
-func (d *DefaultOptions) Kind() string {
+func (d *DefaultProbe) Kind() string {
 	return d.ProbeKind
 }
 
 // Name return the probe name
-func (d *DefaultOptions) Name() string {
+func (d *DefaultProbe) Name() string {
 	return d.ProbeName
 }
 
 // Channels return the probe channels
-func (d *DefaultOptions) Channels() []string {
+func (d *DefaultProbe) Channels() []string {
 	return d.ProbeChannels
 }
 
 // Timeout get the probe timeout
-func (d *DefaultOptions) Timeout() time.Duration {
+func (d *DefaultProbe) Timeout() time.Duration {
 	return d.ProbeTimeout
 }
 
 // Interval get the probe interval
-func (d *DefaultOptions) Interval() time.Duration {
+func (d *DefaultProbe) Interval() time.Duration {
 	return d.ProbeTimeInterval
 }
 
 // Result get the probe result
-func (d *DefaultOptions) Result() *probe.Result {
+func (d *DefaultProbe) Result() *probe.Result {
 	return d.ProbeResult
 }
 
 // Config default config
-func (d *DefaultOptions) Config(gConf global.ProbeSettings,
+func (d *DefaultProbe) Config(gConf global.ProbeSettings,
 	kind, tag, name, endpoint string, fn ProbeFuncType) error {
 
 	d.ProbeKind = kind
@@ -114,7 +113,7 @@ func (d *DefaultOptions) Config(gConf global.ProbeSettings,
 }
 
 // Probe return the checking result
-func (d *DefaultOptions) Probe() probe.Result {
+func (d *DefaultProbe) Probe() probe.Result {
 	if d.ProbeFunc == nil {
 		return *d.ProbeResult
 	}
@@ -154,7 +153,7 @@ func (d *DefaultOptions) Probe() probe.Result {
 }
 
 // ExportMetrics export the metrics
-func (d *DefaultOptions) ExportMetrics() {
+func (d *DefaultProbe) ExportMetrics() {
 	d.metrics.Total.With(prometheus.Labels{
 		"name":   d.ProbeName,
 		"status": d.ProbeResult.Status.String(),
@@ -175,11 +174,11 @@ func (d *DefaultOptions) ExportMetrics() {
 
 	d.metrics.SLA.With(prometheus.Labels{
 		"name": d.ProbeName,
-	}).Set(float64(report.SLAPercent(d.ProbeResult)))
+	}).Set(float64(d.ProbeResult.SLAPercent()))
 }
 
 // DownTimeCalculation calculate the down time
-func (d *DefaultOptions) DownTimeCalculation(status probe.Status) {
+func (d *DefaultProbe) DownTimeCalculation(status probe.Status) {
 
 	// Status from UP to DOWN - Failure
 	if d.ProbeResult.PreStatus != probe.StatusDown && status == probe.StatusDown {
