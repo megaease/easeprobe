@@ -427,9 +427,9 @@ func SLACSV(probers []probe.Prober) string {
 
 // SLAShell set the environment for SLA
 func SLAShell(probers []probe.Prober) string {
-	os.Setenv("TYPE", "SLA")
-	os.Setenv("JSON", SLAJSON(probers))
+	os.Setenv("EASEPROBE_TYPE", "SLA")
+	os.Setenv("EASEPROBE_JSON", SLAJSON(probers))
 	csv := SLACSV(probers)
-	os.Setenv("CSV", csv)
+	os.Setenv("EASEPROBE_CSV", csv)
 	return csv
 }

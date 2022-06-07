@@ -258,20 +258,20 @@ func ToCSV(r probe.Result) string {
 // ToShell convert the result object to shell variables
 func ToShell(r probe.Result) string {
 	// set the notify type variable
-	os.Setenv("TYPE", "Status")
+	os.Setenv("EASEPROBE_TYPE", "Status")
 
 	// set individual variables
-	os.Setenv("TITLE", r.Title())
-	os.Setenv("NAME", r.Name)
-	os.Setenv("ENDPOINT", r.Endpoint)
-	os.Setenv("STATUS", r.Status.String())
-	os.Setenv("TIMESTAMP", fmt.Sprintf("%d", r.StartTimestamp))
-	os.Setenv("RTT", fmt.Sprintf("%d", r.RoundTripTime.Round(time.Millisecond)))
-	os.Setenv("MESSAGE", r.Message)
+	os.Setenv("EASEPROBE_TITLE", r.Title())
+	os.Setenv("EASEPROBE_NAME", r.Name)
+	os.Setenv("EASEPROBE_ENDPOINT", r.Endpoint)
+	os.Setenv("EASEPROBE_STATUS", r.Status.String())
+	os.Setenv("EASEPROBE_TIMESTAMP", fmt.Sprintf("%d", r.StartTimestamp))
+	os.Setenv("EASEPROBE_RTT", fmt.Sprintf("%d", r.RoundTripTime.Round(time.Millisecond)))
+	os.Setenv("EASEPROBE_MESSAGE", r.Message)
 
 	// set JSON and CVS format
-	os.Setenv("JSON", ToJSON(r))
+	os.Setenv("EASEPROBE_JSON", ToJSON(r))
 	csv := ToCSV(r)
-	os.Setenv("CSV", csv)
+	os.Setenv("EASEPROBE_CSV", csv)
 	return csv
 }
