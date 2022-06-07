@@ -20,6 +20,7 @@ package report
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/megaease/easeprobe/global"
@@ -219,7 +220,7 @@ func ToLark(r probe.Result) string {
 					"elements": [
 						{
 							"tag": "plain_text",
-							"content": %s 
+							"content": %s
 						}
 					]
 				}
@@ -244,4 +245,33 @@ func ToLark(r probe.Result) string {
 	content := fmt.Sprintf("%s - ⏱ %s\\n%s", r.Endpoint, rtt, JSONEscape(r.Message))
 	footer := global.FooterString() + " probed at " + r.StartTime.Format(r.TimeFormat)
 	return fmt.Sprintf(json, headerColor, title, content, footer)
+}
+
+// ToCSV convert the object to CSV
+func ToCSV(r probe.Result) string {
+	tpl := "%s, %s, %s, %s, %s, %d, %s"
+	rtt := r.RoundTripTime.Round(time.Millisecond)
+	return fmt.Sprintf(tpl,
+		r.Title(), r.Name, r.Status.String(), r.Endpoint, rtt, r.StartTimestamp, r.Message)
+}
+
+// ToShell convert the result object to shell variables
+func ToShell(r probe.Result) string {
+	// set the notify type variable
+	os.Setenv("TYPE", "Status")
+
+	// set individual variables
+	os.Setenv("TITLE", r.Title())
+	os.Setenv("NAME", r.Name)
+	os.Setenv("ENDPOINT", r.Endpoint)
+	os.Setenv("STATUS", r.Status.String())
+	os.Setenv("TIMESTAMP", fmt.Sprintf("%d", r.StartTimestamp))
+	os.Setenv("RTT", fmt.Sprintf("%d", r.RoundTripTime.Round(time.Millisecond)))
+	os.Setenv("MESSAGE", r.Message)
+
+	// set JSON and CVS format
+	os.Setenv("JSON", ToJSON(r))
+	csv := ToCSV(r)
+	os.Setenv("CSV", csv)
+	return csv
 }

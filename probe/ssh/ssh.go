@@ -83,7 +83,7 @@ func (s *Server) Config(gConf global.ProbeSettings) error {
 	kind := "ssh"
 	tag := ""
 	name := s.ProbeName
-	endpoint := probe.CommandLine(s.Command, s.Args)
+	endpoint := global.CommandLine(s.Command, s.Args)
 
 	s.metrics = newMetrics(kind, tag)
 
@@ -148,7 +148,7 @@ func (s *Server) DoProbe() (bool, string) {
 		}
 	}
 
-	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, probe.CommandLine(s.Command, s.Args))
+	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, global.CommandLine(s.Command, s.Args))
 	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, probe.CheckEmpty(string(output)))
 
 	s.ExportMetrics()
@@ -246,7 +246,7 @@ func (s *Server) RunSSHCmd() (string, error) {
 	var stdoutBuf, stderrBuf bytes.Buffer
 	session.Stdout = &stdoutBuf
 	session.Stderr = &stderrBuf
-	if err := session.Run(env + probe.CommandLine(s.Command, s.Args)); err != nil {
+	if err := session.Run(env + global.CommandLine(s.Command, s.Args)); err != nil {
 		return stderrBuf.String(), err
 	}
 

@@ -20,6 +20,7 @@ package report
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -121,7 +122,7 @@ func SLATextSection(r *probe.Result) string {
 func SLAText(probers []probe.Prober) string {
 	text := "[Overall SLA Report]\n\n"
 	for _, p := range probers {
-		text += SLATextSection(p.Result()) + "\n\b"
+		text += SLATextSection(p.Result()) + "\n"
 	}
 	return text
 }
@@ -403,4 +404,32 @@ func SLASummary(probers []probe.Prober) string {
 	summary := fmt.Sprintf("Total %d Services, Average %.2f%% SLA", len(probers), sla)
 	summary += "\n" + global.FooterString()
 	return summary
+}
+
+// SLACSVSection set the CSV format for SLA
+func SLACSVSection(r *probe.Result) string {
+	text := "%s, %s, up(%s), down(%s), %.2f%%, %d(%s), %s, %s, %s"
+	return fmt.Sprintf(text, r.Name, r.Endpoint,
+		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLAPercent(),
+		r.Stat.Total, SLAStatusText(r.Stat, Text),
+		time.Now().UTC().Format(r.TimeFormat),
+		r.Status.String(), r.Message)
+}
+
+// SLACSV return a full stat report with CSV format
+func SLACSV(probers []probe.Prober) string {
+	csv := ""
+	for _, p := range probers {
+		csv += SLACSVSection(p.Result()) + "\n"
+	}
+	return csv
+}
+
+// SLAShell set the environment for SLA
+func SLAShell(probers []probe.Prober) string {
+	os.Setenv("TYPE", "SLA")
+	os.Setenv("JSON", SLAJSON(probers))
+	csv := SLACSV(probers)
+	os.Setenv("CSV", csv)
+	return csv
 }

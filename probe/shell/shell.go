@@ -52,7 +52,7 @@ func (s *Shell) Config(gConf global.ProbeSettings) error {
 	tag := ""
 	name := s.ProbeName
 	s.DefaultProbe.Config(gConf, kind, tag, name,
-		probe.CommandLine(s.Command, s.Args), s.DoProbe)
+		global.CommandLine(s.Command, s.Args), s.DoProbe)
 
 	s.metrics = newMetrics(kind, tag)
 
@@ -91,7 +91,7 @@ func (s *Shell) DoProbe() (bool, string) {
 		log.Errorf(message)
 		status = false
 	}
-	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, probe.CommandLine(s.Command, s.Args))
+	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, global.CommandLine(s.Command, s.Args))
 	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, probe.CheckEmpty(string(output)))
 
 	s.ExportMetrics()

@@ -113,7 +113,7 @@ func (s *Server) DoProbe() (bool, string) {
 		return false, err.Error() + " - " + output
 	}
 
-	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, probe.CommandLine(s.Command, s.Args))
+	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, global.CommandLine(s.Command, s.Args))
 	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, probe.CheckEmpty(string(output)))
 
 	info, err := s.ParseHostInfo(string(output))

@@ -22,15 +22,6 @@ import (
 	"strings"
 )
 
-// CommandLine will return the whole command line which includes command and all arguments
-func CommandLine(cmd string, args []string) string {
-	result := cmd
-	for _, arg := range args {
-		result += " " + arg
-	}
-	return result
-}
-
 // CheckOutput checks the output text,
 // - if it contains a configured string then return nil
 // - if it does not contain a configured string then return nil

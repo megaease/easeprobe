@@ -19,7 +19,9 @@ package report
 
 import (
 	"encoding/json"
+	"fmt"
 	"math/rand"
+	"os"
 	"testing"
 	"time"
 
@@ -171,4 +173,23 @@ func TestResultToLark(t *testing.T) {
 	r.Status = probe.StatusInit
 	str = ToLark(r)
 	assert.Contains(t, str, "blue")
+}
+
+func TestResultToShell(t *testing.T) {
+	r := newDummyResult("dummy")
+	str := ToShell(r)
+	assert.NotEmpty(t, str)
+	assert.Contains(t, str, r.Title())
+	assert.Contains(t, str, r.Status.String())
+	assert.Contains(t, str, r.Message)
+
+	assert.Equal(t, "Status", os.Getenv("TYPE"))
+	assert.Equal(t, "dummy", os.Getenv("NAME"))
+	assert.Equal(t, r.Status.String(), os.Getenv("STATUS"))
+	assert.Equal(t, fmt.Sprintf("%d", r.StartTimestamp), os.Getenv("TIMESTAMP"))
+	assert.Equal(t, fmt.Sprintf("%d", r.RoundTripTime.Round(time.Millisecond)), os.Getenv("RTT"))
+	assert.Equal(t, r.Message, os.Getenv("MESSAGE"))
+
+	assert.Equal(t, ToCSV(r), os.Getenv("CSV"))
+
 }
