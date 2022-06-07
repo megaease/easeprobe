@@ -19,7 +19,11 @@ package shell
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify/base"
@@ -51,7 +55,19 @@ func (c *NotifyConfig) RunShell(title, msg string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), c.Timeout)
 	defer cancel()
 
+	var envMap map[string]string
+	err := json.Unmarshal([]byte(msg), &envMap)
+	if err != nil {
+		return err
+	}
+
 	cmd := exec.CommandContext(ctx, c.Cmd, c.Args...)
+	var env []string
+	for k, v := range envMap {
+		env = append(env, fmt.Sprintf("%s=%s", k, v))
+	}
+	cmd.Stdin = strings.NewReader(envMap["EASEPROBE_CSV"]+"\n")
+	cmd.Env = append(os.Environ(), env...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return err

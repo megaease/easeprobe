@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
-	"os"
 	"testing"
 	"time"
 
@@ -183,14 +182,18 @@ func TestResultToShell(t *testing.T) {
 	assert.Contains(t, str, r.Status.String())
 	assert.Contains(t, str, r.Message)
 
-	assert.Equal(t, "Status", os.Getenv("EASEPROBE_TYPE"))
-	assert.Equal(t, "dummy", os.Getenv("EASEPROBE_NAME"))
-	assert.Equal(t, r.Status.String(), os.Getenv("EASEPROBE_STATUS"))
-	assert.Equal(t, fmt.Sprintf("%d", r.StartTimestamp), os.Getenv("EASEPROBE_TIMESTAMP"))
-	assert.Equal(t, fmt.Sprintf("%d", r.RoundTripTime.Round(time.Millisecond)), os.Getenv("EASEPROBE_RTT"))
-	assert.Equal(t, r.Message, os.Getenv("EASEPROBE_MESSAGE"))
+	var envMap map[string]string
+	err := json.Unmarshal([]byte(str), &envMap)
+	assert.Nil(t, err)
 
-	assert.Equal(t, ToCSV(r), os.Getenv("EASEPROBE_CSV"))
-	assert.Equal(t, ToJSON(r), os.Getenv("EASEPROBE_JSON"))
+	assert.Equal(t, "Status", envMap["EASEPROBE_TYPE"])
+	assert.Equal(t, "dummy", envMap["EASEPROBE_NAME"])
+	assert.Equal(t, r.Status.String(), envMap["EASEPROBE_STATUS"])
+	assert.Equal(t, fmt.Sprintf("%d", r.StartTimestamp), envMap["EASEPROBE_TIMESTAMP"])
+	assert.Equal(t, fmt.Sprintf("%d", r.RoundTripTime.Round(time.Millisecond)), envMap["EASEPROBE_RTT"])
+	assert.Equal(t, r.Message, envMap["EASEPROBE_MESSAGE"])
+
+	assert.Equal(t, ToCSV(r), envMap["EASEPROBE_CSV"])
+	assert.Equal(t, ToJSON(r), envMap["EASEPROBE_JSON"])
 
 }

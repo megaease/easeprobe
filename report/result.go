@@ -20,7 +20,6 @@ package report
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/megaease/easeprobe/global"
@@ -257,21 +256,28 @@ func ToCSV(r probe.Result) string {
 
 // ToShell convert the result object to shell variables
 func ToShell(r probe.Result) string {
+	env := make(map[string]string)
+
 	// set the notify type variable
-	os.Setenv("EASEPROBE_TYPE", "Status")
+	env["EASEPROBE_TYPE"] = "Status"
 
 	// set individual variables
-	os.Setenv("EASEPROBE_TITLE", r.Title())
-	os.Setenv("EASEPROBE_NAME", r.Name)
-	os.Setenv("EASEPROBE_ENDPOINT", r.Endpoint)
-	os.Setenv("EASEPROBE_STATUS", r.Status.String())
-	os.Setenv("EASEPROBE_TIMESTAMP", fmt.Sprintf("%d", r.StartTimestamp))
-	os.Setenv("EASEPROBE_RTT", fmt.Sprintf("%d", r.RoundTripTime.Round(time.Millisecond)))
-	os.Setenv("EASEPROBE_MESSAGE", r.Message)
+	env["EASEPROBE_TITLE"] = r.Title()
+	env["EASEPROBE_NAME"] = r.Name
+	env["EASEPROBE_ENDPOINT"] = r.Endpoint
+	env["EASEPROBE_STATUS"] = r.Status.String()
+	env["EASEPROBE_TIMESTAMP"] = fmt.Sprintf("%d", r.StartTimestamp)
+	env["EASEPROBE_RTT"] = fmt.Sprintf("%d", r.RoundTripTime.Round(time.Millisecond))
+	env["EASEPROBE_MESSAGE"] = r.Message
 
 	// set JSON and CVS format
-	os.Setenv("EASEPROBE_JSON", ToJSON(r))
-	csv := ToCSV(r)
-	os.Setenv("EASEPROBE_CSV", csv)
-	return csv
+	env["EASEPROBE_JSON"] = ToJSON(r)
+	env["EASEPROBE_CSV"] = ToCSV(r)
+
+	buf, err := json.Marshal(env)
+	if err != nil {
+		log.Errorf("ToShell(): Failed to marshal env to json: %s", err)
+		return ""
+	}
+	return string(buf)
 }

@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
@@ -66,12 +65,8 @@ func (s *Shell) DoProbe() (bool, string) {
 	ctx, cancel := context.WithTimeout(context.Background(), s.ProbeTimeout)
 	defer cancel()
 
-	for _, e := range s.Env {
-		v := strings.Split(e, "=")
-		os.Setenv(v[0], v[1])
-	}
-
 	cmd := exec.CommandContext(ctx, s.Command, s.Args...)
+	cmd.Env = append(os.Environ(), s.Env...)
 	output, err := cmd.CombinedOutput()
 
 	status := true

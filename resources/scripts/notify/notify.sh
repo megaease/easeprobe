@@ -1,4 +1,11 @@
 #!/bin/bash
+echo "----------------------------------------------------"
+echo "<-------- STDIN Begin ------->"
+while read -r line
+do
+  echo "$line"
+done < "${1:-/dev/stdin}"
+echo "<--------- STDIN End -------->"
 
 echo "Type: ${EASEPROBE_TYPE}"
 echo "----------------------------------------------------"

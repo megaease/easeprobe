@@ -20,7 +20,6 @@ package report
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
@@ -427,9 +426,16 @@ func SLACSV(probers []probe.Prober) string {
 
 // SLAShell set the environment for SLA
 func SLAShell(probers []probe.Prober) string {
-	os.Setenv("EASEPROBE_TYPE", "SLA")
-	os.Setenv("EASEPROBE_JSON", SLAJSON(probers))
-	csv := SLACSV(probers)
-	os.Setenv("EASEPROBE_CSV", csv)
-	return csv
+	env := make(map[string]string)
+
+	env["EASEPROBE_TYPE"] = "SLA"
+	env["EASEPROBE_JSON"] = SLAJSON(probers)
+	env["EASEPROBE_CSV"] = SLACSV(probers)
+
+	buf, err := json.Marshal(env)
+	if err != nil {
+		log.Errorf("SLAShell(): Failed to marshal env to json: %s", err)
+		return ""
+	}
+	return string(buf)
 }
