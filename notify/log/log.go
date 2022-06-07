@@ -124,7 +124,7 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 			return err
 		}
 		c.logger.SetOutput(writer)
-		log.Info("[%s] %s - local syslog configured", c.NotifyKind, c.NotifyName)
+		log.Infof("[%s] %s - local syslog configured!", c.NotifyKind, c.NotifyName)
 	} else { // just log file
 		c.NotifyKind = "log"
 		c.Type = FileLog
