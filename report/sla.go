@@ -126,6 +126,26 @@ func SLAText(probers []probe.Prober) string {
 	return text
 }
 
+// SLALogSection return the Log format string to stat
+func SLALogSection(r *probe.Result) string {
+	text := `name="%s"; endpoint="%s"; up="%s"; down="%s"; sla="%.2f%%"; total="%d(%s)"; latest_time="%s"; latest_status="%s"; message="%s"`
+	return fmt.Sprintf(text, r.Name, r.Endpoint,
+		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLAPercent(),
+		r.Stat.Total, SLAStatusText(r.Stat, Log),
+		time.Now().UTC().Format(r.TimeFormat),
+		r.Status.String(), r.Message)
+}
+
+// SLALog return a full stat report with Log format
+func SLALog(probers []probe.Prober) string {
+	var text string
+	n := len(probers)
+	for i, p := range probers {
+		text += fmt.Sprintf("SLA-Report-%d-%d %s\n", i+1, n, SLALogSection(p.Result()))
+	}
+	return text
+}
+
 // SLAMarkdownSection return the Markdown format string to stat
 func SLAMarkdownSection(r *probe.Result, f Format) string {
 
@@ -323,6 +343,8 @@ func SLAStatusText(s probe.Stat, t Format) string {
 		format = "**%s** : `%d` \t"
 	case HTML:
 		format = "<b>%s</b> : %d \t"
+	case Log:
+		format = "%s:%d "
 	}
 	for k, v := range s.Status {
 		status += fmt.Sprintf(format, k.String(), v)
