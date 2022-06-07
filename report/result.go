@@ -29,10 +29,10 @@ import (
 
 // ToLog convert the result object to Log format
 func ToLog(r probe.Result) string {
-	tpl := `title="%s"; status="%s"; endpoint="%s"; rtt="%s"; time="%s"; message="%s"`
+	tpl := `title="%s"; name="%s"; status="%s"; endpoint="%s"; rtt="%s"; time="%s"; message="%s"`
 	rtt := r.RoundTripTime.Round(time.Millisecond)
 	return fmt.Sprintf(tpl,
-		r.Title(), r.Status.String(), r.Endpoint, rtt, r.StartTime.Format(r.TimeFormat), r.Message)
+		r.Title(), r.Name, r.Status.String(), r.Endpoint, rtt, r.StartTime.Format(r.TimeFormat), r.Message)
 }
 
 // ToText convert the result object to ToText
