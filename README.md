@@ -152,7 +152,7 @@ Ease Probe supports the following notifications:
 - **DingTalk**. Support the DingTalk notification.
 - **Lark**. Support the Lark(Feishu) notification.
 - **Log File**. Write the notification into a log file
-- **Shell**. Run a shell command to notify the result.
+- **Shell**. Run a shell command to notify the result. (see [example](resources/scripts/notify/notify.sh))
 - **SMS**. Support SMS notification with multiple SMS service providers - [Twilio](https://www.twilio.com/sms), [Vonage(Nexmo)](https://developer.vonage.com/messaging/sms/overview), [YunPain](https://www.yunpian.com/doc/en/domestic/list.html)
 - **Teams**. Support the [Microsoft Teams](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using?tabs=cURL#setting-up-a-custom-incoming-webhook) notification.
 
@@ -783,6 +783,7 @@ notify:
   # and offer two formats of string
   #  - JSON: the JSON format
   #  - CSV: the CSV format
+  # The CVS format would be set for STDIN for the shell command.
   # (see the example: resources/scripts/notify/notify.sh)
   shell:
     - name: "shell alert service"
@@ -810,7 +811,7 @@ notify:
 settings:
 
   # The customized name and icon
-  name: "Easeprobe" # the name of the probe: default: "EaseProbe"
+  name: "EaseProbe" # the name of the probe: default: "EaseProbe"
   icon: "https://path/to/icon.png" # the icon of the probe. default: "https://megaease.com/favicon.png"
   # Daemon settings
 

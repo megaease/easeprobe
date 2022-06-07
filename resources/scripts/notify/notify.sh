@@ -1,4 +1,7 @@
 #!/bin/bash
+
+# This is the example script for the shell notification script.
+# it shows how to retrive the data in environment variables and the StdIn
 echo "----------------------------------------------------"
 echo "<-------- STDIN Begin ------->"
 while read -r line
