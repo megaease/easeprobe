@@ -151,7 +151,7 @@ Ease Probe supports the following notifications:
 - **WeChat Work**. Support Enterprise WeChat Work notification.
 - **DingTalk**. Support the DingTalk notification.
 - **Lark**. Support the Lark(Feishu) notification.
-- **Log File**. Write the notification into a log file
+- **Log**. Write the notification into a log file or syslog.
 - **SMS**. Support SMS notification with multiple SMS service providers - [Twilio](https://www.twilio.com/sms), [Vonage(Nexmo)](https://developer.vonage.com/messaging/sms/overview), [YunPain](https://www.yunpian.com/doc/en/domestic/list.html)
 - **Teams**. Support the [Microsoft Teams](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using?tabs=cURL#setting-up-a-custom-incoming-webhook) notification.
 
@@ -162,6 +162,13 @@ Ease Probe supports the following notifications:
 ```YAML
 # Notification Configuration
 notify:
+  log:
+    - name: log file # local log file
+      file: /var/log/easeprobe.log
+    - name: Remote syslog # syslog
+      file: syslog # <-- must be "syslog" keyword
+      host: 127.0.0.1:514 # remote syslog server - optional
+      network: udp #remote syslog network [tcp, udp] - optional
   slack:
     - name: "MegaEase#Alert"
       webhook: "https://hooks.slack.com/services/........../....../....../"
@@ -757,6 +764,10 @@ notify:
     - name: "Local Log"
       file: "/tmp/easeprobe.log"
       dry: true
+    - name: Remote syslog # syslog
+      file: syslog # <-- must be "syslog" keyword
+      host: 127.0.0.1:514 # remote syslog server - optional
+      network: udp #remote syslog network [tcp, udp] - optional
   # Notify by sms using yunpian  https://www.yunpian.com/official/document/sms/zh_cn/domestic_single_send
   sms:
     - name: "sms alert service - yunpian"
