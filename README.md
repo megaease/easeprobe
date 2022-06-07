@@ -158,6 +158,7 @@ Ease Probe supports the following notifications:
 > **Note**:
 >
 > The notification is **Edge-Triggered Mode**, only notified while the status is changed.
+> The Windows platform doesn't support syslog
 
 ```YAML
 # Notification Configuration
@@ -165,7 +166,7 @@ notify:
   log:
     - name: log file # local log file
       file: /var/log/easeprobe.log
-    - name: Remote syslog # syslog
+    - name: Remote syslog # syslog (!!! Not For Windows !!!)
       file: syslog # <-- must be "syslog" keyword
       host: 127.0.0.1:514 # remote syslog server - optional
       network: udp #remote syslog network [tcp, udp] - optional
@@ -764,7 +765,7 @@ notify:
     - name: "Local Log"
       file: "/tmp/easeprobe.log"
       dry: true
-    - name: Remote syslog # syslog
+    - name: Remote syslog # syslog (!!! Not For Windows !!!)
       file: syslog # <-- must be "syslog" keyword
       host: 127.0.0.1:514 # remote syslog server - optional
       network: udp #remote syslog network [tcp, udp] - optional
