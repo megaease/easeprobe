@@ -214,3 +214,12 @@ func MakeDirectory(filename string) string {
 
 	return filepath.Join(dir, file)
 }
+
+// CommandLine will return the whole command line which includes command and all arguments
+func CommandLine(cmd string, args []string) string {
+	result := cmd
+	for _, arg := range args {
+		result += " " + arg
+	}
+	return result
+}

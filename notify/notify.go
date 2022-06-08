@@ -25,6 +25,7 @@ import (
 	"github.com/megaease/easeprobe/notify/email"
 	"github.com/megaease/easeprobe/notify/lark"
 	"github.com/megaease/easeprobe/notify/log"
+	"github.com/megaease/easeprobe/notify/shell"
 	"github.com/megaease/easeprobe/notify/slack"
 	"github.com/megaease/easeprobe/notify/sms"
 	"github.com/megaease/easeprobe/notify/teams"
@@ -46,6 +47,7 @@ type Config struct {
 	Lark     []lark.NotifyConfig     `yaml:"lark"`
 	Sms      []sms.NotifyConfig      `yaml:"sms"`
 	Teams    []teams.NotifyConfig    `yaml:"teams"`
+	Shell    []shell.NotifyConfig    `yaml:"shell"`
 }
 
 // Notify is the configuration of the Notify

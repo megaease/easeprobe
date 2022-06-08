@@ -18,12 +18,15 @@
 package report
 
 import (
+	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
+
 	log "github.com/sirupsen/logrus"
 )
 
@@ -252,4 +255,52 @@ func ToLark(r probe.Result) string {
 	content := fmt.Sprintf("%s - ⏱ %s\\n%s", r.Endpoint, rtt, JSONEscape(r.Message))
 	footer := global.FooterString() + " probed at " + r.StartTime.Format(r.TimeFormat)
 	return fmt.Sprintf(json, headerColor, title, content, footer)
+}
+
+// ToCSV convert the object to CSV
+func ToCSV(r probe.Result) string {
+	rtt := fmt.Sprintf("%d", r.RoundTripTime.Round(time.Millisecond))
+	time := r.StartTime.UTC().Format(r.TimeFormat)
+	timestamp := fmt.Sprintf("%d", r.StartTimestamp)
+	data := [][]string{
+		{"Title", "Name", "Endpoint", "Status", "PreStatus", "RoundTripTime", "Time", "Timestamp", "Message"},
+		{r.Title(), r.Name, r.Endpoint, r.Status.String(), r.PreStatus.String(), rtt, time, timestamp, r.Message},
+	}
+
+	buf := new(bytes.Buffer)
+	w := csv.NewWriter(buf)
+
+	if err := w.WriteAll(data); err != nil {
+		log.Errorf("ToCSV(): Failed to write to csv buffer: %v", err)
+		return ""
+	}
+	return buf.String()
+}
+
+// ToShell convert the result object to shell variables
+func ToShell(r probe.Result) string {
+	env := make(map[string]string)
+
+	// set the notify type variable
+	env["EASEPROBE_TYPE"] = "Status"
+
+	// set individual variables
+	env["EASEPROBE_TITLE"] = r.Title()
+	env["EASEPROBE_NAME"] = r.Name
+	env["EASEPROBE_ENDPOINT"] = r.Endpoint
+	env["EASEPROBE_STATUS"] = r.Status.String()
+	env["EASEPROBE_TIMESTAMP"] = fmt.Sprintf("%d", r.StartTimestamp)
+	env["EASEPROBE_RTT"] = fmt.Sprintf("%d", r.RoundTripTime.Round(time.Millisecond))
+	env["EASEPROBE_MESSAGE"] = r.Message
+
+	// set JSON and CVS format
+	env["EASEPROBE_JSON"] = ToJSON(r)
+	env["EASEPROBE_CSV"] = ToCSV(r)
+
+	buf, err := json.Marshal(env)
+	if err != nil {
+		log.Errorf("ToShell(): Failed to marshal env to json: %s", err)
+		return ""
+	}
+	return string(buf)
 }

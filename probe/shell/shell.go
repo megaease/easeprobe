@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
@@ -52,7 +51,7 @@ func (s *Shell) Config(gConf global.ProbeSettings) error {
 	tag := ""
 	name := s.ProbeName
 	s.DefaultProbe.Config(gConf, kind, tag, name,
-		probe.CommandLine(s.Command, s.Args), s.DoProbe)
+		global.CommandLine(s.Command, s.Args), s.DoProbe)
 
 	s.metrics = newMetrics(kind, tag)
 
@@ -66,12 +65,8 @@ func (s *Shell) DoProbe() (bool, string) {
 	ctx, cancel := context.WithTimeout(context.Background(), s.ProbeTimeout)
 	defer cancel()
 
-	for _, e := range s.Env {
-		v := strings.Split(e, "=")
-		os.Setenv(v[0], v[1])
-	}
-
 	cmd := exec.CommandContext(ctx, s.Command, s.Args...)
+	cmd.Env = append(os.Environ(), s.Env...)
 	output, err := cmd.CombinedOutput()
 
 	status := true
@@ -91,7 +86,7 @@ func (s *Shell) DoProbe() (bool, string) {
 		log.Errorf(message)
 		status = false
 	}
-	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, probe.CommandLine(s.Command, s.Args))
+	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, global.CommandLine(s.Command, s.Args))
 	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, probe.CheckEmpty(string(output)))
 
 	s.ExportMetrics()

@@ -146,14 +146,15 @@ Ease Probe supports the following notifications:
 - **Slack**. Using Webhook for notification
 - **Discord**. Using Webhook for notification
 - **Telegram**. Using Telegram Bot for notification
+- **Teams**. Support the [Microsoft Teams](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using?tabs=cURL#setting-up-a-custom-incoming-webhook) notification.
 - **Email**. Support multiple email addresses.
 - **AWS SNS**. Support AWS Simple Notification Service.
 - **WeChat Work**. Support Enterprise WeChat Work notification.
 - **DingTalk**. Support the DingTalk notification.
 - **Lark**. Support the Lark(Feishu) notification.
-- **Log**. Write the notification into a log file or syslog.
 - **SMS**. Support SMS notification with multiple SMS service providers - [Twilio](https://www.twilio.com/sms), [Vonage(Nexmo)](https://developer.vonage.com/messaging/sms/overview), [YunPain](https://www.yunpian.com/doc/en/domestic/list.html)
-- **Teams**. Support the [Microsoft Teams](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using?tabs=cURL#setting-up-a-custom-incoming-webhook) notification.
+- **Log**. Write the notification into a log file or syslog.
+- **Shell**. Run a shell command to notify the result. (see [example](resources/scripts/notify/notify.sh))
 
 > **Note**:
 >
@@ -212,6 +213,13 @@ notify:
   teams:
       - name: "teams alert service"
         webhook: "https://outlook.office365.com/webhook/a1269812-6d10-44b1-abc5-b84f93580ba0@9e7b80c7-d1eb-4b52-8582-76f921e416d9/IncomingWebhook/3fdd6767bae44ac58e5995547d66a4e4/f332c8d9-3397-4ac5-957b-b8e3fc465a8c" # see https://docs.microsoft.com/en-us/outlook/actionable-messages/send-via-connectors
+  shell: # EaseProbe set the environment variables -
+         # (see the example: resources/scripts/notify/notify.sh)
+    - name: "shell alert service"
+      command: "/bin/bash"
+      args:
+        - "-c"
+        - "/path/to/script.sh"
 ```
 
 Check the  [Notification Configuration](#38-notification-configuration) to see how to configure it.
@@ -777,6 +785,24 @@ notify:
       mobile: 123456789,987654321 # mobile phone number, multi phone number joint by `,`
       sign: "xxxxx" # get this from yunpian
 
+  # EaseProbe set the following environment variables
+  #  - TYPE: "Status" or "SLA"
+  #  - NAME: probe name
+  #  - STATUS: "up" or "down"
+  #  - RTT: round trip time in milliseconds
+  #  - TIMESTAMP: timestamp of probe time
+  #  - MESSAGE: probe message
+  # and offer two formats of string
+  #  - JSON: the JSON format
+  #  - CSV: the CSV format
+  # The CVS format would be set for STDIN for the shell command.
+  # (see the example: resources/scripts/notify/notify.sh)
+  shell:
+    - name: "shell alert service"
+      command: "/bin/bash"
+      args:
+        - "-c"
+        - "/path/to/script.sh"
 ```
 
 **Note**: All of the notifications can have the following optional configuration.
@@ -797,7 +823,7 @@ notify:
 settings:
 
   # The customized name and icon
-  name: "Easeprobe" # the name of the probe: default: "EaseProbe"
+  name: "EaseProbe" # the name of the probe: default: "EaseProbe"
   icon: "https://path/to/icon.png" # the icon of the probe. default: "https://megaease.com/favicon.png"
   # Daemon settings
 

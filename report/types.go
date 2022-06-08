@@ -40,6 +40,7 @@ const (
 	Discord
 	Lark
 	SMS
+	Shell
 )
 
 var fmtToStr = map[Format]string{
@@ -54,6 +55,7 @@ var fmtToStr = map[Format]string{
 	Discord:        "discord",
 	Lark:           "lark",
 	SMS:            "sms",
+	Shell:          "shell",
 }
 
 var strToFmt = global.ReverseMap(fmtToStr)
@@ -107,4 +109,5 @@ var FormatFuncs = map[Format]FormatFuncStruct{
 	Slack:          {ToSlack, SLASlack},
 	Lark:           {ToLark, SLALark},
 	SMS:            {ToText, SLASummary},
+	Shell:          {ToShell, SLAShell},
 }

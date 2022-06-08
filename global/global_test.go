@@ -317,3 +317,11 @@ func TestMakeDirectoryFail(t *testing.T) {
 	monkey.Unpatch(os.MkdirAll)
 
 }
+
+func TestCommandLine(t *testing.T) {
+	s := CommandLine("echo", []string{"hello", "world"})
+	assert.Equal(t, "echo hello world", s)
+
+	s = CommandLine("kubectl", []string{"get", "pod", "--all-namespaces", "-o", "json"})
+	assert.Equal(t, "kubectl get pod --all-namespaces -o json", s)
+}

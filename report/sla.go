@@ -18,6 +18,8 @@
 package report
 
 import (
+	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -121,7 +123,7 @@ func SLATextSection(r *probe.Result) string {
 func SLAText(probers []probe.Prober) string {
 	text := "[Overall SLA Report]\n\n"
 	for _, p := range probers {
-		text += SLATextSection(p.Result()) + "\n\b"
+		text += SLATextSection(p.Result()) + "\n"
 	}
 	return text
 }
@@ -425,4 +427,57 @@ func SLASummary(probers []probe.Prober) string {
 	summary := fmt.Sprintf("Total %d Services, Average %.2f%% SLA", len(probers), sla)
 	summary += "\n" + global.FooterString()
 	return summary
+}
+
+// SLACSVSection set the CSV format for SLA
+func SLACSVSection(r *probe.Result) []string {
+	return []string{
+		// Name, Endpoint,
+		r.Name, r.Endpoint,
+		// UpTime, DownTime, SLA
+		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), fmt.Sprintf("%.2f%%", r.SLAPercent()),
+		// ProbeSummary - Total( Up, Down)
+		fmt.Sprintf("%d(%s)", r.Stat.Total, SLAStatusText(r.Stat, Text)),
+		// LatestProbe, LatestStatus
+		r.StartTime.UTC().Format(r.TimeFormat), r.Status.String(),
+		// Message
+		r.Message,
+	}
+}
+
+// SLACSV return a full stat report with CSV format
+func SLACSV(probers []probe.Prober) string {
+	data := [][]string{
+		{"Name", "Endpoint", "UpTime", "DownTime", "SLA", "ProbeSummary", "LatestProbe", "LatestStatus", "Message"},
+	}
+
+	for _, p := range probers {
+		data = append(data, SLACSVSection(p.Result()))
+	}
+
+	buf := new(bytes.Buffer)
+	w := csv.NewWriter(buf)
+
+	if err := w.WriteAll(data); err != nil {
+		log.Errorf("SLACSV(): Failed to write to csv buffer: %v", err)
+		return ""
+	}
+
+	return buf.String()
+}
+
+// SLAShell set the environment for SLA
+func SLAShell(probers []probe.Prober) string {
+	env := make(map[string]string)
+
+	env["EASEPROBE_TYPE"] = "SLA"
+	env["EASEPROBE_JSON"] = SLAJSON(probers)
+	env["EASEPROBE_CSV"] = SLACSV(probers)
+
+	buf, err := json.Marshal(env)
+	if err != nil {
+		log.Errorf("SLAShell(): Failed to marshal env to json: %s", err)
+		return ""
+	}
+	return string(buf)
 }

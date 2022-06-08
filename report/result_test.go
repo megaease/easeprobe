@@ -18,8 +18,11 @@
 package report
 
 import (
+	"encoding/csv"
 	"encoding/json"
+	"fmt"
 	"math/rand"
+	"strings"
 	"testing"
 	"time"
 
@@ -171,4 +174,41 @@ func TestResultToLark(t *testing.T) {
 	r.Status = probe.StatusInit
 	str = ToLark(r)
 	assert.Contains(t, str, "blue")
+}
+
+func TestResultToShell(t *testing.T) {
+	r := newDummyResult("dummy")
+	str := ToShell(r)
+	assert.NotEmpty(t, str)
+	assert.Contains(t, str, r.Title())
+	assert.Contains(t, str, r.Status.String())
+	assert.Contains(t, str, r.Message)
+
+	var envMap map[string]string
+	err := json.Unmarshal([]byte(str), &envMap)
+	assert.Nil(t, err)
+
+	assert.Equal(t, "Status", envMap["EASEPROBE_TYPE"])
+	assert.Equal(t, "dummy", envMap["EASEPROBE_NAME"])
+	assert.Equal(t, r.Status.String(), envMap["EASEPROBE_STATUS"])
+	assert.Equal(t, fmt.Sprintf("%d", r.StartTimestamp), envMap["EASEPROBE_TIMESTAMP"])
+	assert.Equal(t, fmt.Sprintf("%d", r.RoundTripTime.Round(time.Millisecond)), envMap["EASEPROBE_RTT"])
+	assert.Equal(t, r.Message, envMap["EASEPROBE_MESSAGE"])
+
+	assert.Equal(t, ToCSV(r), envMap["EASEPROBE_CSV"])
+	assert.Equal(t, ToJSON(r), envMap["EASEPROBE_JSON"])
+
+	csvReader := csv.NewReader(strings.NewReader(ToCSV(r)))
+	data, err := csvReader.ReadAll()
+	assert.Nil(t, err)
+	assert.Equal(t, len(data), 2)
+	assert.Equal(t, data[1][0], r.Title())
+	assert.Equal(t, data[1][1], r.Name)
+	assert.Equal(t, data[1][2], r.Endpoint)
+	assert.Equal(t, data[1][3], r.Status.String())
+	assert.Equal(t, data[1][4], r.PreStatus.String())
+	assert.Equal(t, data[1][5], fmt.Sprintf("%d", r.RoundTripTime.Round(time.Millisecond)))
+	assert.Equal(t, data[1][6], r.StartTime.UTC().Format(r.TimeFormat))
+	assert.Equal(t, data[1][7], fmt.Sprintf("%d", r.StartTimestamp))
+	assert.Equal(t, data[1][8], r.Message)
 }
