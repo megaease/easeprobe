@@ -786,15 +786,15 @@ notify:
       sign: "xxxxx" # get this from yunpian
 
   # EaseProbe set the following environment variables
-  #  - TYPE: "Status" or "SLA"
-  #  - NAME: probe name
-  #  - STATUS: "up" or "down"
-  #  - RTT: round trip time in milliseconds
-  #  - TIMESTAMP: timestamp of probe time
-  #  - MESSAGE: probe message
+  #  - EASEPROBE_TYPE: "Status" or "SLA"
+  #  - EASEPROBE_NAME: probe name
+  #  - EASEPROBE_STATUS: "up" or "down"
+  #  - EASEPROBE_RTT: round trip time in milliseconds
+  #  - EASEPROBE_TIMESTAMP: timestamp of probe time
+  #  - EASEPROBE_MESSAGE: probe message
   # and offer two formats of string
-  #  - JSON: the JSON format
-  #  - CSV: the CSV format
+  #  - EASEPROBE_JSON: the JSON format
+  #  - EASEPROBE_CSV: the CSV format
   # The CVS format would be set for STDIN for the shell command.
   # (see the example: resources/scripts/notify/notify.sh)
   shell:
