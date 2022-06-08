@@ -58,15 +58,16 @@ Some of the features that are planned/considered for 2022 can be broken down int
 
 ### General
 * [ ] Work on detailed documentation
-* [ ] Improve test coverage
+* [x] Improve test coverage (megaease/easeprobe#128 megaease/easeprobe#127 megaease/easeprobe#119 megaease/easeprobe#118 megaease/easeprobe#117)
 * [ ] Improve 3rd party integrations and supports
   * [x] megaease/easeprobe#95 Prometheus compatible metrics
 * Support for common daemon features
   * [ ] ability to send daemon to background without stdout logs
-  * [ ] add syslog support as an alternative destination instead of `easeprobe.log` eg `log: syslog`
+  * [x] megaease/easeprobe#129 add syslog support as an alternative destination instead of `easeprobe.log` eg `log: syslog`
   * [ ] introduce a control socket for running easyprobe instance with disable or enable probes and notify endpoints (maybe something like `/var/run/easeprobe.sock` that speaks HTTP (`dockerd` & `supervisord` does something like that).
   * [x] megaease/easeprobe#75 add `daemon()` & `/var/run/easeprobe.pid` support
-  * [x] megaease/easeprobe#75 add SIGHUP, and ensure it closes and re-opens of logfile to allow for `easeprobe.log` rotation* [ ] Support for common `timeformat`, use standard timezone and `strftime` conversions, eg `timezone: [UTC|local|Europe/Athens]`, `timeformat: %F %R:%S UTC`
+  * [x] megaease/easeprobe#75 add SIGHUP, and ensure it closes and re-opens of logfile to allow for `easeprobe.log` rotation
+* [ ] Support for common `timeformat`, use standard timezone and `strftime` conversions, eg `timezone: [UTC|local|Europe/Athens]`, `timeformat: %F %R:%S UTC`
 * Add opt-out options where appropriate
   * [x] megaease/easeprobe#75 add opt-out option for `log` option
   * [x] megaease/easeprobe#92 Add opt-out option for SLA data persistence `data: false`
@@ -76,7 +77,7 @@ Some of the features that are planned/considered for 2022 can be broken down int
 * [ ] add automatic service discovery which includes probing details
 * [ ] add plain old `icmp` ping probe
 * [ ] `shell` probe command improvements in handling stdout/stderr
-* [ ] add support to define destination notification channels for probe (see https://github.com/megaease/easeprobe/discussions/82)
+* [x] megaease/easeprobe#108 add support to define destination notification channels for probe (see https://github.com/megaease/easeprobe/discussions/82)
 * [ ] work on cleaner distinction between `host`, `ssh` and `shell` (certain areas seem overlapping):
   * add support for **`host: local`** keyword to monitor self
   * check that we are OS agnostic where possible and confirm OS specific operations are abstracted (such as `daemon_linux.go`, `daemon_darwin.go` etc)
@@ -106,6 +107,6 @@ host:
 ```
 
 ### Notify
-* [ ] extend notify to help on automation operations (eg. not only send a notification message but also call an API or a shell script to assist in service recovery)
-* [ ] support for notification groups or lists (see https://github.com/megaease/easeprobe/discussions/82)
+* [x] megaease/easeprobe#130 extend notify to help on automation operations (eg. not only send a notification message but also call an API or a shell script to assist in service recovery)
+* [x] megaease/easeprobe#108 support for notification groups or lists (see https://github.com/megaease/easeprobe/discussions/82)
 * [ ] megaease/easeprobe#79 Improve on capabilities of discord and other similar notify (such as configurable username)
