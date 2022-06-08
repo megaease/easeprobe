@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/megaease/easeprobe/global"
+
 	log "github.com/sirupsen/logrus"
 )
 

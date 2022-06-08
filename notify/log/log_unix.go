@@ -28,14 +28,19 @@ import (
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/report"
+
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	syslogIdentifier = "syslog"
+)
+
 func (c *NotifyConfig) checkNetworkProtocol() error {
-	if len(c.Network) == 0 {
+	if strings.TrimSpace(c.Network) == "" {
 		return fmt.Errorf("protocol is required")
 	}
-	if len(c.Host) == 0 {
+	if strings.TrimSpace(c.Host) == "" {
 		return fmt.Errorf("host is required")
 	}
 	if c.Network != TCP && c.Network != UDP {
@@ -61,14 +66,13 @@ func (c *NotifyConfig) ConfigLog() error {
 
 	c.logger = log.New()
 
-	isSyslog := (strings.TrimSpace(c.File) == "syslog")
+	isSyslog := (strings.TrimSpace(c.File) == syslogIdentifier)
 	hasNetwork := false
 	if isSyslog == true {
-		if len(c.Network) == 0 || len(c.Host) == 0 {
+		if strings.TrimSpace(c.Network) == "" || strings.TrimSpace(c.Host) == "" {
 			hasNetwork = false
 		} else {
-			err := c.checkNetworkProtocol()
-			if err != nil {
+			if err := c.checkNetworkProtocol(); err != nil {
 				return err
 			}
 			hasNetwork = true
@@ -77,7 +81,7 @@ func (c *NotifyConfig) ConfigLog() error {
 
 	// syslog && network configuration error
 	if isSyslog && hasNetwork == true { // remote syslog
-		c.NotifyKind = "syslog"
+		c.NotifyKind = syslogIdentifier
 		c.Type = SysLog
 		if err := c.checkNetworkProtocol(); err != nil {
 			return err
@@ -90,7 +94,7 @@ func (c *NotifyConfig) ConfigLog() error {
 		c.logger.SetOutput(writer)
 		log.Infof("[%s] %s - remote syslog (%s:%s) configured", c.NotifyKind, c.NotifyName, c.Network, c.Host)
 	} else if isSyslog { // only for local syslog
-		c.NotifyKind = "syslog"
+		c.NotifyKind = syslogIdentifier
 		c.Type = SysLog
 		writer, err := syslog.New(syslog.LOG_NOTICE, global.GetEaseProbe().Name)
 		if err != nil {

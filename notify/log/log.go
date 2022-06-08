@@ -24,6 +24,7 @@ import (
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify/base"
+
 	log "github.com/sirupsen/logrus"
 )
 
