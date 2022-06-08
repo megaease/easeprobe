@@ -6,15 +6,15 @@ The following document will try to provide some general guidelines and informati
 This document is constantly under change with new things been added as the project grows.
 
 ## General guidelines
-The following are some guidelines that will help in getting your code contributions easier accepted.
+The following are some guidelines that will help in getting your code contributions accepted easier and faster.
 
-* For the Coding Standard, we follow [Uber Go Style Guide](https://github.com/uber-go/guide/blob/master/style.md).
-* Write a small description for your PR, this makes it much easier for the reviewer
+* For code changes, make sure the style complies with the [Uber Go Style Guide](https://github.com/uber-go/guide/blob/master/style.md)
+* Write a small description for your PR, so the reviewers know what this is about and what to expect
 * Make sure to address any linting or test failures your PR introduces
 * If you contribute a new feature
     * update or create appropriate tests for it
     * update the README accordingly
-* If you introduced new files make sure to include the license on top of each new `.go` file. Simply run the `resources/scripts/copyright.sh` script to help in adding the open source license.
+* If you introduced new files make sure to include the license on top of each new `.go` file. Running `resources/scripts/copyright.sh` will do that for you
 
 ## How EaseProbe Works
 Basically, the EaseProbe have the following major code organization.
@@ -53,7 +53,7 @@ The SLA Report contains the results of all Probers which include:
 
 - **SLA Data**. SLA data (in `probe/data.go`) that are (optionally) persistent in a file.
 - **Web Server**. the Web server for SLA report is in `web` package, it includes the HTML web page and the Restful API. This uses of Chi framework.
-- **Report Format**. there are serveral formations for SLA report, the code is in `report/sla.go`
+- **Report Format**. there are several formations for SLA report, the code is in `report/sla.go`
 - **Scheduler**. takes care of the SLA report scheduling requirements (such as Daily/Weekly/Monthly) and can be found in `cmd/easeprobe/report.go`
 
 ### 5) Metrics (Prometheus)
@@ -85,7 +85,7 @@ Examples
 * `daemon`. This package is about EaseProbe daemon operations, such as: create the pid file.
     * `daemon.go` -  General operations for all platforms
     * `daemon_windows.go` - For Windows platform
-    * `daemon_linux.go` - For Linux Platform
+    * `daemon_linux.go` - For Linux platform
     * `daemon_unix.go` - For all non-Windows and non-Linux platform such as: macOS & OpenBSD
 * `global`. This package defines the Global variables, structures and functions.
     * `global.go` - Default Value, Retry, TLS structure, Working Directory...
@@ -125,20 +125,9 @@ The project provides a `Makefile` with the following targets
 ## Github Actions
 The project currently has 2 Github Workflows that are responsible for checking the code and assisting in releases of new versions.
 
-- `ci.yaml` would do license checking, code lint, and unit test.
-- `release.yaml` would do release work, build the binaries and docker images.
+- `code.yaml` performs code linting checks on files
+- `license.yaml` checks for license existence in source code files
+- `test.yaml` performs unit and coverage testing
+- `release.yaml` would do release work, build the binaries and docker images
 
-**Note**: goreleaser configuration file is `.goreleaser.yaml`, and it would use the `resources/Dockerfile.goreleaser` for docker image to build the release.
-
-
-​
-### CI (`.github/workflows/ci.yaml`)
-The workflow has two jobs `lint` & `test`
-​
-The `lint` job runs the following
-- Spelling Check with Reviewdog
-- Linting through Revive
-- Check formatting with **`gofmt`**
-​
-The `test` job runs the following
-- `go test -cover -race`
+**Note**: `goreleaser` uses the configuration file at `.goreleaser.yaml`, and builds the release using the docker file at `resources/Dockerfile.goreleaser`
