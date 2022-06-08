@@ -57,6 +57,28 @@ func (c *NotifyConfig) checkNetworkProtocol() error {
 	return nil
 }
 
+// IsSyslog returns true if the log is syslog
+func (c *NotifyConfig) IsSyslog() bool {
+	return strings.TrimSpace(c.File) == syslogIdentifier
+}
+
+// HasNetwork returns true if the log has network configuration
+func (c *NotifyConfig) HasNetwork() (bool, error) {
+	// if is not syslog, then return false
+	if c.IsSyslog() == false {
+		return false, nil
+	}
+	// if is syslog, but not configured network, then return false
+	if strings.TrimSpace(c.Network) == "" || strings.TrimSpace(c.Host) == "" {
+		return false, nil
+	}
+	// if the network is configured error, then return false
+	if err := c.checkNetworkProtocol(); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 // ConfigLog configures the log
 // Unix platform support syslog and log file notification
 func (c *NotifyConfig) ConfigLog() error {
@@ -66,21 +88,13 @@ func (c *NotifyConfig) ConfigLog() error {
 
 	c.logger = log.New()
 
-	isSyslog := (strings.TrimSpace(c.File) == syslogIdentifier)
-	hasNetwork := false
-	if isSyslog == true {
-		if strings.TrimSpace(c.Network) == "" || strings.TrimSpace(c.Host) == "" {
-			hasNetwork = false
-		} else {
-			if err := c.checkNetworkProtocol(); err != nil {
-				return err
-			}
-			hasNetwork = true
-		}
+	isSyslog := c.IsSyslog()
+	hasNetwork, err := c.HasNetwork()
+	if err != nil {
+		return err
 	}
-
 	// syslog && network configuration error
-	if isSyslog && hasNetwork == true { // remote syslog
+	if isSyslog == true && hasNetwork == true { // remote syslog
 		c.NotifyKind = syslogIdentifier
 		c.Type = SysLog
 		if err := c.checkNetworkProtocol(); err != nil {
@@ -93,7 +107,7 @@ func (c *NotifyConfig) ConfigLog() error {
 		}
 		c.logger.SetOutput(writer)
 		log.Infof("[%s] %s - remote syslog (%s:%s) configured", c.NotifyKind, c.NotifyName, c.Network, c.Host)
-	} else if isSyslog { // only for local syslog
+	} else if isSyslog == true { // only for local syslog
 		c.NotifyKind = syslogIdentifier
 		c.Type = SysLog
 		writer, err := syslog.New(syslog.LOG_NOTICE, global.GetEaseProbe().Name)
