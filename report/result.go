@@ -18,12 +18,15 @@
 package report
 
 import (
+	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
+
 	log "github.com/sirupsen/logrus"
 )
 
@@ -248,12 +251,22 @@ func ToLark(r probe.Result) string {
 
 // ToCSV convert the object to CSV
 func ToCSV(r probe.Result) string {
-	head := "Title, Name, Endpoint, Status, PreStatus, RoundTripTime, Time, Timestamp, Message\n"
-	tpl := "%s, %s, %s, %s, %s, %d, %s, %d, %s"
-	rtt := r.RoundTripTime.Round(time.Millisecond)
-	return fmt.Sprintf(head+tpl,
-		r.Title(), r.Name, r.Endpoint, r.Status.String(), r.PreStatus.String(), rtt,
-		r.StartTime.UTC().Format(r.TimeFormat), r.StartTimestamp, r.Message)
+	rtt := fmt.Sprintf("%d", r.RoundTripTime.Round(time.Millisecond))
+	time := r.StartTime.UTC().Format(r.TimeFormat)
+	timestamp := fmt.Sprintf("%d", r.StartTimestamp)
+	data := [][]string{
+		{"Title", "Name", "Endpoint", "Status", "PreStatus", "RoundTripTime", "Time", "Timestamp", "Message"},
+		{r.Title(), r.Name, r.Endpoint, r.Status.String(), r.PreStatus.String(), rtt, time, timestamp, r.Message},
+	}
+
+	buf := new(bytes.Buffer)
+	w := csv.NewWriter(buf)
+
+	if err := w.WriteAll(data); err != nil {
+		log.Errorf("ToCSV(): Failed to write to csv buffer: %v", err)
+		return ""
+	}
+	return buf.String()
 }
 
 // ToShell convert the result object to shell variables

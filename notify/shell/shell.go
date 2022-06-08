@@ -66,7 +66,7 @@ func (c *NotifyConfig) RunShell(title, msg string) error {
 	for k, v := range envMap {
 		env = append(env, fmt.Sprintf("%s=%s", k, v))
 	}
-	cmd.Stdin = strings.NewReader(envMap["EASEPROBE_CSV"] + "\n")
+	cmd.Stdin = strings.NewReader(envMap["EASEPROBE_CSV"])
 	cmd.Env = append(os.Environ(), env...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {

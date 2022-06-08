@@ -18,6 +18,8 @@
 package report
 
 import (
+	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -406,22 +408,40 @@ func SLASummary(probers []probe.Prober) string {
 }
 
 // SLACSVSection set the CSV format for SLA
-func SLACSVSection(r *probe.Result) string {
-	text := "%s, %s, up(%s), down(%s), %.2f%%, %d(%s), %s, %s, %s"
-	return fmt.Sprintf(text, r.Name, r.Endpoint,
-		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLAPercent(),
-		r.Stat.Total, SLAStatusText(r.Stat, Text),
-		r.StartTime.UTC().Format(r.TimeFormat),
-		r.Status.String(), r.Message)
+func SLACSVSection(r *probe.Result) []string {
+	return []string{
+		// Name, Endpoint,
+		r.Name, r.Endpoint,
+		// UpTime, DownTime, SLA
+		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), fmt.Sprintf("%.2f%%", r.SLAPercent()),
+		// ProbeSummary - Total( Up, Down)
+		fmt.Sprintf("%d(%s)", r.Stat.Total, SLAStatusText(r.Stat, Text)),
+		// LatestProbe, LatestStatus
+		r.StartTime.UTC().Format(r.TimeFormat), r.Status.String(),
+		// Message
+		r.Message,
+	}
 }
 
 // SLACSV return a full stat report with CSV format
 func SLACSV(probers []probe.Prober) string {
-	csv := "Name, Endpoint, UpTime, DownTime, SLA, ProbeSummary, LatestProbe, LatestStatus, Message\n"
-	for _, p := range probers {
-		csv += SLACSVSection(p.Result()) + "\n"
+	data := [][]string{
+		{"Name", "Endpoint", "UpTime", "DownTime", "SLA", "ProbeSummary", "LatestProbe", "LatestStatus", "Message"},
 	}
-	return csv
+
+	for _, p := range probers {
+		data = append(data, SLACSVSection(p.Result()))
+	}
+
+	buf := new(bytes.Buffer)
+	w := csv.NewWriter(buf)
+
+	if err := w.WriteAll(data); err != nil {
+		log.Errorf("SLACSV(): Failed to write to csv buffer: %v", err)
+		return ""
+	}
+
+	return buf.String()
 }
 
 // SLAShell set the environment for SLA
