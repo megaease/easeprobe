@@ -30,6 +30,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// ToLog convert the result object to Log format
+func ToLog(r probe.Result) string {
+	tpl := `title="%s"; name="%s"; status="%s"; endpoint="%s"; rtt="%s"; time="%s"; message="%s"`
+	rtt := r.RoundTripTime.Round(time.Millisecond)
+	return fmt.Sprintf(tpl,
+		r.Title(), r.Name, r.Status.String(), r.Endpoint, rtt, r.StartTime.Format(r.TimeFormat), r.Message)
+}
+
 // ToText convert the result object to ToText
 func ToText(r probe.Result) string {
 	tpl := "[%s] %s\n%s - ⏱ %s\n%s\n%s"

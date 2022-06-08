@@ -29,6 +29,9 @@ func TestChannel(t *testing.T) {
 	ch := NewEmpty("test")
 
 	ch.Config()
+	ch.SetNotify(nil)
+	ch.SetProber(nil)
+
 	assert.NotNil(t, ch.Done())
 	assert.NotNil(t, ch.Channel())
 
@@ -47,4 +50,16 @@ func TestChannel(t *testing.T) {
 	ch.SetNotifiers(notifiers)
 	assert.Equal(t, 2, len(ch.Notifiers))
 	assert.Equal(t, "email", ch.GetNotify("dummy-XY").Kind())
+
+	// test duplicate name
+	n := newDummyNotify("discord", "dummy-XY", []string{"X", "Y"})
+	ch.SetNotify(n)
+	assert.NotEqual(t, "discord", ch.GetNotify("dummy-XY").Kind())
+	assert.Equal(t, "email", ch.GetNotify("dummy-XY").Kind())
+
+	p := newDummyProber("ssh", "XY", "dummy-XY", []string{"X", "Y"})
+	ch.SetProber(p)
+	assert.NotEqual(t, "ssh", ch.GetProber("dummy-XY").Kind())
+	assert.Equal(t, "http", ch.GetProber("dummy-XY").Kind())
+
 }
