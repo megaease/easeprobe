@@ -407,11 +407,12 @@ func SLASummary(probers []probe.Prober) string {
 
 // SLACSVSection set the CSV format for SLA
 func SLACSVSection(r *probe.Result) string {
+	head := "Name, Endpoint, UpTime, DownTime, SLA, ProbeStatistic, LatestProbe, LatestStatus, Message\n"
 	text := "%s, %s, up(%s), down(%s), %.2f%%, %d(%s), %s, %s, %s"
-	return fmt.Sprintf(text, r.Name, r.Endpoint,
+	return fmt.Sprintf(head+text, r.Name, r.Endpoint,
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLAPercent(),
 		r.Stat.Total, SLAStatusText(r.Stat, Text),
-		time.Now().UTC().Format(r.TimeFormat),
+		r.StartTime.UTC().Format(r.TimeFormat),
 		r.Status.String(), r.Message)
 }
 
