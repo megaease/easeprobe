@@ -90,6 +90,10 @@ func (c *Channel) SetProber(p probe.Prober) {
 	if p == nil {
 		return
 	}
+	if _, ok := c.Probers[p.Name()]; ok {
+		log.Errorf("Prober [%s - %s] name is duplicated, ignored!", p.Kind(), p.Name())
+		return
+	}
 	c.Probers[p.Name()] = p
 }
 
@@ -108,6 +112,10 @@ func (c *Channel) SetNotifiers(notifiers []notify.Notify) {
 // SetNotify sets the Notify object
 func (c *Channel) SetNotify(n notify.Notify) {
 	if n == nil {
+		return
+	}
+	if _, ok := c.Notifiers[n.Name()]; ok {
+		log.Errorf("Notifier [%s - %s] name is duplicated, ignored!", n.Kind(), n.Name())
 		return
 	}
 	c.Notifiers[n.Name()] = n
