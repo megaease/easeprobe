@@ -35,6 +35,7 @@ const (
 	HTML
 	JSON
 	Text
+	Log
 	Slack
 	Discord
 	Lark
@@ -48,6 +49,7 @@ var fmtToStr = map[Format]string{
 	HTML:           "html",
 	JSON:           "json",
 	Text:           "text",
+	Log:            "log",
 	Slack:          "slack",
 	Discord:        "discord",
 	Lark:           "lark",
@@ -97,6 +99,7 @@ type FormatFuncStruct struct {
 var FormatFuncs = map[Format]FormatFuncStruct{
 	Unknown:        {ToText, SLAText},
 	Text:           {ToText, SLAText},
+	Log:            {ToLog, SLALog},
 	JSON:           {ToJSON, SLAJSON},
 	Markdown:       {ToMarkdown, SLAMarkdown},
 	MarkdownSocial: {ToMarkdownSocial, SLAMarkdownSocial},

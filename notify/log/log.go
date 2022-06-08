@@ -18,62 +18,71 @@
 package log
 
 import (
-	"log"
+	"bufio"
 	"os"
+	"strings"
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify/base"
-	"github.com/megaease/easeprobe/probe"
-	"github.com/megaease/easeprobe/report"
-	"github.com/sirupsen/logrus"
+
+	log "github.com/sirupsen/logrus"
+)
+
+// Network protocols
+const (
+	TCP = "tcp"
+	UDP = "udp"
+)
+
+// Type is the log type
+type Type int
+
+// Log Type
+const (
+	FileLog = iota
+	SysLog
 )
 
 // NotifyConfig is the configuration of the Notify
 type NotifyConfig struct {
 	base.DefaultNotify `yaml:",inline"`
-	File               string `yaml:"file"`
+
+	File    string `yaml:"file"`
+	Host    string `yaml:"host"`
+	Network string `yaml:"network"`
+	Type    Type   `yaml:"-"`
+	logger  *log.Logger
 }
 
-// Config configures the log files
-func (c *NotifyConfig) Config(global global.NotifySettings) error {
+func (c *NotifyConfig) configLogFile() error {
 	c.NotifyKind = "log"
-	c.NotifyFormat = report.Text
-	if c.Dry {
-		logrus.Infof("Notification [%s] - [%s] is running on Dry mode!", c.NotifyKind, c.NotifyName)
-		log.SetOutput(os.Stdout)
-		return nil
-	}
+	c.Type = FileLog
 	file, err := os.OpenFile(c.File, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
-		logrus.Errorf("error: %s", err)
+		log.Errorf("[%s] cannot open file: %s", c.NotifyKind, err)
 		return err
 	}
-	log.SetOutput(file)
-
-	logrus.Infof("Notification [%s] - [%s] is configured!", c.Kind(), c.NotifyName)
-	logrus.Debugf("Notification [%s] - [%s] configuration: %+v", c.Kind(), c.NotifyName, c)
+	c.logger.SetOutput(file)
+	log.Infof("[%s] %s - local log file(%s) configured", c.NotifyKind, c.NotifyName, c.File)
 	return nil
 }
 
-// Notify write the message into the file
-func (c *NotifyConfig) Notify(result probe.Result) {
-	if c.Dry {
-		c.DryNotify(result)
-		return
+// Config configures the log notification
+func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
+	if err := c.ConfigLog(); err != nil {
+		return err
 	}
-	log.Println(result.DebugJSON())
-	logrus.Infof("Logged the notification for %s (%s)!", result.Name, result.Endpoint)
+	return c.DefaultNotify.Config(gConf)
 }
 
-// NotifyStat write the stat message into the file
-func (c *NotifyConfig) NotifyStat(probers []probe.Prober) {
-	if c.Dry {
-		c.DryNotifyStat(probers)
-		return
+// Log logs the message
+func (c *NotifyConfig) Log(title, msg string) error {
+	scanner := bufio.NewScanner(strings.NewReader(msg))
+	for scanner.Scan() {
+		line := scanner.Text()
+		log.Debugf("[%s] %s", c.NotifyKind, line)
+		c.logger.Info(line)
 	}
-	logrus.Infoln("LogFile Sending the Statstics...")
-	for _, p := range probers {
-		log.Println(p.Result())
-	}
-	logrus.Infof("Logged the Statstics into %s!", c.File)
+
+	return scanner.Err()
 }
