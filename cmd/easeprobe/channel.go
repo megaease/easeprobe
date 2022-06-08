@@ -31,6 +31,7 @@ func configChannels(probers []probe.Prober, notifiers []notify.Notify) {
 		p := probers[i]
 		if len(p.Channels()) <= 0 {
 			channel.SetProber(global.DefaultChannelName, p)
+			continue
 		}
 		for _, cName := range p.Channels() {
 			channel.SetProber(cName, p)
@@ -57,22 +58,22 @@ func configChannels(probers []probe.Prober, notifiers []notify.Notify) {
 }
 
 func checkChannels() {
-	log.Debug("--------- Channel Configuration --------- ")
+	log.Info("--------- Channel Configuration --------- ")
 	// check the channel configuration
 	for cName, ch := range channel.GetAllChannels() {
 
-		log.Debugf("Channel: %s\n", cName)
-		log.Debugf("   Probers:\n")
+		log.Infof("Channel: %s\n", cName)
+		log.Infof("   Probers:\n")
 		for _, p := range ch.Probers {
-			log.Debugf("    - %s: %s\n", p.Kind(), p.Name())
+			log.Infof("    - %s: %s\n", p.Kind(), p.Name())
 		}
 		if len(ch.Probers) <= 0 {
 			log.Warnf("Channel(%s) has no probers!", cName)
 		}
 
-		log.Debugf("   Notifiers:\n")
+		log.Infof("   Notifiers:\n")
 		for _, n := range ch.Notifiers {
-			log.Debugf("     - %s: %s\n", n.Kind(), n.Name())
+			log.Infof("     - %s: %s\n", n.Kind(), n.Name())
 		}
 		if len(ch.Notifiers) <= 0 {
 			log.Warnf("Channel(%s) has no notifiers!", cName)
