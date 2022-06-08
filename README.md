@@ -36,16 +36,18 @@ EaseProbe is a simple, standalone, and lightWeight tool that can do health/statu
 
 ## 1. Overview
 
-EaseProbe would do three kinds of work - **Probe**, **Notify**, and **Report**.
+EaseProbe is designed to do three kinds of work - **Probe**, **Notify**, and **Report**.
 
 ### 1.1 Probe
 
-Ease Probe supports the following probing methods: **HTTP**, **TCP**, **Shell Command**, **SSH Command**,  **Host Resource Usage**, and **Native Client**.
+EaseProbe supports the following probing methods: **HTTP**, **TCP**, **Shell Command**, **SSH Command**,  **Host Resource Usage**, and **Native Client**.
 
+Each probe is identified by the method it supports (eg `http`), a unique name (across all probes in the configuration file) and the method specific parameters.
 
 > **Note**:
 >
-> **Keep in mind that the prober name must be **unique** among probes. If multiple probes are defined with the same name, it could lead to corruption of the metrics data and the behavior of the application will be non-deterministic.**
+> **If multiple probes using the same name then this could lead to corruption of the metrics data and/or the behavior of the application in non-deterministic way.**
+
 
 - **HTTP**. Checking the HTTP status code, Support mTLS, HTTP Basic Auth, and can set the Request Header/Body. ( [HTTP Probe Configuration](#31-http-probe-configuration) )
 
@@ -119,7 +121,7 @@ Ease Probe supports the following probing methods: **HTTP**, **TCP**, **Shell Co
           disk: 0.90  # disk usage 90%
   ```
 
-- **Client**. Currently, support the following native client. Support the mTLS. (refer to: [Native Client Probe Configuration](#37-native-client-probe-configuration) )
+- **Client**. Currently, support the following native client. Support the mTLS. ( refer to: [Native Client Probe Configuration](#37-native-client-probe-configuration) )
   - **MySQL**. Connect to the MySQL server and run the `SHOW STATUS` SQL.
   - **Redis**. Connect to the Redis server and run the `PING` command.
   - **MongoDB**. Connect to MongoDB server and just ping server.
@@ -141,7 +143,7 @@ Ease Probe supports the following probing methods: **HTTP**, **TCP**, **Shell Co
 
 ### 1.2 Notification
 
-Ease Probe supports the following notifications:
+EaseProbe supports the following notifications:
 
 - **Slack**. Using Webhook for notification
 - **Discord**. Using Webhook for notification
@@ -158,8 +160,9 @@ Ease Probe supports the following notifications:
 
 > **Note**:
 >
-> The notification is **Edge-Triggered Mode**, only notified while the status is changed.
-> The Windows platform doesn't support syslog
+> The notification is **Edge-Triggered Mode**, this means that these notifications are triggered when the status changes.
+>
+> Windows platforms do not support syslog as notification method.
 
 ```YAML
 # Notification Configuration
@@ -273,9 +276,9 @@ This feature could help you group the Probers and Notifiers into a logical group
 
 > **Note**:
 >
-> 1) If you don't define the Channel, the default channel will be used for these probers and notifiers. The default channel name is `__EaseProbe_Channel__`
+> If no Channel is defined on a probe or notify entry, then the default channel will be used. The default channel name is `__EaseProbe_Channel__`
 >
-> 2) Versions of EaseProbe prior to  v1.5.0, do not support the `channel` feature
+> EaseProbe versions prior to v1.5.0, do not have support for the `channel` feature
 
 ```YAML
 
@@ -318,7 +321,7 @@ Then, we will have the following diagram
 
 There are some administration configuration options:
 
-**1) PID file**
+**PID file**
 
   The EaseProbe would create a PID file (default `$CWD/easeprobe.pid`) when it starts. it can be configured by:
 
@@ -337,11 +340,11 @@ There are some administration configuration options:
     pid: "" # EaseProbe won't create a PID file
   ```
 
-**2) Log file Rotation**
+**Log file Rotation**
 
   There are two types of the log files: **Application Log** and **HTTP Access Log**.
 
-  Both Application Log and HTTP Access Log would be StdOut by default.  They all can be configured by:
+  Both application and HTTP access logs will be displayed on StdOut by default. Both can be be configured by the `log:` directive such as:
 
   ```YAML
   log:
@@ -369,13 +372,13 @@ There are some administration configuration options:
 
 ### 1.6 Prometheus Metrics
 
-EaseProbe supports Prometheus metrics.  The Prometheus endpoint is `http://localhost:8181/metrics` by default.
+EaseProbe supports Prometheus metrics. The Prometheus endpoint is `http://localhost:8181/metrics` by default.
 
 The following snapshot is the Grafana panel for host CPU metrics
 
 ![](./docs/grafana.demo.png)
 
-Refer to the [Global Setting Configuration](#38-global-setting-configuration) to see how to configure the HTTP server.
+Refer to the [Global Setting Configuration](#38-global-setting-configuration) for further details on how to configure the HTTP server.
 
 ## 2. Getting Started
 
@@ -388,7 +391,7 @@ You can get started with EaseProbe, by any of the following methods:
 
 Compiler `Go 1.18+` (Generics Programming Support)
 
-Use `make` to make the binary file. the target is under the `build/bin` directory
+Use `make` to build and produce the `easeprobe` binary file. The executable is produced under the `build/bin` directory
 
 ```shell
 $ make
@@ -411,8 +414,9 @@ $ build/bin/easeprobe -f config.yaml
 
 ## 3. Configuration
 
-EaseProbe can be configured by supplying a yaml file or URL to fetch configuration settings from.
-By default EaseProbe will look for its `config.yaml` on the current folder, this can be changed by supplying the `-f` parameter.
+EaseProbe can be configured by supplying a YAML file or URL to fetch configuration settings from.
+
+By default EaseProbe will look for its `config.yaml` on the current folder. This behavior can be changed by supplying the `-f` parameter.
 
 ```shell
 easeprobe -f path/to/config.yaml
@@ -625,14 +629,13 @@ TLS ping to remote endpoint, can probe for revoked or expired certificates
 
 ### 3.6 Host Resource Usage Probe Configuration
 
-Support the host probe, the configuration example as below.
+The host resource usage probe allows for collecting information and alerting when certain resource utilization thresholds are exceeded.
 
-The feature probe the CPU, Memory, and Disk usage, if one of them exceeds the threshold, then mark the host as status down.
+The resources currently monitored include CPU, memory and disk utilization. The probe status is considered as `down` when any value exceeds its defined threshold.
 
 > **Note**:
-> - The thresholds are **OR** conditions, if one of them exceeds the threshold, then mark the host as status down.
-> - The Host needs remote server have the following command: `top`, `df`, `free`, `awk`, `grep`, `tr`, and `hostname` (check the [source code](./probe/host/host.go) to see how it works).
-> - The disk usage only check the root disk.
+> - The host running easerprobe needs the following commands to be installed on the remote system that will be monitored: `top`, `df`, `free`, `awk`, `grep`, `tr`, and `hostname` (check the [source code](./probe/host/host.go) for more details on this works and/or modify its behavior).
+> - The disk usage check is limited to the root filesystem only with the following command `df -h /`.
 
 ```yaml
 host:
@@ -805,7 +808,7 @@ notify:
         - "/path/to/script.sh"
 ```
 
-**Note**: All of the notifications can have the following optional configuration.
+**Note**: All of the notifications support the following optional configuration parameters.
 
 ```YAML
   dry: true # dry notification, print the Discord JSON in log(STDOUT)
@@ -914,6 +917,7 @@ settings:
 ```
 
 ## 4. Contributing
+
 If you're interested in contributing to the project, please spare a moment to read our [CONTRIBUTING Guide](./docs/CONTRIBUTING.md)
 
 
