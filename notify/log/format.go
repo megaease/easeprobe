@@ -33,16 +33,14 @@ type SysLogFormatter struct {
 
 //Format details
 func (s *SysLogFormatter) Format(entry *log.Entry) ([]byte, error) {
+	if s.Type == SysLog {
+		return []byte(fmt.Sprintf("%s\n", entry.Message)), nil
+	}
+
 	timestamp := time.Now().Local().Format(time.RFC3339)
 	host := global.GetEaseProbe().Host
 	app := global.GetEaseProbe().Name
 
-	var msg string
-	if s.Type == SysLog {
-		msg = fmt.Sprintf("%s\n", entry.Message)
-	} else {
-		msg = fmt.Sprintf("%s %s %s %s %s\n", timestamp, host, app, entry.Level.String(), entry.Message)
-
-	}
+	msg := fmt.Sprintf("%s %s %s %s %s\n", timestamp, host, app, entry.Level.String(), entry.Message)
 	return []byte(msg), nil
 }

@@ -84,5 +84,5 @@ func (c *NotifyConfig) Log(title, msg string) error {
 		c.logger.Info(line)
 	}
 
-	return nil
+	return scanner.Err()
 }
