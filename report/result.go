@@ -251,8 +251,8 @@ func ToCSV(r probe.Result) string {
 	head := "Title, Name, Endpoint, Status, PreStatus, RoundTripTime, Time, Timestamp, Message\n"
 	tpl := "%s, %s, %s, %s, %s, %d, %s"
 	rtt := r.RoundTripTime.Round(time.Millisecond)
-	return fmt.Sprintf(head + tpl,
-		r.Title(), r.Name,  r.Endpoint, r.Status.String(), r.PreStatus.String(), rtt,
+	return fmt.Sprintf(head+tpl,
+		r.Title(), r.Name, r.Endpoint, r.Status.String(), r.PreStatus.String(), rtt,
 		r.StartTime.UTC().Format(r.TimeFormat), r.StartTimestamp, r.Message)
 }
 
