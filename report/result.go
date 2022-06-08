@@ -249,7 +249,7 @@ func ToLark(r probe.Result) string {
 // ToCSV convert the object to CSV
 func ToCSV(r probe.Result) string {
 	head := "Title, Name, Endpoint, Status, PreStatus, RoundTripTime, Time, Timestamp, Message\n"
-	tpl := "%s, %s, %s, %s, %s, %d, %s"
+	tpl := "%s, %s, %s, %s, %s, %d, %s, %d, %s"
 	rtt := r.RoundTripTime.Round(time.Millisecond)
 	return fmt.Sprintf(head+tpl,
 		r.Title(), r.Name, r.Endpoint, r.Status.String(), r.PreStatus.String(), rtt,
