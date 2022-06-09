@@ -20,11 +20,12 @@ package zookeeper
 import (
 	"context"
 	"crypto/tls"
+	"net"
+	"time"
+
 	"github.com/go-zookeeper/zk"
 	"github.com/megaease/easeprobe/probe/client/conf"
 	log "github.com/sirupsen/logrus"
-	"net"
-	"time"
 )
 
 // Kind is the type of driver
@@ -37,7 +38,7 @@ type Zookeeper struct {
 	Context      context.Context `yaml:"conn_str"`
 }
 
-// New create a Redis client
+// New create a Zookeeper client
 func New(opt conf.Options) Zookeeper {
 	tls, err := opt.TLS.Config()
 	if err != nil {

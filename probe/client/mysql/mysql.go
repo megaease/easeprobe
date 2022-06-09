@@ -39,7 +39,7 @@ type MySQL struct {
 	ConnStr      string      `yaml:"conn_str"`
 }
 
-// New create a Redis client
+// New create a Mysql client
 func New(opt conf.Options) MySQL {
 
 	var conn string
