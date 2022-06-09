@@ -541,20 +541,20 @@ func checkSettings(t *testing.T, s Settings) {
 
 const confYAML = confVer + confHTTP + confSSH + confHost + confClient + confNotify + confSettings
 
-func writeConfig(file string) error {
-	return ioutil.WriteFile(file, []byte(confYAML), 0644)
+func writeConfig(file, content string) error {
+	return ioutil.WriteFile(file, []byte(content), 0644)
 }
 
 func httpServer() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(confYAML))
 	})
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":65535", nil)
 }
 
 func TestConfig(t *testing.T) {
 	file := "./config.yaml"
-	err := writeConfig(file)
+	err := writeConfig(file, confYAML)
 	assert.Nil(t, err)
 
 	conf, err := New(&file)
@@ -588,7 +588,7 @@ func TestConfig(t *testing.T) {
 	assert.Equal(t, 6, len(notifiers))
 
 	go httpServer()
-	url := "http://localhost:8080"
+	url := "http://localhost:65535"
 	os.Setenv("HTTP_AUTHORIZATION", "Basic dXNlcm5hbWU6cGFzc3dvcmQ=")
 	os.Setenv("HTTP_TIMEOUT", "10")
 	httpConf, err := New(&url)
@@ -635,5 +635,35 @@ func TestInitData(t *testing.T) {
 	c.initData()
 	assert.NoDirExists(t, "mydata")
 	monkey.Unpatch(os.MkdirAll)
+}
 
+func TestEmptyNotifies(t *testing.T) {
+	myConf := confVer
+	file := "./config.yaml"
+	err := writeConfig(file, myConf)
+	assert.Nil(t, err)
+
+	conf, err := New(&file)
+	assert.Nil(t, err)
+	notifiers := conf.AllNotifiers()
+	assert.Nil(t, err)
+	assert.Equal(t, 0, len(notifiers))
+
+	os.RemoveAll(file)
+	os.RemoveAll("data")
+}
+
+func TestEmptyProbes(t *testing.T) {
+	myConf := confVer
+	file := "./config.yaml"
+	err := writeConfig(file, myConf)
+	assert.Nil(t, err)
+
+	conf, err := New(&file)
+	assert.Nil(t, err)
+	probers := conf.AllProbers()
+	assert.Equal(t, 0, len(probers))
+
+	os.RemoveAll(file)
+	os.RemoveAll("data")
 }
