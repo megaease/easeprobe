@@ -24,16 +24,21 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func configNotifiers(notifies []notify.Notify) {
+func configNotifiers(notifies []notify.Notify) []notify.Notify {
 	gNotifyConf := global.NotifySettings{
 		TimeFormat: conf.Get().Settings.TimeFormat,
 		Retry:      conf.Get().Settings.Notify.Retry,
 	}
+
+	validNotifies := []notify.Notify{}
 	for _, n := range notifies {
 		if err := n.Config(gNotifyConf); err != nil {
 			log.Errorf("error: %v", err)
 			continue
 		}
+		validNotifies = append(validNotifies, n)
 		log.Infof("Successfully setup the notify channel: %s", n.Kind())
 	}
+
+	return validNotifies
 }
