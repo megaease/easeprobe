@@ -28,13 +28,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func configProbers(probers []probe.Prober) {
+func configProbers(probers []probe.Prober) []probe.Prober {
 	gProbeConf := global.ProbeSettings{
 		TimeFormat: conf.Get().Settings.TimeFormat,
 		Interval:   conf.Get().Settings.Probe.Interval,
 		Timeout:    conf.Get().Settings.Probe.Timeout,
 	}
 	log.Debugf("Global Probe Configuration: %+v", gProbeConf)
+
+	validProbers := []probe.Prober{}
 	for i := 0; i < len(probers); i++ {
 		p := probers[i]
 		if err := p.Config(gProbeConf); err != nil {
@@ -47,7 +49,10 @@ func configProbers(probers []probe.Prober) {
 		if len(p.Result().Message) <= 0 {
 			p.Result().Message = "Good Configuration!"
 		}
+		validProbers = append(validProbers, p)
 	}
+
+	return validProbers
 }
 
 func runProbers(probers []probe.Prober, wg *sync.WaitGroup, done chan bool) {

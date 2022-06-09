@@ -103,9 +103,8 @@ func main() {
 	probers := c.AllProbers()
 	// Notification
 	notifies := c.AllNotifiers()
-
 	// Configure the Probes
-	configProbers(probers)
+	probers = configProbers(probers)
 	// Configure the Notifiers
 	configNotifiers(notifies)
 	// configure channels
