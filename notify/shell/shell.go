@@ -39,6 +39,8 @@ type NotifyConfig struct {
 	Cmd  string   `yaml:"cmd"`
 	Args []string `yaml:"args"`
 	Env  []string `yaml:"env"`
+
+	CleanEnv bool `yaml:"clean_env"`
 }
 
 // Config is the config for shell probe
@@ -68,7 +70,12 @@ func (c *NotifyConfig) RunShell(title, msg string) error {
 		env = append(env, fmt.Sprintf("%s=%s", k, v))
 	}
 	cmd.Stdin = strings.NewReader(envMap["EASEPROBE_CSV"])
-	cmd.Env = append(os.Environ(), env...)
+	if c.CleanEnv == false {
+		cmd.Env = append(os.Environ(), env...)
+	} else {
+		log.Infof("[%s / %s] clean the environment variables", c.NotifyKind, c.NotifyName)
+		cmd.Env = env
+	}
 	cmd.Env = append(cmd.Env, c.Env...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {

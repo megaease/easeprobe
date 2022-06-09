@@ -19,6 +19,7 @@ package shell
 
 import (
 	"context"
+	"os"
 	"os/exec"
 	"reflect"
 	"testing"
@@ -78,5 +79,30 @@ func TestShell(t *testing.T) {
 	status, message = s.DoProbe()
 	assert.False(t, status)
 	assert.NotContains(t, message, "ExitCode(null)")
+}
 
+func TestEnv(t *testing.T) {
+	s := &Shell{
+		DefaultProbe: base.DefaultProbe{ProbeName: "dummy shell"},
+		Command:      "env",
+		Args:         []string{},
+		Env:          []string{},
+	}
+
+	s.Config(global.ProbeSettings{})
+
+	err := os.Setenv("EASEPROBE", "1")
+	assert.Nil(t, err)
+	s.Contain = "EASEPROBE=1"
+	status, message := s.DoProbe()
+	assert.True(t, status)
+	assert.Contains(t, message, "Successfully")
+
+	s.CleanEnv = true
+	s.Env = []string{"env1=value1"}
+	s.Contain = "env1=value1"
+	s.NotContain = "EASEPROBE=1"
+	status, message = s.DoProbe()
+	assert.True(t, status)
+	assert.Contains(t, message, "Successfully")
 }
