@@ -534,6 +534,8 @@ shell:
       - "-h"
       - "127.0.0.1"
       - "ping"
+    clean_env: true # Do not pass the OS environment variables to the command
+                    # default: false
     env:
       # set the `REDISCLI_AUTH` environment variable for redis password
       - "REDISCLI_AUTH=abc123"
@@ -805,6 +807,8 @@ notify:
       args:
         - "-c"
         - "/path/to/script.sh"
+      clean_env: true # Do not pass the OS environment variables to the command
+                      # default: false
       env: # set the env to the notification command
         - "EASEPROBE=1"
         - "KEY=Value"
