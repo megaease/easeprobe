@@ -18,6 +18,8 @@
 package client
 
 import (
+	"fmt"
+
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/client/conf"
@@ -45,6 +47,10 @@ func (c *Client) Config(gConf global.ProbeSettings) error {
 	name := c.ProbeName
 	c.DefaultProbe.Config(gConf, kind, tag, name, c.Host, c.DoProbe)
 	c.configClientDriver()
+
+	if c.DriverType == conf.Unknown {
+		return fmt.Errorf("[%s / %s ] unknown driver type", kind, name)
+	}
 
 	log.Debugf("[%s] configuration: %+v, %+v", c.ProbeKind, c, c.Result())
 	return nil
