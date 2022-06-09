@@ -216,10 +216,12 @@ notify:
   shell: # EaseProbe set the environment variables -
          # (see the example: resources/scripts/notify/notify.sh)
     - name: "shell alert service"
-      command: "/bin/bash"
+      cmd: "/bin/bash"
       args:
         - "-c"
         - "/path/to/script.sh"
+      env: # set the env to the notification command
+        - "EASEPROBE=1"
 ```
 
 Check the  [Notification Configuration](#38-notification-configuration) to see how to configure it.
@@ -799,10 +801,13 @@ notify:
   # (see the example: resources/scripts/notify/notify.sh)
   shell:
     - name: "shell alert service"
-      command: "/bin/bash"
+      cmd: "/bin/bash"
       args:
         - "-c"
         - "/path/to/script.sh"
+      env: # set the env to the notification command
+        - "EASEPROBE=1"
+        - "KEY=Value"
 ```
 
 **Note**: All of the notifications can have the following optional configuration.

@@ -38,6 +38,7 @@ type NotifyConfig struct {
 
 	Cmd  string   `yaml:"cmd"`
 	Args []string `yaml:"args"`
+	Env  []string `yaml:"env"`
 }
 
 // Config is the config for shell probe
@@ -68,6 +69,7 @@ func (c *NotifyConfig) RunShell(title, msg string) error {
 	}
 	cmd.Stdin = strings.NewReader(envMap["EASEPROBE_CSV"])
 	cmd.Env = append(os.Environ(), env...)
+	cmd.Env = append(cmd.Env, c.Env...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return err
