@@ -219,10 +219,12 @@ notify:
   shell: # EaseProbe set the environment variables -
          # (see the example: resources/scripts/notify/notify.sh)
     - name: "shell alert service"
-      command: "/bin/bash"
+      cmd: "/bin/bash"
       args:
         - "-c"
         - "/path/to/script.sh"
+      env: # set the env to the notification command
+        - "EASEPROBE=1"
 ```
 
 Check the  [Notification Configuration](#38-notification-configuration) to see how to configure it.
@@ -534,6 +536,8 @@ shell:
       - "-h"
       - "127.0.0.1"
       - "ping"
+    clean_env: true # Do not pass the OS environment variables to the command
+                    # default: false
     env:
       # set the `REDISCLI_AUTH` environment variable for redis password
       - "REDISCLI_AUTH=abc123"
@@ -800,10 +804,15 @@ notify:
   # (see the example: resources/scripts/notify/notify.sh)
   shell:
     - name: "shell alert service"
-      command: "/bin/bash"
+      cmd: "/bin/bash"
       args:
         - "-c"
         - "/path/to/script.sh"
+      clean_env: true # Do not pass the OS environment variables to the command
+                      # default: false
+      env: # set the env to the notification command
+        - "EASEPROBE=1"
+        - "KEY=Value"
 ```
 
 **Note**: All of the notifications support the following optional configuration parameters.

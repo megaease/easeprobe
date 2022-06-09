@@ -36,6 +36,7 @@ type Shell struct {
 	Command           string   `yaml:"cmd"`
 	Args              []string `yaml:"args,omitempty"`
 	Env               []string `yaml:"env,omitempty"`
+	CleanEnv          bool     `yaml:"clean_env,omitempty"`
 	Contain           string   `yaml:"contain,omitempty"`
 	NotContain        string   `yaml:"not_contain,omitempty"`
 
@@ -66,7 +67,12 @@ func (s *Shell) DoProbe() (bool, string) {
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, s.Command, s.Args...)
-	cmd.Env = append(os.Environ(), s.Env...)
+	if s.CleanEnv == false {
+		cmd.Env = append(os.Environ(), s.Env...)
+	} else {
+		log.Infof("[%s / %s] clean the environment variables", s.ProbeKind, s.ProbeName)
+		cmd.Env = s.Env
+	}
 	output, err := cmd.CombinedOutput()
 
 	status := true
