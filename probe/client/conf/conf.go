@@ -40,6 +40,7 @@ const (
 	Unknown DriverType = iota
 	MySQL
 	Redis
+	Memcache
 	Kafka
 	Mongo
 	PostgreSQL
@@ -50,6 +51,7 @@ const (
 var DriverMap = map[DriverType]string{
 	MySQL:      "mysql",
 	Redis:      "redis",
+	Memcache:   "memcache",
 	Kafka:      "kafka",
 	Mongo:      "mongo",
 	PostgreSQL: "postgres",
