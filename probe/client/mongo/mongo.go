@@ -39,7 +39,7 @@ type Mongo struct {
 	Context      context.Context        `yaml:"-"`
 }
 
-// New create a Redis client
+// New create a Mongo client
 func New(opt conf.Options) Mongo {
 	var conn string
 	if len(opt.Password) > 0 {

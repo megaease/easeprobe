@@ -37,7 +37,7 @@ type Kafka struct {
 	Context      context.Context `yaml:"-"`
 }
 
-// New create a Redis client
+// New create a Kafka client
 func New(opt conf.Options) Kafka {
 	tls, err := opt.TLS.Config()
 	if err != nil {
