@@ -105,6 +105,10 @@ func main() {
 	notifies := c.AllNotifiers()
 	// Configure the Probes
 	probers = configProbers(probers)
+	if len(probers) == 0 {
+		fmt.Errorf("No probes configured, exiting...")
+		os.Exit(-1)
+	}
 	// Configure the Notifiers
 	configNotifiers(notifies)
 	// configure channels
