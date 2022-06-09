@@ -30,8 +30,8 @@ const Kind string = "Memcache"
 // Memcache is the Memcache client
 type Memcache struct {
 	conf.Options `yaml:",inline"`
-	Key          string          `yaml:",inline`
-	Value        string          `yaml:",inline`
+	Key          string          `yaml:"key"`
+	Value        string          `yaml:"value"`
 	Context      context.Context `yaml:"-"`
 }
 
@@ -50,18 +50,17 @@ func (r Memcache) Kind() string {
 }
 
 // Probe do the health check
-func (r Memcache) Probe() (bool, string) {
+func (m Memcache) Probe() (bool, string) {
 
-	mc := MemcacheClient.New(r.Host)
+	mc := MemcacheClient.New(m.Host)
 	//	ctx, cancel := context.WithTimeout(r.Context, r.Timeout())
 	//	defer cancel()
 
-	it, err := mc.Get("sysconfig:event_active")
+	it, err := mc.Get(m.Key)
 	if err != nil {
 		return false, err.Error()
 	}
-
-	if string(it.Value) != "1" {
+	if string(it.Value) != m.Value {
 		return false, "Memcache value returned do not much"
 	}
 
