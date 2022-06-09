@@ -36,7 +36,7 @@ import (
 func TestZooKeeper(t *testing.T) {
 	conf := conf.Options{
 		Host:       "127.0.0.0:2181",
-		DriverType: conf.Redis,
+		DriverType: conf.Zookeeper,
 		Username:   "username",
 		Password:   "password",
 		TLS: global.TLS{
