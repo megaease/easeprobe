@@ -280,8 +280,6 @@ This feature could help you group the Probers and Notifiers into a logical group
 >
 > EaseProbe versions prior to v1.5.0, do not have support for the `channel` feature
 
-```YAML
-
 For example:
 
 ```YAML
