@@ -22,6 +22,7 @@ import (
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/client/conf"
 	"github.com/megaease/easeprobe/probe/client/kafka"
+	"github.com/megaease/easeprobe/probe/client/memcache"
 	"github.com/megaease/easeprobe/probe/client/mongo"
 	"github.com/megaease/easeprobe/probe/client/mysql"
 	"github.com/megaease/easeprobe/probe/client/postgres"
@@ -56,6 +57,8 @@ func (c *Client) configClientDriver() {
 		c.client = mysql.New(c.Options)
 	case conf.Redis:
 		c.client = redis.New(c.Options)
+	case conf.Memcache:
+		c.client = memcache.New(c.Options)
 	case conf.Mongo:
 		c.client = mongo.New(c.Options)
 	case conf.Kafka:
