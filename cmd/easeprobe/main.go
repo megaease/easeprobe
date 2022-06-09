@@ -109,7 +109,11 @@ func main() {
 		log.Fatal("No probes configured, exiting...")
 	}
 	// Configure the Notifiers
-	configNotifiers(notifies)
+	notifies = configNotifiers(notifies)
+	if len(notifies) == 0 {
+		log.Fatal("No notifies configured, exiting...")
+	}
+
 	// configure channels
 	configChannels(probers, notifies)
 
