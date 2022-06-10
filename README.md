@@ -124,6 +124,7 @@ Each probe is identified by the method it supports (eg `http`), a unique name (a
 - **Client**. Currently, support the following native client. Support the mTLS. ( refer to: [Native Client Probe Configuration](#37-native-client-probe-configuration) )
   - **MySQL**. Connect to the MySQL server and run the `SHOW STATUS` SQL.
   - **Redis**. Connect to the Redis server and run the `PING` command.
+  - **Memcache**. Connect to a Memcache server and run the `version` command or check based on key/value checks.
   - **MongoDB**. Connect to MongoDB server and just ping server.
   - **Kafka**. Connect to Kafka server and list all topics.
   - **PostgreSQL**. Connect to PostgreSQL server and run `SELECT 1` SQL.
@@ -689,6 +690,14 @@ client:
     username: "admin"
     password: "abc123"
     timeout: 5s
+
+  - name: Memcache Native Client (local)
+    driver: "memcache"
+    host: "localhost:11211"
+    timeout: 5s
+    data:         # Optional
+      key: val    # Check that key exists and its value is val
+      "namespace:key": val # Namespaced keys enclosed in "
 
   - name: Kafka Native Client (local)
     driver: "kafka"
