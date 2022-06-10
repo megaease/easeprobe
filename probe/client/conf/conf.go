@@ -40,6 +40,7 @@ const (
 	Unknown DriverType = iota
 	MySQL
 	Redis
+	Memcache
 	Kafka
 	Mongo
 	PostgreSQL
@@ -50,6 +51,7 @@ const (
 var DriverMap = map[DriverType]string{
 	MySQL:      "mysql",
 	Redis:      "redis",
+	Memcache:   "memcache",
 	Kafka:      "kafka",
 	Mongo:      "mongo",
 	PostgreSQL: "postgres",
@@ -61,10 +63,11 @@ var DriverMap = map[DriverType]string{
 type Options struct {
 	base.DefaultProbe `yaml:",inline"`
 
-	Host       string     `yaml:"host"`
-	DriverType DriverType `yaml:"driver"`
-	Username   string     `yaml:"username"`
-	Password   string     `yaml:"password"`
+	Host       string            `yaml:"host"`
+	DriverType DriverType        `yaml:"driver"`
+	Username   string            `yaml:"username"`
+	Password   string            `yaml:"password"`
+	Data       map[string]string `yaml:"data"`
 
 	//TLS
 	global.TLS `yaml:",inline"`

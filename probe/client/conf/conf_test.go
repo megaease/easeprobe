@@ -28,11 +28,13 @@ import (
 func TestDirverType(t *testing.T) {
 	assert.Equal(t, "mysql", MySQL.String())
 	assert.Equal(t, "redis", Redis.String())
+	assert.Equal(t, "memcache", Memcache.String())
 	assert.Equal(t, "mongo", Mongo.String())
 
 	d := Unknown
 	assert.Equal(t, MySQL, d.DriverType("mysql"))
 	assert.Equal(t, Redis, d.DriverType("redis"))
+	assert.Equal(t, Memcache, d.DriverType("memcache"))
 
 	d = d.DriverType("postgres")
 	buf, err := yaml.Marshal(d)
@@ -55,6 +57,11 @@ func TestDirverType(t *testing.T) {
 	err = json.Unmarshal([]byte("\"mongo\""), &d)
 	assert.Nil(t, err)
 	assert.Equal(t, Mongo, d)
+
+	d = Memcache
+	buf, err = json.Marshal(d)
+	assert.Nil(t, err)
+	assert.Equal(t, "\"memcache\"", string(buf))
 
 	d = 10
 	assert.Equal(t, "unknown", d.String())
