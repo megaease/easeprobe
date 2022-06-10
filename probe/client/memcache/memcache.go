@@ -20,6 +20,7 @@ package memcache
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	MemcacheClient "github.com/bradfitz/gomemcache/memcache"
 	"github.com/megaease/easeprobe/probe/client/conf"
