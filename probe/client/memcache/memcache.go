@@ -97,12 +97,12 @@ func (m *Memcache) validateKeyValues(items map[string]*MemcacheClient.Item) (boo
 	// iterate the keys and confirm their values match
 	for _, item := range items {
 		log.Debugf("Got key: %s with value: %s", item.Key, string(item.Value))
-		if string(m.Data[item.Key]) != "" {
-			if string(item.Value) != m.Data[item.Key] {
-				return false, fmt.Sprintf("Memcache value for key %s returned %s, expected %s", item.Key, string(item.Value), string(m.Data[item.Key]))
-			}
-		} else {
+		if strings.TrimSpace(m.Data[item.Key]) == "" {
 			log.Debugf("Skipping value check for item %s", item.Key)
+			continue
+		}
+		if string(item.Value) != m.Data[item.Key] {
+			return false, fmt.Sprintf("Memcache value for key %s returned %s, expected %s", item.Key, string(item.Value), string(m.Data[item.Key]))
 		}
 	}
 	return true, "Memcache key values match"
