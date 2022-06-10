@@ -18,6 +18,7 @@
 package memcache
 
 import (
+	"runtime"
 	"testing"
 
 	"github.com/megaease/easeprobe/probe/client/conf"
@@ -38,7 +39,11 @@ func TestMemcache(t *testing.T) {
 	// confirm that we get error
 	s, errmsg := m.Probe()
 	assert.False(t, s)
-	assert.Contains(t, errmsg, "connection refused")
+	if runtime.GOOS == "windows" {
+		assert.Contains(t, errmsg, "connect timeout")
+	} else {
+		assert.Contains(t, errmsg, "connection refused")
+	}
 
 	conf.Data = map[string]string{"sysconfig:event_active": "1"}
 	assert.Equal(t, len(m.getDataKeys()), len(conf.Data))
