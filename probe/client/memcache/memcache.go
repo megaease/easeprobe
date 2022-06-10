@@ -19,9 +19,11 @@ package memcache
 
 import (
 	"context"
+	"fmt"
 
 	MemcacheClient "github.com/bradfitz/gomemcache/memcache"
 	"github.com/megaease/easeprobe/probe/client/conf"
+	log "github.com/sirupsen/logrus"
 )
 
 // Kind is the type of driver
@@ -30,8 +32,6 @@ const Kind string = "Memcache"
 // Memcache is the Memcache client
 type Memcache struct {
 	conf.Options `yaml:",inline"`
-	Key          string          `yaml:"key"`
-	Value        string          `yaml:"value"`
 	Context      context.Context `yaml:"-"`
 }
 
@@ -45,25 +45,66 @@ func New(opt conf.Options) Memcache {
 }
 
 // Kind return the name of client
-func (r Memcache) Kind() string {
+func (m Memcache) Kind() string {
 	return Kind
 }
 
 // Probe do the health check
 func (m Memcache) Probe() (bool, string) {
-
+	// TODO: Add SASL AUTH and protocol details
 	mc := MemcacheClient.New(m.Host)
-	//	ctx, cancel := context.WithTimeout(r.Context, r.Timeout())
-	//	defer cancel()
+	mc.Timeout = m.Timeout()
 
-	it, err := mc.Get(m.Key)
-	if err != nil {
-		return false, err.Error()
-	}
-	if string(it.Value) != m.Value {
-		return false, "Memcache value returned do not much"
+	// Check if we need to query specific keys or not
+	if len(m.Data) > 0 {
+		keys := m.getDataKeys()
+
+		// TODO: mc.GetMulti(ctx, keys)
+		items, err := mc.GetMulti(keys)
+		if err != nil {
+			return false, err.Error()
+		}
+
+		if len(items) != len(m.Data) {
+			return false, fmt.Sprintf("Number of fetched keys %d expected %d", len(items), len(m.Data))
+		}
+
+		return m.validateKeyValues(items)
+	} else {
+		log.Debugf("Data empty, Pinging")
+		err := mc.Ping()
+		if err != nil {
+			return false, err.Error()
+		}
 	}
 
 	return true, "Memcache key fetched Successfully!"
+}
 
+// Slice the keys only from the configuration file
+func (m *Memcache) getDataKeys() []string {
+	keys := make([]string, len(m.Data))
+	i := 0
+	for k, _ := range m.Data {
+		keys[i] = k
+		i++
+	}
+
+	return keys
+}
+
+// Validate memcache items against configuration data
+func (m *Memcache) validateKeyValues(items map[string]*MemcacheClient.Item) (bool, string) {
+	// iterate the keys and confirm their values match
+	for _, item := range items {
+		log.Debugf("Got key: %s with value: %s", item.Key, string(item.Value))
+		if string(m.Data[item.Key]) != "" {
+			if string(item.Value) != m.Data[item.Key] {
+				return false, fmt.Sprintf("Memcache value for key %s returned %s, expected %s", item.Key, string(item.Value), string(m.Data[item.Key]))
+			}
+		} else {
+			log.Debugf("Skipping value check for item %s", item.Key)
+		}
+	}
+	return true, "Memcache key values match"
 }
