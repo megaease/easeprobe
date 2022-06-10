@@ -37,7 +37,6 @@ type Memcache struct {
 
 // New create a Memcache client
 func New(opt conf.Options) Memcache {
-
 	return Memcache{
 		Options: opt,
 		Context: context.Background(),
@@ -70,12 +69,12 @@ func (m Memcache) Probe() (bool, string) {
 		}
 
 		return m.validateKeyValues(items)
-	} else {
-		log.Debugf("Data empty, Pinging")
-		err := mc.Ping()
-		if err != nil {
-			return false, err.Error()
-		}
+	}
+
+	log.Debugf("Data empty, Pinging")
+	err := mc.Ping()
+	if err != nil {
+		return false, err.Error()
 	}
 
 	return true, "Memcache key fetched Successfully!"
@@ -85,7 +84,7 @@ func (m Memcache) Probe() (bool, string) {
 func (m *Memcache) getDataKeys() []string {
 	keys := make([]string, len(m.Data))
 	i := 0
-	for k, _ := range m.Data {
+	for k := range m.Data {
 		keys[i] = k
 		i++
 	}
