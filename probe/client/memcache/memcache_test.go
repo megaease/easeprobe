@@ -26,7 +26,7 @@ import (
 
 func TestMemcache(t *testing.T) {
 	conf := conf.Options{
-		Host:       "localhost:11211",
+		Host:       "localhost:12345",
 		DriverType: conf.Memcache,
 		Data:       map[string]string{"sysconfig:event_active": "1"},
 	}
@@ -34,8 +34,11 @@ func TestMemcache(t *testing.T) {
 	m := New(conf)
 	assert.Equal(t, "Memcache", m.Kind())
 
-	s, _ := m.Probe()
-	assert.True(t, s)
+	// since memcached is not running
+	// confirm that we get error
+	s, errmsg := m.Probe()
+	assert.False(t, s)
+	assert.Contains(t, errmsg, "connection refused")
 
 	conf.Data = map[string]string{"sysconfig:event_active": "1"}
 	assert.Equal(t, len(m.getDataKeys()), len(conf.Data))
