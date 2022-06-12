@@ -44,7 +44,8 @@ type TLS struct {
 	RootCaPem     string `yaml:"root_ca_pem"`
 	rootCAs       *x509.CertPool
 
-	ExpireSkipVerify bool `yaml:"expire_skip_verify"`
+	ExpireSkipVerify  bool          `yaml:"expire_skip_verify"`
+	AlertExpireBefore time.Duration `yaml:"alert_expire_before"`
 
 	metrics *metrics
 }
@@ -118,6 +119,13 @@ func (t *TLS) DoProbe() (bool, string) {
 			if !valid {
 				log.Errorf("host %v cert expired", t.Host)
 				return false, "certificate is expired or not yet valid"
+			}
+
+			if t.AlertExpireBefore > 0 {
+				durLeft := time.Until(cert.NotAfter)
+				if durLeft < t.AlertExpireBefore {
+					return false, fmt.Sprintf("certificate is expiring in %v", durLeft)
+				}
 			}
 		}
 	}
