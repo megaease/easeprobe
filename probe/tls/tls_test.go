@@ -31,6 +31,7 @@ import (
 	"math/big"
 	"net"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -268,6 +269,81 @@ func TestTlsExpired(t *testing.T) {
 		ok, msg := tls.DoProbe()
 		if !ok {
 			t.Errorf("tls probe failed %v", msg)
+		}
+	})
+}
+
+func TestTlsAlertExpiredBefore(t *testing.T) {
+	mock, err := newTLSMockServer(&x509.Certificate{
+		DNSNames:              []string{"0.0.0.0"},
+		IPAddresses:           []net.IP{net.IPv4zero, net.IPv6loopback, net.IPv6unspecified},
+		SerialNumber:          big.NewInt(1),
+		NotBefore:             time.Now().Add(time.Hour * 24 * -366),
+		NotAfter:              time.Now().Add(time.Hour * 24 * 1),
+		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		BasicConstraintsValid: true,
+	})
+	if err != nil {
+		t.Errorf("newTlsMockServer error: %v", err)
+		return
+	}
+	defer mock.Close()
+
+	t.Run("alert_expired_before_default", func(t *testing.T) {
+
+		tls := &TLS{
+			Host:               mock.hostname,
+			InsecureSkipVerify: true,
+		}
+
+		tls.Config(global.ProbeSettings{
+			Timeout: time.Second * 10,
+		})
+
+		ok, _ := tls.DoProbe()
+		if !ok {
+			t.Error("tls probe should not fail for alert_expired_before_default")
+		}
+	})
+	t.Run("alert_expired_before_enough", func(t *testing.T) {
+
+		{
+			tls := &TLS{
+				Host:               mock.hostname,
+				InsecureSkipVerify: true,
+				AlertExpireBefore:  time.Minute * 30,
+			}
+
+			tls.Config(global.ProbeSettings{
+				Timeout: time.Second * 10,
+			})
+
+			ok, _ := tls.DoProbe()
+			if !ok {
+				t.Error("tls probe should not fail for alert_expired_before_enough")
+			}
+		}
+	})
+
+	t.Run("alert_expired_before", func(t *testing.T) {
+		tls := &TLS{
+			Host:               mock.hostname,
+			InsecureSkipVerify: true,
+			AlertExpireBefore:  time.Hour * 24 * 2,
+		}
+
+		tls.Config(global.ProbeSettings{
+			Timeout: time.Second * 10,
+		})
+
+		ok, msg := tls.DoProbe()
+		if ok {
+			t.Error("tls probe should fail for alert_expired_before")
+		}
+
+		if !strings.HasPrefix(msg, "certificate is expiring in") {
+			t.Error("tls probe should fail return wrong expired msg")
 		}
 	})
 }
