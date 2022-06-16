@@ -52,12 +52,20 @@ func main() {
 	dryNotify := flag.Bool("d", os.Getenv("PROBE_DRY") == "true", "dry notification mode")
 	yamlFile := flag.String("f", getEnvOrDefault("PROBE_CONFIG", "config.yaml"), "configuration file")
 	version := flag.Bool("v", false, "prints version")
+	loglevel := flag.String("l", getEnvOrDefault("PROBE_LOG_LEVEL", "info"), "log level, one of: trace, debug, info, warn, error, fatal, panic")
 	flag.Parse()
 
 	if *version {
 		fmt.Println(global.DefaultProg, global.Ver)
 		os.Exit(0)
 	}
+
+	level, err := log.ParseLevel(*loglevel)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "invalid log level: %v", *loglevel)
+		os.Exit(1)
+	}
+	log.SetLevel(level)
 
 	c, err := conf.New(yamlFile)
 	if err != nil {
