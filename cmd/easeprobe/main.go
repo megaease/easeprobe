@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"syscall"
@@ -43,7 +44,29 @@ func getEnvOrDefault(key, defaultValue string) string {
 	return defaultValue
 }
 
+func showVersion() {
+
+	var v = global.Ver
+
+	bi, ok := debug.ReadBuildInfo()
+	if ok {
+		for _, s := range bi.Settings {
+			switch s.Key {
+			case "vcs.revision":
+				v = fmt.Sprintf("%v, %v", v, s.Value[:9])
+			case "vcs.time":
+				v = fmt.Sprintf("%v, %v", v, s.Value)
+			}
+		}
+	}
+
+	v = fmt.Sprintf("%v %v, %v", global.DefaultProg, v, bi.GoVersion)
+
+	fmt.Println(v)
+}
+
 func main() {
+	log.SetLevel(log.DebugLevel)
 
 	////////////////////////////////////////////////////////////////////////////
 	//          Parse command line arguments and config file settings         //
@@ -55,7 +78,7 @@ func main() {
 	flag.Parse()
 
 	if *version {
-		fmt.Println(global.DefaultProg, global.Ver)
+		showVersion()
 		os.Exit(0)
 	}
 
