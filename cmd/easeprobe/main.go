@@ -52,6 +52,7 @@ func showVersion() {
 	if !ok {
 		v = fmt.Sprintf("%v %v", global.DefaultProg, v)
 		fmt.Println(v)
+		return
 	}
 
 	for _, s := range bi.Settings {
