@@ -35,7 +35,7 @@ func TestEaseProbe(t *testing.T) {
 	e = GetEaseProbe()
 	assert.Equal(t, "test", e.Name)
 	assert.Equal(t, "icon", e.IconURL)
-	assert.Equal(t, Ver, e.Version)
+	assert.Equal(t, VersionString(), e.Version)
 
 	h, err := os.Hostname()
 	if err != nil {
@@ -43,7 +43,7 @@ func TestEaseProbe(t *testing.T) {
 	}
 	assert.Equal(t, h, e.Host)
 
-	str := "test " + Ver + " @ " + h
+	str := "test " + VersionString() + " @ " + h
 	assert.Equal(t, str, FooterString())
 
 }

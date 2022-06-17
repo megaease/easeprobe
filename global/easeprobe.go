@@ -43,7 +43,7 @@ func InitEaseProbe(name, icon string) {
 	easeProbe = &EaseProbe{
 		Name:    name,
 		IconURL: icon,
-		Version: Ver,
+		Version: VersionString(),
 		Host:    host,
 	}
 }
