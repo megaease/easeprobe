@@ -24,7 +24,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"runtime/debug"
 	"strings"
 	"time"
 
@@ -223,25 +222,4 @@ func CommandLine(cmd string, args []string) string {
 		result += " " + arg
 	}
 	return result
-}
-
-func VersionString() string {
-	var v = Ver
-
-	bi, ok := debug.ReadBuildInfo()
-	if !ok {
-		return v
-	}
-
-	for _, s := range bi.Settings {
-		switch s.Key {
-		case "vcs.revision":
-			v = fmt.Sprintf("%v %v", v, s.Value[:9])
-		case "vcs.time":
-			v = fmt.Sprintf("%v %v", v, s.Value)
-		}
-	}
-
-	v = fmt.Sprintf("%v %v", v, bi.GoVersion)
-	return v
 }

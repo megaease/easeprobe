@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"syscall"
@@ -43,6 +44,30 @@ func getEnvOrDefault(key, defaultValue string) string {
 	return defaultValue
 }
 
+func showVersion() {
+
+	var v = global.Ver
+
+	bi, ok := debug.ReadBuildInfo()
+	if !ok {
+		v = fmt.Sprintf("%v %v", global.DefaultProg, v)
+		fmt.Println(v)
+		return
+	}
+
+	for _, s := range bi.Settings {
+		switch s.Key {
+		case "vcs.revision":
+			v = fmt.Sprintf("%v %v", v, s.Value[:9])
+		case "vcs.time":
+			v = fmt.Sprintf("%v %v", v, s.Value)
+		}
+	}
+
+	v = fmt.Sprintf("%v %v %v", global.DefaultProg, v, bi.GoVersion)
+	fmt.Println(v)
+}
+
 func main() {
 	////////////////////////////////////////////////////////////////////////////
 	//          Parse command line arguments and config file settings         //
@@ -50,11 +75,11 @@ func main() {
 
 	dryNotify := flag.Bool("d", os.Getenv("PROBE_DRY") == "true", "dry notification mode")
 	yamlFile := flag.String("f", getEnvOrDefault("PROBE_CONFIG", "config.yaml"), "configuration file")
-	showVersion := flag.Bool("v", false, "prints version")
+	version := flag.Bool("v", false, "prints version")
 	flag.Parse()
 
-	if *showVersion {
-		fmt.Println(global.DefaultProg, global.VersionString())
+	if *version {
+		showVersion()
 		os.Exit(0)
 	}
 
