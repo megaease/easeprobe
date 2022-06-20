@@ -23,6 +23,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/megaease/easeprobe/global"
@@ -86,6 +87,9 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 		log.Errorf("TLS configuration error - %s", err)
 		return err
 	}
+
+	// security check
+	log.Debugf("[%s] the security checks %s", h.ProbeName, strconv.FormatBool(h.Insecure))
 
 	h.client = &http.Client{
 		Timeout: h.Timeout(),
