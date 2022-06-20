@@ -95,9 +95,10 @@ type Retry struct {
 
 // TLS is the configuration for TLS files
 type TLS struct {
-	CA   string `yaml:"ca"`
-	Cert string `yaml:"cert"`
-	Key  string `yaml:"key"`
+	CA       string `yaml:"ca"`
+	Cert     string `yaml:"cert"`
+	Key      string `yaml:"key"`
+	Insecure bool   `yaml:"insecure"`
 }
 
 // The normalize() function logic as below:
@@ -129,6 +130,9 @@ func ReverseMap[K comparable, V comparable](m map[K]V) map[V]K {
 // Config return a tls.Config object
 func (t *TLS) Config() (*tls.Config, error) {
 	if len(t.CA) <= 0 || len(t.Cert) <= 0 || len(t.Key) <= 0 {
+		if t.Insecure == true {
+			return &tls.Config{InsecureSkipVerify: true}, nil
+		}
 		return nil, nil
 	}
 
@@ -144,8 +148,9 @@ func (t *TLS) Config() (*tls.Config, error) {
 		return nil, err
 	}
 	return &tls.Config{
-		RootCAs:      caCertPool,
-		Certificates: []tls.Certificate{certificate},
+		RootCAs:            caCertPool,
+		Certificates:       []tls.Certificate{certificate},
+		InsecureSkipVerify: t.Insecure,
 	}, nil
 }
 

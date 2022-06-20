@@ -143,6 +143,13 @@ func TestTLS(t *testing.T) {
 	assert.Nil(t, conn)
 	assert.Nil(t, e)
 
+	_tls = TLS{
+		Insecure: true,
+	}
+	conn, e = _tls.Config()
+	assert.NotNil(t, conn)
+	assert.Nil(t, e)
+
 	path := GetWorkDir() + "/certs/"
 	os.MkdirAll(path, 0755)
 	defer os.RemoveAll(path)
