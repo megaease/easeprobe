@@ -129,7 +129,7 @@ func ReverseMap[K comparable, V comparable](m map[K]V) map[V]K {
 
 // Config return a tls.Config object
 func (t *TLS) Config() (*tls.Config, error) {
-	if len(t.CA) <= 0 || len(t.Cert) <= 0 || len(t.Key) <= 0 {
+	if len(t.CA) <= 0 {
 		if t.Insecure == true {
 			return &tls.Config{InsecureSkipVerify: true}, nil
 		}
@@ -143,6 +143,15 @@ func (t *TLS) Config() (*tls.Config, error) {
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(cert)
 
+	// only have CA file, go TLS
+	if len(t.Cert) <= 0 || len(t.Key) <= 0 {
+		return &tls.Config{
+			RootCAs:            caCertPool,
+			InsecureSkipVerify: t.Insecure,
+		}, nil
+	}
+
+	// have both CA and cert/key, go mTLS way
 	certificate, err := tls.LoadX509KeyPair(t.Cert, t.Key)
 	if err != nil {
 		return nil, err

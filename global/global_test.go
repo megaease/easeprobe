@@ -138,11 +138,13 @@ func makeCert(path string, caCert *x509.Certificate, caKey *rsa.PrivateKey, subj
 }
 
 func TestTLS(t *testing.T) {
+	// no TLS
 	_tls := TLS{}
 	conn, e := _tls.Config()
 	assert.Nil(t, conn)
 	assert.Nil(t, e)
 
+	// only have insecure option
 	_tls = TLS{
 		Insecure: true,
 	}
@@ -154,6 +156,7 @@ func TestTLS(t *testing.T) {
 	os.MkdirAll(path, 0755)
 	defer os.RemoveAll(path)
 
+	//mTLS
 	_tls = TLS{
 		CA:   filepath.Join(path, "./ca.crt"),
 		Cert: filepath.Join(path, "./test.crt"),
@@ -201,6 +204,16 @@ func TestTLS(t *testing.T) {
 	assert.NotNil(t, e)
 	assert.Nil(t, conn)
 	monkey.UnpatchAll()
+
+	//TLS
+	_tls = TLS{
+		CA:       filepath.Join(path, "./ca.crt"),
+		Insecure: false,
+	}
+	conn, e = _tls.Config()
+	assert.Nil(t, e)
+	assert.NotNil(t, conn)
+	assert.Nil(t, conn.Certificates)
 }
 
 func TestNormalize(t *testing.T) {

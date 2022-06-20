@@ -494,7 +494,7 @@ http:
     cert: /path/to/file.crt
     key: /path/to/file.key
     # TLS
-    insecure: true # skip the security check, use for self-signed certs. default: false
+    insecure: true # skip any security checks, useful for self-signed and expired certs. default: false
     # HTTP successful response code range, default is [0, 499].
     success_code:
       - [200,206] # the code >=200 and <= 206
