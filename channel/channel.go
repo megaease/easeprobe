@@ -121,13 +121,6 @@ func (c *Channel) SetNotify(n notify.Notify) {
 	c.Notifiers[n.Name()] = n
 }
 
-var dryNotify bool
-
-// SetDryNotify sets the global dry run flag
-func SetDryNotify(dry bool) {
-	dryNotify = dry
-}
-
 // WatchEvent watches the notification event
 // Go through all of notification to notify the result.
 func (c *Channel) WatchEvent(wg *sync.WaitGroup) {
