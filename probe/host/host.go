@@ -78,8 +78,8 @@ func (s *Server) Config(gConf global.ProbeSettings) error {
 	// 4. retrieve the cpu core:		`grep -c ^processor /proc/cpuinfo;`
 	// 5. retrieve the cpu usage:	`top -b -n 1 | grep Cpu | awk -F ":" '{print $2}'`
 	//    output example: 1.6 us,  0.0 sy,  0.0 ni, 98.4 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
-	// 6. retrieve the disk usage	`df -h / 2>/dev/null | awk '$NF=="/"{printf "%d %d %s\n", $3,$2,$5}'`
-	//    output: used(GB) total(GB) usage(%), example: 40 970 5%
+	// 6. retrieve the disk usage	`df -h / 2>/dev/null | awk '$NF=="/"{printf "%d %d %s\n", $3,$2,$5,$6}'`
+	//    output: used(GB) total(GB) usage(%) disk, example: 40 970 5% /
 
 	s.Command = `hostname;
 	awk -F= '/^NAME/{print $2}' /etc/os-release | tr -d '\"';
@@ -360,7 +360,6 @@ func (s *Server) ExportMemoryMetrics(info *Info) {
 // ExportDiskMetrics export the disk metrics
 func (s *Server) ExportDiskMetrics(info *Info) {
 	for _, disk := range info.Disks {
-
 		s.metrics.Disk.With(prometheus.Labels{
 			"host":  s.Name(),
 			"disk":  disk.Tag,
