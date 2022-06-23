@@ -659,6 +659,9 @@ host:
       bastion: aws #  <-- bastion server id ------─┘
       host: ubuntu@172.20.2.202:22
       key: /path/to/server.pem
+      disks: # [optional] Check multiple disks. if not present, only check `/` by default
+        - /
+        - /data
       threshold:
         cpu: 0.80  # cpu usage  80%
         mem: 0.70  # memory usage 70%
