@@ -51,6 +51,7 @@ func (t *Threshold) String() string {
 type Server struct {
 	ssh.Server `yaml:",inline"`
 	Threshold  Threshold `yaml:"threshold"`
+	Disks      []string  `yaml:"disks"`
 	metrics    *metrics  `yaml:"-"`
 }
 
@@ -77,15 +78,20 @@ func (s *Server) Config(gConf global.ProbeSettings) error {
 	// 4. retrieve the cpu core:		`grep -c ^processor /proc/cpuinfo;`
 	// 5. retrieve the cpu usage:	`top -b -n 1 | grep Cpu | awk -F ":" '{print $2}'`
 	//    output example: 1.6 us,  0.0 sy,  0.0 ni, 98.4 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
-	// 6. retrieve the disk usage	`df -h / 2>/dev/null | awk '$NF=="/"{printf "%d %d %s\n", $3,$2,$5}'`
-	//    output: used(GB) total(GB) usage(%), example: 40 970 5%
+	// 6. retrieve the disk usage	`df -h / 2>/dev/null | awk '(NR>1){printf "%d %d %s %s\n", $3,$2,$5,$6}'`
+	//    output: used(GB) total(GB) usage(%) disk, example: 40 970 5% /
 
 	s.Command = `hostname;
 	awk -F= '/^NAME/{print $2}' /etc/os-release | tr -d '\"';
 	free -m | awk 'NR==2{printf "%s %s %.2f\n", $3,$2,$3*100/$2 }';
 	grep -c ^processor /proc/cpuinfo;
-	top -b -n 1 | grep Cpu | awk -F ":" '{print $2}';
-	df -h / 2>/dev/null | awk '$NF=="/"{printf "%d %d %s\n", $3,$2,$5}'`
+	top -b -n 1 | grep Cpu | awk -F ":" '{print $2}';` + "\n"
+
+	if len(s.Disks) == 0 {
+		s.Disks = []string{"/"}
+	}
+
+	s.Command += "\t" + `df -h ` + strings.Join(s.Disks, " ") + ` 2>/dev/null | awk '(NR>1){printf "%d %d %s %s\n", $3,$2,$5,$6}'`
 
 	if s.Threshold.CPU == 0 {
 		s.Threshold.CPU = DefaultCPUThreshold
@@ -132,7 +138,11 @@ func (s *Server) CheckThreshold(info Info) (bool, string) {
 	message := ""
 	usage := fmt.Sprintf(" ( CPU: %.2f%% - ", (100 - info.CPU.Idle))
 	usage += fmt.Sprintf("Memory: %.2f%% - ", info.Memory.Usage)
-	usage += fmt.Sprintf("Disk: %.2f%% )", info.Disk.Usage)
+	diskUsage := []string{}
+	for _, disk := range info.Disks {
+		diskUsage = append(diskUsage, fmt.Sprintf("`%s` %.2f%%", disk.Tag, disk.Usage))
+	}
+	usage += "Disk: " + strings.Join(diskUsage, ", ") + " )"
 
 	if s.Threshold.CPU > 0 && s.Threshold.CPU <= (100-info.CPU.Idle)/100 {
 		status = false
@@ -145,12 +155,18 @@ func (s *Server) CheckThreshold(info Info) (bool, string) {
 		}
 		message += "Memory Shortage!"
 	}
-	if s.Threshold.Disk > 0 && s.Threshold.Disk <= info.Disk.Usage/100 {
+	lowDisks := []string{}
+	for _, disk := range info.Disks {
+		if s.Threshold.Disk > 0 && s.Threshold.Disk <= disk.Usage/100 {
+			lowDisks = append(lowDisks, disk.Tag)
+		}
+	}
+	if len(lowDisks) > 0 {
 		status = false
 		if message != "" {
 			message += " | "
 		}
-		message += "Disk Full!"
+		message += fmt.Sprintf("Disk Space Low! - [%s]", strings.Join(lowDisks, ", "))
 	}
 
 	if message == "" {
@@ -165,6 +181,7 @@ type Usage struct {
 	Used  int     `yaml:"used"`
 	Total int     `yaml:"total"`
 	Usage float64 `yaml:"usage"`
+	Tag   string  `yaml:"tag"`
 }
 
 // CPU is the cpu usage
@@ -203,12 +220,12 @@ func first(str string) string {
 
 // Info is the host probe information
 type Info struct {
-	HostName string `yaml:"hostname"`
-	OS       string `yaml:"os"`
-	Core     int64  `yaml:"core"`
-	CPU      CPU    `yaml:"cpu"`
-	Memory   Usage  `yaml:"memory"`
-	Disk     Usage  `yaml:"disk"`
+	HostName string  `yaml:"hostname"`
+	OS       string  `yaml:"os"`
+	Core     int64   `yaml:"core"`
+	CPU      CPU     `yaml:"cpu"`
+	Memory   Usage   `yaml:"memory"`
+	Disks    []Usage `yaml:"disks"`
 }
 
 // ParseHostInfo parse the host info
@@ -235,13 +252,21 @@ func (s *Server) ParseHostInfo(str string) (Info, error) {
 		return info, err
 	}
 
-	disk := strings.Split(line[5], " ")
-	if len(disk) < 3 {
-		return info, fmt.Errorf("invalid disk output")
+	for i := 5; i < len(line); i++ {
+		if strings.TrimSpace(line[i]) == "" {
+			break
+		}
+		disk := strings.Split(line[i], " ")
+		if len(disk) < 4 {
+			return info, fmt.Errorf("invalid disk output")
+		}
+		info.Disks = append(info.Disks, Usage{
+			Used:  int(strInt(disk[0])),
+			Total: int(strInt(disk[1])),
+			Usage: strFloat(disk[2][:len(disk[2])-1]),
+			Tag:   disk[3],
+		})
 	}
-	info.Disk.Used = int(strInt(disk[0]))
-	info.Disk.Total = int(strInt(disk[1]))
-	info.Disk.Usage = strFloat(disk[2][:len(disk[2])-1])
 
 	return info, nil
 }
@@ -337,23 +362,29 @@ func (s *Server) ExportMemoryMetrics(info *Info) {
 
 // ExportDiskMetrics export the disk metrics
 func (s *Server) ExportDiskMetrics(info *Info) {
-	s.metrics.Disk.With(prometheus.Labels{
-		"host":  s.Name(),
-		"state": "used",
-	}).Set(float64(info.Disk.Used))
+	for _, disk := range info.Disks {
+		s.metrics.Disk.With(prometheus.Labels{
+			"host":  s.Name(),
+			"disk":  disk.Tag,
+			"state": "used",
+		}).Set(float64(disk.Used))
 
-	s.metrics.Disk.With(prometheus.Labels{
-		"host":  s.Name(),
-		"state": "available",
-	}).Set(float64(info.Disk.Total - info.Disk.Used))
+		s.metrics.Disk.With(prometheus.Labels{
+			"host":  s.Name(),
+			"disk":  disk.Tag,
+			"state": "available",
+		}).Set(float64(disk.Total - disk.Used))
 
-	s.metrics.Disk.With(prometheus.Labels{
-		"host":  s.Name(),
-		"state": "total",
-	}).Set(float64(info.Disk.Total))
+		s.metrics.Disk.With(prometheus.Labels{
+			"host":  s.Name(),
+			"disk":  disk.Tag,
+			"state": "total",
+		}).Set(float64(disk.Total))
 
-	s.metrics.Disk.With(prometheus.Labels{
-		"host":  s.Name(),
-		"state": "usage",
-	}).Set(info.Disk.Usage)
+		s.metrics.Disk.With(prometheus.Labels{
+			"host":  s.Name(),
+			"disk":  disk.Tag,
+			"state": "usage",
+		}).Set(disk.Usage)
+	}
 }

@@ -39,6 +39,6 @@ func newMetrics(subsystem, name string) *metrics {
 		Memory: metric.NewGauge(namespace, subsystem, name, "memory",
 			"Memory Usage", []string{"host", "state"}),
 		Disk: metric.NewGauge(namespace, subsystem, name, "disk",
-			"Disk Usage", []string{"host", "state"}),
+			"Disk Usage", []string{"host", "disk", "state"}),
 	}
 }

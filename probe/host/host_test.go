@@ -48,7 +48,9 @@ Ubuntu
 4407 15718 28.04
 4
   71.6 us,  1.7 sy,  0.2 ni, 26.8 id,  0.3 wa,  0.4 hi,  0.5 si,  0.6 st
-58 97 60%`
+58 97 60% /
+20 80 20% /data
+`
 
 func TestHostInfo(t *testing.T) {
 	host := newHost(t)
@@ -68,9 +70,14 @@ func TestHostInfo(t *testing.T) {
 	assert.Equal(t, "0.40", fmt.Sprintf("%.2f", info.CPU.Hard))
 	assert.Equal(t, "0.50", fmt.Sprintf("%.2f", info.CPU.Soft))
 	assert.Equal(t, "0.60", fmt.Sprintf("%.2f", info.CPU.Steal))
-	assert.Equal(t, 58, info.Disk.Used)
-	assert.Equal(t, 97, info.Disk.Total)
-	assert.Equal(t, "60.00", fmt.Sprintf("%.2f", info.Disk.Usage))
+	assert.Equal(t, 58, info.Disks[0].Used)
+	assert.Equal(t, 97, info.Disks[0].Total)
+	assert.Equal(t, "60.00", fmt.Sprintf("%.2f", info.Disks[0].Usage))
+	assert.Equal(t, "/", info.Disks[0].Tag)
+	assert.Equal(t, 20, info.Disks[1].Used)
+	assert.Equal(t, 80, info.Disks[1].Total)
+	assert.Equal(t, "20.00", fmt.Sprintf("%.2f", info.Disks[1].Usage))
+	assert.Equal(t, "/data", info.Disks[1].Tag)
 }
 
 func TestHost(t *testing.T) {
@@ -105,7 +112,7 @@ func TestHost(t *testing.T) {
 	server.Threshold.Disk = 0.2
 	status, message = server.DoProbe()
 	assert.False(t, status)
-	assert.Contains(t, message, "Disk Full!")
+	assert.Contains(t, message, "Disk Space Low!")
 
 	// invalid disk format
 	hostInfo = `t01
