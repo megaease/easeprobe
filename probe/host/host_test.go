@@ -49,7 +49,8 @@ Ubuntu
 4
   71.6 us,  1.7 sy,  0.2 ni, 26.8 id,  0.3 wa,  0.4 hi,  0.5 si,  0.6 st
 58 97 60% /
-20 80 20% /data`
+20 80 20% /data
+`
 
 func TestHostInfo(t *testing.T) {
 	host := newHost(t)
@@ -111,7 +112,7 @@ func TestHost(t *testing.T) {
 	server.Threshold.Disk = 0.2
 	status, message = server.DoProbe()
 	assert.False(t, status)
-	assert.Contains(t, message, "Disk Full!")
+	assert.Contains(t, message, "Disk Space Low!")
 
 	// invalid disk format
 	hostInfo = `t01
