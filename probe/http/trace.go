@@ -51,10 +51,14 @@ type TraceStats struct {
 
 func (s *TraceStats) getConn(hostPort string) {
 	s.totalStartAt = time.Now()
+	log.Debugf("[%s %s %s] - total - start get connection: %d",
+		s.kind, s.tag, s.name, s.totalStartAt.UnixNano())
 }
 
 func (s *TraceStats) dnsStart(info httptrace.DNSStartInfo) {
 	s.dnsStartAt = time.Now()
+	log.Debugf("[%s %s %s] - dns - start resolve %s: %d",
+		s.kind, s.tag, s.name, info.Host, s.dnsStartAt.UnixMicro())
 }
 
 func (s *TraceStats) dnsDone(info httptrace.DNSDoneInfo) {
@@ -62,14 +66,17 @@ func (s *TraceStats) dnsDone(info httptrace.DNSDoneInfo) {
 	if info.Err != nil {
 		return
 	}
-	log.Debugf("[%s %s %s] - DNS resolve time %.3fms", s.kind, s.tag, s.name, toMS(s.dnsTook))
-	for _, addr := range info.Addrs {
-		log.Debugf("[%s %s %s]   %s\n", s.kind, s.tag, s.name, &addr.IP)
-	}
+	log.Debugf("[%s %s %s] - dns - resolve ip %s, time %.3fms",
+		s.kind, s.tag, s.name, info.Addrs, toMS(s.dnsTook))
 }
 
 func (s *TraceStats) connectStart(network, addr string) {
-	s.connStartAt = time.Now()
+	var nilTime time.Time
+	if s.connStartAt == nilTime {
+		s.connStartAt = time.Now()
+	}
+	log.Debugf("[%s %s %s] - conn - start %s connect to %s: %d",
+		s.kind, s.tag, s.name, network, addr, s.connStartAt.UnixMicro())
 }
 
 func (s *TraceStats) connectDone(network, addr string, err error) {
@@ -77,12 +84,14 @@ func (s *TraceStats) connectDone(network, addr string, err error) {
 	if err != nil {
 		return
 	}
-	log.Debugf("[%s %s %s] - %s connection created to %s. time: %.3fms\n",
+	log.Debugf("[%s %s %s] - conn - %s connection created to %s. time: %.3fms\n",
 		s.kind, s.tag, s.name, network, addr, toMS(s.connTook))
 }
 
 func (s *TraceStats) tlsStart() {
 	s.tlsStartAt = time.Now()
+	log.Debugf("[%s %s %s] - tls - start negotiation: %d",
+		s.kind, s.tag, s.name, s.tlsStartAt.UnixMicro())
 }
 
 func (s *TraceStats) tlsDone(cs tls.ConnectionState, err error) {
@@ -90,7 +99,7 @@ func (s *TraceStats) tlsDone(cs tls.ConnectionState, err error) {
 	if err != nil {
 		return
 	}
-	log.Debugf("[%s %s %s] - tls negotiated to %q, time: %.3fms",
+	log.Debugf("[%s %s %s] - tls - negotiated to %q, time: %.3fms",
 		s.kind, s.tag, s.name, cs.ServerName, toMS(s.tlsTook))
 }
 
@@ -100,17 +109,25 @@ func (s TraceStats) gotConn(info httptrace.GotConnInfo) {
 }
 
 func (s *TraceStats) wroteHeaderField(key string, value []string) {
-	s.sendStartAt = time.Now()
+	var nilTime time.Time
+	if s.sendStartAt == nilTime {
+		s.sendStartAt = time.Now()
+	}
+	log.Debugf("[%s %s %s] - send - start write header field %s %s : %d",
+		s.kind, s.tag, s.name, key, value, s.sendStartAt.UnixMicro())
 }
 
 func (s *TraceStats) wroteHeaders() {
 	s.sendTook = time.Since(s.sendStartAt)
-	log.Debugf("[%s %s %s] - headers written, time: %.3fms",
+	log.Debugf("[%s %s %s] - send - headers written, time: %.3fms",
 		s.kind, s.tag, s.name, toMS(s.sendTook))
 }
 
 func (s *TraceStats) wroteRequest(info httptrace.WroteRequestInfo) {
 	s.waitStartAt = time.Now()
+	log.Debugf("[%s %s %s] - wait - start write request: %d",
+		s.kind, s.tag, s.name, s.waitStartAt.UnixMicro())
+
 	if info.Err != nil {
 		return
 	}
@@ -119,18 +136,44 @@ func (s *TraceStats) wroteRequest(info httptrace.WroteRequestInfo) {
 func (s *TraceStats) gotFirstResponseByte() {
 	s.waitTook = time.Since(s.waitStartAt)
 	s.transferStartAt = time.Now()
-	log.Debugf("[%s %s %s] - got first response byte, time: %.3fms",
+	log.Debugf("[%s %s %s] - transfer - start transfer the response: %d",
+		s.kind, s.tag, s.name, s.transferStartAt.UnixMicro())
+	log.Debugf("[%s %s %s] - wait - got first response byte, time: %.3fms",
 		s.kind, s.tag, s.name, toMS(s.waitTook))
 }
 
 func (s *TraceStats) putIdleConn(err error) {
+	s.Done()
+}
+
+// Done function is used to finish the trace manually
+func (s *TraceStats) Done() {
 	s.totalTook = time.Since(s.totalStartAt)
 	s.transferTook = time.Since(s.transferStartAt)
-	if err != nil {
-		return
-	}
-	log.Debugf("[%s %s %s] - put conn idle, transfer: %.3f, total: %.3fms",
-		s.kind, s.tag, s.name, toMS(s.transferTook), toMS(s.totalTook))
+	log.Debugf("[%s %s %s] - transfer - done, time: %.3fms",
+		s.kind, s.tag, s.name, toMS(s.transferTook))
+	log.Debugf("[%s %s %s] - total - done , time: %.3fms",
+		s.kind, s.tag, s.name, toMS(s.totalTook))
+
+	s.Report()
+}
+
+// Report show the trace stats
+func (s *TraceStats) Report() {
+	log.Debugf("[%s %s %s] ======================== Trace Stats ======================", s.kind, s.tag, s.name)
+	log.Debugf("[%s %s %s] DNS\tConnect\tTLS\tSend\tWait\tTrans\tTotal",
+		s.kind, s.tag, s.name)
+	log.Debugf("[%s %s %s] %.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\n",
+		s.kind, s.tag, s.name,
+		float64(s.dnsTook.Nanoseconds())/1000000.0,
+		float64(s.connTook.Nanoseconds())/1000000.0,
+		float64(s.tlsTook.Nanoseconds())/1000000.0,
+		float64(s.sendTook.Nanoseconds())/1000000.0,
+		float64(s.waitTook.Nanoseconds())/1000000.0,
+		float64(s.transferTook.Nanoseconds())/1000000.0,
+		float64(s.totalTook.Nanoseconds())/1000000.0,
+	)
+	log.Debugf("[%s %s %s] ===========================================================", s.kind, s.tag, s.name)
 }
 
 func toMS(t time.Duration) float64 {

@@ -58,7 +58,7 @@ type HTTP struct {
 
 	client *http.Client `yaml:"-"`
 
-	traceStatus *TraceStats `yaml:"-"`
+	traceStats *TraceStats `yaml:"-"`
 
 	metrics *metrics `yaml:"-"`
 }
@@ -100,8 +100,6 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 			TLSClientConfig: tls,
 		},
 	}
-	// set the http client trace
-	h.traceStatus = NewTraceStats(kind, "TRACE", name)
 
 	if !checkHTTPMethod(h.Method) {
 		h.Method = "GET"
@@ -148,10 +146,14 @@ func (h *HTTP) DoProbe() (bool, string) {
 	req.Header.Set("User-Agent", global.OrgProgVer)
 
 	// Tracing HTTP request
-	clientTraceCtx := httptrace.WithClientTrace(req.Context(), h.traceStatus.clientTrace)
+	// set the http client trace
+	h.traceStats = NewTraceStats(h.ProbeKind, "TRACE", h.ProbeName)
+	clientTraceCtx := httptrace.WithClientTrace(req.Context(), h.traceStats.clientTrace)
 	req = req.WithContext(clientTraceCtx)
 
 	resp, err := h.client.Do(req)
+	h.traceStats.Done()
+
 	h.ExportMetrics(resp)
 	if err != nil {
 		log.Errorf("error making get request: %v", err)
@@ -207,35 +209,35 @@ func (h *HTTP) ExportMetrics(resp *http.Response) {
 	h.metrics.DNSDuration.With(prometheus.Labels{
 		"name":   h.ProbeName,
 		"status": fmt.Sprintf("%d", code),
-	}).Set(toMS(h.traceStatus.dnsTook))
+	}).Set(toMS(h.traceStats.dnsTook))
 
 	h.metrics.ConnectDuration.With(prometheus.Labels{
 		"name":   h.ProbeName,
 		"status": fmt.Sprintf("%d", code),
-	}).Set(toMS(h.traceStatus.connTook))
+	}).Set(toMS(h.traceStats.connTook))
 
 	h.metrics.TLSDuration.With(prometheus.Labels{
 		"name":   h.ProbeName,
 		"status": fmt.Sprintf("%d", code),
-	}).Set(toMS(h.traceStatus.tlsTook))
+	}).Set(toMS(h.traceStats.tlsTook))
 
 	h.metrics.SendDuration.With(prometheus.Labels{
 		"name":   h.ProbeName,
 		"status": fmt.Sprintf("%d", code),
-	}).Set(toMS(h.traceStatus.sendTook))
+	}).Set(toMS(h.traceStats.sendTook))
 
 	h.metrics.WaitDuration.With(prometheus.Labels{
 		"name":   h.ProbeName,
 		"status": fmt.Sprintf("%d", code),
-	}).Set(toMS(h.traceStatus.waitTook))
+	}).Set(toMS(h.traceStats.waitTook))
 
 	h.metrics.TransferDuration.With(prometheus.Labels{
 		"name":   h.ProbeName,
 		"status": fmt.Sprintf("%d", code),
-	}).Set(toMS(h.traceStatus.transferTook))
+	}).Set(toMS(h.traceStats.transferTook))
 
 	h.metrics.TotalDuration.With(prometheus.Labels{
 		"name":   h.ProbeName,
 		"status": fmt.Sprintf("%d", code),
-	}).Set(toMS(h.traceStatus.totalTook))
+	}).Set(toMS(h.traceStats.totalTook))
 }
