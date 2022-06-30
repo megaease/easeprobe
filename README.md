@@ -19,7 +19,7 @@ EaseProbe is a simple, standalone, and lightWeight tool that can do health/statu
     - [1.3 Report](#13-report)
     - [1.4 Channel](#14-channel)
     - [1.5 Administration](#15-administration)
-    - [1.6 Prometheus Metrics](#16-prometheus-metrics)
+    - [1.6 Prometheus Metrics Exporter](#16-prometheus-metrics-exporter)
   - [2. Getting Started](#2-getting-started)
     - [2.1 Build](#21-build)
     - [2.2 Configure](#22-configure)
@@ -375,15 +375,49 @@ There are some administration configuration options:
 
   EaseProbe accepts the `HUP` signal to rotate the log.
 
-### 1.6 Prometheus Metrics
+### 1.6 Prometheus Metrics Exporter
 
-EaseProbe supports Prometheus metrics. The Prometheus endpoint is `http://localhost:8181/metrics` by default.
+EaseProbe supports Prometheus metrics exporter. The Prometheus endpoint is `http://localhost:8181/metrics` by default.
+
+Currently, All of the Probers support the following metrics:
+
+  - `total`: the total number of probes
+  - `duration`: Probe duration in milliseconds
+  - `status`: Probe status
+  - `SLA`: Probe SLA percentage
+
+And for the different Probers, the following metrics are available:
+
+- HTTP Probe
+  - `status_code`: HTTP status code
+  - `content_len`: HTTP content length
+  - `dns_duration`: DNS duration in milliseconds
+  - `connect_duration`: TCP connection duration in milliseconds
+  - `tls_duration`: TLS handshake duration in milliseconds
+  - `send_duration`: HTTP send duration in milliseconds
+  - `wait_duration`: HTTP wait duration in milliseconds
+  - `transfer_duration`: HTTP transfer duration in milliseconds
+  - `total_duration`: HTTP total duration in milliseconds
+
+- TLS Probe
+  - `earliest_cert_expiry`: last TLS chain expiry in timestamp seconds
+  - `last_chain_expiry_timestamp_seconds`: earliest TLS cert expiry in Unix time
+
+- Shell & SSH Probe
+  - `exit_code`: exit code of the command
+  - `output_len`: length of the output
+
+- Host Probe
+  - `cpu`: CPU usage in percentage
+  - `memory`: memory usage in percentage
+  - `disk`: disk usage in percentage
+
 
 The following snapshot is the Grafana panel for host CPU metrics
 
 ![](./docs/grafana.demo.png)
 
-Refer to the [Global Setting Configuration](#38-global-setting-configuration) for further details on how to configure the HTTP server.
+Refer to the [Global Setting Configuration](#39-global-setting-configuration) for further details on how to configure the HTTP server.
 
 ## 2. Getting Started
 

@@ -39,7 +39,7 @@ func newMetrics(subsystem, name string) *metrics {
 		EarliestCertExpiry: metric.NewGauge(namespace, subsystem, name, "earliest_cert_expiry",
 			"last TLS chain expiry in timestamp seconds", []string{}),
 		LastChainExpiryTimestampSeconds: metric.NewGauge(namespace, subsystem, name, "last_chain_expiry_timestamp_seconds",
-			"earliest TLS cert expiry in unixtime", []string{}),
+			"earliest TLS cert expiry in unix time", []string{}),
 	}
 }
 

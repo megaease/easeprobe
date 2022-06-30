@@ -40,8 +40,8 @@ var (
 )
 
 var (
-	validMetric = regexp.MustCompile(`[a-zA-Z_:][a-zA-Z0-9_:]*`)
-	validLabel  = regexp.MustCompile(`[a-zA-Z_][a-zA-Z0-9_]*`)
+	validMetric = regexp.MustCompile(`^[a-zA-Z_:][a-zA-Z0-9_:]*$`)
+	validLabel  = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`)
 )
 
 // Counter get the counter metric by key
@@ -112,13 +112,11 @@ func NewGauge(namespace, subsystem, name, metric string,
 func getAndValid(namespace, subsystem, name, metric string, labels []string) (string, error) {
 	metricName := GetName(namespace, subsystem, name, metric)
 	if ValidMetricName(metricName) == false {
-
 		return "", fmt.Errorf("Invalid metric name: %s", metricName)
 	}
 
 	for _, l := range labels {
 		if ValidLabelName(l) == false {
-
 			return "", fmt.Errorf("Invalid label name: %s", l)
 		}
 	}
