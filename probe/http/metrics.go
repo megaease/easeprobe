@@ -47,7 +47,7 @@ func newMetrics(subsystem, name string) *metrics {
 		DNSDuration: metric.NewGauge(namespace, subsystem, name, "dns_duration",
 			"DNS Duration", []string{"name", "status"}),
 		ConnectDuration: metric.NewGauge(namespace, subsystem, name, "connect_duration",
-			"Connect Duration", []string{"name", "status"}),
+			"TCP Connection Duration", []string{"name", "status"}),
 		TLSDuration: metric.NewGauge(namespace, subsystem, name, "tls_duration",
 			"TLS Duration", []string{"name", "status"}),
 		SendDuration: metric.NewGauge(namespace, subsystem, name, "send_duration",
