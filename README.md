@@ -255,7 +255,7 @@ Check the  [Notification Configuration](#38-notification-configuration) to see h
   - HTML: `http://localhost:8181/`
   - JSON: `http://localhost:8181/api/v1/sla`
 
-For the HTML report, you can use the following options:
+For the HTML report, you can use the following URL query options:
 
   - `refresh=30s`: refresh the report every `refresh` seconds.
   - `status=up`: only shows the probers which status is `up`. the value can be `up` or `down`.
