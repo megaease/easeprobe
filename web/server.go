@@ -51,10 +51,57 @@ func getRefreshInterval(refersh string) time.Duration {
 	return r
 }
 
+func getStatus(status string) *probe.Status {
+	var s probe.Status
+	s.Status(status)
+	return &s
+}
+
+func getFloat(f string, _default float64) float64 {
+	if f == "" {
+		return _default
+	}
+	flt, err := strconv.ParseFloat(f, 64)
+	if err != nil {
+		log.Errorf("[Web] Invalid float value: %s", err)
+		return _default
+	}
+	return flt
+}
+
+func checkFilter(filter report.SLAFilter) error {
+	log.Debugf("[Web] Check filter: %+v", filter)
+	if filter.SLAGreater > filter.SLALess {
+		return fmt.Errorf("Error: Invalid SLA filter: gt(%0.2f) > (%0.2f)", filter.SLAGreater, filter.SLALess)
+	}
+	if filter.SLAGreater > 100 || filter.SLALess < 0 {
+		return fmt.Errorf("Error: Invalid SLA filter: gt(%0.2f), it must be between 0 - 100", filter.SLAGreater)
+	}
+	if filter.SLALess > 100 || filter.SLALess < 0 {
+		return fmt.Errorf("Error: Invalid SLA filter: lt(%0.2f), it must be between 0 - 100", filter.SLALess)
+	}
+	return nil
+}
+
 func slaHTML(w http.ResponseWriter, req *http.Request) {
 	interval := getRefreshInterval(req.URL.Query().Get("refresh"))
+
+	filter := report.SLAFilter{}
+
+	if req.URL.Query().Get("status") != "" {
+		filter.Status = getStatus(req.URL.Query().Get("status"))
+	}
+	filter.SLAGreater = getFloat(req.URL.Query().Get("gt"), 0)
+	filter.SLALess = getFloat(req.URL.Query().Get("lt"), 100)
+
+	if err := checkFilter(filter); err != nil {
+		log.Errorf(err.Error())
+		w.Write([]byte(err.Error()))
+		return
+	}
+
 	refresh := fmt.Sprintf("%d", interval.Milliseconds())
-	html := []byte(report.SLAHTML(*probers) + report.AutoRefreshJS(refresh))
+	html := []byte(report.SLAHTMLFilter(*probers, &filter) + report.AutoRefreshJS(refresh))
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Write(html)

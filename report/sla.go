@@ -218,13 +218,31 @@ func SLAHTMLSection(r *probe.Result) string {
 		r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
 }
 
+// SLAFilter filter the probers
+type SLAFilter struct {
+	Status     *probe.Status
+	SLAGreater float64
+	SLALess    float64
+}
+
 // SLAHTML return a full stat report
 func SLAHTML(probers []probe.Prober) string {
+	return SLAHTMLFilter(probers, nil)
+}
+
+// SLAHTMLFilter return a stat report with filter
+func SLAHTMLFilter(probers []probe.Prober, filter *SLAFilter) string {
 	html := HTMLHeader("Overall SLA Report")
 
 	html += `<table style="font-size: 16px; line-height: 20px;">`
 	for _, p := range probers {
-		html += SLAHTMLSection(p.Result())
+		if filter == nil {
+			html += SLAHTMLSection(p.Result())
+		} else if p.Result().SLAPercent() >= filter.SLAGreater && p.Result().SLAPercent() <= filter.SLALess {
+			if filter.Status == nil || p.Result().Status == *filter.Status {
+				html += SLAHTMLSection(p.Result())
+			}
+		}
 	}
 	html += `</table>`
 
