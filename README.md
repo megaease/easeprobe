@@ -257,10 +257,10 @@ Check the  [Notification Configuration](#38-notification-configuration) to see h
 
 For the HTML report, you can use the following URL query options:
 
-  - `refresh=30s`: refresh the report every `refresh` seconds.
-  - `status=up`: only shows the probers which status is `up`. the value can be `up` or `down`.
-  - `gt=50`: only shows the probers the SLA is greater than `50%`.
-  - `lt=90`: only shows the probers the SLA is less than `90%`.
+  - `refresh`: report refresh rate (ex. `?refresh=30s` refreshes the page every 30 second)
+  - `status`: only show the probers with specific status, accepted values `up` or `down` (ex. `?status=up` list only probers with status `up`).
+  - `gt`: only shows the probers with SLA greater than given percentage (ex. `?gt=50` filter only hosts with SLA percentage greater than 50%)
+  - `lt`: only shows the probers with SLA less than the given percentage (ex. `?lt=90` filter only hosts with SLA percentage less than 90%)
 
   Refer to the [Global Setting Configuration](#39-global-setting-configuration) to see how to configure the access log.
 
