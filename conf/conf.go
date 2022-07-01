@@ -221,13 +221,13 @@ func New(conf *string) (*Conf, error) {
 			Log:        NewLog(),
 			TimeFormat: "2006-01-02 15:04:05 UTC",
 			Probe: Probe{
-				Interval: time.Second * 60,
-				Timeout:  time.Second * 10,
+				Interval: global.DefaultProbeInterval,
+				Timeout:  global.DefaultTimeOut,
 			},
 			Notify: Notify{
 				Retry: global.Retry{
-					Times:    3,
-					Interval: time.Second * 5,
+					Times:    global.DefaultRetryTimes,
+					Interval: global.DefaultRetryInterval,
 				},
 				Dry: false,
 			},
