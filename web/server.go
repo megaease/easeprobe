@@ -91,8 +91,8 @@ func slaHTML(w http.ResponseWriter, req *http.Request) {
 	if req.URL.Query().Get("status") != "" {
 		filter.Status = getStatus(req.URL.Query().Get("status"))
 	}
-	filter.SLAGreater = getFloat(req.URL.Query().Get("gt"), 0)
-	filter.SLALess = getFloat(req.URL.Query().Get("lt"), 100)
+	filter.SLAGreater = getFloat(req.URL.Query().Get("gte"), 0)
+	filter.SLALess = getFloat(req.URL.Query().Get("lte"), 100)
 
 	if err := checkFilter(filter); err != nil {
 		log.Errorf(err.Error())
