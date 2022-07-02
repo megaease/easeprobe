@@ -57,8 +57,8 @@ func configProbers(probers []probe.Prober) []probe.Prober {
 
 func runProbers(probers []probe.Prober, wg *sync.WaitGroup, done chan bool) {
 	// we need to run all probers in equally distributed time, not at the same time.
-	timeGap := time.Duration(global.DefaultProbeInterval) / time.Duration(len(probers))
-	log.Debugf("Start Time Gap: %v = %s / %d", timeGap, global.DefaultProbeInterval, len(probers))
+	timeGap := global.DefaultProbeInterval / time.Duration(len(probers))
+	log.Debugf("Start Time Gap: %v = %v / %d", timeGap, global.DefaultProbeInterval, len(probers))
 
 	probeFn := func(p probe.Prober, index int) {
 		wg.Add(1)
@@ -67,7 +67,7 @@ func runProbers(probers []probe.Prober, wg *sync.WaitGroup, done chan bool) {
 		// Sleep a round time to avoid all probers start at the same time.
 		t := time.Duration(index) * timeGap
 		log.Debugf("[%s / %s] Delay %v = (%d * %v) seconds to start the probe work",
-			p.Kind(), p.Name(), t.Seconds(), index, timeGap.Seconds())
+			p.Kind(), p.Name(), t, index, timeGap)
 		time.Sleep(t)
 
 		interval := time.NewTimer(p.Interval())
