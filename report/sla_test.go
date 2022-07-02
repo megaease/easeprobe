@@ -76,6 +76,14 @@ func TestSLA(t *testing.T) {
 	}
 }
 
+func TestSLAJSONSection(t *testing.T) {
+	p := newDummyProber("probe1")
+	sla := SLAJSONSection(p.Result())
+	assert.NotEmpty(t, sla)
+	assert.Contains(t, sla, "\"name\":\"probe1\"")
+	assert.Contains(t, sla, "\"status\":\"up\"")
+}
+
 func TestSLAFilter(t *testing.T) {
 	probes[0].Result().Status = probe.StatusUp
 	probes[1].Result().Status = probe.StatusDown
