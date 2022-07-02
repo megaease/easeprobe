@@ -224,6 +224,7 @@ type SLAFilter struct {
 	SLAGreater float64
 	SLALess    float64
 }
+
 // HTML return the HTML format string
 func (f *SLAFilter) HTML() string {
 	result := fmt.Sprintf("<b>SLA</b>: %.2f%% - %.2f%% ", f.SLAGreater, f.SLALess)
