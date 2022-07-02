@@ -63,6 +63,20 @@ func newDummyResult(name string) probe.Result {
 	}
 }
 
+func TestToLog(t *testing.T) {
+	global.InitEaseProbe("EaseProbe", "http://icon/url")
+	r := newDummyResult("dummy")
+	str := ToLog(r)
+	assert.NotEmpty(t, str)
+	assert.Contains(t, str, r.Title())
+	assert.Contains(t, str, r.Endpoint)
+	assert.Contains(t, str, r.StartTime.Format(r.TimeFormat))
+	assert.Contains(t, str, r.RoundTripTime.String())
+	assert.NotContains(t, str, r.PreStatus.Emoji())
+	assert.Contains(t, str, r.Message)
+	assert.Contains(t, str, r.LatestDownTime.Format(r.TimeFormat))
+}
+
 func TestToText(t *testing.T) {
 	global.InitEaseProbe("EaseProbe", "http://icon/url")
 	r := newDummyResult("dummy")

@@ -218,15 +218,53 @@ func SLAHTMLSection(r *probe.Result) string {
 		r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
 }
 
+// SLAFilter filter the probers
+type SLAFilter struct {
+	Status     *probe.Status
+	SLAGreater float64
+	SLALess    float64
+}
+
+// HTML return the HTML format string
+func (f *SLAFilter) HTML() string {
+	result := fmt.Sprintf("<b>SLA</b>: %.2f%% - %.2f%% ", f.SLAGreater, f.SLALess)
+	if f.Status != nil {
+		result += fmt.Sprintf("  <b>Status</b>: %s", f.Status.String())
+	}
+
+	return result
+}
+
 // SLAHTML return a full stat report
 func SLAHTML(probers []probe.Prober) string {
+	return SLAHTMLFilter(probers, nil)
+}
+
+// SLAHTMLFilter return a stat report with filter
+func SLAHTMLFilter(probers []probe.Prober, filter *SLAFilter) string {
 	html := HTMLHeader("Overall SLA Report")
 
-	html += `<table style="font-size: 16px; line-height: 20px;">`
+	cnt := 0
+	table := `<table style="font-size: 16px; line-height: 20px;">`
 	for _, p := range probers {
-		html += SLAHTMLSection(p.Result())
+		if filter == nil {
+			table += SLAHTMLSection(p.Result())
+			cnt++
+		} else if p.Result().SLAPercent() >= filter.SLAGreater && p.Result().SLAPercent() <= filter.SLALess {
+			if filter.Status == nil || p.Result().Status == *filter.Status {
+				table += SLAHTMLSection(p.Result())
+				cnt++
+			}
+		}
 	}
-	html += `</table>`
+	table += `</table>`
+
+	summary := ""
+	if filter != nil {
+		summary += filter.HTML() + " :  "
+	}
+	summary += fmt.Sprintf(`( <b>%d</b> Probers found! )`, cnt)
+	html = html + summary + table
 
 	timeFmt := "2006-01-02 15:04:05"
 	if len(probers) > 0 {

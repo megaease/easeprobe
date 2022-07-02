@@ -75,3 +75,67 @@ func TestSLA(t *testing.T) {
 		}
 	}
 }
+
+func TestSLAJSONSection(t *testing.T) {
+	p := newDummyProber("probe1")
+	sla := SLAJSONSection(p.Result())
+	assert.NotEmpty(t, sla)
+	assert.Contains(t, sla, "\"name\":\"probe1\"")
+	assert.Contains(t, sla, "\"status\":\"up\"")
+}
+
+func TestSLAFilter(t *testing.T) {
+	probes[0].Result().Status = probe.StatusUp
+	probes[1].Result().Status = probe.StatusDown
+	probes[2].Result().Status = probe.StatusUp
+	probes[3].Result().Status = probe.StatusDown
+
+	html := SLAHTMLFilter(probes, nil)
+	for _, p := range probes {
+		assert.Contains(t, html, p.Name())
+	}
+
+	filter := SLAFilter{
+		Status:     nil,
+		SLAGreater: 0,
+		SLALess:    100,
+	}
+	html = SLAHTMLFilter(probes, &filter)
+	for _, p := range probes {
+		assert.Contains(t, html, p.Name())
+	}
+
+	status := probe.StatusUp
+	filter.Status = &status
+	html = SLAHTMLFilter(probes, &filter)
+	assert.Contains(t, html, probes[0].Name())
+	assert.NotContains(t, html, probes[1].Name())
+	assert.Contains(t, html, probes[2].Name())
+	assert.NotContains(t, html, probes[3].Name())
+
+	// 80% SLA
+	probes[0].Result().Stat.UpTime = 80
+	probes[0].Result().Stat.DownTime = 20
+
+	// 60% SLA
+	probes[1].Result().Stat.UpTime = 60
+	probes[1].Result().Stat.DownTime = 40
+
+	// 40% SLA
+	probes[2].Result().Stat.UpTime = 40
+	probes[2].Result().Stat.DownTime = 60
+
+	// 20% SLA
+	probes[3].Result().Stat.UpTime = 20
+	probes[3].Result().Stat.DownTime = 80
+
+	// sla between 50 - 90, status is up
+	filter.SLAGreater = 50
+	filter.SLALess = 90
+	html = SLAHTMLFilter(probes, &filter)
+	assert.Contains(t, html, probes[0].Name())
+	assert.NotContains(t, html, probes[1].Name())
+	assert.NotContains(t, html, probes[2].Name())
+	assert.NotContains(t, html, probes[3].Name())
+
+}

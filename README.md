@@ -252,8 +252,15 @@ Check the  [Notification Configuration](#38-notification-configuration) to see h
 
   The EaseProbe would listen on the `0.0.0.0:8181` port by default. And you can access the Live SLA report by the following URL:
 
-  - HTML: `http://localhost:8181/` or `http://localhost:8181/?refresh=30s`
+  - HTML: `http://localhost:8181/`
   - JSON: `http://localhost:8181/api/v1/sla`
+
+For the HTML report, you can use the following URL query options:
+
+  - `refresh`: report refresh rate (ex. `?refresh=30s` refreshes the page every 30 seconds)
+  - `status`: only shows the probers with specific status, accepted values `up` or `down` (ex. `?status=up` list only probers with status `up`).
+  - `gte`: only shows the probers with SLA greater than or equal to the given percentage (ex. `?gte=50` filter only hosts with SLA percentage `>= 50%`)
+  - `lte`: only shows the probers with SLA less than or equal to the given percentage (ex. `?lte=90` filter only hosts with SLA percentage `<= 90%` )
 
   Refer to the [Global Setting Configuration](#39-global-setting-configuration) to see how to configure the access log.
 
