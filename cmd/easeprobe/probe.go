@@ -18,6 +18,7 @@
 package main
 
 import (
+	"math/rand"
 	"sync"
 	"time"
 
@@ -59,6 +60,13 @@ func runProbers(probers []probe.Prober, wg *sync.WaitGroup, done chan bool) {
 	probeFn := func(p probe.Prober) {
 		wg.Add(1)
 		defer wg.Done()
+
+		// Sleep a round time to avoid all probers start at the same time.
+		s := rand.NewSource(time.Now().UnixNano())
+		r := rand.New(s)
+		t := time.Duration(r.Int63n(int64(global.DefaultProbeInterval)))
+		log.Debugf("[%s / %s] Sleep %v seconds before probe", p.Kind(), p.Name(), t.Seconds())
+		time.Sleep(t)
 
 		interval := time.NewTimer(p.Interval())
 		defer interval.Stop()
