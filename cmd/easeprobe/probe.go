@@ -18,7 +18,6 @@
 package main
 
 import (
-	"math/rand"
 	"sync"
 	"time"
 
@@ -57,15 +56,18 @@ func configProbers(probers []probe.Prober) []probe.Prober {
 }
 
 func runProbers(probers []probe.Prober, wg *sync.WaitGroup, done chan bool) {
-	probeFn := func(p probe.Prober) {
+	// we need to run all probers in equally distributed time, not at the same time.
+	timeGap := time.Duration(global.DefaultProbeInterval) / time.Duration(len(probers))
+	log.Debugf("Start Time Gap: %v = %s / %d", timeGap, global.DefaultProbeInterval, len(probers))
+
+	probeFn := func(p probe.Prober, index int) {
 		wg.Add(1)
 		defer wg.Done()
 
 		// Sleep a round time to avoid all probers start at the same time.
-		s := rand.NewSource(time.Now().UnixNano())
-		r := rand.New(s)
-		t := time.Duration(r.Int63n(int64(global.DefaultProbeInterval)))
-		log.Debugf("[%s / %s] Sleep %v seconds before probe", p.Kind(), p.Name(), t.Seconds())
+		t := time.Duration(index) * timeGap
+		log.Debugf("[%s / %s] Delay %v = (%d * %v) seconds to start the probe work",
+			p.Kind(), p.Name(), t.Seconds(), index, timeGap.Seconds())
 		time.Sleep(t)
 
 		interval := time.NewTimer(p.Interval())
@@ -90,12 +92,13 @@ func runProbers(probers []probe.Prober, wg *sync.WaitGroup, done chan bool) {
 			}
 		}
 	}
+
 	for i := 0; i < len(probers); i++ {
 		p := probers[i]
 		if p.Result().Status == probe.StatusBad {
 			continue
 		}
 		log.Infof("Ready to monitor(%s): %s - %s", p.Kind(), p.Result().Name, p.Result().Endpoint)
-		go probeFn(p)
+		go probeFn(p, i)
 	}
 }
