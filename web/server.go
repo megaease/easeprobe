@@ -72,13 +72,13 @@ func getFloat(f string, _default float64) float64 {
 func checkFilter(filter report.SLAFilter) error {
 	log.Debugf("[Web] Check filter: %+v", filter)
 	if filter.SLAGreater > filter.SLALess {
-		return fmt.Errorf("Error: Invalid SLA filter: gt(%0.2f) > (%0.2f)", filter.SLAGreater, filter.SLALess)
+		return fmt.Errorf("Error: Invalid SLA filter: gte(%0.2f) > (%0.2f)", filter.SLAGreater, filter.SLALess)
 	}
 	if filter.SLAGreater > 100 || filter.SLALess < 0 {
-		return fmt.Errorf("Error: Invalid SLA filter: gt(%0.2f), it must be between 0 - 100", filter.SLAGreater)
+		return fmt.Errorf("Error: Invalid SLA filter: gte(%0.2f), it must be between 0 - 100", filter.SLAGreater)
 	}
 	if filter.SLALess > 100 || filter.SLALess < 0 {
-		return fmt.Errorf("Error: Invalid SLA filter: lt(%0.2f), it must be between 0 - 100", filter.SLALess)
+		return fmt.Errorf("Error: Invalid SLA filter: lte(%0.2f), it must be between 0 - 100", filter.SLALess)
 	}
 	return nil
 }
