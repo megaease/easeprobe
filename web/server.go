@@ -74,7 +74,7 @@ func checkFilter(filter report.SLAFilter) error {
 	if filter.SLAGreater > filter.SLALess {
 		return fmt.Errorf("Error: Invalid SLA filter: gte(%0.2f) > (%0.2f)", filter.SLAGreater, filter.SLALess)
 	}
-	if filter.SLAGreater > 100 || filter.SLALess < 0 {
+	if filter.SLAGreater > 100 || filter.SLAGreater < 0 {
 		return fmt.Errorf("Error: Invalid SLA filter: gte(%0.2f), it must be between 0 - 100", filter.SLAGreater)
 	}
 	if filter.SLALess > 100 || filter.SLALess < 0 {
