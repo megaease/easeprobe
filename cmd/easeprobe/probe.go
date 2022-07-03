@@ -58,6 +58,10 @@ func configProbers(probers []probe.Prober) []probe.Prober {
 func runProbers(probers []probe.Prober, wg *sync.WaitGroup, done chan bool) {
 	// we need to run all probers in equally distributed time, not at the same time.
 	timeGap := global.DefaultProbeInterval / time.Duration(len(probers))
+	// if less than or equal to 60 probers, use 1 second instead
+	if time.Duration(len(probers))*time.Second <= time.Minute {
+		timeGap = time.Second
+	}
 	log.Debugf("Start Time Gap: %v = %v / %d", timeGap, global.DefaultProbeInterval, len(probers))
 
 	probeFn := func(p probe.Prober, index int) {
