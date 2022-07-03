@@ -41,14 +41,14 @@ func (d *dummyProber) Config(g global.ProbeSettings) error {
 func (d *dummyProber) DoProbe() (bool, string) {
 	return rand.Int()%2 == 0, "hello world"
 }
-
-var probes = []probe.Prober{
-	newDummyProber("probe1"),
-	newDummyProber("probe2"),
-	newDummyProber("probe3"),
-	newDummyProber("probe4"),
+func getProbers() []probe.Prober {
+	return []probe.Prober{
+		newDummyProber("probe1"),
+		newDummyProber("probe2"),
+		newDummyProber("probe3"),
+		newDummyProber("probe4"),
+	}
 }
-
 func newDummyProber(name string) probe.Prober {
 	r := newDummyResult(name)
 	return &dummyProber{
@@ -63,6 +63,7 @@ func newDummyProber(name string) probe.Prober {
 
 func TestSLA(t *testing.T) {
 	global.InitEaseProbe("DummyProbe", "icon")
+	probes := getProbers()
 	for f, fn := range FormatFuncs {
 		sla := fn.StatFn(probes)
 		assert.NotEmpty(t, sla)
@@ -85,6 +86,7 @@ func TestSLAJSONSection(t *testing.T) {
 }
 
 func TestSLAFilter(t *testing.T) {
+	probes := getProbers()
 	probes[0].Result().Status = probe.StatusUp
 	probes[1].Result().Status = probe.StatusDown
 	probes[2].Result().Status = probe.StatusUp

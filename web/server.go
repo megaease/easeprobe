@@ -18,6 +18,7 @@
 package web
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
@@ -52,6 +53,9 @@ func getRefreshInterval(refersh string) time.Duration {
 }
 
 func getStatus(status string) *probe.Status {
+	if status == "" {
+		return nil
+	}
 	var s probe.Status
 	s.Status(status)
 	return &s
@@ -69,47 +73,54 @@ func getFloat(f string, _default float64) float64 {
 	return flt
 }
 
-func checkFilter(filter report.SLAFilter) error {
-	log.Debugf("[Web] Check filter: %+v", filter)
-	if filter.SLAGreater > filter.SLALess {
-		return fmt.Errorf("Error: Invalid SLA filter: gte(%0.2f) > (%0.2f)", filter.SLAGreater, filter.SLALess)
+func getFilter(req *http.Request) (*report.SLAFilter, error) {
+	filter := &report.SLAFilter{}
+
+	filter.Name = req.URL.Query().Get("name")
+	filter.Kind = req.URL.Query().Get("kind")
+	filter.Endpoint = req.URL.Query().Get("ep")
+	filter.Status = getStatus(req.URL.Query().Get("status"))
+	filter.Message = req.URL.Query().Get("msg")
+	filter.SLAGreater = getFloat(req.URL.Query().Get("gte"), 0)
+	filter.SLALess = getFloat(req.URL.Query().Get("lte"), 100)
+
+	if err := filter.Check(); err != nil {
+		log.Errorf(err.Error())
+		return nil, err
 	}
-	if filter.SLAGreater > 100 || filter.SLAGreater < 0 {
-		return fmt.Errorf("Error: Invalid SLA filter: gte(%0.2f), it must be between 0 - 100", filter.SLAGreater)
-	}
-	if filter.SLALess > 100 || filter.SLALess < 0 {
-		return fmt.Errorf("Error: Invalid SLA filter: lte(%0.2f), it must be between 0 - 100", filter.SLALess)
-	}
-	return nil
+	return filter, nil
 }
 
 func slaHTML(w http.ResponseWriter, req *http.Request) {
 	interval := getRefreshInterval(req.URL.Query().Get("refresh"))
 
-	filter := report.SLAFilter{}
-
-	if req.URL.Query().Get("status") != "" {
-		filter.Status = getStatus(req.URL.Query().Get("status"))
-	}
-	filter.SLAGreater = getFloat(req.URL.Query().Get("gte"), 0)
-	filter.SLALess = getFloat(req.URL.Query().Get("lte"), 100)
-
-	if err := checkFilter(filter); err != nil {
-		log.Errorf(err.Error())
+	filter, err := getFilter(req)
+	if err != nil {
 		w.Write([]byte(err.Error()))
 		return
 	}
 
 	refresh := fmt.Sprintf("%d", interval.Milliseconds())
-	html := []byte(report.SLAHTMLFilter(*probers, &filter) + report.AutoRefreshJS(refresh))
+	html := []byte(report.SLAHTMLFilter(*probers, filter) + report.AutoRefreshJS(refresh))
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Write(html)
 }
 
 func slaJSON(w http.ResponseWriter, req *http.Request) {
+	filter, err := getFilter(req)
+	if err != nil {
+		buf, e := json.Marshal(err)
+		if e != nil {
+			w.Write([]byte(err.Error()))
+			return
+		}
+		w.Write(buf)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.Write([]byte(report.SLAJSON(*probers)))
+	_probers := filter.Filter(*probers)
+	w.Write([]byte(report.SLAJSON(_probers)))
 }
 
 // SetProbers set the probers
