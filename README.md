@@ -281,7 +281,7 @@ You can use the following URL query options for both HTML and JSON:
       data: /path/to/data/file.yaml
   ```
 
-For more information, please check the [Global Setting Configuration](#38-global-setting-configuration)
+For more information, please check the [Global Setting Configuration](#39-global-setting-configuration)
 
 
 ### 1.4 Channel
