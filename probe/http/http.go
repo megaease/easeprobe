@@ -19,8 +19,10 @@ package http
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/http/httptrace"
 	"net/url"
@@ -31,6 +33,7 @@ import (
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/base"
 	"github.com/prometheus/client_golang/prometheus"
+
 	log "github.com/sirupsen/logrus"
 )
 
@@ -97,7 +100,22 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 	h.client = &http.Client{
 		Timeout: h.Timeout(),
 		Transport: &http.Transport{
-			TLSClientConfig: tls,
+			TLSClientConfig:   tls,
+			DisableKeepAlives: true,
+			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+				d := net.Dialer{Timeout: h.Timeout()}
+				conn, err := d.DialContext(ctx, network, addr)
+				if err != nil {
+					return nil, err
+				}
+				tcpConn, ok := conn.(*net.TCPConn)
+				if ok {
+					log.Debugf("[%s / %s] dial %s:%s", h.ProbeKind, h.ProbeName, network, addr)
+					tcpConn.SetLinger(0)
+					return tcpConn, nil
+				}
+				return conn, nil
+			},
 		},
 	}
 
