@@ -48,6 +48,10 @@ EaseProbe supports the following probing methods: **HTTP**, **TCP**, **Shell Com
 
 Each probe is identified by the method it supports (eg `http`), a unique name (across all probes in the configuration file) and the method specific parameters.
 
+On application startup, the configured probes are scheduled for their initial fire up based on the following criteria:
+* Less than or equal to 60 total probers exist: the delay between initial prober fire-up is `1 second`
+* More than 60 total probers exist: the startup is scheduled based on the following equation `timeGap = DefaultProbeInterval / numProbes`
+
 > **Note**:
 >
 > **If multiple probes using the same name then this could lead to corruption of the metrics data and/or the behavior of the application in non-deterministic way.**
