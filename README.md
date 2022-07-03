@@ -256,9 +256,10 @@ Check the  [Notification Configuration](#38-notification-configuration) to see h
   - JSON: `http://localhost:8181/api/v1/sla`
 
 You can use the following URL query options for both HTML and JSON:
-  - `name`: filter the report by the probe name (ex, `?name=probe1` list the probers which name containing `probe1`)
-  - `kind`: filter the report by the probe kind (ex, `?kind=http` list the probers with kind `http`)
-  - `ep`: filter the report by the probe endpoint (ex, `?ep=example.com` list the probers which endpoint containing  `example.com`)
+  - `name`: filter the probers with the name (ex, `?name=probe1` list the probers which name containing `probe1`)
+  - `kind`: filter the probers with the kind (ex, `?kind=http` list the probers with kind `http`)
+  - `ep`: filter the probers with the endpoint (ex, `?ep=example.com` list the probers which endpoint containing  `example.com`)
+  - `msg`: filter the probers with the message (ex, `?msg=example` list the probers which message containing `example`)
   - `status`: filter the probers with specific status, accepted values `up` or `down` (ex. `?status=up` list only probers with status `up`).
   - `gte`: filter the probers with SLA greater than or equal to the given percentage (ex. `?gte=50` filter only hosts with SLA percentage `>= 50%`)
   - `lte`:filter the probers with SLA less than or equal to the given percentage (ex. `?lte=90` filter only hosts with SLA percentage `<= 90%` )
