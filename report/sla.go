@@ -115,7 +115,7 @@ func SLATextSection(r *probe.Result) string {
 	return fmt.Sprintf(text, r.Name, r.Endpoint,
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLAPercent(),
 		r.Stat.Total, SLAStatusText(r.Stat, Text),
-		time.Now().UTC().Format(r.TimeFormat),
+		r.StartTime.UTC().Format(r.TimeFormat),
 		r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
 }
 
@@ -134,7 +134,7 @@ func SLALogSection(r *probe.Result) string {
 	return fmt.Sprintf(text, r.Name, r.Endpoint,
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLAPercent(),
 		r.Stat.Total, SLAStatusText(r.Stat, Log),
-		time.Now().UTC().Format(r.TimeFormat),
+		r.StartTime.UTC().Format(r.TimeFormat),
 		r.Status.String(), r.Message)
 }
 
@@ -164,7 +164,7 @@ func SLAMarkdownSection(r *probe.Result, f Format) string {
 	return fmt.Sprintf(text, r.Name, r.Endpoint,
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLAPercent(),
 		r.Stat.Total, SLAStatusText(r.Stat, MarkdownSocial),
-		time.Now().UTC().Format(r.TimeFormat),
+		r.StartTime.UTC().Format(r.TimeFormat),
 		r.Status.Emoji()+" "+r.Status.String(), r.Message)
 }
 
@@ -214,7 +214,7 @@ func SLAHTMLSection(r *probe.Result) string {
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime),
 		r.SLAPercent(),
 		r.Stat.Total, SLAStatusText(r.Stat, HTML),
-		time.Now().UTC().Format(r.TimeFormat),
+		r.StartTime.UTC().Format(r.TimeFormat),
 		r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
 }
 
@@ -381,7 +381,7 @@ func SLALarkSection(r *probe.Result) string {
 	return fmt.Sprintf(text, r.Name, r.Endpoint,
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLAPercent(),
 		r.Stat.Total, SLAStatusText(r.Stat, Lark),
-		time.Now().UTC().Format(r.TimeFormat),
+		r.StartTime.UTC().Format(r.TimeFormat),
 		r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
 }
 
