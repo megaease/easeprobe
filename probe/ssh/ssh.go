@@ -20,6 +20,7 @@ package ssh
 import (
 	"bytes"
 	"fmt"
+	"net"
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
@@ -203,6 +204,10 @@ func (s *Server) GetSSHClientFromBastion() error {
 	conn, err := bClient.Dial("tcp", s.Host)
 	if err != nil {
 		return fmt.Errorf("Server: %s", err)
+	}
+
+	if tcpConn, ok := conn.(*net.TCPConn); ok {
+		tcpConn.SetLinger(0)
 	}
 
 	ncc, chans, reqs, err := ssh.NewClientConn(conn, s.Host, config)

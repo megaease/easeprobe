@@ -88,6 +88,9 @@ func (t *TLS) DoProbe() (bool, string) {
 		log.Errorf("tcp dial error: %v", err)
 		return false, fmt.Sprintf("tcp dial error: %v", err)
 	}
+	if tcpConn, ok := conn.(*net.TCPConn); ok {
+		tcpConn.SetLinger(0)
+	}
 	defer conn.Close()
 
 	colonPos := strings.LastIndex(addr, ":")

@@ -54,7 +54,10 @@ func (t *TCP) DoProbe() (bool, string) {
 		status = false
 	} else {
 		message = "TCP Connection Established Successfully!"
-		conn.Close()
+		if tcpCon, ok := conn.(*net.TCPConn); ok {
+			tcpCon.SetLinger(0)
+		}
+		defer conn.Close()
 	}
 	return status, message
 }
