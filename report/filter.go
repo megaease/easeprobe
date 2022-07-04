@@ -35,7 +35,8 @@ type SLAFilter struct {
 	SLAGreater float64
 	SLALess    float64
 	Message    string
-	cnt        int // the count of probers
+	total      int // the total number of probers
+	cnt        int // the number of probers that match the filter
 }
 
 // NewEmptyFilter create a new SLAFilter
@@ -95,7 +96,7 @@ func (f *SLAFilter) HTML() string {
 	}
 
 	span = `<span style="font-size:9pt; background-color:#4E944F; color:white; padding:0 5px; margin-left:10px;border-radius: 3px;">`
-	result += fmt.Sprintf(span+"<b>%d Probers found!</b>"+_span, f.cnt)
+	result += fmt.Sprintf(span+"<b>%d / %d Probers found!</b>"+_span, f.cnt, f.total)
 
 	result += "<br><br>"
 	return result
@@ -134,6 +135,7 @@ func (f *SLAFilter) Filter(probers []probe.Prober) []probe.Prober {
 
 		result = append(result, p)
 	}
+	f.total = len(probers)
 	f.cnt = len(result)
 	return result
 }
