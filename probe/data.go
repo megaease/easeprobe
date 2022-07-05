@@ -85,7 +85,6 @@ func GetResultData(name string) *Result {
 
 // CleanData removes the items in resultData not in []Prober
 func CleanData(p []Prober) {
-	mutex.Lock()
 	var data = map[string]*Result{}
 	for i := 0; i < len(p); i++ {
 		r := p[i].Result()
@@ -96,6 +95,7 @@ func CleanData(p []Prober) {
 			data[r.Name] = r
 		}
 	}
+	mutex.Lock()
 	resultData = data
 	mutex.Unlock()
 }
@@ -162,8 +162,6 @@ func LoadDataFromFile(filename string) error {
 					log.Debugf("Load meta data: name[%s], version[%s]", metaData.Name, metaData.Ver)
 				}
 			} else {
-				mutex.Lock()
-				defer mutex.Unlock()
 				if err := yaml.Unmarshal(valueBytes, &resultData); err != nil {
 					return err
 				}
