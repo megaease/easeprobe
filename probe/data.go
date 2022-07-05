@@ -25,6 +25,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/megaease/easeprobe/global"
@@ -48,6 +49,7 @@ var (
 		Ver:  global.Ver,
 	}
 	metaBuf []byte
+	mutex = &sync.RWMutex{}
 )
 
 const split = "---\n"
@@ -59,7 +61,9 @@ func GetMetaData() *MetaData {
 
 // SetResultData set the result of probe
 func SetResultData(name string, result *Result) {
+	mutex.Lock()
 	resultData[name] = result
+	mutex.Unlock()
 }
 
 // SetResultsData set the results of probe
@@ -71,6 +75,8 @@ func SetResultsData(r []Result) {
 
 // GetResultData get the result of probe
 func GetResultData(name string) *Result {
+	mutex.RLock()
+	defer mutex.RUnlock()
 	if v, ok := resultData[name]; ok {
 		return v
 	}
@@ -89,7 +95,9 @@ func CleanData(p []Prober) {
 			data[r.Name] = r
 		}
 	}
+	mutex.Lock()
 	resultData = data
+	mutex.Unlock()
 }
 
 // SaveDataToFile save the results to file
@@ -99,7 +107,9 @@ func SaveDataToFile(filename string) error {
 		return nil
 	}
 
+	mutex.RLock()
 	dataBuf, err := yaml.Marshal(resultData)
+	mutex.RUnlock()
 	if err != nil {
 		return err
 	}
@@ -152,6 +162,8 @@ func LoadDataFromFile(filename string) error {
 					log.Debugf("Load meta data: name[%s], version[%s]", metaData.Name, metaData.Ver)
 				}
 			} else {
+				mutex.Lock()
+				defer mutex.Unlock()
 				if err := yaml.Unmarshal(valueBytes, &resultData); err != nil {
 					return err
 				}
