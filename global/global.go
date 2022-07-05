@@ -68,6 +68,8 @@ const (
 	DefaultHTTPServerIP = "0.0.0.0"
 	// DefaultHTTPServerPort is the default port of the HTTP server
 	DefaultHTTPServerPort = "8181"
+	// DefaultPageSize is the default page size
+	DefaultPageSize = 100
 	// DefaultAccessLogFile is the default access log file name
 	DefaultAccessLogFile = "access.log"
 	// DefaultDataFile is the default data file name

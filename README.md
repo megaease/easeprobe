@@ -257,6 +257,7 @@ Check the  [Notification Configuration](#38-notification-configuration) to see h
 
 You can use the following URL query options for both HTML and JSON:
   - `refresh`: (_HTML only_) refresh the page every given seconds (ex, `?refresh=30s` refreshes the page every 30 seconds)
+  - `pg` & `sz`: page number and page size (ex, `?pg=2&sz=10` shows the second page with 10 probers), default page size is `100`
   - `name`: filter the probers that contain the value of name (ex, `?name=probe1` list the probers which name containing `probe1`)
   - `kind`: filter the probers with the kind (ex, `?kind=http` list the probers with kind `http`)
   - `ep`: filter the probers with the endpoint (ex, `?ep=example.com` list the probers which endpoint containing  `example.com`)

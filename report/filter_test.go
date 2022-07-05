@@ -221,5 +221,35 @@ func TestFilter(t *testing.T) {
 	probes = filter.Filter(_probes)
 	assert.Equal(t, 1, len(probes))
 	assert.Equal(t, _probes[2], probes[0])
+}
+
+func NewFilterWithPage(pg, sz int) *SLAFilter {
+	filter := NewEmptyFilter()
+	filter.PageNum = pg
+	filter.PageSize = sz
+	return filter
+}
+func TestPage(t *testing.T) {
+	_probes := initData()
+	filter := NewEmptyFilter()
+	probes := filter.Filter(_probes)
+	assert.Equal(t, _probes, probes)
+
+	filter = NewFilterWithPage(1, 2)
+	probes = filter.Filter(_probes)
+	assert.Equal(t, 2, len(probes))
+	assert.Equal(t, _probes[0], probes[0])
+	assert.Equal(t, _probes[1], probes[1])
+
+	filter = NewFilterWithPage(2, 2)
+	probes = filter.Filter(_probes)
+	assert.Equal(t, 2, len(probes))
+	assert.Equal(t, _probes[2], probes[0])
+	assert.Equal(t, _probes[3], probes[1])
+
+	filter = NewFilterWithPage(2, 3)
+	probes = filter.Filter(_probes)
+	assert.Equal(t, 1, len(probes))
+	assert.Equal(t, _probes[3], probes[0])
 
 }

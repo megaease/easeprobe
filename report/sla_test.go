@@ -97,19 +97,15 @@ func TestSLAFilter(t *testing.T) {
 		assert.Contains(t, html, p.Name())
 	}
 
-	filter := SLAFilter{
-		Status:     nil,
-		SLAGreater: 0,
-		SLALess:    100,
-	}
-	html = SLAHTMLFilter(probes, &filter)
+	filter := NewEmptyFilter()
+	html = SLAHTMLFilter(probes, filter)
 	for _, p := range probes {
 		assert.Contains(t, html, p.Name())
 	}
 
 	status := probe.StatusUp
 	filter.Status = &status
-	html = SLAHTMLFilter(probes, &filter)
+	html = SLAHTMLFilter(probes, filter)
 	assert.Contains(t, html, probes[0].Name())
 	assert.NotContains(t, html, probes[1].Name())
 	assert.Contains(t, html, probes[2].Name())
@@ -134,7 +130,7 @@ func TestSLAFilter(t *testing.T) {
 	// sla between 50 - 90, status is up
 	filter.SLAGreater = 50
 	filter.SLALess = 90
-	html = SLAHTMLFilter(probes, &filter)
+	html = SLAHTMLFilter(probes, filter)
 	assert.Contains(t, html, probes[0].Name())
 	assert.NotContains(t, html, probes[1].Name())
 	assert.NotContains(t, html, probes[2].Name())

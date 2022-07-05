@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
 
 	log "github.com/sirupsen/logrus"
@@ -35,6 +36,8 @@ type SLAFilter struct {
 	SLAGreater float64
 	SLALess    float64
 	Message    string
+	PageNum    int
+	PageSize   int
 	total      int // the total number of probers
 	cnt        int // the number of probers that match the filter
 }
@@ -49,6 +52,9 @@ func NewEmptyFilter() *SLAFilter {
 		SLAGreater: 0,
 		SLALess:    100,
 		Message:    "",
+		PageNum:    1,
+		PageSize:   global.DefaultPageSize,
+		total:      0,
 		cnt:        0,
 	}
 }
@@ -64,6 +70,12 @@ func (f *SLAFilter) Check() error {
 	}
 	if f.SLALess > 100 || f.SLALess < 0 {
 		return fmt.Errorf("Error: Invalid SLA filter: lte(%0.2f), it must be between 0 - 100", f.SLALess)
+	}
+	if f.PageNum < 1 {
+		return fmt.Errorf("Error: Invalid page number: %d, it must be greater than 0", f.PageNum)
+	}
+	if f.PageSize < 1 {
+		return fmt.Errorf("Error: Invalid page size: %d, it must be greater than 0", f.PageSize)
 	}
 	return nil
 }
@@ -95,16 +107,30 @@ func (f *SLAFilter) HTML() string {
 		result += fmt.Sprintf(span+"<b>SLA</b>: %.2f%% - %.2f%% "+_span, f.SLAGreater, f.SLALess)
 	}
 
+	color := "#c00"
+	if f.PageNum <= f.cnt/f.PageSize+1 {
+		color = "#4E944F"
+	}
+	span = `<span style="font-size:9pt; background-color:` + color + `; color:white; padding:0 5px; margin-left:10px;border-radius: 3px;">`
+	result += fmt.Sprintf(span+"<b>Page %d / %d</b>"+_span, f.PageNum, f.cnt/f.PageSize+1)
+
 	span = `<span style="font-size:9pt; background-color:#4E944F; color:white; padding:0 5px; margin-left:10px;border-radius: 3px;">`
 	result += fmt.Sprintf(span+"<b>%d / %d Probers found!</b>"+_span, f.cnt, f.total)
 
 	result += "<br><br>"
+
 	return result
+}
+
+func (f *SLAFilter) getIndics() (start int, end int) {
+	start = (f.PageNum - 1) * f.PageSize
+	end = f.PageNum*f.PageSize - 1
+	return start, end
 }
 
 // Filter filter the probers
 func (f *SLAFilter) Filter(probers []probe.Prober) []probe.Prober {
-
+	start, end := f.getIndics()
 	result := make([]probe.Prober, 0)
 	for _, p := range probers {
 		// if the name is not empty then filter by name
@@ -133,9 +159,11 @@ func (f *SLAFilter) Filter(probers []probe.Prober) []probe.Prober {
 			continue
 		}
 
-		result = append(result, p)
+		if f.cnt >= start && f.cnt <= end { // if the prober is in the page
+			result = append(result, p)
+		}
+		f.cnt++ // how many probers are filtered
 	}
 	f.total = len(probers)
-	f.cnt = len(result)
 	return result
 }

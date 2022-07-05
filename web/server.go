@@ -73,6 +73,18 @@ func getFloat(f string, _default float64) float64 {
 	return flt
 }
 
+func getInt(i string, _default int) int {
+	if i == "" {
+		return _default
+	}
+	it, err := strconv.Atoi(i)
+	if err != nil {
+		log.Errorf("[Web] Invalid int value: %s", err)
+		return _default
+	}
+	return it
+}
+
 func getFilter(req *http.Request) (*report.SLAFilter, error) {
 	filter := &report.SLAFilter{}
 
@@ -83,6 +95,8 @@ func getFilter(req *http.Request) (*report.SLAFilter, error) {
 	filter.Message = req.URL.Query().Get("msg")
 	filter.SLAGreater = getFloat(req.URL.Query().Get("gte"), 0)
 	filter.SLALess = getFloat(req.URL.Query().Get("lte"), 100)
+	filter.PageNum = getInt(req.URL.Query().Get("pg"), 1)
+	filter.PageSize = getInt(req.URL.Query().Get("sz"), global.DefaultPageSize)
 
 	if err := filter.Check(); err != nil {
 		log.Errorf(err.Error())
