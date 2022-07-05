@@ -49,7 +49,7 @@ var (
 		Ver:  global.Ver,
 	}
 	metaBuf []byte
-	mutex = &sync.RWMutex{}
+	mutex   = &sync.RWMutex{}
 )
 
 const split = "---\n"
