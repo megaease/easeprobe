@@ -236,6 +236,7 @@ func SetMetaData(name string, ver string) {
 	// reconstructure the meta buf
 	genMetaBuf()
 }
+
 // Note: we no need lock for this function, because this is only called by one go routine.
 func genMetaBuf() {
 	// if the meta data is not exist in current data file, using the default.
