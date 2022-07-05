@@ -118,7 +118,7 @@ func (s *Stat) Clone() Stat {
 	return dst
 }
 
-// DoStat is the function do the statstics
+// DoStat is the function do the statistics
 func (r *Result) DoStat(d time.Duration) {
 	r.Stat.Total++
 	r.Stat.Status[r.Status]++

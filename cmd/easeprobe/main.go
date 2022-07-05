@@ -153,13 +153,15 @@ func main() {
 	doneProbe := make(chan bool, len(probers))
 	// the exit channel for saving the data
 	doneSave := make(chan bool)
+	// the channel for saving the probe result data
+	saveChannel := make(chan probe.Result, len(probers))
 
 	// 1) SLA Data Save process
-	probe.CleanData(probers) // remove the data not in probers
-	go saveData(doneSave)    // save the data to file
+	probe.CleanData(probers)           // remove the data not in probers
+	go saveData(doneSave, saveChannel) // save the data to file
 
 	// 2) Start the Probers
-	runProbers(probers, &wg, doneProbe)
+	runProbers(probers, &wg, doneProbe, saveChannel)
 	// 3) Start the Event Watching
 	channel.WatchForAllEvents()
 

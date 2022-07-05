@@ -25,7 +25,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/megaease/easeprobe/global"
@@ -49,7 +48,6 @@ var (
 		Ver:  global.Ver,
 	}
 	metaBuf []byte
-	mutex   = &sync.RWMutex{}
 )
 
 const split = "---\n"
@@ -61,9 +59,8 @@ func GetMetaData() *MetaData {
 
 // SetResultData set the result of probe
 func SetResultData(name string, result *Result) {
-	mutex.Lock()
-	resultData[name] = result
-	mutex.Unlock()
+	r := result.Clone()
+	resultData[name] = &r
 }
 
 // SetResultsData set the results of probe
@@ -75,16 +72,14 @@ func SetResultsData(r []Result) {
 
 // GetResultData get the result of probe
 func GetResultData(name string) *Result {
-	mutex.RLock()
-	defer mutex.RUnlock()
 	if v, ok := resultData[name]; ok {
-		return v
+		r := v.Clone()
+		return &r
 	}
 	return nil
 }
 
 // CleanData removes the items in resultData not in []Prober
-// Note: we no need lock for this function, because this is only called once during the startup
 func CleanData(p []Prober) {
 	var data = map[string]*Result{}
 	for i := 0; i < len(p); i++ {
@@ -106,9 +101,7 @@ func SaveDataToFile(filename string) error {
 		return nil
 	}
 
-	mutex.RLock()
 	dataBuf, err := yaml.Marshal(resultData)
-	mutex.RUnlock()
 	if err != nil {
 		return err
 	}
@@ -123,7 +116,6 @@ func SaveDataToFile(filename string) error {
 }
 
 // LoadDataFromFile load the results from file
-// Note: we no need lock for this function, because this is only called once during the startup
 func LoadDataFromFile(filename string) error {
 
 	// if the data file is disabled, return
@@ -188,7 +180,6 @@ func LoadDataFromFile(filename string) error {
 }
 
 // CleanDataFile keeps the max backup of data file
-// Note: we no need lock for this function, because this is only called once during the startup
 func CleanDataFile(filename string, backups int) {
 	if strings.TrimSpace(filename) == "-" {
 		return
@@ -226,7 +217,6 @@ func CleanDataFile(filename string, backups int) {
 }
 
 // SetMetaData set the meta data
-// Note: we no need lock for this function, because this is only called once during the startup
 func SetMetaData(name string, ver string) {
 
 	metaData.Name = name
@@ -236,7 +226,6 @@ func SetMetaData(name string, ver string) {
 	genMetaBuf()
 }
 
-// Note: we no need lock for this function, because this is only called by one go routine.
 func genMetaBuf() {
 	// if the meta data is not exist in current data file, using the default.
 	if metaData.Name == "" {

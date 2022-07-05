@@ -27,7 +27,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func saveData(doneSave chan bool) {
+func saveData(doneSave chan bool, saveChannel chan probe.Result) {
 	c := conf.Get()
 	file := c.Settings.SLAReport.DataFile
 	save := func() {
@@ -50,6 +50,8 @@ func saveData(doneSave chan bool) {
 	defer interval.Stop()
 	for {
 		select {
+		case res := <-saveChannel:
+			probe.SetResultData(res.Name, &res)
 		case <-doneSave:
 			save()
 			log.Info("Received the exit signal, Saving data process is exiting...")
