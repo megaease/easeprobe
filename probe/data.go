@@ -100,7 +100,6 @@ func CleanData(p []Prober) {
 }
 
 // SaveDataToFile save the results to file
-// Note: we no need lock for this function, because this is only called once during the startup
 func SaveDataToFile(filename string) error {
 	metaData.file = filename
 	if strings.TrimSpace(filename) == "-" {
