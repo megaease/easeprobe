@@ -67,7 +67,7 @@ func getFloat(f string, _default float64) float64 {
 	}
 	flt, err := strconv.ParseFloat(f, 64)
 	if err != nil {
-		log.Errorf("[Web] Invalid float value: %s", err)
+		log.Debugf("[Web] Invalid float value: %s", err)
 		return _default
 	}
 	return flt
@@ -79,7 +79,7 @@ func getInt(i string, _default int) int {
 	}
 	it, err := strconv.Atoi(i)
 	if err != nil {
-		log.Errorf("[Web] Invalid int value: %s", err)
+		log.Debugf("[Web] Invalid int value: %s", err)
 		return _default
 	}
 	return it

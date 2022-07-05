@@ -131,6 +131,7 @@ func (f *SLAFilter) getIndics() (start int, end int) {
 // Filter filter the probers
 func (f *SLAFilter) Filter(probers []probe.Prober) []probe.Prober {
 	start, end := f.getIndics()
+	f.cnt = 0
 	result := make([]probe.Prober, 0)
 	for _, p := range probers {
 		// if the name is not empty then filter by name
