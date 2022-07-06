@@ -88,11 +88,11 @@ func getInt(i string, _default int) int {
 func getFilter(req *http.Request) (*report.SLAFilter, error) {
 	filter := &report.SLAFilter{}
 
-	filter.Name = req.URL.Query().Get("name")
-	filter.Kind = req.URL.Query().Get("kind")
-	filter.Endpoint = req.URL.Query().Get("ep")
+	filter.Name = strings.TrimSpace(req.URL.Query().Get("name"))
+	filter.Kind = strings.TrimSpace(req.URL.Query().Get("kind"))
+	filter.Endpoint = strings.TrimSpace(req.URL.Query().Get("ep"))
 	filter.Status = getStatus(req.URL.Query().Get("status"))
-	filter.Message = req.URL.Query().Get("msg")
+	filter.Message = strings.TrimSpace(req.URL.Query().Get("msg"))
 	filter.SLAGreater = getFloat(req.URL.Query().Get("gte"), 0)
 	filter.SLALess = getFloat(req.URL.Query().Get("lte"), 100)
 	filter.PageNum = getInt(req.URL.Query().Get("pg"), 1)

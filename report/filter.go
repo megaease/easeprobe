@@ -135,15 +135,15 @@ func (f *SLAFilter) Filter(probers []probe.Prober) []probe.Prober {
 	result := make([]probe.Prober, 0)
 	for _, p := range probers {
 		// if the name is not empty then filter by name
-		if strings.TrimSpace(f.Name) != "" && !strings.Contains(p.Name(), f.Name) {
+		if f.Name != "" && !strings.Contains(p.Name(), f.Name) {
 			continue
 		}
 		// if the kind is not empty then filter by kind
-		if strings.TrimSpace(f.Kind) != "" && p.Kind() != f.Kind {
+		if f.Kind != "" && p.Kind() != f.Kind {
 			continue
 		}
 		// if the endpoint is not empty then filter by endpoint
-		if strings.TrimSpace(f.Endpoint) != "" && !strings.Contains(p.Result().Endpoint, f.Endpoint) {
+		if f.Endpoint != "" && !strings.Contains(p.Result().Endpoint, f.Endpoint) {
 			continue
 		}
 		// if the status is not right then ignore it
@@ -151,7 +151,7 @@ func (f *SLAFilter) Filter(probers []probe.Prober) []probe.Prober {
 			continue
 		}
 		// if the message is not empty then filter by message
-		if strings.TrimSpace(f.Message) != "" && !strings.Contains(p.Result().Message, f.Message) {
+		if f.Message != "" && !strings.Contains(p.Result().Message, f.Message) {
 			continue
 		}
 		//if the SLA is not right then ignore it
