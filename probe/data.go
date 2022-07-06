@@ -25,6 +25,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/megaease/easeprobe/global"
@@ -48,6 +49,7 @@ var (
 		Ver:  global.Ver,
 	}
 	metaBuf []byte
+	mutex   = &sync.RWMutex{}
 )
 
 const split = "---\n"
@@ -58,9 +60,14 @@ func GetMetaData() *MetaData {
 }
 
 // SetResultData set the result of probe
+// Note: this function would be called by status update goroutine
+//       int saveData() in cmd/easeprobe/report.go
 func SetResultData(name string, result *Result) {
 	r := result.Clone()
+	mutex.Lock()
 	resultData[name] = &r
+	mutex.Unlock()
+
 }
 
 // SetResultsData set the results of probe
@@ -71,7 +78,10 @@ func SetResultsData(r []Result) {
 }
 
 // GetResultData get the result of probe
+// Note: the function would be called by Data Saving, SLA Report, Web Server
 func GetResultData(name string) *Result {
+	mutex.RLock()
+	defer mutex.RUnlock()
 	if v, ok := resultData[name]; ok {
 		r := v.Clone()
 		return &r
@@ -80,6 +90,7 @@ func GetResultData(name string) *Result {
 }
 
 // CleanData removes the items in resultData not in []Prober
+// Note: No need to consider the thread-safe, because this function is only called once during the startup
 func CleanData(p []Prober) {
 	var data = map[string]*Result{}
 	for i := 0; i < len(p); i++ {
@@ -95,6 +106,7 @@ func CleanData(p []Prober) {
 }
 
 // SaveDataToFile save the results to file
+// Note: No need to consider the thread-safe, because this function and SetResultData in same goroutine
 func SaveDataToFile(filename string) error {
 	metaData.file = filename
 	if strings.TrimSpace(filename) == "-" {
@@ -116,6 +128,7 @@ func SaveDataToFile(filename string) error {
 }
 
 // LoadDataFromFile load the results from file
+// Note: No need to consider the thread-safe, because this function is only called once during the startup
 func LoadDataFromFile(filename string) error {
 
 	// if the data file is disabled, return
@@ -164,7 +177,7 @@ func LoadDataFromFile(filename string) error {
 	// set the meta name and version
 	// - if the Name is found in the data file, use it, otherwise use the default
 	// - always use the program version for the data file.
-	metaData.ver = metaData.Ver // save the file's verstion
+	metaData.ver = metaData.Ver // save the file's version
 	SetMetaData(metaData.Name, global.Ver)
 
 	// backup the current data file
@@ -180,6 +193,7 @@ func LoadDataFromFile(filename string) error {
 }
 
 // CleanDataFile keeps the max backup of data file
+// Note: No need to consider the thread-safe, because this function is only called once during the startup
 func CleanDataFile(filename string, backups int) {
 	if strings.TrimSpace(filename) == "-" {
 		return
@@ -217,6 +231,7 @@ func CleanDataFile(filename string, backups int) {
 }
 
 // SetMetaData set the meta data
+// Note: No need to consider the thread-safe, because this function is only called during the startup
 func SetMetaData(name string, ver string) {
 
 	metaData.Name = name

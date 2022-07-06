@@ -42,12 +42,14 @@ func (d *dummyProber) DoProbe() (bool, string) {
 	return rand.Int()%2 == 0, "hello world"
 }
 func getProbers() []probe.Prober {
-	return []probe.Prober{
+	ps := []probe.Prober{
 		newDummyProber("probe1"),
 		newDummyProber("probe2"),
 		newDummyProber("probe3"),
 		newDummyProber("probe4"),
 	}
+	setResultData(ps)
+	return ps
 }
 func newDummyProber(name string) probe.Prober {
 	r := newDummyResult(name)
@@ -58,6 +60,12 @@ func newDummyProber(name string) probe.Prober {
 			ProbeName:   name,
 			ProbeResult: &r,
 		},
+	}
+}
+
+func setResultData(probes []probe.Prober) {
+	for _, p := range probes {
+		probe.SetResultData(p.Name(), p.Result())
 	}
 }
 
@@ -91,6 +99,7 @@ func TestSLAFilter(t *testing.T) {
 	probes[1].Result().Status = probe.StatusDown
 	probes[2].Result().Status = probe.StatusUp
 	probes[3].Result().Status = probe.StatusDown
+	setResultData(probes)
 
 	html := SLAHTMLFilter(probes, nil)
 	for _, p := range probes {
@@ -126,6 +135,8 @@ func TestSLAFilter(t *testing.T) {
 	// 20% SLA
 	probes[3].Result().Stat.UpTime = 20
 	probes[3].Result().Stat.DownTime = 80
+
+	setResultData(probes)
 
 	// sla between 50 - 90, status is up
 	filter.SLAGreater = 50
