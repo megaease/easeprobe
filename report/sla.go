@@ -115,7 +115,7 @@ func SLATextSection(r *probe.Result) string {
 	return fmt.Sprintf(text, r.Name, r.Endpoint,
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLAPercent(),
 		r.Stat.Total, SLAStatusText(r.Stat, Text),
-		time.Now().UTC().Format(r.TimeFormat),
+		r.StartTime.UTC().Format(r.TimeFormat),
 		r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
 }
 
@@ -134,7 +134,7 @@ func SLALogSection(r *probe.Result) string {
 	return fmt.Sprintf(text, r.Name, r.Endpoint,
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLAPercent(),
 		r.Stat.Total, SLAStatusText(r.Stat, Log),
-		time.Now().UTC().Format(r.TimeFormat),
+		r.StartTime.UTC().Format(r.TimeFormat),
 		r.Status.String(), r.Message)
 }
 
@@ -164,7 +164,7 @@ func SLAMarkdownSection(r *probe.Result, f Format) string {
 	return fmt.Sprintf(text, r.Name, r.Endpoint,
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLAPercent(),
 		r.Stat.Total, SLAStatusText(r.Stat, MarkdownSocial),
-		time.Now().UTC().Format(r.TimeFormat),
+		r.StartTime.UTC().Format(r.TimeFormat),
 		r.Status.Emoji()+" "+r.Status.String(), r.Message)
 }
 
@@ -214,25 +214,8 @@ func SLAHTMLSection(r *probe.Result) string {
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime),
 		r.SLAPercent(),
 		r.Stat.Total, SLAStatusText(r.Stat, HTML),
-		time.Now().UTC().Format(r.TimeFormat),
+		r.StartTime.UTC().Format(r.TimeFormat),
 		r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
-}
-
-// SLAFilter filter the probers
-type SLAFilter struct {
-	Status     *probe.Status
-	SLAGreater float64
-	SLALess    float64
-}
-
-// HTML return the HTML format string
-func (f *SLAFilter) HTML() string {
-	result := fmt.Sprintf("<b>SLA</b>: %.2f%% - %.2f%% ", f.SLAGreater, f.SLALess)
-	if f.Status != nil {
-		result += fmt.Sprintf("  <b>Status</b>: %s", f.Status.String())
-	}
-
-	return result
 }
 
 // SLAHTML return a full stat report
@@ -244,27 +227,18 @@ func SLAHTML(probers []probe.Prober) string {
 func SLAHTMLFilter(probers []probe.Prober, filter *SLAFilter) string {
 	html := HTMLHeader("Overall SLA Report")
 
-	cnt := 0
+	if filter == nil {
+		filter = NewEmptyFilter()
+	}
+
+	probers = filter.Filter(probers)
 	table := `<table style="font-size: 16px; line-height: 20px;">`
 	for _, p := range probers {
-		if filter == nil {
-			table += SLAHTMLSection(p.Result())
-			cnt++
-		} else if p.Result().SLAPercent() >= filter.SLAGreater && p.Result().SLAPercent() <= filter.SLALess {
-			if filter.Status == nil || p.Result().Status == *filter.Status {
-				table += SLAHTMLSection(p.Result())
-				cnt++
-			}
-		}
+		table += SLAHTMLSection(p.Result())
 	}
 	table += `</table>`
 
-	summary := ""
-	if filter != nil {
-		summary += filter.HTML() + " :  "
-	}
-	summary += fmt.Sprintf(`( <b>%d</b> Probers found! )`, cnt)
-	html = html + summary + table
+	html = html + filter.HTML() + table
 
 	timeFmt := "2006-01-02 15:04:05"
 	if len(probers) > 0 {
@@ -407,7 +381,7 @@ func SLALarkSection(r *probe.Result) string {
 	return fmt.Sprintf(text, r.Name, r.Endpoint,
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLAPercent(),
 		r.Stat.Total, SLAStatusText(r.Stat, Lark),
-		time.Now().UTC().Format(r.TimeFormat),
+		r.StartTime.UTC().Format(r.TimeFormat),
 		r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
 }
 

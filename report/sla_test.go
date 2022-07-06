@@ -41,14 +41,14 @@ func (d *dummyProber) Config(g global.ProbeSettings) error {
 func (d *dummyProber) DoProbe() (bool, string) {
 	return rand.Int()%2 == 0, "hello world"
 }
-
-var probes = []probe.Prober{
-	newDummyProber("probe1"),
-	newDummyProber("probe2"),
-	newDummyProber("probe3"),
-	newDummyProber("probe4"),
+func getProbers() []probe.Prober {
+	return []probe.Prober{
+		newDummyProber("probe1"),
+		newDummyProber("probe2"),
+		newDummyProber("probe3"),
+		newDummyProber("probe4"),
+	}
 }
-
 func newDummyProber(name string) probe.Prober {
 	r := newDummyResult(name)
 	return &dummyProber{
@@ -63,6 +63,7 @@ func newDummyProber(name string) probe.Prober {
 
 func TestSLA(t *testing.T) {
 	global.InitEaseProbe("DummyProbe", "icon")
+	probes := getProbers()
 	for f, fn := range FormatFuncs {
 		sla := fn.StatFn(probes)
 		assert.NotEmpty(t, sla)
@@ -85,6 +86,7 @@ func TestSLAJSONSection(t *testing.T) {
 }
 
 func TestSLAFilter(t *testing.T) {
+	probes := getProbers()
 	probes[0].Result().Status = probe.StatusUp
 	probes[1].Result().Status = probe.StatusDown
 	probes[2].Result().Status = probe.StatusUp
@@ -95,19 +97,15 @@ func TestSLAFilter(t *testing.T) {
 		assert.Contains(t, html, p.Name())
 	}
 
-	filter := SLAFilter{
-		Status:     nil,
-		SLAGreater: 0,
-		SLALess:    100,
-	}
-	html = SLAHTMLFilter(probes, &filter)
+	filter := NewEmptyFilter()
+	html = SLAHTMLFilter(probes, filter)
 	for _, p := range probes {
 		assert.Contains(t, html, p.Name())
 	}
 
 	status := probe.StatusUp
 	filter.Status = &status
-	html = SLAHTMLFilter(probes, &filter)
+	html = SLAHTMLFilter(probes, filter)
 	assert.Contains(t, html, probes[0].Name())
 	assert.NotContains(t, html, probes[1].Name())
 	assert.Contains(t, html, probes[2].Name())
@@ -132,7 +130,7 @@ func TestSLAFilter(t *testing.T) {
 	// sla between 50 - 90, status is up
 	filter.SLAGreater = 50
 	filter.SLALess = 90
-	html = SLAHTMLFilter(probes, &filter)
+	html = SLAHTMLFilter(probes, filter)
 	assert.Contains(t, html, probes[0].Name())
 	assert.NotContains(t, html, probes[1].Name())
 	assert.NotContains(t, html, probes[2].Name())
