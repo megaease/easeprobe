@@ -37,7 +37,7 @@ func newDummyResult(name string) probe.Result {
 	up := rand.Int63n(total)
 	down := rand.Int63n(total - up)
 
-	return probe.Result{
+	r := probe.Result{
 		Name:             name,
 		Endpoint:         "http://endpoint:8080",
 		StartTime:        time.Now(),
@@ -61,6 +61,8 @@ func newDummyResult(name string) probe.Result {
 		},
 		TimeFormat: time.RFC3339,
 	}
+	probe.SetResultData(name, &r)
+	return r
 }
 
 func TestToLog(t *testing.T) {

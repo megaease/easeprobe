@@ -99,7 +99,8 @@ func SLAJSONSection(r *probe.Result) string {
 func SLAJSON(probers []probe.Prober) string {
 	var sla []SLA
 	for _, p := range probers {
-		sla = append(sla, SLAObject(p.Result()))
+		r := probe.GetResultData(p.Name())
+		sla = append(sla, SLAObject(r))
 	}
 	j, err := json.Marshal(&sla)
 	if err != nil {
@@ -123,7 +124,8 @@ func SLATextSection(r *probe.Result) string {
 func SLAText(probers []probe.Prober) string {
 	text := "[Overall SLA Report]\n\n"
 	for _, p := range probers {
-		text += SLATextSection(p.Result()) + "\n"
+		r := probe.GetResultData(p.Name())
+		text += SLATextSection(r) + "\n"
 	}
 	return text
 }
@@ -143,7 +145,8 @@ func SLALog(probers []probe.Prober) string {
 	var text string
 	n := len(probers)
 	for i, p := range probers {
-		text += fmt.Sprintf("SLA-Report-%d-%d %s\n", i+1, n, SLALogSection(p.Result()))
+		r := probe.GetResultData(p.Name())
+		text += fmt.Sprintf("SLA-Report-%d-%d %s\n", i+1, n, SLALogSection(r))
 	}
 	return text
 }
@@ -184,7 +187,8 @@ func slaMarkdown(probers []probe.Prober, f Format) string {
 		md = "*Overall SLA Report*\n"
 	}
 	for _, p := range probers {
-		md += SLAMarkdownSection(p.Result(), f)
+		r := probe.GetResultData(p.Name())
+		md += SLAMarkdownSection(r, f)
 	}
 	timeFmt := "2006-01-02 15:04:05"
 	if len(probers) > 0 {
@@ -234,7 +238,8 @@ func SLAHTMLFilter(probers []probe.Prober, filter *SLAFilter) string {
 	probers = filter.Filter(probers)
 	table := `<table style="font-size: 16px; line-height: 20px;">`
 	for _, p := range probers {
-		table += SLAHTMLSection(p.Result())
+		r := probe.GetResultData(p.Name())
+		table += SLAHTMLSection(r)
 	}
 	table += `</table>`
 
@@ -312,9 +317,11 @@ func SLASlack(probers []probe.Prober) string {
 		}
 		json += "," + sectionHead
 		for i := start; i < end-1; i++ {
-			json += SLASlackSection(probers[i].Result()) + ","
+			r := probe.GetResultData(probers[i].Name())
+			json += SLASlackSection(r) + ","
 		}
-		json += SLASlackSection(probers[end-1].Result())
+		r := probe.GetResultData(probers[end-1].Name())
+		json += SLASlackSection(r)
 		json += sectionFoot
 	}
 
@@ -420,7 +427,8 @@ func SLALark(probers []probe.Prober) string {
 	title := "Overall SLA Report"
 	sections := []string{}
 	for _, p := range probers {
-		sections = append(sections, SLALarkSection(p.Result()))
+		r := probe.GetResultData(p.Name())
+		sections = append(sections, SLALarkSection(r))
 	}
 
 	elements := strings.Join(sections, "")
@@ -433,7 +441,8 @@ func SLALark(probers []probe.Prober) string {
 func SLASummary(probers []probe.Prober) string {
 	sla := 0.0
 	for _, p := range probers {
-		sla += p.Result().SLAPercent()
+		r := probe.GetResultData(p.Name())
+		sla += r.SLAPercent()
 	}
 	sla /= float64(len(probers))
 	summary := fmt.Sprintf("Total %d Services, Average %.2f%% SLA", len(probers), sla)
@@ -464,7 +473,8 @@ func SLACSV(probers []probe.Prober) string {
 	}
 
 	for _, p := range probers {
-		data = append(data, SLACSVSection(p.Result()))
+		r := probe.GetResultData(p.Name())
+		data = append(data, SLACSVSection(r))
 	}
 
 	buf := new(bytes.Buffer)

@@ -55,7 +55,7 @@ func configProbers(probers []probe.Prober) []probe.Prober {
 	return validProbers
 }
 
-func runProbers(probers []probe.Prober, wg *sync.WaitGroup, done chan bool) {
+func runProbers(probers []probe.Prober, wg *sync.WaitGroup, done chan bool, saveChannel chan probe.Result) {
 	// we need to run all probers in equally distributed time, not at the same time.
 	timeGap := global.DefaultProbeInterval / time.Duration(len(probers))
 	// if less than or equal to 60 probers, use 1 second instead
@@ -79,7 +79,9 @@ func runProbers(probers []probe.Prober, wg *sync.WaitGroup, done chan bool) {
 		for {
 			res := p.Probe()
 			log.Debugf("%s: %s", p.Kind(), res.DebugJSON())
-			// send the notification to all channels
+			// send the result to the persistent channel
+			saveChannel <- res
+			// send the result to all channels
 			for _, cName := range p.Channels() {
 				if ch := channel.GetChannel(cName); ch != nil {
 					ch.Send(res)

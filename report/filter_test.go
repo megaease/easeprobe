@@ -90,6 +90,10 @@ func initData() []probe.Prober {
 	probes[3].Result().Stat.UpTime = 20
 	probes[3].Result().Stat.DownTime = 80
 
+	for _, p := range probes {
+		probe.SetResultData(p.Name(), p.Result())
+	}
+
 	return probes
 }
 func TestFilter(t *testing.T) {

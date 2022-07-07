@@ -149,7 +149,9 @@ func (d *DefaultProbe) Probe() probe.Result {
 	d.DownTimeCalculation(status)
 
 	d.ProbeResult.DoStat(d.Interval())
-	return *d.ProbeResult
+
+	result := d.ProbeResult.Clone()
+	return result
 }
 
 // ExportMetrics export the metrics

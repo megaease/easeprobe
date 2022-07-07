@@ -134,6 +134,8 @@ func (f *SLAFilter) Filter(probers []probe.Prober) []probe.Prober {
 	f.cnt = 0
 	result := make([]probe.Prober, 0)
 	for _, p := range probers {
+		// get the Probe Result data from the Data Manager
+		r := probe.GetResultData(p.Name())
 		// if the name is not empty then filter by name
 		if f.Name != "" && !strings.Contains(p.Name(), f.Name) {
 			continue
@@ -143,19 +145,19 @@ func (f *SLAFilter) Filter(probers []probe.Prober) []probe.Prober {
 			continue
 		}
 		// if the endpoint is not empty then filter by endpoint
-		if f.Endpoint != "" && !strings.Contains(p.Result().Endpoint, f.Endpoint) {
+		if f.Endpoint != "" && !strings.Contains(r.Endpoint, f.Endpoint) {
 			continue
 		}
 		// if the status is not right then ignore it
-		if f.Status != nil && p.Result().Status != *f.Status {
+		if f.Status != nil && r.Status != *f.Status {
 			continue
 		}
 		// if the message is not empty then filter by message
-		if f.Message != "" && !strings.Contains(p.Result().Message, f.Message) {
+		if f.Message != "" && !strings.Contains(r.Message, f.Message) {
 			continue
 		}
 		//if the SLA is not right then ignore it
-		percent := p.Result().SLAPercent()
+		percent := r.SLAPercent()
 		if percent < f.SLAGreater || percent > f.SLALess {
 			continue
 		}
