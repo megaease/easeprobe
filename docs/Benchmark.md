@@ -36,7 +36,7 @@ The document is the performance test report for EaseProbe.
 
     > Note: the DNS server `1.1.1.1` would be a problem if we query DNS too many, `1.1.1.1` would block the DNS query.
 
-- **Build**: the following PRs are important for this test, must be included:
+- **Build**: the following PRs are needed for this test and we must ensure they are included (already merged in `main`):
   -  [PR #157](https://github.com/megaease/easeprobe/pull/157) - Equally distributing start the probers.
      - without this PR, each prober would start to work a same time.
      - with it the prober would start in evenly distribute with in 1 minute
