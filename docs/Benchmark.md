@@ -64,9 +64,9 @@ Using the the following command to observe the performance:
 
 ## 3. Test Data
 
-The test data is come from the top 1M websites (https://majestic.com/reports/majestic-million)
+The test data is taken from the top 1M websites (https://majestic.com/reports/majestic-million)
 
-You have these test data by visit this document - [EaseProbe Test](../../resources/test/)
+The test data can be found under the [EaseProbe Test](../../resources/test/) folder.
 
 ## 4. Test Result
 

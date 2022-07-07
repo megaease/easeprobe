@@ -27,7 +27,7 @@ these files would be generated
 
 ### 1.2. Run the EaseProbe
 
-You can edit the config file's probe interval.
+You can edit the config file's to modify probe intervals.
 
 ```shell
 ./easeprobe -d -f config.tcp.10k.yaml > easeprobe.log 2>&1
