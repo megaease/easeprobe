@@ -34,9 +34,10 @@ EaseProbe is a simple, standalone, and lightWeight tool that can do health/statu
     - [3.7 Native Client Probe Configuration](#37-native-client-probe-configuration)
     - [3.8 Notification Configuration](#38-notification-configuration)
     - [3.9 Global Setting Configuration](#39-global-setting-configuration)
-  - [4. Contributing](#4-contributing)
-  - [5. Community](#5-community)
-  - [6. License](#6-license)
+  - [4. Benchmark](#4-benchmark)
+  - [5. Contributing](#5-contributing)
+  - [6. Community](#6-community)
+  - [7. License](#7-license)
 
 ## 1. Overview
 
@@ -987,16 +988,20 @@ settings:
 
 ```
 
-## 4. Contributing
+## 4. Benchmark
+
+Refer to - [Benchmark Report](./docs/Benchmark.md)
+
+## 5. Contributing
 
 If you're interested in contributing to the project, please spare a moment to read our [CONTRIBUTING Guide](./docs/CONTRIBUTING.md)
 
 
-## 5. Community
+## 6. Community
 
 - [Join Slack Workspace](https://join.slack.com/t/openmegaease/shared_invite/zt-upo7v306-lYPHvVwKnvwlqR0Zl2vveA) for requirement, issue, and development.
 - [MegaEase on Twitter](https://twitter.com/megaease)
 
-## 6. License
+## 7. License
 
 EaseProbe is under the Apache 2.0 license. See the [LICENSE](./LICENSE) file for details.
