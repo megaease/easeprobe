@@ -32,6 +32,9 @@ The document is the performance test report for EaseProbe.
 
       session required pam_limits.so
       ```
+  - DNS server is `8.8.8.8`
+
+    > Note: the DNS server `1.1.1.1` would be a problem if we query DNS too many, `1.1.1.1` would block the DNS query.
 
 - **Build**: the following PRs are important for this test, must be included:
   -  [PR #157](https://github.com/megaease/easeprobe/pull/157) - Equally distributing start the probers.
@@ -157,7 +160,7 @@ You have these test data by visit this document - [EaseProbe Test](../../resourc
 | ----- | :------: | :--------: | :---------------: | :---------: |
 | https | 5s       |    -       |      -            |   -         |
 | https | 10s      |    -       |      -            |   -         |
-| https | 20s      |   88.8%    |   1.6GB           |   -         |
+| https | 20s      |   88.8%    |   1.6GB           |    0        |
 | https | 30s      |   58.7%    |   1.3GB           |    0        |
 | https | 60s      |   32.6%    |   1.0GB           |    0        |
 
