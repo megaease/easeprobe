@@ -457,7 +457,7 @@ Read the [Configuration Guide](#3-configuration) to learn how to configure EaseP
 
 Create the configuration file - `$CWD/config.yaml`.
 
-The following is an example of the configuration file:
+The following is an example of simple configuration file to get started:
 
 ```YAML
 http: # http probes
