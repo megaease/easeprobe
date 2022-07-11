@@ -457,6 +457,22 @@ Read the [Configuration Guide](#3-configuration) to learn how to configure EaseP
 
 Create the configuration file - `$CWD/config.yaml`.
 
+The following is an example of simple configuration file to get started:
+
+```YAML
+http: # http probes
+  - name: EaseProbe Github
+    url: https://github.com/megaease/easeprobe
+notify:
+  log:
+    - name: log file # local log file
+      file: /var/log/easeprobe.log
+settings:
+  probe:
+    timeout: 30s # the time out for all probes
+    interval: 1m # probe every minute for all probes
+```
+
 ### 2.3 Run
 
 Running the following command for the local test
@@ -471,7 +487,7 @@ $ build/bin/easeprobe -f config.yaml
 
 EaseProbe can be configured by supplying a YAML file or URL to fetch configuration settings from.
 
-By default EaseProbe will look for its `config.yaml` on the current folder. This behavior can be changed by supplying the `-f` parameter.
+By default, EaseProbe will look for its `config.yaml` on the current folder. This behavior can be changed by supplying the `-f` parameter.
 
 ```shell
 easeprobe -f path/to/config.yaml
