@@ -133,3 +133,10 @@ func JSONEscape(str string) string {
 	s := string(b)
 	return s[1 : len(s)-1]
 }
+
+// FormatTime format the time with time zone and time format
+func FormatTime(t time.Time) string {
+	tf := global.GetTimeFormat()
+	tz := global.GetTimeLocation()
+	return t.In(tz).Format(tf)
+}

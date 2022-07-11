@@ -121,6 +121,7 @@ type Settings struct {
 	PIDFile    string     `yaml:"pid"`
 	Log        Log        `yaml:"log"`
 	TimeFormat string     `yaml:"timeformat"`
+	TimeZone   string     `yaml:"timezone"`
 	Probe      Probe      `yaml:"probe"`
 	Notify     Notify     `yaml:"notify"`
 	SLAReport  SLAReport  `yaml:"sla"`
@@ -220,6 +221,7 @@ func New(conf *string) (*Conf, error) {
 			PIDFile:    filepath.Join(global.GetWorkDir(), global.DefaultPIDFile),
 			Log:        NewLog(),
 			TimeFormat: "2006-01-02 15:04:05 UTC",
+			TimeZone:   "UTC",
 			Probe: Probe{
 				Interval: global.DefaultProbeInterval,
 				Timeout:  global.DefaultTimeOut,
@@ -261,7 +263,8 @@ func New(conf *string) (*Conf, error) {
 	}
 
 	// Initialization
-	global.InitEaseProbe(c.Settings.Name, c.Settings.IconURL)
+	global.InitEaseProbeWithTime(c.Settings.Name, c.Settings.IconURL,
+		c.Settings.TimeFormat, c.Settings.TimeZone)
 	c.initData()
 
 	ssh.BastionMap.ParseAllBastionHost()

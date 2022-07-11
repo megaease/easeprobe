@@ -47,8 +47,6 @@ type Result struct {
 	LatestDownTime   time.Time     `json:"latestdowntime" yaml:"latestdowntime"`
 	RecoveryDuration time.Duration `json:"recoverytime" yaml:"recoverytime"`
 	Stat             Stat          `json:"stat" yaml:"stat"`
-
-	TimeFormat string `json:"timeformat" yaml:"timeformat"`
 }
 
 // NewResult return a Result object
@@ -100,7 +98,6 @@ func (r *Result) Clone() Result {
 	dst.LatestDownTime = r.LatestDownTime
 	dst.RecoveryDuration = r.RecoveryDuration
 	dst.Stat = r.Stat.Clone()
-	dst.TimeFormat = r.TimeFormat
 	return dst
 }
 

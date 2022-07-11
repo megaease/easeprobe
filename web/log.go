@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/middleware"
+	"github.com/megaease/easeprobe/global"
 	"github.com/sirupsen/logrus"
 )
 
@@ -98,7 +99,7 @@ func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
 
 	access.RemoteAddr = r.RemoteAddr
 	access.UserAgent = r.UserAgent()
-	access.Time = time.Now().UTC().Format(time.RFC1123)
+	access.Time = time.Now().In(global.GetTimeLocation()).Format(time.RFC1123)
 
 	access.Referrer = r.Referer()
 

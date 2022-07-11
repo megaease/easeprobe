@@ -21,9 +21,8 @@ import "time"
 
 // ProbeSettings is the global probe setting
 type ProbeSettings struct {
-	TimeFormat string
-	Interval   time.Duration
-	Timeout    time.Duration
+	Interval time.Duration
+	Timeout  time.Duration
 }
 
 // NormalizeTimeOut return a normalized timeout value

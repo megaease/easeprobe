@@ -53,8 +53,10 @@ const (
 	DefaultRetryTimes = 3
 	// DefaultRetryInterval is 5 seconds
 	DefaultRetryInterval = time.Second * 5
-	// DefaultTimeFormat is "2006-01-02 15:04:05 UTC"
-	DefaultTimeFormat = "2006-01-02 15:04:05 UTC"
+	// DefaultTimeFormat is "2006-01-02 15:04:05 Z0700"
+	DefaultTimeFormat = "2006-01-02 15:04:05 Z0700"
+	// DefaultTimeZone is "UTC"
+	DefaultTimeZone = "UTC"
 	// DefaultProbeInterval is 1 minutes
 	DefaultProbeInterval = time.Second * 60
 	// DefaultTimeOut is 30 seconds

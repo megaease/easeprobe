@@ -35,7 +35,7 @@ func ToLog(r probe.Result) string {
 	tpl := `title="%s"; name="%s"; status="%s"; endpoint="%s"; rtt="%s"; time="%s"; message="%s"`
 	rtt := r.RoundTripTime.Round(time.Millisecond)
 	return fmt.Sprintf(tpl,
-		r.Title(), r.Name, r.Status.String(), r.Endpoint, rtt, r.StartTime.Format(r.TimeFormat), r.Message)
+		r.Title(), r.Name, r.Status.String(), r.Endpoint, rtt, FormatTime(r.StartTime), r.Message)
 }
 
 // ToText convert the result object to ToText
@@ -44,7 +44,7 @@ func ToText(r probe.Result) string {
 	rtt := r.RoundTripTime.Round(time.Millisecond)
 	return fmt.Sprintf(tpl,
 		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, r.Message,
-		global.FooterString()+" at "+r.StartTime.Format(r.TimeFormat))
+		global.FooterString()+" at "+FormatTime(r.StartTime))
 }
 
 // resultDTO only for JSON format notification
@@ -128,11 +128,11 @@ func ToHTML(r probe.Result) string {
 					<td class="data">%s</td>
 				</tr>
 			</table>
-		` + HTMLFooter(r.StartTime.Format(r.TimeFormat))
+		` + HTMLFooter(FormatTime(r.StartTime))
 
 	rtt := r.RoundTripTime.Round(time.Millisecond)
 	return fmt.Sprintf(html, r.Name, r.Endpoint, r.Status.Emoji(), r.Status.String(),
-		r.StartTime.Format(r.TimeFormat), rtt, r.Message)
+		FormatTime(r.StartTime), rtt, r.Message)
 }
 
 // ToMarkdown convert the object to ToMarkdown
@@ -153,7 +153,7 @@ func markdown(r probe.Result, f Format) string {
 	rtt := r.RoundTripTime.Round(time.Millisecond)
 	return fmt.Sprintf(tpl,
 		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, r.Message,
-		global.FooterString()+" at "+r.StartTime.Format(r.TimeFormat))
+		global.FooterString()+" at "+FormatTime(r.StartTime))
 }
 
 // ToSlack convert the object to ToSlack notification
@@ -192,7 +192,7 @@ func ToSlack(r probe.Result) string {
 	rtt := r.RoundTripTime.Round(time.Millisecond)
 	body := fmt.Sprintf("*%s*\\n>%s %s - ⏱ %s\n>%s",
 		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, JSONEscape(r.Message))
-	context := SlackTimeFormation(r.StartTime, " probed at ", r.TimeFormat)
+	context := SlackTimeFormation(r.StartTime, " probed at ", global.GetTimeFormat())
 	summary := fmt.Sprintf("%s %s - %s", r.Title(), r.Status.Emoji(), JSONEscape(r.Message))
 	return fmt.Sprintf(json, summary, body, context)
 }
@@ -253,14 +253,14 @@ func ToLark(r probe.Result) string {
 	title := fmt.Sprintf("%s %s", r.Title(), r.Status.Emoji())
 	rtt := r.RoundTripTime.Round(time.Millisecond)
 	content := fmt.Sprintf("%s - ⏱ %s\\n%s", r.Endpoint, rtt, JSONEscape(r.Message))
-	footer := global.FooterString() + " probed at " + r.StartTime.Format(r.TimeFormat)
+	footer := global.FooterString() + " probed at " + FormatTime(r.StartTime)
 	return fmt.Sprintf(json, headerColor, title, content, footer)
 }
 
 // ToCSV convert the object to CSV
 func ToCSV(r probe.Result) string {
 	rtt := fmt.Sprintf("%d", r.RoundTripTime.Round(time.Millisecond))
-	time := r.StartTime.UTC().Format(r.TimeFormat)
+	time := FormatTime(r.StartTime)
 	timestamp := fmt.Sprintf("%d", r.StartTimestamp)
 	data := [][]string{
 		{"Title", "Name", "Endpoint", "Status", "PreStatus", "RoundTripTime", "Time", "Timestamp", "Message"},

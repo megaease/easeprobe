@@ -59,7 +59,6 @@ func newDummyResult(name string) probe.Result {
 			UpTime:   time.Duration(up) * time.Second,
 			DownTime: time.Duration(down) * time.Second,
 		},
-		TimeFormat: time.RFC3339,
 	}
 	probe.SetResultData(name, &r)
 	return r
@@ -72,11 +71,11 @@ func TestToLog(t *testing.T) {
 	assert.NotEmpty(t, str)
 	assert.Contains(t, str, r.Title())
 	assert.Contains(t, str, r.Endpoint)
-	assert.Contains(t, str, r.StartTime.Format(r.TimeFormat))
+	assert.Contains(t, str, FormatTime(r.StartTime))
 	assert.Contains(t, str, r.RoundTripTime.String())
 	assert.NotContains(t, str, r.PreStatus.Emoji())
 	assert.Contains(t, str, r.Message)
-	assert.Contains(t, str, r.LatestDownTime.Format(r.TimeFormat))
+	assert.Contains(t, str, FormatTime(r.LatestDownTime))
 }
 
 func TestToText(t *testing.T) {
@@ -86,19 +85,19 @@ func TestToText(t *testing.T) {
 	assert.NotEmpty(t, str)
 	assert.Contains(t, str, r.Title())
 	assert.Contains(t, str, r.Endpoint)
-	assert.Contains(t, str, r.StartTime.Format(r.TimeFormat))
+	assert.Contains(t, str, FormatTime(r.StartTime))
 	assert.Contains(t, str, r.RoundTripTime.String())
 	assert.Contains(t, str, r.Status.Emoji())
 	assert.NotContains(t, str, r.PreStatus.Emoji())
 	assert.Contains(t, str, r.Message)
-	assert.Contains(t, str, r.LatestDownTime.Format(r.TimeFormat))
+	assert.Contains(t, str, FormatTime(r.LatestDownTime))
 	assert.Contains(t, str, global.FooterString())
 }
 
 func checkResult(t *testing.T, r probe.Result, rDTO resultDTO) {
 	assert.Equal(t, r.Title(), rDTO.Name)
 	assert.Equal(t, r.Endpoint, rDTO.Endpoint)
-	assert.Equal(t, r.StartTime.Format(r.TimeFormat), rDTO.StartTime.Format(r.TimeFormat))
+	assert.Equal(t, FormatTime(r.StartTime), FormatTime(rDTO.StartTime))
 	assert.Equal(t, r.StartTimestamp, rDTO.StartTimestamp)
 	assert.Equal(t, r.RoundTripTime.Round(time.Millisecond), rDTO.RoundTripTime)
 	assert.Equal(t, r.Status, rDTO.Status)
@@ -134,9 +133,9 @@ func checkMarkdown(t *testing.T, str string, r probe.Result) {
 	assert.Contains(t, str, r.Title())
 	assert.Contains(t, str, r.Status.Emoji())
 	assert.Contains(t, str, r.Message)
-	assert.Contains(t, str, r.StartTime.Format(r.TimeFormat))
+	assert.Contains(t, str, FormatTime(r.StartTime))
 	assert.Contains(t, str, r.RoundTripTime.String())
-	assert.Contains(t, str, r.LatestDownTime.Format(r.TimeFormat))
+	assert.Contains(t, str, FormatTime(r.LatestDownTime))
 	assert.Contains(t, str, global.FooterString())
 }
 
@@ -159,7 +158,7 @@ func TestResultToSlack(t *testing.T) {
 	assert.Contains(t, str, r.Title())
 	assert.Contains(t, str, r.Status.Emoji())
 	assert.Contains(t, str, r.Message)
-	context := SlackTimeFormation(r.StartTime, " probed at ", r.TimeFormat)
+	context := SlackTimeFormation(r.StartTime, " probed at ", global.GetTimeFormat())
 	assert.Contains(t, str, context)
 	assert.Contains(t, str, r.RoundTripTime.String())
 	assert.Contains(t, str, global.FooterString())
@@ -224,7 +223,7 @@ func TestResultToShell(t *testing.T) {
 	assert.Equal(t, data[1][3], r.Status.String())
 	assert.Equal(t, data[1][4], r.PreStatus.String())
 	assert.Equal(t, data[1][5], fmt.Sprintf("%d", r.RoundTripTime.Round(time.Millisecond)))
-	assert.Equal(t, data[1][6], r.StartTime.UTC().Format(r.TimeFormat))
+	assert.Equal(t, data[1][6], FormatTime(r.StartTime))
 	assert.Equal(t, data[1][7], fmt.Sprintf("%d", r.StartTimestamp))
 	assert.Equal(t, data[1][8], r.Message)
 }
