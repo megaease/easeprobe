@@ -214,10 +214,12 @@ func (c *NotifyConfig) NewField(result probe.Result, inline bool) Fields {
 		"\n**Latest Probe**\n>\t%s | %s" +
 		"\n>\t`%s ` \n\n"
 
+	timeFmt := global.GetTimeFormat()
+	timeLoc := global.GetTimeLocation()
 	desc := fmt.Sprintf(message, result.Endpoint,
 		report.DurationStr(result.Stat.UpTime), report.DurationStr(result.Stat.DownTime), result.SLAPercent(),
 		result.Stat.Total, report.SLAStatusText(result.Stat, report.Markdown),
-		result.StartTime.UTC().Format(result.TimeFormat), result.Status.Emoji()+" "+result.Status.String(),
+		result.StartTime.In(timeLoc).Format(timeFmt), result.Status.Emoji()+" "+result.Status.String(),
 		result.Message)
 
 	line := ""

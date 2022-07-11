@@ -1004,8 +1004,10 @@ settings:
   #   - 02 Jan 06 15:04 -0700             (with numeric zone)
   #   - Mon, 02 Jan 2006 15:04:05 MST     (RFC 1123)
   #   - Mon, 02 Jan 2006 15:04:05 -0700   (with numeric zone)
-  timeformat: "2006-01-02 15:04:05 UTC"
-
+  timeformat: "2006-01-02 15:04:05 Z07:00"
+  # check the following link to see the time zone list
+  # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  timezone: "America/New_York" #  default: UTC
 ```
 
 ## 4. Benchmark

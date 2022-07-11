@@ -95,7 +95,6 @@ func (d *DefaultProbe) Config(gConf global.ProbeSettings,
 	d.ProbeResult = probe.NewResultWithName(name)
 	d.ProbeResult.Name = name
 	d.ProbeResult.Endpoint = endpoint
-	d.ProbeResult.TimeFormat = gConf.TimeFormat
 
 	if len(d.ProbeChannels) == 0 {
 		d.ProbeChannels = append(d.ProbeChannels, global.DefaultChannelName)

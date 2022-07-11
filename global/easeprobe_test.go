@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"bou.ke/monkey"
 	"github.com/stretchr/testify/assert"
@@ -60,4 +61,46 @@ func TestEaseProbeFail(t *testing.T) {
 	assert.Equal(t, "unknown", e.Host)
 
 	monkey.Unpatch(os.Hostname)
+}
+
+func TestEaseProbeTime(t *testing.T) {
+	easeProbe = nil
+	tf := GetTimeFormat()
+	assert.Equal(t, DefaultTimeFormat, tf)
+
+	easeProbe = nil
+	tz := GetTimeLocation()
+	assert.Equal(t, DefaultTimeZone, tz.String())
+
+	InitEaseProbeWithTime("test", "icon", "2006-01-02 15:04:05 Z07:00", "Asia/Shanghai")
+	e := GetEaseProbe()
+	assert.Equal(t, "Asia/Shanghai", e.TimeZone)
+	assert.Equal(t, "2006-01-02 15:04:05 Z07:00", e.TimeFormat)
+	assert.Equal(t, "Asia/Shanghai", e.TimeLoc.String())
+
+	ti := time.Date(2022, time.January, 2, 15, 4, 5, 0, time.UTC)
+	ts := ti.In(e.TimeLoc).Format(e.TimeFormat)
+	assert.Equal(t, "2022-01-02 23:04:05 +08:00", ts)
+
+	SetTimeZone("America/New_York")
+	ts = ti.In(e.TimeLoc).Format(e.TimeFormat)
+	assert.Equal(t, "2022-01-02 10:04:05 -05:00", ts)
+
+	// Daylight saving time
+	ti = time.Date(2022, time.July, 2, 15, 4, 5, 0, time.UTC)
+	ts = ti.In(e.TimeLoc).Format(e.TimeFormat)
+	assert.Equal(t, "2022-07-02 11:04:05 -04:00", ts)
+
+	SetTimeZone("Wrong/TimeZone")
+	ts = ti.In(e.TimeLoc).Format(e.TimeFormat)
+	assert.Equal(t, "2022-07-02 15:04:05 Z", ts)
+
+	SetTimeZone("")
+	SetTimeFormat(time.RFC3339)
+	ts = ti.In(e.TimeLoc).Format(e.TimeFormat)
+	assert.Equal(t, "2022-07-02T15:04:05Z", ts)
+
+	SetTimeFormat("")
+	ts = ti.In(e.TimeLoc).Format(e.TimeFormat)
+	assert.Equal(t, "2022-07-02 15:04:05 Z", ts)
 }

@@ -116,7 +116,7 @@ func SLATextSection(r *probe.Result) string {
 	return fmt.Sprintf(text, r.Name, r.Endpoint,
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLAPercent(),
 		r.Stat.Total, SLAStatusText(r.Stat, Text),
-		r.StartTime.UTC().Format(r.TimeFormat),
+		FormatTime(r.StartTime),
 		r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
 }
 
@@ -136,7 +136,7 @@ func SLALogSection(r *probe.Result) string {
 	return fmt.Sprintf(text, r.Name, r.Endpoint,
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLAPercent(),
 		r.Stat.Total, SLAStatusText(r.Stat, Log),
-		r.StartTime.UTC().Format(r.TimeFormat),
+		FormatTime(r.StartTime),
 		r.Status.String(), r.Message)
 }
 
@@ -167,7 +167,7 @@ func SLAMarkdownSection(r *probe.Result, f Format) string {
 	return fmt.Sprintf(text, r.Name, r.Endpoint,
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLAPercent(),
 		r.Stat.Total, SLAStatusText(r.Stat, MarkdownSocial),
-		r.StartTime.UTC().Format(r.TimeFormat),
+		FormatTime(r.StartTime),
 		r.Status.Emoji()+" "+r.Status.String(), r.Message)
 }
 
@@ -190,11 +190,8 @@ func slaMarkdown(probers []probe.Prober, f Format) string {
 		r := probe.GetResultData(p.Name())
 		md += SLAMarkdownSection(r, f)
 	}
-	timeFmt := "2006-01-02 15:04:05"
-	if len(probers) > 0 {
-		timeFmt = probers[len(probers)-1].Result().TimeFormat
-	}
-	md += "\n> " + global.FooterString() + " at " + time.Now().UTC().Format(timeFmt)
+
+	md += "\n> " + global.FooterString() + " at " + FormatTime(time.Now())
 	return md
 }
 
@@ -218,7 +215,7 @@ func SLAHTMLSection(r *probe.Result) string {
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime),
 		r.SLAPercent(),
 		r.Stat.Total, SLAStatusText(r.Stat, HTML),
-		r.StartTime.UTC().Format(r.TimeFormat),
+		FormatTime(r.StartTime),
 		r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
 }
 
@@ -245,11 +242,7 @@ func SLAHTMLFilter(probers []probe.Prober, filter *SLAFilter) string {
 
 	html = html + filter.HTML() + table
 
-	timeFmt := "2006-01-02 15:04:05"
-	if len(probers) > 0 {
-		timeFmt = probers[len(probers)-1].Result().TimeFormat
-	}
-	html += HTMLFooter(time.Now().UTC().Format(timeFmt))
+	html += HTMLFooter(FormatTime(time.Now()))
 	return html
 }
 
@@ -266,7 +259,7 @@ func SLASlackSection(r *probe.Result) string {
 		`\n>\t%s"` + `
 			}`
 
-	t := SlackTimeFormation(r.StartTime, "", r.TimeFormat)
+	t := SlackTimeFormation(r.StartTime, "", global.GetTimeFormat())
 
 	message := JSONEscape(r.Message)
 	if r.Status != probe.StatusUp {
@@ -341,11 +334,7 @@ func SLASlack(probers []probe.Prober) string {
 		]
 	}`
 
-	timeFmt := "2006-01-02 15:04:05"
-	if len(probers) > 0 {
-		timeFmt = probers[len(probers)-1].Result().TimeFormat
-	}
-	time := SlackTimeFormation(time.Now(), " reported at ", timeFmt)
+	time := SlackTimeFormation(time.Now(), " reported at ", global.GetTimeFormat())
 	json += fmt.Sprintf(context, time)
 
 	json += `]}`
@@ -388,7 +377,7 @@ func SLALarkSection(r *probe.Result) string {
 	return fmt.Sprintf(text, r.Name, r.Endpoint,
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLAPercent(),
 		r.Stat.Total, SLAStatusText(r.Stat, Lark),
-		r.StartTime.UTC().Format(r.TimeFormat),
+		FormatTime(r.StartTime),
 		r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
 }
 
@@ -460,7 +449,7 @@ func SLACSVSection(r *probe.Result) []string {
 		// ProbeSummary - Total( Up, Down)
 		fmt.Sprintf("%d(%s)", r.Stat.Total, SLAStatusText(r.Stat, Text)),
 		// LatestProbe, LatestStatus
-		r.StartTime.UTC().Format(r.TimeFormat), r.Status.String(),
+		FormatTime(r.StartTime), r.Status.String(),
 		// Message
 		r.Message,
 	}
