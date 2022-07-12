@@ -56,7 +56,7 @@ func (s *Shell) Config(gConf global.ProbeSettings) error {
 
 	s.metrics = newMetrics(kind, tag)
 
-	log.Debugf("[%s] configuration: %+v, %+v", s.ProbeKind, s, s.Result())
+	log.Debugf("[%s / %s] configuration: %+v, %+v", s.ProbeKind, s.ProbeName, s, s.Result())
 	return nil
 }
 

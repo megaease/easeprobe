@@ -109,12 +109,12 @@ func (c *DefaultNotify) SendWithRetry(title string, message string, tag string) 
 
 // DryNotify just log the notification message
 func (c *DefaultNotify) DryNotify(result probe.Result) {
-	log.Infof("[%s / %s] - %s", c.NotifyKind, c.NotifyName,
+	log.Infof("[%s / %s / dry_notify] - %s", c.NotifyKind, c.NotifyName,
 		report.FormatFuncs[c.NotifyFormat].ResultFn(result))
 }
 
 // DryNotifyStat just log the notification message
 func (c *DefaultNotify) DryNotifyStat(probers []probe.Prober) {
-	log.Infof("[%s / %s] - %s", c.NotifyKind, c.NotifyName,
+	log.Infof("[%s / %s / dry_notify ] - %s", c.NotifyKind, c.NotifyName,
 		report.FormatFuncs[c.NotifyFormat].StatFn(probers))
 }

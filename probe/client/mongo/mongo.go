@@ -60,7 +60,7 @@ func New(opt conf.Options) Mongo {
 
 	tls, err := opt.TLS.Config()
 	if err != nil {
-		log.Errorf("[%s] %s - TLS Config error - %v", Kind, opt.ProbeName, err)
+		log.Errorf("[%s / %s / %s] - TLS Config error - %v", opt.ProbeKind, opt.ProbeName, opt.ProbeTag, err)
 	} else if tls != nil {
 		client.TLSConfig = tls
 		client.SetAuth(options.Credential{AuthMechanism: "MONGODB-X509"})
@@ -84,8 +84,6 @@ func (r Mongo) Probe() (bool, string) {
 
 	ctx, cancel := context.WithTimeout(r.Context, r.Timeout())
 	defer cancel()
-
-	log.Debugln(r.ClientOpt)
 
 	db, err := mongo.Connect(ctx, r.ClientOpt)
 	if err != nil {

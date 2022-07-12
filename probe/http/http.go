@@ -84,18 +84,18 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 	h.DefaultProbe.Config(gConf, kind, tag, name, h.URL, h.DoProbe)
 
 	if _, err := url.ParseRequestURI(h.URL); err != nil {
-		log.Errorf("URL is not valid - %+v url=%+v", err, h.URL)
+		log.Errorf("[%s / %s] URL is not valid - %+v url=%+v", h.ProbeKind, h.ProbeName, err, h.URL)
 		return err
 	}
 
 	tls, err := h.TLS.Config()
 	if err != nil {
-		log.Errorf("TLS configuration error - %s", err)
+		log.Errorf("[%s / %s] TLS configuration error - %s", h.ProbeKind, h.ProbeName, err)
 		return err
 	}
 
 	// security check
-	log.Debugf("[%s] the security checks %s", h.ProbeName, strconv.FormatBool(h.Insecure))
+	log.Debugf("[%s / %s] the security checks %s", h.ProbeKind, h.ProbeName, strconv.FormatBool(h.Insecure))
 
 	h.client = &http.Client{
 		Timeout: h.Timeout(),
@@ -126,7 +126,7 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 	var codeRange [][]int
 	for _, r := range h.SuccessCode {
 		if len(r) != 2 {
-			log.Warnf("HTTP Success Code range is not valid - %v, skip", r)
+			log.Warnf("[%s/ %s] HTTP Success Code range is not valid - %v, skip", h.ProbeKind, h.ProbeName, r)
 			continue
 		}
 		codeRange = append(codeRange, []int{r[0], r[1]})
@@ -138,7 +138,7 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 
 	h.metrics = newMetrics(kind, tag)
 
-	log.Debugf("[%s] configuration: %+v, %+v", h.ProbeKind, h, h.Result())
+	log.Debugf("[%s / %s] configuration: %+v", h.ProbeKind, h.ProbeName, h)
 	return nil
 }
 
@@ -174,7 +174,7 @@ func (h *HTTP) DoProbe() (bool, string) {
 
 	h.ExportMetrics(resp)
 	if err != nil {
-		log.Errorf("error making get request: %v", err)
+		log.Errorf("[%s / %s] error making get request: %v", h.ProbeKind, h.ProbeName, err)
 		return false, fmt.Sprintf("Error: %v", err)
 	}
 	// Read the response body

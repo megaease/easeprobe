@@ -21,7 +21,7 @@ import (
 	"os"
 	"strings"
 	"time"
-	_ "time/tzdata"
+	_ "time/tzdata" // revive:disable
 
 	log "github.com/sirupsen/logrus"
 )

@@ -76,7 +76,7 @@ func (t *TLS) Config(gConf global.ProbeSettings) error {
 
 	t.metrics = newMetrics(kind, tag)
 
-	log.Debugf("[%s] configuration: %+v, %+v", t.ProbeKind, t, t.Result())
+	log.Debugf("[%s / %s] configuration: %+v", t.ProbeKind, t.ProbeName, t)
 	return nil
 }
 
@@ -85,7 +85,7 @@ func (t *TLS) DoProbe() (bool, string) {
 	addr := t.Host
 	conn, err := net.DialTimeout("tcp", addr, t.Timeout())
 	if err != nil {
-		log.Errorf("tcp dial error: %v", err)
+		log.Errorf("[%s / %s] tcp dial error: %v", t.ProbeKind, t.ProbeName, err)
 		return false, fmt.Sprintf("tcp dial error: %v", err)
 	}
 	if tcpConn, ok := conn.(*net.TCPConn); ok {
@@ -109,7 +109,7 @@ func (t *TLS) DoProbe() (bool, string) {
 	defer cancel()
 	err = tconn.HandshakeContext(ctx)
 	if err != nil {
-		log.Errorf("tls handshake error: %v", err)
+		log.Errorf("[%s / %s] tls handshake error: %v", t.ProbeKind, t.ProbeName, err)
 		return false, fmt.Sprintf("tls handshake error: %v", err)
 	}
 
@@ -120,7 +120,7 @@ func (t *TLS) DoProbe() (bool, string) {
 			valid = valid && !time.Now().Before(cert.NotBefore)
 
 			if !valid {
-				log.Errorf("host %v cert expired", t.Host)
+				log.Errorf("[%s / %s] host %v cert expired", t.ProbeKind, t.ProbeName, t.Host)
 				return false, "certificate is expired or not yet valid"
 			}
 

@@ -72,7 +72,7 @@ func (m Memcache) Probe() (bool, string) {
 		return m.validateKeyValues(items)
 	}
 
-	log.Debugf("Data empty, Pinging")
+	log.Debugf("[%s / %s %s] Data empty, Pinging", m.ProbeKind, m.ProbeName, m.ProbeTag)
 	err := mc.Ping()
 	if err != nil {
 		return false, err.Error()
@@ -97,14 +97,14 @@ func (m *Memcache) getDataKeys() []string {
 func (m *Memcache) validateKeyValues(items map[string]*MemcacheClient.Item) (bool, string) {
 	// iterate the keys and confirm their values match
 	for _, item := range items {
-		log.Debugf("Got key: %s with value: %s", item.Key, string(item.Value))
+		log.Debugf("[%s / %s / %s] Got key: %s with value: %s", m.ProbeKind, m.ProbeName, m.ProbeTag, item.Key, string(item.Value))
 		if strings.TrimSpace(m.Data[item.Key]) == "" {
-			log.Debugf("Skipping value check for item %s", item.Key)
+			log.Debugf("[%s / %s / %s] Skipping value check for item %s", m.ProbeKind, m.ProbeName, m.ProbeTag, item.Key)
 			continue
 		}
 		if string(item.Value) != m.Data[item.Key] {
 			return false, fmt.Sprintf("Memcache value for key %s returned %s, expected %s", item.Key, string(item.Value), string(m.Data[item.Key]))
 		}
 	}
-	return true, "Memcache key values match"
+	return true, "Memcache key values match successfully"
 }
