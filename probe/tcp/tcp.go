@@ -39,7 +39,7 @@ func (t *TCP) Config(gConf global.ProbeSettings) error {
 	name := t.ProbeName
 	t.DefaultProbe.Config(gConf, kind, tag, name, t.Host, t.DoProbe)
 
-	log.Debugf("[%s] configuration: %+v, %+v", t.ProbeKind, t, t.Result())
+	log.Debugf("[%s / %s] configuration: %+v", t.ProbeKind, t.ProbeName, t)
 	return nil
 }
 
@@ -50,7 +50,7 @@ func (t *TCP) DoProbe() (bool, string) {
 	message := ""
 	if err != nil {
 		message = fmt.Sprintf("Error: %v", err)
-		log.Errorf("error: %v", err)
+		log.Errorf("[%s / %s] error: %v", t.ProbeKind, t.ProbeName, err)
 		status = false
 	} else {
 		message = "TCP Connection Established Successfully!"

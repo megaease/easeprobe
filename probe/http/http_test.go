@@ -18,10 +18,12 @@
 package http
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"reflect"
 	"testing"
@@ -153,6 +155,26 @@ func TestHTTPDoProbe(t *testing.T) {
 	s, m = h.DoProbe()
 	assert.False(t, s)
 	assert.Contains(t, m, "new request error")
+
+	monkey.UnpatchAll()
+
+	var d *net.Dialer
+	monkey.PatchInstanceMethod(reflect.TypeOf(d), "DialContext", func(*net.Dialer, context.Context, string, string) (net.Conn, error) {
+		return &net.TCPConn{}, nil
+	})
+
+	h.TLS = global.TLS{
+		CA:   "",
+		Cert: "",
+		Key:  "",
+	}
+	h.URL = "http://127.0.0.1:1234"
+	err = h.Config(global.ProbeSettings{})
+	assert.NoError(t, err)
+
+	s, m = h.DoProbe()
+	assert.False(t, s)
+	assert.NotContains(t, m, "200")
 
 	monkey.UnpatchAll()
 }
