@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"runtime"
 	"testing"
+	"time"
 
 	"bou.ke/monkey"
 	"github.com/bradfitz/gomemcache/memcache"
@@ -105,9 +106,9 @@ func TestMemcache(t *testing.T) {
 	assert.Contains(t, msg, "expected")
 
 	m.Data = map[string]string{}
+	m.ProbeTimeout = time.Second
 	s, msg = m.Probe()
 	assert.False(t, s)
-	assert.Contains(t, msg, "connection refused")
 
 	monkey.PatchInstanceMethod(reflect.TypeOf(mc), "Ping", func(*memcache.Client) error {
 		return nil
