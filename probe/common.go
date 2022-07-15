@@ -31,18 +31,18 @@ type TextChecker struct {
 }
 
 // Check the text
-func (oc *TextChecker) Check(Text string) error {
-	if oc.RegExp {
-		return CheckOutputRegExp(oc.Contain, oc.NotContain, Text)
+func (tc *TextChecker) Check(Text string) error {
+	if tc.RegExp {
+		return CheckOutputRegExp(tc.Contain, tc.NotContain, Text)
 	}
-	return CheckOutput(oc.Contain, oc.NotContain, Text)
+	return CheckOutput(tc.Contain, tc.NotContain, Text)
 }
 
-func (oc *TextChecker) String() string {
-	if oc.RegExp {
-		return fmt.Sprintf("RegExp Mode - Contain:[%s], NotContain:[%s]", oc.Contain, oc.NotContain)
+func (tc *TextChecker) String() string {
+	if tc.RegExp {
+		return fmt.Sprintf("RegExp Mode - Contain:[%s], NotContain:[%s]", tc.Contain, tc.NotContain)
 	}
-	return fmt.Sprintf("Text Mode - Contain:[%s], NotContain:[%s]", oc.Contain, oc.NotContain)
+	return fmt.Sprintf("Text Mode - Contain:[%s], NotContain:[%s]", tc.Contain, tc.NotContain)
 }
 
 // CheckOutput checks the output text,
