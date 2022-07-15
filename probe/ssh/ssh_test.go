@@ -27,6 +27,7 @@ import (
 
 	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/base"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/ssh"
@@ -65,12 +66,14 @@ func createSSHConfig() *SSH {
 					Password:   "",
 					client:     &ssh.Client{},
 				},
-				Command:    "test",
-				Args:       []string{},
-				Env:        []string{},
-				Contain:    "good",
-				NotContain: "bad",
-				BastionID:  "aws",
+				Command: "test",
+				Args:    []string{},
+				Env:     []string{},
+				TextChecker: probe.TextChecker{
+					Contain:    "good",
+					NotContain: "bad",
+				},
+				BastionID: "aws",
 			},
 			{
 				DefaultProbe: base.DefaultProbe{

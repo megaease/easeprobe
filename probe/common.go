@@ -19,8 +19,31 @@ package probe
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 )
+
+// TextChecker is the struct to check the output
+type TextChecker struct {
+	Contain    string `yaml:"contain,omitempty"`
+	NotContain string `yaml:"not_contain,omitempty"`
+	RegExp     bool   `yaml:"regex,omitempty"`
+}
+
+// Check the text
+func (oc *TextChecker) Check(Text string) error {
+	if oc.RegExp {
+		return CheckOutputRegExp(oc.Contain, oc.NotContain, Text)
+	}
+	return CheckOutput(oc.Contain, oc.NotContain, Text)
+}
+
+func (oc *TextChecker) String() string {
+	if oc.RegExp {
+		return fmt.Sprintf("RegExp Mode - Contain:[%s], NotContain:[%s]", oc.Contain, oc.NotContain)
+	}
+	return fmt.Sprintf("Text Mode - Contain:[%s], NotContain:[%s]", oc.Contain, oc.NotContain)
+}
 
 // CheckOutput checks the output text,
 // - if it contains a configured string then return nil
@@ -33,6 +56,31 @@ func CheckOutput(Contain, NotContain, Output string) error {
 
 	if len(NotContain) > 0 && strings.Contains(Output, NotContain) {
 		return fmt.Errorf("the output contains [%s]", NotContain)
+	}
+	return nil
+}
+
+// CheckOutputRegExp checks the output text,
+// - if it contains a configured pattern then return nil
+// - if it does not contain a configured pattern then return nil
+func CheckOutputRegExp(Contain, NotContain, Output string) error {
+
+	if len(Contain) > 0 {
+		match, err := regexp.Match(Contain, []byte(Output))
+		if err != nil {
+			return err
+		} else if !match {
+			return fmt.Errorf("the output does not contain [%s]", Contain)
+		}
+	}
+
+	if len(NotContain) > 0 {
+		match, err := regexp.Match(NotContain, []byte(Output))
+		if err != nil {
+			return err
+		} else if match {
+			return fmt.Errorf("the output contains [%s]", NotContain)
+		}
 	}
 	return nil
 }

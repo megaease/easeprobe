@@ -26,6 +26,7 @@ import (
 
 	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/base"
 	"github.com/stretchr/testify/assert"
 )
@@ -36,8 +37,10 @@ func createShell() *Shell {
 		Command:      "dummy command",
 		Args:         []string{"arg1", "arg2"},
 		Env:          []string{"env1=value1", "env2=value2"},
-		Contain:      "good",
-		NotContain:   "bad",
+		TextChecker: probe.TextChecker{
+			Contain:    "good",
+			NotContain: "bad",
+		},
 	}
 }
 func TestShell(t *testing.T) {

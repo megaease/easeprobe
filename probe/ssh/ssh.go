@@ -41,8 +41,9 @@ type Server struct {
 	Command           string   `yaml:"cmd"`
 	Args              []string `yaml:"args,omitempty"`
 	Env               []string `yaml:"env,omitempty"`
-	Contain           string   `yaml:"contain,omitempty"`
-	NotContain        string   `yaml:"not_contain,omitempty"`
+
+	// Output Text Checker
+	probe.TextChecker `yaml:",inline"`
 
 	BastionID string    `yaml:"bastion"`
 	bastion   *Endpoint `yaml:"-"`
@@ -142,7 +143,8 @@ func (s *Server) DoProbe() (bool, string) {
 		status = false
 		message = err.Error() + " - " + output
 	} else {
-		if err := probe.CheckOutput(s.Contain, s.NotContain, string(output)); err != nil {
+		log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, s.TextChecker.String())
+		if err := s.Check(string(output)); err != nil {
 			log.Errorf("[%s / %s] - %v", s.ProbeKind, s.ProbeName, err)
 			message = fmt.Sprintf("Error: %v", err)
 			status = false

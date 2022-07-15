@@ -45,8 +45,9 @@ type HTTP struct {
 	Method            string            `yaml:"method,omitempty"`
 	Headers           map[string]string `yaml:"headers,omitempty"`
 	Body              string            `yaml:"body,omitempty"`
-	Contain           string            `yaml:"contain,omitempty"`
-	NotContain        string            `yaml:"not_contain,omitempty"`
+
+	// Output Text Checker
+	probe.TextChecker `yaml:",inline"`
 
 	// Option - HTTP Basic Auth Credentials
 	User string `yaml:"username,omitempty"`
@@ -197,7 +198,9 @@ func (h *HTTP) DoProbe() (bool, string) {
 	}
 
 	message := fmt.Sprintf("HTTP Status Code is %d", resp.StatusCode)
-	if err := probe.CheckOutput(h.Contain, h.NotContain, string(response)); err != nil {
+
+	log.Debugf("[%s / %s] - %s", h.ProbeKind, h.ProbeName, h.TextChecker.String())
+	if err := h.Check(string(response)); err != nil {
 		log.Errorf("[%s / %s] - %v", h.ProbeKind, h.ProbeName, err)
 		message += fmt.Sprintf(". Error: %v", err)
 		return false, message

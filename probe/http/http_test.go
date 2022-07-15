@@ -30,6 +30,7 @@ import (
 
 	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/base"
 	"github.com/stretchr/testify/assert"
 )
@@ -41,10 +42,12 @@ func createHTTP() *HTTP {
 		ContentEncoding: "text/json",
 		Headers:         map[string]string{"header1": "value1", "header2": "value2"},
 		Body:            "{ \"key1\": \"value1\", \"key2\": \"value2\" }",
-		Contain:         "good",
-		NotContain:      "bad",
-		User:            "user",
-		Pass:            "pass",
+		TextChecker: probe.TextChecker{
+			Contain:    "good",
+			NotContain: "bad",
+		},
+		User: "user",
+		Pass: "pass",
 		TLS: global.TLS{
 			CA:   "ca.crt",
 			Cert: "cert.crt",

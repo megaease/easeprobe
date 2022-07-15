@@ -568,6 +568,7 @@ http:
     # Response Checking
     contain: "success" # response body must contain this string, if not the probe is considered failed.
     not_contain: "failure" # response body must NOT contain this string, if it does the probe is considered failed.
+    regex: false # if true, the contain and not_contain will be treated as regular expression. default: false
     # configuration
     timeout: 10s # default is 30 seconds
 
@@ -616,6 +617,8 @@ shell:
       - "REDISCLI_AUTH=abc123"
     # check the command output, if does not contain the PONG, mark the status down
     contain : "PONG"
+    not_contain: "failure" # response body must NOT contain this string, if it does the probe is considered failed.
+    regex: false # if true, the contain and not_contain will be treated as regular expression. default: false
 
   # Run Zookeeper command `stat` to check the zookeeper status
   - name: Zookeeper (Local)
@@ -670,6 +673,8 @@ ssh:
         - "REDISCLI_AUTH=abc123"
       # check the command output, if does not contain the PONG, mark the status down
       contain : "PONG"
+      not_contain: "failure" # response body must NOT contain this string, if it does the probe is considered failed.
+      regex: false # if true, the contain and not_contain will be treated as regular expression. default: false
 
     # Check the process status of `Kafka`
     - name:  Kafka (GCP)
