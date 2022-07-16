@@ -85,6 +85,29 @@ func TestHTTPConfig(t *testing.T) {
 	monkey.UnpatchAll()
 }
 
+func TestTextCheckerConfig(t *testing.T) {
+	h := createHTTP()
+	h.TextChecker = probe.TextChecker{
+		Contain:    "",
+		NotContain: "",
+		RegExp:     true,
+	}
+	h.TLS = global.TLS{}
+
+	err := h.Config(global.ProbeSettings{})
+	assert.NoError(t, err)
+
+	h.Contain = `[a-zA-z]\d+`
+	err = h.Config(global.ProbeSettings{})
+	assert.NoError(t, err)
+	assert.Equal(t, `[a-zA-z]\d+`, h.TextChecker.Contain)
+
+	h.NotContain = `(?=.*word1)(?=.*word2)`
+	err = h.Config(global.ProbeSettings{})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid or unsupported Perl syntax")
+}
+
 func TestHTTPDoProbe(t *testing.T) {
 	// clear request
 	h := createHTTP()

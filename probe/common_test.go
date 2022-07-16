@@ -23,52 +23,97 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCheckOutput(t *testing.T) {
-	err := CheckOutput("hello", "good", "easeprobe hello world")
+func TestCheckText(t *testing.T) {
+	tc := TextChecker{}
+
+	tc.Contain = "hello"
+	tc.NotContain = "bad"
+	err := tc.Check("easeprobe hello world")
 	assert.Nil(t, err)
 
-	err = CheckOutput("hello", "world", "easeprobe hello world")
+	tc.Contain = "hello"
+	tc.NotContain = "world"
+	err = tc.Check("easeprobe hello world")
 	assert.NotNil(t, err)
 
-	err = CheckOutput("hello", "world", "easeprobe hello world")
+	tc.Contain = ""
+	tc.NotContain = "world"
+	err = tc.Check("easeprobe hello world")
 	assert.NotNil(t, err)
 
-	err = CheckOutput("good", "bad", "easeprobe hello world")
+	tc.Contain = "hello"
+	tc.NotContain = ""
+	err = tc.Check("easeprobe hello world")
+	assert.Nil(t, err)
+
+	tc.Contain = "good"
+	tc.NotContain = ""
+	err = tc.Check("easeprobe hello world")
+	assert.NotNil(t, err)
+
+	tc.Contain = ""
+	tc.NotContain = "bad"
+	err = tc.Check("easeprobe hello world")
+	assert.Nil(t, err)
+
+	tc.Contain = "good"
+	tc.NotContain = "bad"
+	err = tc.Check("easeprobe hello world")
 	assert.NotNil(t, err)
 }
 
-func TestCheckOutputRegExp(t *testing.T) {
-	reg := `word[0-9]+`
-	err := CheckOutputRegExp(reg, "", "word word10 word")
-	assert.Nil(t, err)
-	err = CheckOutputRegExp("", reg, "word word word")
-	assert.Nil(t, err)
+func testRegExpHelper(t *testing.T, regExp string, str string, match bool) {
+	tc := TextChecker{RegExp: true}
+	tc.Contain = regExp
+	tc.Config()
+	if match {
+		assert.Nil(t, tc.CheckRegExp(str))
+	} else {
+		assert.NotNil(t, tc.CheckRegExp(str))
+	}
+
+	tc.Contain = ""
+	tc.NotContain = regExp
+	tc.Config()
+	if match {
+		assert.NotNil(t, tc.CheckRegExp(str))
+	} else {
+		assert.Nil(t, tc.CheckRegExp(str))
+	}
+}
+
+func TestCheckRegExp(t *testing.T) {
+
+	word := `word[0-9]+`
+	testRegExpHelper(t, word, "word word10 word", true)
+	testRegExpHelper(t, word, "word word word", false)
 
 	time := "[0-9]?[0-9]:[0-9][0-9]"
-	err = CheckOutputRegExp(time, "", "easeprobe hello world 1234")
-	assert.NotNil(t, err)
-	err = CheckOutputRegExp(time, "", "easeprobe hello world 12:34")
-	assert.Nil(t, err)
+	testRegExpHelper(t, time, "easeprobe hello world 12:34", true)
+	testRegExpHelper(t, time, "easeprobe hello world 1234", false)
 
 	html := `<\/?[\w\s]*>|<.+[\W]>`
-	err = CheckOutputRegExp(html, "", "<p>test hello world </p>")
-	assert.Nil(t, err)
-	err = CheckOutputRegExp("hello", html, "text test hello world")
-	assert.Nil(t, err)
+	testRegExpHelper(t, html, "<p>test hello world </p>", true)
+	testRegExpHelper(t, html, "test hello world", false)
 
 	or := `word1|word2`
-	err = CheckOutputRegExp(or, "", "word1 easeprobe word2")
-	assert.Nil(t, err)
-	err = CheckOutputRegExp(or, "", "word2 easeprobe word1")
-	assert.Nil(t, err)
-	err = CheckOutputRegExp("", or, " easeprobe word1")
-	assert.NotNil(t, err)
+	testRegExpHelper(t, or, "word1 easeprobe word2", true)
+	testRegExpHelper(t, or, "word2 easeprobe word1", true)
+	testRegExpHelper(t, or, "word3 easeprobe word1", true)
+	testRegExpHelper(t, or, "word2 easeprobe word3", true)
+	testRegExpHelper(t, or, "word easeprobe word3", false)
+	testRegExpHelper(t, or, "word easeprobe hello world", false)
 
 	unsupported := "(?=.*word1)(?=.*word2)"
-	err = CheckOutputRegExp(unsupported, "", "word1 word2")
+	tc := TextChecker{RegExp: true}
+	tc.Contain = unsupported
+	err := tc.Config()
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "invalid or unsupported Perl syntax")
-	err = CheckOutputRegExp("", unsupported, "word1 word2")
+
+	tc.Contain = ""
+	tc.NotContain = unsupported
+	err = tc.Config()
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "invalid or unsupported Perl syntax")
 
@@ -80,6 +125,7 @@ func TestTextChecker(t *testing.T) {
 		NotContain: "",
 		RegExp:     false,
 	}
+	checker.Config()
 	assert.Nil(t, checker.Check("hello world"))
 	assert.Contains(t, checker.String(), "Text Mode")
 
@@ -88,6 +134,7 @@ func TestTextChecker(t *testing.T) {
 		NotContain: "",
 		RegExp:     true,
 	}
+	checker.Config()
 	assert.Nil(t, checker.Check("hello world 2022"))
 	assert.Contains(t, checker.String(), "RegExp Mode")
 
@@ -96,6 +143,7 @@ func TestTextChecker(t *testing.T) {
 		NotContain: `<\/?[\w\s]*>|<.+[\W]>`,
 		RegExp:     true,
 	}
+	checker.Config()
 	assert.NotNil(t, checker.Check("<p>test hello world </p>"))
 }
 

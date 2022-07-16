@@ -117,6 +117,10 @@ func (s *Server) Configure(gConf global.ProbeSettings,
 		return err
 	}
 
+	if err := s.TextChecker.Config(); err != nil {
+		return err
+	}
+
 	log.Debugf("[%s / %s] configuration: %+v", s.ProbeKind, s.ProbeName, s)
 	return nil
 }

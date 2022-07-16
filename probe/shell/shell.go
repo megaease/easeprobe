@@ -55,6 +55,10 @@ func (s *Shell) Config(gConf global.ProbeSettings) error {
 	s.DefaultProbe.Config(gConf, kind, tag, name,
 		global.CommandLine(s.Command, s.Args), s.DoProbe)
 
+	if err := s.TextChecker.Config(); err != nil {
+		return err
+	}
+
 	s.metrics = newMetrics(kind, tag)
 
 	log.Debugf("[%s / %s] configuration: %+v, %+v", s.ProbeKind, s.ProbeName, s, s.Result())

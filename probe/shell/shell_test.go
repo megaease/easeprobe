@@ -43,6 +43,29 @@ func createShell() *Shell {
 		},
 	}
 }
+
+func TestTextCheckerConfig(t *testing.T) {
+	s := createShell()
+	s.TextChecker = probe.TextChecker{
+		Contain:    "",
+		NotContain: "",
+		RegExp:     true,
+	}
+
+	err := s.Config(global.ProbeSettings{})
+	assert.NoError(t, err)
+
+	s.Contain = `[a-zA-z]\d+`
+	err = s.Config(global.ProbeSettings{})
+	assert.NoError(t, err)
+	assert.Equal(t, `[a-zA-z]\d+`, s.TextChecker.Contain)
+
+	s.NotContain = `(?=.*word1)(?=.*word2)`
+	err = s.Config(global.ProbeSettings{})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid or unsupported Perl syntax")
+}
+
 func TestShell(t *testing.T) {
 	s := createShell()
 	s.Config(global.ProbeSettings{})

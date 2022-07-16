@@ -137,6 +137,10 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 	}
 	h.SuccessCode = codeRange
 
+	if err := h.TextChecker.Config(); err != nil {
+		return err
+	}
+
 	h.metrics = newMetrics(kind, tag)
 
 	log.Debugf("[%s / %s] configuration: %+v", h.ProbeKind, h.ProbeName, h)

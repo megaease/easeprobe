@@ -28,14 +28,40 @@ type TextChecker struct {
 	Contain    string `yaml:"contain,omitempty"`
 	NotContain string `yaml:"not_contain,omitempty"`
 	RegExp     bool   `yaml:"regex,omitempty"`
+
+	containReg    *regexp.Regexp `yaml:"-"`
+	notContainReg *regexp.Regexp `yaml:"-"`
+}
+
+// Config the text checker initialize the regexp
+func (tc *TextChecker) Config() (err error) {
+	if !tc.RegExp {
+		return nil
+	}
+
+	if len(tc.Contain) == 0 {
+		tc.containReg = nil
+	} else if tc.containReg, err = regexp.Compile(tc.Contain); err != nil {
+		tc.containReg = nil
+		return err
+	}
+
+	if len(tc.NotContain) == 0 {
+		tc.notContainReg = nil
+	} else if tc.notContainReg, err = regexp.Compile(tc.NotContain); err != nil {
+		tc.notContainReg = nil
+		return err
+	}
+
+	return nil
 }
 
 // Check the text
 func (tc *TextChecker) Check(Text string) error {
 	if tc.RegExp {
-		return CheckOutputRegExp(tc.Contain, tc.NotContain, Text)
+		return tc.CheckRegExp(Text)
 	}
-	return CheckOutput(tc.Contain, tc.NotContain, Text)
+	return tc.CheckText(Text)
 }
 
 func (tc *TextChecker) String() string {
@@ -45,42 +71,32 @@ func (tc *TextChecker) String() string {
 	return fmt.Sprintf("Text Mode - Contain:[%s], NotContain:[%s]", tc.Contain, tc.NotContain)
 }
 
-// CheckOutput checks the output text,
+// CheckText checks the output text,
 // - if it contains a configured string then return nil
 // - if it does not contain a configured string then return nil
-func CheckOutput(Contain, NotContain, Output string) error {
+func (tc *TextChecker) CheckText(Output string) error {
 
-	if len(Contain) > 0 && !strings.Contains(Output, Contain) {
-		return fmt.Errorf("the output does not contain [%s]", Contain)
+	if len(tc.Contain) > 0 && !strings.Contains(Output, tc.Contain) {
+		return fmt.Errorf("the output does not contain [%s]", tc.Contain)
 	}
 
-	if len(NotContain) > 0 && strings.Contains(Output, NotContain) {
-		return fmt.Errorf("the output contains [%s]", NotContain)
+	if len(tc.NotContain) > 0 && strings.Contains(Output, tc.NotContain) {
+		return fmt.Errorf("the output contains [%s]", tc.NotContain)
 	}
 	return nil
 }
 
-// CheckOutputRegExp checks the output text,
+// CheckRegExp checks the output text,
 // - if it contains a configured pattern then return nil
 // - if it does not contain a configured pattern then return nil
-func CheckOutputRegExp(Contain, NotContain, Output string) error {
+func (tc *TextChecker) CheckRegExp(Output string) error {
 
-	if len(Contain) > 0 {
-		match, err := regexp.Match(Contain, []byte(Output))
-		if err != nil {
-			return err
-		} else if !match {
-			return fmt.Errorf("the output does not contain [%s]", Contain)
-		}
+	if len(tc.Contain) > 0 && tc.containReg != nil && !tc.containReg.MatchString(Output) {
+		return fmt.Errorf("the output does not match the pattern [%s]", tc.Contain)
 	}
 
-	if len(NotContain) > 0 {
-		match, err := regexp.Match(NotContain, []byte(Output))
-		if err != nil {
-			return err
-		} else if match {
-			return fmt.Errorf("the output contains [%s]", NotContain)
-		}
+	if len(tc.NotContain) > 0 && tc.notContainReg != nil && tc.notContainReg.MatchString(Output) {
+		return fmt.Errorf("the output match the pattern [%s]", tc.NotContain)
 	}
 	return nil
 }
