@@ -763,8 +763,8 @@ client:
     password: "pass"
     data: # Optional, check the specific column value in the table
       #  Usage: "database:table:column:primary_key:value" : "expected_value"
-      "test:product:name:id:1" : "iPhone X" # select name from test.product where id = 1
-      "test:employee:age:id:2" : 45 # select age from test.employee where id = 2
+      "test:product:name:id:1" : "EaseProbe" # select name from test.product where id = 1
+      "test:employee:age:id:2" : 45          # select age from test.employee where id = 2
 
   - name: MongoDB Native Client (local)
     driver: "mongo"
@@ -772,6 +772,10 @@ client:
     username: "admin"
     password: "abc123"
     timeout: 5s
+    data: # Optional, find the specific value in the table
+      #  Usage: "database:collection" : "{JSON}"
+      "test.employee" : '{"name":"Hao Chen"}' # find the employee with name "Hao Chen"
+      "test.product" : '{"name":"EaseProbe"}' # find the product with name "EaseProbe"
 
   - name: Memcache Native Client (local)
     driver: "memcache"

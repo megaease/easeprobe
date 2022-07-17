@@ -83,7 +83,7 @@ func (r Redis) Probe() (bool, string) {
 			if val != v {
 				return false, fmt.Sprintf("Key [%s] expected [%s] got [%s]", k, v, val)
 			}
-			log.Debugf("[%s / %s / %s] Verify Data Successfully! key= [%s], value = [%s]", r.ProbeKind, r.ProbeName, r.ProbeTag, k, v)
+			log.Debugf("[%s / %s / %s] Data Verified Successfully! key= [%s], value = [%s]", r.ProbeKind, r.ProbeName, r.ProbeTag, k, v)
 		}
 	} else {
 		_, err := rdb.Ping(ctx).Result()

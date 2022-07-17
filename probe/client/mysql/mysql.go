@@ -109,7 +109,7 @@ func (r MySQL) Probe() (bool, string) {
 			if value != v {
 				return false, fmt.Sprintf("Value not match for [%s] expected [%s] got [%s] ", k, v, value)
 			}
-			log.Debugf("[%s / %s / %s] - Verify Data Successfully! - [%s] : [%s]", r.ProbeKind, r.ProbeName, r.ProbeTag, k, v)
+			log.Debugf("[%s / %s / %s] - Data Verified Successfully! - [%s] : [%s]", r.ProbeKind, r.ProbeName, r.ProbeTag, k, v)
 		}
 	} else {
 		err = db.Ping()
@@ -133,7 +133,7 @@ func (r MySQL) getSQL(str string) (string, error) {
 	}
 	fields := strings.Split(str, ":")
 	if len(fields) != 5 {
-		return "", fmt.Errorf("Invalid SQL data - [%s], the pattern is `database:table:field:key:value`", str)
+		return "", fmt.Errorf("Invalid SQL data - [%s]. (syntax: database:table:field:key:value)", str)
 	}
 	db := fields[0]
 	table := fields[1]
