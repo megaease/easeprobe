@@ -41,6 +41,7 @@ func TestKaf(t *testing.T) {
 
 	kaf := New(conf)
 	assert.Equal(t, "Kafka", kaf.Kind())
+	assert.Nil(t, kaf.Config(global.ProbeSettings{}))
 
 	var dialer *kafka.Dialer
 	monkey.PatchInstanceMethod(reflect.TypeOf(dialer), "DialContext", func(_ *kafka.Dialer, _ context.Context, _ string, _ string) (*kafka.Conn, error) {
