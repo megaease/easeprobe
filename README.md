@@ -759,6 +759,8 @@ client:
     host: "localhost:3306"
     username: "root"
     password: "pass"
+    data:         # Optional
+      key: val    # Check that `key` exists and its value is `val`
 
   - name: MongoDB Native Client (local)
     driver: "mongo"
