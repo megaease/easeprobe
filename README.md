@@ -573,6 +573,12 @@ http:
     timeout: 10s # default is 30 seconds
 
 ```
+
+> **Note**:
+>
+> The Regular Expression supported refer to https://github.com/google/re2/wiki/Syntax
+
+
 ### 3.2 TCP Probe Configuration
 
 ```YAML
@@ -618,7 +624,7 @@ shell:
     # check the command output, if does not contain the PONG, mark the status down
     contain : "PONG"
     not_contain: "failure" # response body must NOT contain this string, if it does the probe is considered failed.
-    regex: false # if true, the contain and not_contain will be treated as regular expression. default: false
+    regex: false # if true, the `contain` and `not_contain` will be treated as regular expression. default: false
 
   # Run Zookeeper command `stat` to check the zookeeper status
   - name: Zookeeper (Local)
@@ -628,6 +634,10 @@ shell:
       - "echo stat | nc 127.0.0.1 2181"
     contain: "Mode:"
 ```
+
+> **Note**:
+>
+> The Regular Expression supported refer to https://github.com/google/re2/wiki/Syntax
 
 ### 3.4 SSH Command Probe Configuration
 
@@ -684,6 +694,9 @@ ssh:
       key: /path/to/private.key
       cmd: "ps -ef | grep kafka"
 ```
+> **Note**:
+>
+> The Regular Expression supported refer to https://github.com/google/re2/wiki/Syntax
 
 ### 3.5 TLS Probe Configuration
 
