@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe/client/conf"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
@@ -81,6 +82,22 @@ func New(opt conf.Options) Mongo {
 // Kind return the name of client
 func (r Mongo) Kind() string {
 	return Kind
+}
+
+// Config do the config check
+func (r Mongo) Config(gConf global.ProbeSettings) error {
+	if len(r.Data) > 0 {
+		for k, v := range r.Data {
+			if _, _, err := getDBCollection(k); err != nil {
+				return err
+			}
+			var bdoc interface{}
+			if err := bson.UnmarshalExtJSON([]byte(v), true, &bdoc); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 // Probe do the health check

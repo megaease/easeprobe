@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	MemcacheClient "github.com/bradfitz/gomemcache/memcache"
+	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe/client/conf"
 	log "github.com/sirupsen/logrus"
 )
@@ -47,6 +48,11 @@ func New(opt conf.Options) Memcache {
 // Kind return the name of client
 func (m Memcache) Kind() string {
 	return Kind
+}
+
+// Config do the config check
+func (m Memcache) Config(gConf global.ProbeSettings) error {
+	return nil
 }
 
 // Probe do the health check

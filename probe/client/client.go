@@ -47,12 +47,17 @@ func (c *Client) Config(gConf global.ProbeSettings) error {
 	tag := c.DriverType.String()
 	name := c.ProbeName
 	c.DefaultProbe.Config(gConf, kind, tag, name, c.Host, c.DoProbe)
+	if err := c.Check(); err != nil {
+		return err
+	}
 	c.configClientDriver()
-
-	if c.DriverType == conf.Unknown {
-		return fmt.Errorf("[%s / %s ] unknown driver type", kind, name)
+	if c.client == nil {
+		return fmt.Errorf("Unknown Client Driver")
 	}
 
+	if err := c.client.Config(gConf); err != nil {
+		return err
+	}
 	log.Debugf("[%s] configuration: %+v, %+v", c.ProbeKind, c, c.Result())
 	return nil
 }

@@ -74,6 +74,19 @@ func (r PostgreSQL) Kind() string {
 	return Kind
 }
 
+// Config do the config check
+func (r PostgreSQL) Config(gConf global.ProbeSettings) error {
+	if len(r.Data) > 0 {
+		for k, _ := range r.Data {
+			_, _, err := r.getSQL(k)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 // Probe do the health check
 func (r PostgreSQL) Probe() (bool, string) {
 

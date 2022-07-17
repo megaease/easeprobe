@@ -49,6 +49,7 @@ func TestMongo(t *testing.T) {
 
 	mg := New(conf)
 	assert.Equal(t, "Mongo", mg.Kind())
+	assert.Nil(t, mg.Config(global.ProbeSettings{}))
 	connStr := fmt.Sprintf("mongodb://%s:%s@%s/?connectTimeoutMS=%d",
 		conf.Username, conf.Password, conf.Host, conf.Timeout().Milliseconds())
 	assert.Equal(t, connStr, mg.ConnStr)
@@ -133,6 +134,8 @@ func TestDta(t *testing.T) {
 	}
 
 	mg := New(conf)
+	err := mg.Config(global.ProbeSettings{})
+	assert.NotNil(t, err)
 	s, m := mg.Probe()
 	assert.False(t, s)
 	assert.Contains(t, m, "Database Collection name is empty")
@@ -149,6 +152,8 @@ func TestDta(t *testing.T) {
 		"database:collection": "{'key' : 'value'}",
 	}
 	mg = New(conf)
+	err = mg.Config(global.ProbeSettings{})
+	assert.NotNil(t, err)
 	s, m = mg.Probe()
 	assert.False(t, s)
 	assert.Contains(t, m, "invalid JSON input")

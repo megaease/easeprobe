@@ -48,6 +48,7 @@ func TestZooKeeper(t *testing.T) {
 
 	z := New(conf)
 	assert.Equal(t, "ZooKeeper", z.Kind())
+	assert.Nil(t, z.Config(global.ProbeSettings{}))
 
 	monkey.Patch(net.DialTimeout, func(network, address string, timeout time.Duration) (net.Conn, error) {
 		return &net.TCPConn{}, nil

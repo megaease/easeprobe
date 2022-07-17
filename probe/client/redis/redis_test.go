@@ -47,6 +47,7 @@ func TestRedis(t *testing.T) {
 	r := New(conf)
 	assert.Equal(t, "Redis", r.Kind())
 	assert.Nil(t, r.tls)
+	assert.Nil(t, r.Config(global.ProbeSettings{}))
 
 	var client *redis.Client
 	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Ping", func(_ *redis.Client, ctx context.Context) *redis.StatusCmd {

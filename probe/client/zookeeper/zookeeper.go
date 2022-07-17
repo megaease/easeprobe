@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/go-zookeeper/zk"
+	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe/client/conf"
 	log "github.com/sirupsen/logrus"
 )
@@ -55,6 +56,11 @@ func New(opt conf.Options) Zookeeper {
 // Kind return the name of client
 func (z Zookeeper) Kind() string {
 	return Kind
+}
+
+// Config do the config check
+func (z Zookeeper) Config(gConf global.ProbeSettings) error {
+	return nil
 }
 
 // Probe do the health check

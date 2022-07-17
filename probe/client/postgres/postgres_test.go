@@ -47,6 +47,7 @@ func TestPostgreSQL(t *testing.T) {
 
 	pg := New(conf)
 	assert.Equal(t, "PostgreSQL", pg.Kind())
+	assert.Nil(t, pg.Config(global.ProbeSettings{}))
 	pgd := pgdriver.NewConnector(pg.ClientOptions...)
 	assert.Equal(t, conf.Host, pgd.Config().Addr)
 	assert.Equal(t, conf.Username, pgd.Config().User)
@@ -129,6 +130,8 @@ func TestData(t *testing.T) {
 	}
 
 	pg := New(conf)
+	err := pg.Config(global.ProbeSettings{})
+	assert.NotNil(t, err)
 	s, m := pg.Probe()
 	assert.False(t, s)
 	assert.Contains(t, m, "Empty SQL data")

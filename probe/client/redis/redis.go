@@ -23,6 +23,7 @@ import (
 	"fmt"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe/client/conf"
 	log "github.com/sirupsen/logrus"
 )
@@ -55,6 +56,11 @@ func New(opt conf.Options) Redis {
 // Kind return the name of client
 func (r Redis) Kind() string {
 	return Kind
+}
+
+// Config do the config check
+func (r Redis) Config(gConf global.ProbeSettings) error {
+	return nil
 }
 
 // Probe do the health check

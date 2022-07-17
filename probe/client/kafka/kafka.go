@@ -21,6 +21,7 @@ import (
 	"context"
 	"crypto/tls"
 
+	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe/client/conf"
 	"github.com/segmentio/kafka-go"
 	"github.com/segmentio/kafka-go/sasl/plain"
@@ -53,6 +54,11 @@ func New(opt conf.Options) Kafka {
 // Kind return the name of client
 func (k Kafka) Kind() string {
 	return Kind
+}
+
+// Config do the config check
+func (k Kafka) Config(gConf global.ProbeSettings) error {
+	return nil
 }
 
 // Probe do the health check

@@ -50,6 +50,7 @@ func TestMySQL(t *testing.T) {
 	connStr := fmt.Sprintf("%s:%s@tcp(%s)/?timeout=%s",
 		conf.Username, conf.Password, conf.Host, conf.Timeout().Round(time.Second))
 	assert.Equal(t, connStr, my.ConnStr)
+	assert.Nil(t, my.Config(global.ProbeSettings{}))
 
 	conf.Password = ""
 	my = New(conf)
@@ -138,6 +139,8 @@ func TestData(t *testing.T) {
 		},
 	}
 	my := New(conf)
+	err := my.Config(global.ProbeSettings{})
+	assert.NotNil(t, err)
 	s, m := my.Probe()
 	assert.False(t, s)
 	assert.Contains(t, m, "Empty SQL data")
