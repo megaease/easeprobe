@@ -75,7 +75,7 @@ func (r Redis) Probe() (bool, string) {
 	// Check if we need to query specific keys or not
 	if len(r.Data) > 0 {
 		for k, v := range r.Data {
-			log.Debugf("[%s / %s / %s] Verifying key= [%s], value = [%s]", r.ProbeKind, r.ProbeName, r.ProbeTag, k, v)
+			log.Debugf("[%s / %s / %s] Verifying Data -  key = [%s], value = [%s]", r.ProbeKind, r.ProbeName, r.ProbeTag, k, v)
 			val, err := rdb.Get(ctx, k).Result()
 			if err != nil {
 				return false, fmt.Sprintf("Get Key [%s] Error - %v", k, err)
@@ -83,7 +83,7 @@ func (r Redis) Probe() (bool, string) {
 			if val != v {
 				return false, fmt.Sprintf("Key [%s] expected [%s] got [%s]", k, v, val)
 			}
-			log.Debugf("[%s / %s / %s] Verify Successfully! key= [%s], value = [%s]", r.ProbeKind, r.ProbeName, r.ProbeTag, k, v)
+			log.Debugf("[%s / %s / %s] Verify Data Successfully! key= [%s], value = [%s]", r.ProbeKind, r.ProbeName, r.ProbeTag, k, v)
 		}
 	} else {
 		_, err := rdb.Ping(ctx).Result()

@@ -749,6 +749,8 @@ client:
     driver: "redis"  # driver is redis
     host: "localhost:6379"  # server and port
     password: "abc123" # password
+    data:         # Optional
+      key: val    # Check that `key` exists and its value is `val`
     # mTLS
     ca: /path/to/file.ca
     cert: /path/to/file.crt
@@ -759,8 +761,10 @@ client:
     host: "localhost:3306"
     username: "root"
     password: "pass"
-    data:         # Optional
-      key: val    # Check that `key` exists and its value is `val`
+    data: # Optional, check the specific column value in the table
+      #  Usage: "database:table:column:primary_key:value" : "expected_value"
+      "test:product:name:id:1" : "iPhone X" # select name from test.product where id = 1
+      "test:employee:age:id:2" : 45 # select age from test.employee where id = 2
 
   - name: MongoDB Native Client (local)
     driver: "mongo"
