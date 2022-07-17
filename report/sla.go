@@ -405,7 +405,7 @@ func SLALark(probers []probe.Prober) string {
 					"elements": [
 						{
 							"tag": "plain_text",
-							"content": global.Prog
+							"content": "` + global.FooterString() + `"
 						}
 					]
 				}

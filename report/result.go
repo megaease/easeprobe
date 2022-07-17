@@ -230,7 +230,7 @@ func ToLark(r probe.Result) string {
 					"elements": [
 						{
 							"tag": "plain_text",
-							"content": %s
+							"content": "%s"
 						}
 					]
 				}
