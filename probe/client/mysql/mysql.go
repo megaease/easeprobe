@@ -75,7 +75,7 @@ func (r MySQL) Kind() string {
 // Config do the config check
 func (r MySQL) Config(gConf global.ProbeSettings) error {
 	if len(r.Data) > 0 {
-		for k, _ := range r.Data {
+		for k := range r.Data {
 			if _, err := r.getSQL(k); err != nil {
 				return err
 			}
