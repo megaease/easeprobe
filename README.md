@@ -780,8 +780,8 @@ client:
     timeout: 5s
     data: # Optional, find the specific value in the table
       #  Usage: "database:collection" : "{JSON}"
-      "test.employee" : '{"name":"Hao Chen"}' # find the employee with name "Hao Chen"
-      "test.product" : '{"name":"EaseProbe"}' # find the product with name "EaseProbe"
+      "test:employee" : '{"name":"Hao Chen"}' # find the employee with name "Hao Chen"
+      "test:product" : '{"name":"EaseProbe"}' # find the product with name "EaseProbe"
 
   - name: Memcache Native Client (local)
     driver: "memcache"

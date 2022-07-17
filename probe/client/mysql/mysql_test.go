@@ -117,5 +117,108 @@ func TestMySQL(t *testing.T) {
 	s, m = my.Probe()
 	assert.False(t, s)
 	assert.Contains(t, m, "connect error")
+}
+
+func TestData(t *testing.T) {
+	monkey.Patch(sql.Open, func(driverName, dataSourceName string) (*sql.DB, error) {
+		return &sql.DB{}, nil
+	})
+	var db *sql.DB
+	monkey.PatchInstanceMethod(reflect.TypeOf(db), "Close", func(_ *sql.DB) error {
+		return nil
+	})
+
+	conf := conf.Options{
+		Host:       "example.com",
+		DriverType: conf.MySQL,
+		Username:   "username",
+		Password:   "password",
+		Data: map[string]string{
+			"": "",
+		},
+	}
+	my := New(conf)
+	s, m := my.Probe()
+	assert.False(t, s)
+	assert.Contains(t, m, "Empty SQL data")
+
+	conf.Data = map[string]string{
+		"key": "value",
+	}
+	my = New(conf)
+	s, m = my.Probe()
+	assert.False(t, s)
+	assert.Contains(t, m, "Invalid SQL data")
+
+	conf.Data = map[string]string{
+		"database:table:column:key:value": "expected",
+	}
+	my = New(conf)
+	s, m = my.Probe()
+	assert.False(t, s)
+	assert.Contains(t, m, "the value must be int")
+
+	monkey.PatchInstanceMethod(reflect.TypeOf(db), "Ping", func(_ *sql.DB) error {
+		return nil
+	})
+	monkey.PatchInstanceMethod(reflect.TypeOf(db), "Query", func(_ *sql.DB, query string, args ...interface{}) (*sql.Rows, error) {
+		return &sql.Rows{}, nil
+	})
+	var r *sql.Rows
+	monkey.PatchInstanceMethod(reflect.TypeOf(r), "Close", func(_ *sql.Rows) error {
+		return nil
+	})
+	monkey.PatchInstanceMethod(reflect.TypeOf(r), "Next", func(_ *sql.Rows) bool {
+		return true
+	})
+	monkey.PatchInstanceMethod(reflect.TypeOf(r), "Scan", func(_ *sql.Rows, args ...interface{}) error {
+		v := args[0].(*string)
+		*v = "expected"
+		return nil
+	})
+
+	conf.Data = map[string]string{
+		"database:table:column:key:1": "expected",
+	}
+	my = New(conf)
+	s, m = my.Probe()
+	assert.True(t, s)
+	assert.Contains(t, m, "Successfully")
+
+	//mismatch
+	monkey.PatchInstanceMethod(reflect.TypeOf(r), "Scan", func(_ *sql.Rows, args ...interface{}) error {
+		v := args[0].(*string)
+		*v = "unexpected"
+		return nil
+	})
+	s, m = my.Probe()
+	assert.False(t, s)
+	assert.Contains(t, m, "alue not match")
+
+	// scan error
+	monkey.PatchInstanceMethod(reflect.TypeOf(r), "Scan", func(_ *sql.Rows, args ...interface{}) error {
+		return fmt.Errorf("scan error")
+	})
+	s, m = my.Probe()
+	assert.False(t, s)
+	assert.Contains(t, m, "scan error")
+
+	// Next error
+	monkey.PatchInstanceMethod(reflect.TypeOf(r), "Next", func(_ *sql.Rows) bool {
+		return false
+	})
+	s, m = my.Probe()
+	assert.False(t, s)
+	assert.Contains(t, m, "No data")
+
+	// Query error
+	monkey.PatchInstanceMethod(reflect.TypeOf(db), "Query", func(_ *sql.DB, query string, args ...interface{}) (*sql.Rows, error) {
+		return nil, fmt.Errorf("query error")
+	})
+	s, m = my.Probe()
+	assert.False(t, s)
+	assert.Contains(t, m, "query error")
+
+	monkey.UnpatchAll()
 
 }

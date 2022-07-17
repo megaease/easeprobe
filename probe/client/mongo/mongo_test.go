@@ -111,3 +111,72 @@ func TestMongo(t *testing.T) {
 
 	monkey.UnpatchAll()
 }
+
+func TestDta(t *testing.T) {
+
+	monkey.Patch(mongo.Connect, func(ctx context.Context, opts ...*options.ClientOptions) (*mongo.Client, error) {
+		return &mongo.Client{}, nil
+	})
+	var client *mongo.Client
+	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Disconnect", func(_ *mongo.Client, _ context.Context) error {
+		return nil
+	})
+
+	conf := conf.Options{
+		Host:       "example.com",
+		DriverType: conf.Mongo,
+		Username:   "username",
+		Password:   "password",
+		Data: map[string]string{
+			"": "",
+		},
+	}
+
+	mg := New(conf)
+	s, m := mg.Probe()
+	assert.False(t, s)
+	assert.Contains(t, m, "Database Collection name is empty")
+
+	conf.Data = map[string]string{
+		"key": "value",
+	}
+	mg = New(conf)
+	s, m = mg.Probe()
+	assert.False(t, s)
+	assert.Contains(t, m, "Invalid Format")
+
+	conf.Data = map[string]string{
+		"database:collection": "{'key' : 'value'}",
+	}
+	mg = New(conf)
+	s, m = mg.Probe()
+	assert.False(t, s)
+	assert.Contains(t, m, "invalid JSON input")
+
+	var collection *mongo.Collection
+	monkey.PatchInstanceMethod(reflect.TypeOf(collection), "FindOne", func(_ *mongo.Collection, _ context.Context, _ interface{}, _ ...*options.FindOneOptions) *mongo.SingleResult {
+		return &mongo.SingleResult{}
+	})
+	var result *mongo.SingleResult
+	monkey.PatchInstanceMethod(reflect.TypeOf(result), "Err", func(_ *mongo.SingleResult) error {
+		return nil
+	})
+	monkey.PatchInstanceMethod(reflect.TypeOf(result), "Decode", func(_ *mongo.SingleResult, _ interface{}) error {
+		return nil
+	})
+
+	conf.Data = map[string]string{
+		"database:collection": "{\"key\" : \"value\"}",
+	}
+	mg = New(conf)
+	s, m = mg.Probe()
+	assert.True(t, s)
+	assert.Contains(t, m, "Successfully")
+
+	monkey.UnpatchInstanceMethod(reflect.TypeOf(result), "Err")
+	s, m = mg.Probe()
+	assert.False(t, s)
+	assert.Contains(t, m, "Error")
+
+	monkey.UnpatchAll()
+}

@@ -137,9 +137,9 @@ func getDBCollection(str string) (database, collection string, err error) {
 	if len(strings.TrimSpace(str)) == 0 {
 		return "", "", fmt.Errorf("Database Collection name is empty")
 	}
-	fields := strings.Split(str, ".")
+	fields := strings.Split(str, ":")
 	if len(fields) != 2 {
-		err = fmt.Errorf("invalid format - [%s] (syntax: database.collection) ", str)
+		err = fmt.Errorf("Invalid Format - [%s] (syntax: database.collection) ", str)
 		return
 	}
 	database = fields[0]

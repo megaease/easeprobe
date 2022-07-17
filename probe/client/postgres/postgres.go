@@ -97,17 +97,20 @@ func (r PostgreSQL) Probe() (bool, string) {
 				return false, fmt.Sprintf("Query error - [%s], %v", v, err)
 			}
 			if !rows.Next() {
-				return false, fmt.Sprintf("Query error - [%s], no data", v)
+				rows.Close()
+				return false, fmt.Sprintf("No data found for [%s]", k)
 			}
 			//check the value is equal to the value in data
 			var value string
 			if err := rows.Scan(&value); err != nil {
+				rows.Close()
 				return false, err.Error()
 			}
 			if value != v {
+				rows.Close()
 				return false, fmt.Sprintf("Value not match for [%s] expected [%s] got [%s] ", k, v, value)
 			}
-
+			rows.Close()
 			db.Close()
 			log.Debugf("[%s / %s / %s] - Data Verified Successfully! - [%s] : [%s]", r.ProbeKind, r.ProbeName, r.ProbeTag, k, v)
 		}
