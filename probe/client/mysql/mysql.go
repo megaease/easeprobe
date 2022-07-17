@@ -93,6 +93,7 @@ func (r MySQL) Probe() (bool, string) {
 			if err != nil {
 				return false, err.Error()
 			}
+			log.Debugf("[%s / %s / %s] - SQL - [%s]", r.ProbeKind, r.ProbeName, r.ProbeTag, sql)
 			rows, err := db.Query(sql)
 			if err != nil {
 				return false, err.Error()
@@ -127,6 +128,9 @@ func (r MySQL) Probe() (bool, string) {
 
 }
 
+// getSQL get the SQL statement
+// input: database:table:column:key:value
+// output: SELECT column FROM database.table WHERE key = value
 func (r MySQL) getSQL(str string) (string, error) {
 	if len(strings.TrimSpace(str)) == 0 {
 		return "", fmt.Errorf("Empty SQL data")

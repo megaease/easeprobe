@@ -751,7 +751,7 @@ client:
     password: "abc123" # password
     data:         # Optional
       key: val    # Check that `key` exists and its value is `val`
-    # mTLS
+    # mTLS - Optional
     ca: /path/to/file.ca
     cert: /path/to/file.crt
     key: /path/to/file.key
@@ -763,8 +763,14 @@ client:
     password: "pass"
     data: # Optional, check the specific column value in the table
       #  Usage: "database:table:column:primary_key:value" : "expected_value"
+      #         transfer to : "SELECT column FROM database.table WHERE primary_key = value"
+      #         the `value` for `primary_key` must be int
       "test:product:name:id:1" : "EaseProbe" # select name from test.product where id = 1
       "test:employee:age:id:2" : 45          # select age from test.employee where id = 2
+    # mTLS - Optional
+    ca: /path/to/file.ca
+    cert: /path/to/file.crt
+    key: /path/to/file.key
 
   - name: MongoDB Native Client (local)
     driver: "mongo"
@@ -788,7 +794,7 @@ client:
   - name: Kafka Native Client (local)
     driver: "kafka"
     host: "localhost:9093"
-    # mTLS
+    # mTLS - Optional
     ca: /path/to/file.ca
     cert: /path/to/file.crt
     key: /path/to/file.key
@@ -798,6 +804,16 @@ client:
     host: "localhost:5432"
     username: "postgres"
     password: "pass"
+    data: # Optional, check the specific column value in the table
+      #  Usage: "database:table:column:primary_key:value" : "expected_value"
+      #         transfer to : "SELECT column FROM table WHERE primary_key = value"
+      #         the `value` for `primary_key` must be int
+      "test:product:name:id:1" : "EaseProbe" # select name from product where id = 1
+      "test:employee:age:id:2" : 45          # select age from employee where id = 2
+    # mTLS - Optional
+    ca: /path/to/file.ca
+    cert: /path/to/file.crt
+    key: /path/to/file.key
 
   - name: Zookeeper Native Client (local)
     driver: "zookeeper"
