@@ -30,6 +30,7 @@ import (
 
 	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/base"
 	"github.com/stretchr/testify/assert"
 )
@@ -41,10 +42,12 @@ func createHTTP() *HTTP {
 		ContentEncoding: "text/json",
 		Headers:         map[string]string{"header1": "value1", "header2": "value2"},
 		Body:            "{ \"key1\": \"value1\", \"key2\": \"value2\" }",
-		Contain:         "good",
-		NotContain:      "bad",
-		User:            "user",
-		Pass:            "pass",
+		TextChecker: probe.TextChecker{
+			Contain:    "good",
+			NotContain: "bad",
+		},
+		User: "user",
+		Pass: "pass",
 		TLS: global.TLS{
 			CA:   "ca.crt",
 			Cert: "cert.crt",
@@ -80,6 +83,29 @@ func TestHTTPConfig(t *testing.T) {
 	assert.Equal(t, "GET", h.Method)
 
 	monkey.UnpatchAll()
+}
+
+func TestTextCheckerConfig(t *testing.T) {
+	h := createHTTP()
+	h.TextChecker = probe.TextChecker{
+		Contain:    "",
+		NotContain: "",
+		RegExp:     true,
+	}
+	h.TLS = global.TLS{}
+
+	err := h.Config(global.ProbeSettings{})
+	assert.NoError(t, err)
+
+	h.Contain = `[a-zA-z]\d+`
+	err = h.Config(global.ProbeSettings{})
+	assert.NoError(t, err)
+	assert.Equal(t, `[a-zA-z]\d+`, h.TextChecker.Contain)
+
+	h.NotContain = `(?=.*word1)(?=.*word2)`
+	err = h.Config(global.ProbeSettings{})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid or unsupported Perl syntax")
 }
 
 func TestHTTPDoProbe(t *testing.T) {
