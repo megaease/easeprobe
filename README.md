@@ -139,12 +139,18 @@ On application startup, the configured probes are scheduled for their initial fi
   - **PostgreSQL**. Connect to PostgreSQL server and run `SELECT 1` SQL.
   - **Zookeeper**. Connect to Zookeeper server and run `get /` command.
 
+  Most of them are supported to check the data whether is stored correctly.
+
   ```YAML
   client:
-    - name: Kafka Native Client (local)
-      driver: "kafka"
-      host: "localhost:9093"
-      # mTLS
+    - name: MySQL Native Client (local)
+      driver: "mysql"
+      host: "localhost:3306"
+      user: "root"
+      password: "pass"
+      data: # Optional - Data to check
+        "database:table:column:id:100": "value"
+      # mTLS - Optional
       ca: /path/to/file.ca
       cert: /path/to/file.crt
       key: /path/to/file.key
@@ -741,6 +747,8 @@ host:
 ```
 
 ### 3.7 Native Client Probe Configuration
+
+Native Client probe using the SDK to communicate with the remote endpoint. And you can define multiple data, and EaseProbe would help to check the data whether is stored or not.
 
 ```YAML
 # Native Client Probe
