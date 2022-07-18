@@ -819,7 +819,9 @@ client:
     driver: "zookeeper"
     host: "localhost:2181"
     timeout: 5s
-    # mTLS
+    data: # Optional, check the specific value in the path
+      "/path/to/key": "value" # Check that the value of the `/path/to/key` is "value"
+    # mTLS - Optional
     ca: /path/to/file.ca
     cert: /path/to/file.crt
     key: /path/to/file.key

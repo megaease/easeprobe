@@ -56,7 +56,6 @@ func TestZooKeeper(t *testing.T) {
 	assert.NotNil(t, z)
 	assert.Nil(t, e)
 	assert.Equal(t, "ZooKeeper", z.Kind())
-	assert.Nil(t, z.Config(global.ProbeSettings{}))
 
 	monkey.Patch(net.DialTimeout, func(network, address string, timeout time.Duration) (net.Conn, error) {
 		return &net.TCPConn{}, nil
@@ -156,5 +155,53 @@ func TestGetDialer(t *testing.T) {
 	conn, err = fn("tcp", zConf.Host, time.Second)
 	assert.Equal(t, "dial error", err.Error())
 	assert.Nil(t, conn)
+}
+
+func TestData(t *testing.T) {
+	z := &Zookeeper{
+		Options: conf.Options{
+			Host:       "127.0.0.0:2181",
+			DriverType: conf.Redis,
+			Username:   "username",
+			Password:   "password",
+			Data: map[string]string{
+				"test": "test",
+			},
+		},
+	}
+
+	monkey.Patch(getDialer, func(z *Zookeeper) func(string, string, time.Duration) (net.Conn, error) {
+		return net.DialTimeout
+	})
+	monkey.Patch(zk.ConnectWithDialer, func(servers []string, sessionTimeout time.Duration, dialer zk.Dialer) (*zk.Conn, <-chan zk.Event, error) {
+		return &zk.Conn{}, nil, nil
+	})
+	var conn *zk.Conn
+	monkey.PatchInstanceMethod(reflect.TypeOf(conn), "Close", func(_ *zk.Conn) {
+		return
+	})
+	monkey.PatchInstanceMethod(reflect.TypeOf(conn), "Get", func(_ *zk.Conn, path string) ([]byte, *zk.Stat, error) {
+		return []byte("test"), &zk.Stat{}, nil
+	})
+
+	s, m := z.Probe()
+	assert.True(t, s)
+	assert.Contains(t, m, "Successfully")
+
+	z.Data = map[string]string{
+		"test": "test1",
+	}
+	s, m = z.Probe()
+	assert.False(t, s)
+	assert.Contains(t, m, "Data not match")
+
+	monkey.PatchInstanceMethod(reflect.TypeOf(conn), "Get", func(_ *zk.Conn, path string) ([]byte, *zk.Stat, error) {
+		return []byte(""), &zk.Stat{}, fmt.Errorf("get error")
+	})
+	s, m = z.Probe()
+	assert.False(t, s)
+	assert.Contains(t, m, "get error")
+
+	monkey.UnpatchAll()
 
 }

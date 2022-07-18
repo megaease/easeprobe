@@ -25,7 +25,6 @@ import (
 	"time"
 
 	"github.com/go-zookeeper/zk"
-	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe/client/conf"
 	log "github.com/sirupsen/logrus"
 )
@@ -62,11 +61,6 @@ func (z *Zookeeper) Kind() string {
 	return Kind
 }
 
-// Config do the config check
-func (z *Zookeeper) Config(gConf global.ProbeSettings) error {
-	return nil
-}
-
 // Probe do the health check
 func (z *Zookeeper) Probe() (bool, string) {
 	var (
@@ -81,9 +75,23 @@ func (z *Zookeeper) Probe() (bool, string) {
 	}
 	defer conn.Close()
 
-	_, _, err = conn.Get("/")
-	if err != nil {
-		return false, err.Error()
+	if len(z.Data) > 0 {
+		for path, val := range z.Data {
+			log.Debugf("[%s / %s / %s] - Verifying Data - Path = [%s], Value=[%s]", z.ProbeKind, z.ProbeName, z.ProbeTag, path, val)
+			v, _, err := conn.Get(path)
+			if err != nil {
+				return false, err.Error()
+			}
+			if string(v) != val {
+				return false, fmt.Sprintf("Data not match - Path = [%s], expected [%s] got [%s]", path, val, string(v))
+			}
+			log.Debugf("[%s / %s / %s] - Data Verified Successfully! Path = [%s], Value=[%s]", z.ProbeKind, z.ProbeName, z.ProbeTag, path, val)
+		}
+	} else {
+		_, _, err = conn.Get("/")
+		if err != nil {
+			return false, err.Error()
+		}
 	}
 
 	return true, "Check Zookeeper Server Successfully!"
