@@ -50,38 +50,34 @@ func (c *Client) Config(gConf global.ProbeSettings) error {
 	if err := c.Check(); err != nil {
 		return err
 	}
-	c.configClientDriver()
-	if c.client == nil {
-		return fmt.Errorf("Unknown Client Driver")
-	}
-
-	if err := c.client.Config(gConf); err != nil {
+	if err := c.configClientDriver(); err != nil {
 		return err
 	}
 	log.Debugf("[%s] configuration: %+v, %+v", c.ProbeKind, c, c.Result())
 	return nil
 }
 
-func (c *Client) configClientDriver() {
+func (c *Client) configClientDriver() (err error) {
 	switch c.DriverType {
 	case conf.MySQL:
-		c.client = mysql.New(c.Options)
+		c.client, err = mysql.New(c.Options)
 	case conf.Redis:
-		c.client = redis.New(c.Options)
+		c.client, err = redis.New(c.Options)
 	case conf.Memcache:
-		c.client = memcache.New(c.Options)
+		c.client, err = memcache.New(c.Options)
 	case conf.Mongo:
-		c.client = mongo.New(c.Options)
+		c.client, err = mongo.New(c.Options)
 	case conf.Kafka:
-		c.client = kafka.New(c.Options)
+		c.client, err = kafka.New(c.Options)
 	case conf.PostgreSQL:
-		c.client = postgres.New(c.Options)
+		c.client, err = postgres.New(c.Options)
 	case conf.Zookeeper:
-		c.client = zookeeper.New(c.Options)
+		c.client, err = zookeeper.New(c.Options)
 	default:
 		c.DriverType = conf.Unknown
+		err = fmt.Errorf("Unknown Driver Type")
 	}
-
+	return
 }
 
 // DoProbe return the checking result

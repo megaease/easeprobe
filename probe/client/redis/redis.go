@@ -23,7 +23,6 @@ import (
 	"fmt"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe/client/conf"
 	log "github.com/sirupsen/logrus"
 )
@@ -39,32 +38,29 @@ type Redis struct {
 }
 
 // New create a Redis client
-func New(opt conf.Options) Redis {
+func New(opt conf.Options) (*Redis, error) {
 
 	tls, err := opt.TLS.Config()
 	if err != nil {
-		log.Errorf("[%s / %s / %s] - TLS Config error - %v", opt.ProbeKind, opt.ProbeName, opt.ProbeTag, err)
+		log.Errorf("[%s / %s / %s] - TLS Config Error - %v", opt.ProbeKind, opt.ProbeName, opt.ProbeTag, err)
+		return nil, fmt.Errorf("TLS Config Error - %v", err)
 	}
 
-	return Redis{
+	r := Redis{
 		Options: opt,
 		tls:     tls,
 		Context: context.Background(),
 	}
+	return &r, nil
 }
 
 // Kind return the name of client
-func (r Redis) Kind() string {
+func (r *Redis) Kind() string {
 	return Kind
 }
 
-// Config do the config check
-func (r Redis) Config(gConf global.ProbeSettings) error {
-	return nil
-}
-
 // Probe do the health check
-func (r Redis) Probe() (bool, string) {
+func (r *Redis) Probe() (bool, string) {
 
 	rdb := redis.NewClient(&redis.Options{
 		Addr:        r.Host,

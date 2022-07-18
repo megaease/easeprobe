@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	MemcacheClient "github.com/bradfitz/gomemcache/memcache"
-	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe/client/conf"
 	log "github.com/sirupsen/logrus"
 )
@@ -38,25 +37,20 @@ type Memcache struct {
 }
 
 // New create a Memcache client
-func New(opt conf.Options) Memcache {
-	return Memcache{
+func New(opt conf.Options) (*Memcache, error) {
+	return &Memcache{
 		Options: opt,
 		Context: context.Background(),
-	}
+	}, nil
 }
 
 // Kind return the name of client
-func (m Memcache) Kind() string {
+func (m *Memcache) Kind() string {
 	return Kind
 }
 
-// Config do the config check
-func (m Memcache) Config(gConf global.ProbeSettings) error {
-	return nil
-}
-
 // Probe do the health check
-func (m Memcache) Probe() (bool, string) {
+func (m *Memcache) Probe() (bool, string) {
 	// TODO: Add SASL AUTH and protocol details
 	mc := MemcacheClient.New(m.Host)
 	mc.Timeout = m.Timeout()

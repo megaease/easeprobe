@@ -44,10 +44,17 @@ func TestRedis(t *testing.T) {
 		},
 	}
 
-	r := New(conf)
+	r, err := New(conf)
+	assert.Nil(t, r)
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "TLS Config Error")
+
+	conf.TLS = global.TLS{}
+	r, err = New(conf)
+	assert.NotNil(t, r)
+	assert.Nil(t, err)
 	assert.Equal(t, "Redis", r.Kind())
 	assert.Nil(t, r.tls)
-	assert.Nil(t, r.Config(global.ProbeSettings{}))
 
 	var client *redis.Client
 	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Ping", func(_ *redis.Client, ctx context.Context) *redis.StatusCmd {
@@ -70,7 +77,10 @@ func TestRedis(t *testing.T) {
 	monkey.PatchInstanceMethod(reflect.TypeOf(tc), "Config", func(_ *global.TLS) (*tls.Config, error) {
 		return &tls.Config{}, nil
 	})
-	r = New(conf)
+
+	r, err = New(conf)
+	assert.NotNil(t, r)
+	assert.Nil(t, err)
 	assert.NotNil(t, r.tls)
 
 	s, m = r.Probe()
@@ -100,7 +110,9 @@ func TestData(t *testing.T) {
 		},
 	}
 
-	r := New(conf)
+	r, err := New(conf)
+	assert.NotNil(t, r)
+	assert.Nil(t, err)
 
 	var client *redis.Client
 	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Get", func(_ *redis.Client, ctx context.Context, key string) *redis.StringCmd {

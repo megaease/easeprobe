@@ -46,7 +46,15 @@ func TestZooKeeper(t *testing.T) {
 		},
 	}
 
-	z := New(conf)
+	z, e := New(conf)
+	assert.Nil(t, z)
+	assert.NotNil(t, e)
+	assert.Contains(t, e.Error(), "TLS Config Error")
+
+	conf.TLS = global.TLS{}
+	z, e = New(conf)
+	assert.NotNil(t, z)
+	assert.Nil(t, e)
 	assert.Equal(t, "ZooKeeper", z.Kind())
 	assert.Nil(t, z.Config(global.ProbeSettings{}))
 
@@ -74,7 +82,9 @@ func TestZooKeeper(t *testing.T) {
 	monkey.PatchInstanceMethod(reflect.TypeOf(tc), "Config", func(_ *global.TLS) (*tls.Config, error) {
 		return &tls.Config{}, nil
 	})
-	z = New(conf)
+	z, e = New(conf)
+	assert.NotNil(t, z)
+	assert.Nil(t, e)
 	assert.NotNil(t, z.tls)
 
 	s, m = z.Probe()
@@ -101,7 +111,7 @@ func TestZooKeeper(t *testing.T) {
 }
 
 func TestGetDialer(t *testing.T) {
-	zConf := Zookeeper{
+	zConf := &Zookeeper{
 		Options: conf.Options{
 			Host:       "127.0.0.0:2181",
 			DriverType: conf.Redis,

@@ -18,7 +18,6 @@
 package client
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -53,16 +52,10 @@ func newDummyClient(driver conf.DriverType) Client {
 	}
 }
 
-func MockProbe[T any](c T, success bool) {
+func MockProbe[T any](c T) {
 	p := &c
 	monkey.PatchInstanceMethod(reflect.TypeOf(p), "Probe", func(_ *T) (bool, string) {
 		return true, "Successfully"
-	})
-	monkey.PatchInstanceMethod(reflect.TypeOf(p), "Config", func(_ *T, _ global.ProbeSettings) error {
-		if success {
-			return nil
-		}
-		return fmt.Errorf("Failed")
 	})
 }
 
@@ -77,7 +70,7 @@ func TestClient(t *testing.T) {
 		newDummyClient(conf.Memcache),
 	}
 
-	for i, client := range clients {
+	for _, client := range clients {
 		err := client.Config(global.ProbeSettings{})
 		assert.Nil(t, err)
 		assert.Equal(t, "client", client.ProbeKind)
@@ -88,30 +81,25 @@ func TestClient(t *testing.T) {
 		assert.NotNil(t, err)
 		assert.Contains(t, err.Error(), "Invalid Host")
 
-		success := (i%2 == 0)
 		switch client.DriverType {
 		case conf.MySQL:
-			MockProbe(mysql.MySQL{}, success)
+			MockProbe(mysql.MySQL{})
 		case conf.PostgreSQL:
-			MockProbe(postgres.PostgreSQL{}, success)
+			MockProbe(postgres.PostgreSQL{})
 		case conf.Redis:
-			MockProbe(redis.Redis{}, success)
+			MockProbe(redis.Redis{})
 		case conf.Mongo:
-			MockProbe(mongo.Mongo{}, success)
+			MockProbe(mongo.Mongo{})
 		case conf.Kafka:
-			MockProbe(kafka.Kafka{}, success)
+			MockProbe(kafka.Kafka{})
 		case conf.Zookeeper:
-			MockProbe(zookeeper.Zookeeper{}, success)
+			MockProbe(zookeeper.Zookeeper{})
 		case conf.Memcache:
-			MockProbe(memcache.Memcache{}, success)
+			MockProbe(memcache.Memcache{})
 		}
 		client.Host = "example.com:1234"
 		err = client.Config(global.ProbeSettings{})
-		if success {
-			assert.Nil(t, err)
-		} else {
-			assert.NotNil(t, err)
-		}
+		assert.Nil(t, err)
 
 		s, m := client.DoProbe()
 		assert.True(t, s)
@@ -128,20 +116,13 @@ func TestClient(t *testing.T) {
 }
 
 func TestFailed(t *testing.T) {
-	c := newDummyClient(conf.MySQL)
-	var client *mysql.MySQL
-	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Config", func(_ *mysql.MySQL, _ global.ProbeSettings) error {
-		return fmt.Errorf("Failed")
-	})
-	err := c.Config(global.ProbeSettings{})
-	assert.NotNil(t, err)
 
-	c = newDummyClient(conf.Unknown)
+	c := newDummyClient(conf.Unknown)
 	var cnf *conf.Options
 	monkey.PatchInstanceMethod(reflect.TypeOf(cnf), "Check", func(_ *conf.Options) error {
 		return nil
 	})
-	err = c.Config(global.ProbeSettings{})
+	err := c.Config(global.ProbeSettings{})
 	assert.NotNil(t, err)
 
 }

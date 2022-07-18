@@ -43,7 +43,7 @@ type PostgreSQL struct {
 // revive:enable
 
 // New create a PostgreSQL client
-func New(opt conf.Options) PostgreSQL {
+func New(opt conf.Options) (*PostgreSQL, error) {
 	clientOptions := []pgdriver.Option{
 		pgdriver.WithNetwork("tcp"),
 		pgdriver.WithAddr(opt.Host),
@@ -57,25 +57,30 @@ func New(opt conf.Options) PostgreSQL {
 
 	tls, err := opt.TLS.Config()
 	if err != nil {
-		log.Errorf("[%s / %s / %s] - TLS Config error - %v", opt.ProbeKind, opt.ProbeName, opt.ProbeTag, err)
+		log.Errorf("[%s / %s / %s] - TLS Config Error - %v", opt.ProbeKind, opt.ProbeName, opt.ProbeTag, err)
+		return nil, fmt.Errorf("TLS Config Error - %v", err)
 	} else if tls != nil {
 		tls.InsecureSkipVerify = true
 		clientOptions = append(clientOptions, pgdriver.WithTLSConfig(tls))
 	}
 
-	return PostgreSQL{
+	pg := &PostgreSQL{
 		Options:       opt,
 		ClientOptions: clientOptions,
 	}
+	if err := pg.checkData(); err != nil {
+		return nil, err
+	}
+	return pg, nil
 }
 
 // Kind return the name of client
-func (r PostgreSQL) Kind() string {
+func (r *PostgreSQL) Kind() string {
 	return Kind
 }
 
-// Config do the config check
-func (r PostgreSQL) Config(gConf global.ProbeSettings) error {
+// checkData do the data checking
+func (r *PostgreSQL) checkData() error {
 	if len(r.Data) > 0 {
 		for k := range r.Data {
 			_, _, err := r.getSQL(k)
@@ -88,7 +93,7 @@ func (r PostgreSQL) Config(gConf global.ProbeSettings) error {
 }
 
 // Probe do the health check
-func (r PostgreSQL) Probe() (bool, string) {
+func (r *PostgreSQL) Probe() (bool, string) {
 
 	if len(r.Data) > 0 {
 		for k, v := range r.Data {
@@ -153,7 +158,7 @@ func (r PostgreSQL) Probe() (bool, string) {
 // getSQL get the SQL statement
 // input: database:table:column:key:value
 // output: SELECT column FROM database.table WHERE key = value
-func (r PostgreSQL) getSQL(str string) (string, string, error) {
+func (r *PostgreSQL) getSQL(str string) (string, string, error) {
 	if len(strings.TrimSpace(str)) == 0 {
 		return "", "", fmt.Errorf("Empty SQL data")
 	}

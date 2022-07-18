@@ -42,7 +42,7 @@ type MySQL struct {
 }
 
 // New create a Mysql client
-func New(opt conf.Options) MySQL {
+func New(opt conf.Options) (*MySQL, error) {
 
 	var conn string
 	if len(opt.Password) > 0 {
@@ -55,25 +55,31 @@ func New(opt conf.Options) MySQL {
 
 	tls, err := opt.TLS.Config()
 	if err != nil {
-		log.Errorf("[%s / %s / %s] - TLS Config error - %v", opt.ProbeKind, opt.ProbeName, opt.ProbeTag, err)
+		log.Errorf("[%s / %s / %s] - TLS Config Error - %v", opt.ProbeKind, opt.ProbeName, opt.ProbeTag, err)
+		return nil, fmt.Errorf("TLS Config Error - %v", err)
 	} else if tls != nil {
 		conn += "&tls=" + global.DefaultProg
 	}
 
-	return MySQL{
+	m := &MySQL{
 		Options: opt,
 		tls:     tls,
 		ConnStr: conn,
 	}
+
+	if err := m.checkData(); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 // Kind return the name of client
-func (r MySQL) Kind() string {
+func (r *MySQL) Kind() string {
 	return Kind
 }
 
-// Config do the config check
-func (r MySQL) Config(gConf global.ProbeSettings) error {
+// checkData do the data checking
+func (r *MySQL) checkData() error {
 	if len(r.Data) > 0 {
 		for k := range r.Data {
 			if _, err := r.getSQL(k); err != nil {
@@ -85,7 +91,7 @@ func (r MySQL) Config(gConf global.ProbeSettings) error {
 }
 
 // Probe do the health check
-func (r MySQL) Probe() (bool, string) {
+func (r *MySQL) Probe() (bool, string) {
 
 	if r.tls != nil {
 		mysql.RegisterTLSConfig(global.DefaultProg, r.tls)
@@ -146,7 +152,7 @@ func (r MySQL) Probe() (bool, string) {
 // getSQL get the SQL statement
 // input: database:table:column:key:value
 // output: SELECT column FROM database.table WHERE key = value
-func (r MySQL) getSQL(str string) (string, error) {
+func (r *MySQL) getSQL(str string) (string, error) {
 	if len(strings.TrimSpace(str)) == 0 {
 		return "", fmt.Errorf("Empty SQL data")
 	}

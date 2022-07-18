@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe/client/conf"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
@@ -43,7 +42,7 @@ type Mongo struct {
 }
 
 // New create a Mongo client
-func New(opt conf.Options) Mongo {
+func New(opt conf.Options) (*Mongo, error) {
 	var conn string
 	if len(opt.Password) > 0 {
 		conn = fmt.Sprintf("mongodb://%s:%s@%s/?connectTimeoutMS=%d",
@@ -65,27 +64,34 @@ func New(opt conf.Options) Mongo {
 
 	tls, err := opt.TLS.Config()
 	if err != nil {
-		log.Errorf("[%s / %s / %s] - TLS Config error - %v", opt.ProbeKind, opt.ProbeName, opt.ProbeTag, err)
+		log.Errorf("[%s / %s / %s] - TLS Config Error - %v", opt.ProbeKind, opt.ProbeName, opt.ProbeTag, err)
+		return nil, fmt.Errorf("TLS Config Error - %v", err)
 	} else if tls != nil {
 		client.TLSConfig = tls
 		client.SetAuth(options.Credential{AuthMechanism: "MONGODB-X509"})
 	}
 
-	return Mongo{
+	mongo := &Mongo{
 		Options:   opt,
 		ConnStr:   conn,
 		ClientOpt: client,
 		Context:   context.Background(),
 	}
+
+	if err := mongo.checkData(); err != nil {
+		return nil, err
+	}
+
+	return mongo, nil
 }
 
 // Kind return the name of client
-func (r Mongo) Kind() string {
+func (r *Mongo) Kind() string {
 	return Kind
 }
 
-// Config do the config check
-func (r Mongo) Config(gConf global.ProbeSettings) error {
+// checkData do the data checking
+func (r *Mongo) checkData() error {
 	if len(r.Data) > 0 {
 		for k, v := range r.Data {
 			if _, _, err := getDBCollection(k); err != nil {
@@ -101,7 +107,7 @@ func (r Mongo) Config(gConf global.ProbeSettings) error {
 }
 
 // Probe do the health check
-func (r Mongo) Probe() (bool, string) {
+func (r *Mongo) Probe() (bool, string) {
 
 	ctx, cancel := context.WithTimeout(r.Context, r.Timeout())
 	defer cancel()

@@ -31,7 +31,6 @@ import (
 // Driver Interface
 type Driver interface {
 	Kind() string
-	Config(global.ProbeSettings) error
 	Probe() (bool, string)
 }
 

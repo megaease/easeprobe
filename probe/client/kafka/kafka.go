@@ -20,8 +20,8 @@ package kafka
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 
-	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe/client/conf"
 	"github.com/segmentio/kafka-go"
 	"github.com/segmentio/kafka-go/sasl/plain"
@@ -39,30 +39,27 @@ type Kafka struct {
 }
 
 // New create a Kafka client
-func New(opt conf.Options) Kafka {
+func New(opt conf.Options) (*Kafka, error) {
 	tls, err := opt.TLS.Config()
 	if err != nil {
-		log.Errorf("[%s / %s / %s] - TLS Config error - %v", opt.ProbeKind, opt.ProbeName, opt.ProbeTag, err)
+		log.Errorf("[%s / %s / %s] - TLS Config Error - %v", opt.ProbeKind, opt.ProbeName, opt.ProbeTag, err)
+		return nil, fmt.Errorf("TLS Config Error - %v", err)
 	}
-	return Kafka{
+	k := &Kafka{
 		Options: opt,
 		tls:     tls,
 		Context: context.Background(),
 	}
+	return k, nil
 }
 
 // Kind return the name of client
-func (k Kafka) Kind() string {
+func (k *Kafka) Kind() string {
 	return Kind
 }
 
-// Config do the config check
-func (k Kafka) Config(gConf global.ProbeSettings) error {
-	return nil
-}
-
 // Probe do the health check
-func (k Kafka) Probe() (bool, string) {
+func (k *Kafka) Probe() (bool, string) {
 
 	var dialer *kafka.Dialer
 

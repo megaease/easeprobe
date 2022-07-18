@@ -25,7 +25,6 @@ import (
 
 	"bou.ke/monkey"
 	"github.com/bradfitz/gomemcache/memcache"
-	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe/client/conf"
 	"github.com/stretchr/testify/assert"
 )
@@ -37,9 +36,9 @@ func TestMemcache(t *testing.T) {
 		Data:       map[string]string{"sysconfig:event_active": "1"},
 	}
 
-	m := New(conf)
+	m, e := New(conf)
 	assert.Equal(t, "Memcache", m.Kind())
-	assert.Nil(t, m.Config(global.ProbeSettings{}))
+	assert.Nil(t, e)
 
 	// since memcached is not running
 	// confirm that we get error

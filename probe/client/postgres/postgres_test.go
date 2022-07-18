@@ -45,9 +45,15 @@ func TestPostgreSQL(t *testing.T) {
 		},
 	}
 
-	pg := New(conf)
+	pg, err := New(conf)
+	assert.Nil(t, pg)
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "TLS Config Error")
+
+	conf.TLS = global.TLS{}
+	pg, err = New(conf)
+	assert.Nil(t, err)
 	assert.Equal(t, "PostgreSQL", pg.Kind())
-	assert.Nil(t, pg.Config(global.ProbeSettings{}))
 	pgd := pgdriver.NewConnector(pg.ClientOptions...)
 	assert.Equal(t, conf.Host, pgd.Config().Addr)
 	assert.Equal(t, conf.Username, pgd.Config().User)
@@ -86,7 +92,7 @@ func TestPostgreSQL(t *testing.T) {
 		return &tls.Config{}, nil
 	})
 
-	pg = New(conf)
+	pg, err = New(conf)
 	pgd = pgdriver.NewConnector(pg.ClientOptions...)
 	assert.True(t, pgd.Config().TLSConfig.InsecureSkipVerify)
 
@@ -129,28 +135,26 @@ func TestData(t *testing.T) {
 		},
 	}
 
-	pg := New(conf)
-	err := pg.Config(global.ProbeSettings{})
+	pg, err := New(conf)
+	assert.Nil(t, pg)
 	assert.NotNil(t, err)
-	s, m := pg.Probe()
-	assert.False(t, s)
-	assert.Contains(t, m, "Empty SQL data")
+	assert.Contains(t, err.Error(), "Empty SQL data")
 
 	conf.Data = map[string]string{
 		"sql": "",
 	}
-	pg = New(conf)
-	s, m = pg.Probe()
-	assert.False(t, s)
-	assert.Contains(t, m, "Invalid SQL data")
+	pg, err = New(conf)
+	assert.Nil(t, pg)
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "Invalid SQL data")
 
 	conf.Data = map[string]string{
 		"database:table:column:key:value": "excepted",
 	}
-	pg = New(conf)
-	s, m = pg.Probe()
-	assert.False(t, s)
-	assert.Contains(t, m, "the value must be int")
+	pg, err = New(conf)
+	assert.Nil(t, pg)
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "the value must be int")
 
 	monkey.Patch(sql.OpenDB, func(c driver.Connector) *sql.DB {
 		return &sql.DB{}
@@ -178,8 +182,8 @@ func TestData(t *testing.T) {
 	conf.Data = map[string]string{
 		"database:table:column:key:1": "expected",
 	}
-	pg = New(conf)
-	s, m = pg.Probe()
+	pg, err = New(conf)
+	s, m := pg.Probe()
 	assert.True(t, s)
 	assert.Contains(t, m, "Successfully")
 
@@ -223,6 +227,13 @@ func TestData(t *testing.T) {
 	s, m = pg.Probe()
 	assert.False(t, s)
 	assert.Contains(t, m, "OpenDB error")
+
+	pg.Data = map[string]string{
+		"key": "value",
+	}
+	s, m = pg.Probe()
+	assert.False(t, s)
+	assert.Contains(t, m, "Invalid SQL data")
 
 	monkey.UnpatchAll()
 }

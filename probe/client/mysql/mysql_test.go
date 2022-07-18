@@ -45,15 +45,21 @@ func TestMySQL(t *testing.T) {
 		},
 	}
 
-	my := New(conf)
+	my, err := New(conf)
+	assert.Nil(t, my)
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "TLS Config Error")
+
+	conf.TLS = global.TLS{}
+	my, err = New(conf)
+	assert.Nil(t, err)
 	assert.Equal(t, "MySQL", my.Kind())
 	connStr := fmt.Sprintf("%s:%s@tcp(%s)/?timeout=%s",
 		conf.Username, conf.Password, conf.Host, conf.Timeout().Round(time.Second))
 	assert.Equal(t, connStr, my.ConnStr)
-	assert.Nil(t, my.Config(global.ProbeSettings{}))
 
 	conf.Password = ""
-	my = New(conf)
+	my, err = New(conf)
 	connStr = fmt.Sprintf("%s@tcp(%s)/?timeout=%s",
 		conf.Username, conf.Host, conf.Timeout().Round(time.Second))
 	assert.Equal(t, connStr, my.ConnStr)
@@ -89,7 +95,7 @@ func TestMySQL(t *testing.T) {
 		return nil
 	})
 
-	my = New(conf)
+	my, err = New(conf)
 	assert.NotNil(t, my.tls)
 	s, m = my.Probe()
 	assert.True(t, s)
@@ -118,6 +124,8 @@ func TestMySQL(t *testing.T) {
 	s, m = my.Probe()
 	assert.False(t, s)
 	assert.Contains(t, m, "connect error")
+
+	monkey.UnpatchAll()
 }
 
 func TestData(t *testing.T) {
@@ -138,28 +146,23 @@ func TestData(t *testing.T) {
 			"": "",
 		},
 	}
-	my := New(conf)
-	err := my.Config(global.ProbeSettings{})
+	my, err := New(conf)
 	assert.NotNil(t, err)
-	s, m := my.Probe()
-	assert.False(t, s)
-	assert.Contains(t, m, "Empty SQL data")
+	assert.Contains(t, err.Error(), "Empty SQL data")
 
 	conf.Data = map[string]string{
 		"key": "value",
 	}
-	my = New(conf)
-	s, m = my.Probe()
-	assert.False(t, s)
-	assert.Contains(t, m, "Invalid SQL data")
+	my, err = New(conf)
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "Invalid SQL data")
 
 	conf.Data = map[string]string{
 		"database:table:column:key:value": "expected",
 	}
-	my = New(conf)
-	s, m = my.Probe()
-	assert.False(t, s)
-	assert.Contains(t, m, "the value must be int")
+	my, err = New(conf)
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "the value must be int")
 
 	monkey.PatchInstanceMethod(reflect.TypeOf(db), "Ping", func(_ *sql.DB) error {
 		return nil
@@ -183,8 +186,8 @@ func TestData(t *testing.T) {
 	conf.Data = map[string]string{
 		"database:table:column:key:1": "expected",
 	}
-	my = New(conf)
-	s, m = my.Probe()
+	my, err = New(conf)
+	s, m := my.Probe()
 	assert.True(t, s)
 	assert.Contains(t, m, "Successfully")
 
@@ -221,6 +224,13 @@ func TestData(t *testing.T) {
 	s, m = my.Probe()
 	assert.False(t, s)
 	assert.Contains(t, m, "query error")
+
+	my.Data = map[string]string{
+		"key": "value",
+	}
+	s, m = my.Probe()
+	assert.False(t, s)
+	assert.Contains(t, m, "Invalid SQL data")
 
 	monkey.UnpatchAll()
 

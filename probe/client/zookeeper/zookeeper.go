@@ -20,6 +20,7 @@ package zookeeper
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"net"
 	"time"
 
@@ -40,31 +41,34 @@ type Zookeeper struct {
 }
 
 // New create a Zookeeper client
-func New(opt conf.Options) Zookeeper {
+func New(opt conf.Options) (*Zookeeper, error) {
 	tls, err := opt.TLS.Config()
 	if err != nil {
-		log.Errorf("[%s / %s / %s] - TLS Config error - %v", opt.ProbeKind, opt.ProbeName, opt.ProbeTag, err)
+		log.Errorf("[%s / %s / %s] - TLS Config Error - %v", opt.ProbeKind, opt.ProbeName, opt.ProbeTag, err)
+		return nil, fmt.Errorf("TLS Config Error - %v", err)
 	}
 
-	return Zookeeper{
+	z := &Zookeeper{
 		Options: opt,
 		tls:     tls,
 		Context: context.Background(),
 	}
+
+	return z, nil
 }
 
 // Kind return the name of client
-func (z Zookeeper) Kind() string {
+func (z *Zookeeper) Kind() string {
 	return Kind
 }
 
 // Config do the config check
-func (z Zookeeper) Config(gConf global.ProbeSettings) error {
+func (z *Zookeeper) Config(gConf global.ProbeSettings) error {
 	return nil
 }
 
 // Probe do the health check
-func (z Zookeeper) Probe() (bool, string) {
+func (z *Zookeeper) Probe() (bool, string) {
 	var (
 		conn *zk.Conn
 		err  error
@@ -85,7 +89,7 @@ func (z Zookeeper) Probe() (bool, string) {
 	return true, "Check Zookeeper Server Successfully!"
 }
 
-func getDialer(z Zookeeper) func(network string, address string, _ time.Duration) (net.Conn, error) {
+func getDialer(z *Zookeeper) func(network string, address string, _ time.Duration) (net.Conn, error) {
 	if z.tls == nil {
 		return net.DialTimeout
 	}

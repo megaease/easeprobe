@@ -39,9 +39,9 @@ func TestKaf(t *testing.T) {
 		TLS:        global.TLS{},
 	}
 
-	kaf := New(conf)
+	kaf, err := New(conf)
 	assert.Equal(t, "Kafka", kaf.Kind())
-	assert.Nil(t, kaf.Config(global.ProbeSettings{}))
+	assert.Nil(t, err)
 
 	var dialer *kafka.Dialer
 	monkey.PatchInstanceMethod(reflect.TypeOf(dialer), "DialContext", func(_ *kafka.Dialer, _ context.Context, _ string, _ string) (*kafka.Conn, error) {
@@ -79,9 +79,15 @@ func TestKafkaFailed(t *testing.T) {
 		},
 	}
 
-	kaf := New(conf)
+	kaf, err := New(conf)
 	//TLS failed
-	assert.Nil(t, kaf.tls)
+	assert.Nil(t, kaf)
+	assert.NotNil(t, err)
+
+	conf.TLS = global.TLS{}
+	kaf, err = New(conf)
+	assert.NotNil(t, kaf)
+	assert.Nil(t, err)
 	assert.Equal(t, "Kafka", kaf.Kind())
 
 	var dialer *kafka.Dialer

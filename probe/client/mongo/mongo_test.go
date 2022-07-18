@@ -47,9 +47,15 @@ func TestMongo(t *testing.T) {
 		},
 	}
 
-	mg := New(conf)
+	mg, err := New(conf)
+	assert.Nil(t, mg)
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "TLS Config Error")
+
+	conf.TLS = global.TLS{}
+	mg, err = New(conf)
 	assert.Equal(t, "Mongo", mg.Kind())
-	assert.Nil(t, mg.Config(global.ProbeSettings{}))
+	assert.Nil(t, err)
 	connStr := fmt.Sprintf("mongodb://%s:%s@%s/?connectTimeoutMS=%d",
 		conf.Username, conf.Password, conf.Host, conf.Timeout().Milliseconds())
 	assert.Equal(t, connStr, mg.ConnStr)
@@ -71,7 +77,7 @@ func TestMongo(t *testing.T) {
 	assert.Contains(t, m, "Successfully")
 
 	conf.Password = ""
-	mg = New(conf)
+	mg, err = New(conf)
 	connStr = fmt.Sprintf("mongodb://%s/?connectTimeoutMS=%d",
 		conf.Host, conf.Timeout().Milliseconds())
 	assert.Equal(t, connStr, mg.ConnStr)
@@ -85,7 +91,7 @@ func TestMongo(t *testing.T) {
 		return &tls.Config{}, nil
 	})
 
-	mg = New(conf)
+	mg, err = New(conf)
 	assert.Equal(t, "Mongo", mg.Kind())
 	assert.Equal(t, connStr, mg.ConnStr)
 	assert.NotNil(t, mg.ClientOpt.TLSConfig)
@@ -133,30 +139,25 @@ func TestDta(t *testing.T) {
 		},
 	}
 
-	mg := New(conf)
-	err := mg.Config(global.ProbeSettings{})
+	mg, err := New(conf)
+	assert.Nil(t, mg)
 	assert.NotNil(t, err)
-	s, m := mg.Probe()
-	assert.False(t, s)
-	assert.Contains(t, m, "Database Collection name is empty")
+	assert.Contains(t, err.Error(), "Database Collection name is empty")
 
 	conf.Data = map[string]string{
 		"key": "value",
 	}
-	mg = New(conf)
-	s, m = mg.Probe()
-	assert.False(t, s)
-	assert.Contains(t, m, "Invalid Format")
+	mg, err = New(conf)
+	assert.Nil(t, mg)
+	assert.Contains(t, err.Error(), "Invalid Format")
 
 	conf.Data = map[string]string{
 		"database:collection": "{'key' : 'value'}",
 	}
-	mg = New(conf)
-	err = mg.Config(global.ProbeSettings{})
+	mg, err = New(conf)
+	assert.Nil(t, mg)
 	assert.NotNil(t, err)
-	s, m = mg.Probe()
-	assert.False(t, s)
-	assert.Contains(t, m, "invalid JSON input")
+	assert.Contains(t, err.Error(), "invalid JSON input")
 
 	var collection *mongo.Collection
 	monkey.PatchInstanceMethod(reflect.TypeOf(collection), "FindOne", func(_ *mongo.Collection, _ context.Context, _ interface{}, _ ...*options.FindOneOptions) *mongo.SingleResult {
@@ -173,8 +174,8 @@ func TestDta(t *testing.T) {
 	conf.Data = map[string]string{
 		"database:collection": "{\"key\" : \"value\"}",
 	}
-	mg = New(conf)
-	s, m = mg.Probe()
+	mg, err = New(conf)
+	s, m := mg.Probe()
 	assert.True(t, s)
 	assert.Contains(t, m, "Successfully")
 
@@ -182,6 +183,20 @@ func TestDta(t *testing.T) {
 	s, m = mg.Probe()
 	assert.False(t, s)
 	assert.Contains(t, m, "Error")
+
+	mg.Data = map[string]string{
+		"database:collection": "{'key' : 'value'}",
+	}
+	s, m = mg.Probe()
+	assert.False(t, s)
+	assert.Contains(t, m, "invalid JSON input")
+
+	mg.Data = map[string]string{
+		"key": "value",
+	}
+	s, m = mg.Probe()
+	assert.False(t, s)
+	assert.Contains(t, m, "Invalid Format")
 
 	monkey.UnpatchAll()
 }
