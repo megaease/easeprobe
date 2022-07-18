@@ -37,8 +37,9 @@ type Shell struct {
 	Args              []string `yaml:"args,omitempty"`
 	Env               []string `yaml:"env,omitempty"`
 	CleanEnv          bool     `yaml:"clean_env,omitempty"`
-	Contain           string   `yaml:"contain,omitempty"`
-	NotContain        string   `yaml:"not_contain,omitempty"`
+
+	// Output Text Checker
+	probe.TextChecker `yaml:",inline"`
 
 	exitCode  int `yaml:"-"`
 	outputLen int `yaml:"-"`
@@ -53,6 +54,10 @@ func (s *Shell) Config(gConf global.ProbeSettings) error {
 	name := s.ProbeName
 	s.DefaultProbe.Config(gConf, kind, tag, name,
 		global.CommandLine(s.Command, s.Args), s.DoProbe)
+
+	if err := s.TextChecker.Config(); err != nil {
+		return err
+	}
 
 	s.metrics = newMetrics(kind, tag)
 
@@ -97,7 +102,8 @@ func (s *Shell) DoProbe() (bool, string) {
 
 	s.ExportMetrics()
 
-	if err := probe.CheckOutput(s.Contain, s.NotContain, string(output)); err != nil {
+	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, s.TextChecker.String())
+	if err := s.Check(string(output)); err != nil {
 		log.Errorf("[%s / %s] - %v", s.ProbeKind, s.ProbeName, err)
 		message = fmt.Sprintf("Error: %v", err)
 		status = false
