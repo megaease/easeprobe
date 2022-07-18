@@ -81,14 +81,14 @@ func (r *PostgreSQL) Kind() string {
 
 // checkData do the data checking
 func (r *PostgreSQL) checkData() error {
-	if len(r.Data) > 0 {
-		for k := range r.Data {
-			_, _, err := r.getSQL(k)
-			if err != nil {
-				return err
-			}
+
+	for k := range r.Data {
+		_, _, err := r.getSQL(k)
+		if err != nil {
+			return err
 		}
 	}
+
 	return nil
 }
 

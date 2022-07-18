@@ -92,17 +92,17 @@ func (r *Mongo) Kind() string {
 
 // checkData do the data checking
 func (r *Mongo) checkData() error {
-	if len(r.Data) > 0 {
-		for k, v := range r.Data {
-			if _, _, err := getDBCollection(k); err != nil {
-				return err
-			}
-			var bdoc interface{}
-			if err := bson.UnmarshalExtJSON([]byte(v), true, &bdoc); err != nil {
-				return err
-			}
+
+	for k, v := range r.Data {
+		if _, _, err := getDBCollection(k); err != nil {
+			return err
+		}
+		var bdoc interface{}
+		if err := bson.UnmarshalExtJSON([]byte(v), true, &bdoc); err != nil {
+			return err
 		}
 	}
+
 	return nil
 }
 

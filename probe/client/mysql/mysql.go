@@ -80,13 +80,13 @@ func (r *MySQL) Kind() string {
 
 // checkData do the data checking
 func (r *MySQL) checkData() error {
-	if len(r.Data) > 0 {
-		for k := range r.Data {
-			if _, err := r.getSQL(k); err != nil {
-				return err
-			}
+
+	for k := range r.Data {
+		if _, err := r.getSQL(k); err != nil {
+			return err
 		}
 	}
+
 	return nil
 }
 
