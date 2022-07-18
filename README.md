@@ -139,7 +139,7 @@ On application startup, the configured probes are scheduled for their initial fi
   - **PostgreSQL**. Connect to PostgreSQL server and run `SELECT 1` SQL.
   - **Zookeeper**. Connect to Zookeeper server and run `get /` command.
 
-  Most of them are supported to check the data whether is stored correctly.
+  Most of the clients support the additional validity check of data pulled from the service (such as checking a redis or memcache key for specific values). Check the documentation of the corresponding client for details on how to enable.
 
   ```YAML
   client:
@@ -766,7 +766,7 @@ host:
 
 ### 3.7 Native Client Probe Configuration
 
-Native Client probe using the SDK to communicate with the remote endpoint. And you can define multiple data, and EaseProbe would help to check the data whether is stored or not.
+Native Client probe uses the native GO SDK to communicate with the remote endpoints. Additionally to simple connectivity checks, you can also define key and data validity checks for EaseProbe, it will query for the given keys and verify the data stored on each service.
 
 ```YAML
 # Native Client Probe
