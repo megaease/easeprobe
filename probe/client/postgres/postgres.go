@@ -19,6 +19,9 @@ package postgres
 
 import (
 	"database/sql"
+	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/megaease/easeprobe/global"
@@ -40,14 +43,13 @@ type PostgreSQL struct {
 // revive:enable
 
 // New create a PostgreSQL client
-func New(opt conf.Options) PostgreSQL {
+func New(opt conf.Options) (*PostgreSQL, error) {
 	clientOptions := []pgdriver.Option{
 		pgdriver.WithNetwork("tcp"),
 		pgdriver.WithAddr(opt.Host),
 		pgdriver.WithUser(opt.Username),
 		pgdriver.WithTimeout(opt.Timeout().Round(time.Second)),
 		pgdriver.WithApplicationName(global.OrgProgVer),
-		pgdriver.WithDatabase("template1"),
 	}
 	if len(opt.Password) > 0 {
 		clientOptions = append(clientOptions, pgdriver.WithPassword(opt.Password))
@@ -55,41 +57,125 @@ func New(opt conf.Options) PostgreSQL {
 
 	tls, err := opt.TLS.Config()
 	if err != nil {
-		log.Errorf("[%s / %s / %s] - TLS Config error - %v", opt.ProbeKind, opt.ProbeName, opt.ProbeTag, err)
+		log.Errorf("[%s / %s / %s] - TLS Config Error - %v", opt.ProbeKind, opt.ProbeName, opt.ProbeTag, err)
+		return nil, fmt.Errorf("TLS Config Error - %v", err)
 	} else if tls != nil {
 		tls.InsecureSkipVerify = true
 		clientOptions = append(clientOptions, pgdriver.WithTLSConfig(tls))
 	}
 
-	return PostgreSQL{
+	pg := &PostgreSQL{
 		Options:       opt,
 		ClientOptions: clientOptions,
 	}
+	if err := pg.checkData(); err != nil {
+		return nil, err
+	}
+	return pg, nil
 }
 
 // Kind return the name of client
-func (r PostgreSQL) Kind() string {
+func (r *PostgreSQL) Kind() string {
 	return Kind
 }
 
+// checkData do the data checking
+func (r *PostgreSQL) checkData() error {
+
+	for k := range r.Data {
+		_, _, err := r.getSQL(k)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // Probe do the health check
-func (r PostgreSQL) Probe() (bool, string) {
-	db := sql.OpenDB(pgdriver.NewConnector(r.ClientOptions...))
-	if db == nil {
-		return false, "OpenDB error"
-	}
-	defer db.Close()
+func (r *PostgreSQL) Probe() (bool, string) {
 
-	if err := db.Ping(); err != nil {
-		return false, err.Error()
-	}
+	if len(r.Data) > 0 {
+		for k, v := range r.Data {
+			log.Debugf("[%s / %s / %s] - Verifying Data - [%s] : [%s]", r.ProbeKind, r.ProbeName, r.ProbeTag, k, v)
+			//connect to the database
+			dbName, sqlstr, err := r.getSQL(k)
+			if err != nil {
+				return false, fmt.Sprintf("Invalid SQL data - [%s], %v", v, err)
+			}
+			clientOptions := append(r.ClientOptions, pgdriver.WithDatabase(dbName))
+			db := sql.OpenDB(pgdriver.NewConnector(clientOptions...))
+			if db == nil {
+				return false, "OpenDB error"
+			}
+			// query the data
+			log.Debugf("[%s / %s / %s] - SQL - [%s]", r.ProbeKind, r.ProbeName, r.ProbeTag, sqlstr)
+			rows, err := db.Query(sqlstr)
+			if err != nil {
+				return false, fmt.Sprintf("Query error - [%s], %v", v, err)
+			}
+			if !rows.Next() {
+				rows.Close()
+				return false, fmt.Sprintf("No data found for [%s]", k)
+			}
+			//check the value is equal to the value in data
+			var value string
+			if err := rows.Scan(&value); err != nil {
+				rows.Close()
+				return false, err.Error()
+			}
+			if value != v {
+				rows.Close()
+				return false, fmt.Sprintf("Value not match for [%s] expected [%s] got [%s] ", k, v, value)
+			}
+			rows.Close()
+			db.Close()
+			log.Debugf("[%s / %s / %s] - Data Verified Successfully! - [%s] : [%s]", r.ProbeKind, r.ProbeName, r.ProbeTag, k, v)
+		}
+	} else {
+		r.ClientOptions = append(r.ClientOptions, pgdriver.WithDatabase("template1"))
+		db := sql.OpenDB(pgdriver.NewConnector(r.ClientOptions...))
+		if db == nil {
+			return false, "OpenDB error"
+		}
+		defer db.Close()
 
-	// run a SQL to test
-	row, err := db.Query(`SELECT 1`)
-	if err != nil {
-		return false, err.Error()
+		if err := db.Ping(); err != nil {
+			return false, err.Error()
+		}
+
+		// run a SQL to test
+		row, err := db.Query(`SELECT 1`)
+		if err != nil {
+			return false, err.Error()
+		}
+		row.Close()
 	}
-	row.Close()
 
 	return true, "Check PostgreSQL Server Successfully!"
+}
+
+// getSQL get the SQL statement
+// input: database:table:column:key:value
+// output: SELECT column FROM database.table WHERE key = value
+func (r *PostgreSQL) getSQL(str string) (string, string, error) {
+	if len(strings.TrimSpace(str)) == 0 {
+		return "", "", fmt.Errorf("Empty SQL data")
+	}
+	fields := strings.Split(str, ":")
+	if len(fields) != 5 {
+		return "", "", fmt.Errorf("Invalid SQL data - [%s]. (syntax: database:table:field:key:value)", str)
+	}
+	db := fields[0]
+	table := fields[1]
+	field := fields[2]
+	key := fields[3]
+	value := fields[4]
+	//check value is int or not
+	if _, err := strconv.Atoi(value); err != nil {
+		return "", "", fmt.Errorf("Invalid SQL data - [%s], the value must be int", str)
+	}
+
+	sql := fmt.Sprintf("SELECT %s FROM %s WHERE %s = %s", field, table, key, value)
+	return db, sql, nil
 }

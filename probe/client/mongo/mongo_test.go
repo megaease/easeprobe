@@ -47,8 +47,15 @@ func TestMongo(t *testing.T) {
 		},
 	}
 
-	mg := New(conf)
+	mg, err := New(conf)
+	assert.Nil(t, mg)
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "TLS Config Error")
+
+	conf.TLS = global.TLS{}
+	mg, err = New(conf)
 	assert.Equal(t, "Mongo", mg.Kind())
+	assert.Nil(t, err)
 	connStr := fmt.Sprintf("mongodb://%s:%s@%s/?connectTimeoutMS=%d",
 		conf.Username, conf.Password, conf.Host, conf.Timeout().Milliseconds())
 	assert.Equal(t, connStr, mg.ConnStr)
@@ -70,7 +77,7 @@ func TestMongo(t *testing.T) {
 	assert.Contains(t, m, "Successfully")
 
 	conf.Password = ""
-	mg = New(conf)
+	mg, err = New(conf)
 	connStr = fmt.Sprintf("mongodb://%s/?connectTimeoutMS=%d",
 		conf.Host, conf.Timeout().Milliseconds())
 	assert.Equal(t, connStr, mg.ConnStr)
@@ -84,7 +91,7 @@ func TestMongo(t *testing.T) {
 		return &tls.Config{}, nil
 	})
 
-	mg = New(conf)
+	mg, err = New(conf)
 	assert.Equal(t, "Mongo", mg.Kind())
 	assert.Equal(t, connStr, mg.ConnStr)
 	assert.NotNil(t, mg.ClientOpt.TLSConfig)
@@ -108,6 +115,88 @@ func TestMongo(t *testing.T) {
 	s, m = mg.Probe()
 	assert.False(t, s)
 	assert.Contains(t, m, "connect error")
+
+	monkey.UnpatchAll()
+}
+
+func TestDta(t *testing.T) {
+
+	monkey.Patch(mongo.Connect, func(ctx context.Context, opts ...*options.ClientOptions) (*mongo.Client, error) {
+		return &mongo.Client{}, nil
+	})
+	var client *mongo.Client
+	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Disconnect", func(_ *mongo.Client, _ context.Context) error {
+		return nil
+	})
+
+	conf := conf.Options{
+		Host:       "example.com",
+		DriverType: conf.Mongo,
+		Username:   "username",
+		Password:   "password",
+		Data: map[string]string{
+			"": "",
+		},
+	}
+
+	mg, err := New(conf)
+	assert.Nil(t, mg)
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "Database Collection name is empty")
+
+	conf.Data = map[string]string{
+		"key": "value",
+	}
+	mg, err = New(conf)
+	assert.Nil(t, mg)
+	assert.Contains(t, err.Error(), "Invalid Format")
+
+	conf.Data = map[string]string{
+		"database:collection": "{'key' : 'value'}",
+	}
+	mg, err = New(conf)
+	assert.Nil(t, mg)
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "invalid JSON input")
+
+	var collection *mongo.Collection
+	monkey.PatchInstanceMethod(reflect.TypeOf(collection), "FindOne", func(_ *mongo.Collection, _ context.Context, _ interface{}, _ ...*options.FindOneOptions) *mongo.SingleResult {
+		return &mongo.SingleResult{}
+	})
+	var result *mongo.SingleResult
+	monkey.PatchInstanceMethod(reflect.TypeOf(result), "Err", func(_ *mongo.SingleResult) error {
+		return nil
+	})
+	monkey.PatchInstanceMethod(reflect.TypeOf(result), "Decode", func(_ *mongo.SingleResult, _ interface{}) error {
+		return nil
+	})
+
+	conf.Data = map[string]string{
+		"database:collection": "{\"key\" : \"value\"}",
+	}
+	mg, err = New(conf)
+	s, m := mg.Probe()
+	assert.True(t, s)
+	assert.Contains(t, m, "Successfully")
+
+	monkey.UnpatchInstanceMethod(reflect.TypeOf(result), "Err")
+	s, m = mg.Probe()
+	assert.False(t, s)
+	assert.Contains(t, m, "Error")
+
+	mg.Data = map[string]string{
+		"database:collection": "{'key' : 'value'}",
+	}
+	s, m = mg.Probe()
+	assert.False(t, s)
+	assert.Contains(t, m, "invalid JSON input")
+
+	mg.Data = map[string]string{
+		"key": "value",
+	}
+	s, m = mg.Probe()
+	assert.False(t, s)
+	assert.Contains(t, m, "Invalid Format")
 
 	monkey.UnpatchAll()
 }

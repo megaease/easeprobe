@@ -20,6 +20,7 @@ package zookeeper
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"net"
 	"time"
 
@@ -39,26 +40,29 @@ type Zookeeper struct {
 }
 
 // New create a Zookeeper client
-func New(opt conf.Options) Zookeeper {
+func New(opt conf.Options) (*Zookeeper, error) {
 	tls, err := opt.TLS.Config()
 	if err != nil {
-		log.Errorf("[%s / %s / %s] - TLS Config error - %v", opt.ProbeKind, opt.ProbeName, opt.ProbeTag, err)
+		log.Errorf("[%s / %s / %s] - TLS Config Error - %v", opt.ProbeKind, opt.ProbeName, opt.ProbeTag, err)
+		return nil, fmt.Errorf("TLS Config Error - %v", err)
 	}
 
-	return Zookeeper{
+	z := &Zookeeper{
 		Options: opt,
 		tls:     tls,
 		Context: context.Background(),
 	}
+
+	return z, nil
 }
 
 // Kind return the name of client
-func (z Zookeeper) Kind() string {
+func (z *Zookeeper) Kind() string {
 	return Kind
 }
 
 // Probe do the health check
-func (z Zookeeper) Probe() (bool, string) {
+func (z *Zookeeper) Probe() (bool, string) {
 	var (
 		conn *zk.Conn
 		err  error
@@ -71,15 +75,29 @@ func (z Zookeeper) Probe() (bool, string) {
 	}
 	defer conn.Close()
 
-	_, _, err = conn.Get("/")
-	if err != nil {
-		return false, err.Error()
+	if len(z.Data) > 0 {
+		for path, val := range z.Data {
+			log.Debugf("[%s / %s / %s] - Verifying Data - Path = [%s], Value=[%s]", z.ProbeKind, z.ProbeName, z.ProbeTag, path, val)
+			v, _, err := conn.Get(path)
+			if err != nil {
+				return false, err.Error()
+			}
+			if string(v) != val {
+				return false, fmt.Sprintf("Data not match - Path = [%s], expected [%s] got [%s]", path, val, string(v))
+			}
+			log.Debugf("[%s / %s / %s] - Data Verified Successfully! Path = [%s], Value=[%s]", z.ProbeKind, z.ProbeName, z.ProbeTag, path, val)
+		}
+	} else {
+		_, _, err = conn.Get("/")
+		if err != nil {
+			return false, err.Error()
+		}
 	}
 
 	return true, "Check Zookeeper Server Successfully!"
 }
 
-func getDialer(z Zookeeper) func(network string, address string, _ time.Duration) (net.Conn, error) {
+func getDialer(z *Zookeeper) func(network string, address string, _ time.Duration) (net.Conn, error) {
 	if z.tls == nil {
 		return net.DialTimeout
 	}

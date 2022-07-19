@@ -44,7 +44,15 @@ func TestRedis(t *testing.T) {
 		},
 	}
 
-	r := New(conf)
+	r, err := New(conf)
+	assert.Nil(t, r)
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "TLS Config Error")
+
+	conf.TLS = global.TLS{}
+	r, err = New(conf)
+	assert.NotNil(t, r)
+	assert.Nil(t, err)
 	assert.Equal(t, "Redis", r.Kind())
 	assert.Nil(t, r.tls)
 
@@ -69,7 +77,10 @@ func TestRedis(t *testing.T) {
 	monkey.PatchInstanceMethod(reflect.TypeOf(tc), "Config", func(_ *global.TLS) (*tls.Config, error) {
 		return &tls.Config{}, nil
 	})
-	r = New(conf)
+
+	r, err = New(conf)
+	assert.NotNil(t, r)
+	assert.Nil(t, err)
 	assert.NotNil(t, r.tls)
 
 	s, m = r.Probe()
@@ -86,4 +97,49 @@ func TestRedis(t *testing.T) {
 
 	monkey.UnpatchAll()
 
+}
+
+func TestData(t *testing.T) {
+	conf := conf.Options{
+		Host:       "example.com",
+		DriverType: conf.Redis,
+		Username:   "username",
+		Password:   "password",
+		Data: map[string]string{
+			"key1": "value1",
+		},
+	}
+
+	r, err := New(conf)
+	assert.NotNil(t, r)
+	assert.Nil(t, err)
+
+	var client *redis.Client
+	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Get", func(_ *redis.Client, ctx context.Context, key string) *redis.StringCmd {
+		return &redis.StringCmd{}
+	})
+	var cmd *redis.StringCmd
+	monkey.PatchInstanceMethod(reflect.TypeOf(cmd), "Result", func(_ *redis.StringCmd) (string, error) {
+		return "value1", nil
+	})
+
+	s, m := r.Probe()
+	assert.True(t, s)
+	assert.Contains(t, m, "Successfully")
+
+	monkey.PatchInstanceMethod(reflect.TypeOf(cmd), "Result", func(_ *redis.StringCmd) (string, error) {
+		return "value", nil
+	})
+	s, m = r.Probe()
+	assert.False(t, s)
+	assert.Contains(t, m, "value")
+
+	monkey.PatchInstanceMethod(reflect.TypeOf(cmd), "Result", func(_ *redis.StringCmd) (string, error) {
+		return "", fmt.Errorf("get result error")
+	})
+	s, m = r.Probe()
+	assert.False(t, s)
+	assert.Contains(t, m, "get result error")
+
+	monkey.UnpatchAll()
 }

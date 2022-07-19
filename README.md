@@ -139,12 +139,18 @@ On application startup, the configured probes are scheduled for their initial fi
   - **PostgreSQL**. Connect to PostgreSQL server and run `SELECT 1` SQL.
   - **Zookeeper**. Connect to Zookeeper server and run `get /` command.
 
+  Most of the clients support the additional validity check of data pulled from the service (such as checking a redis or memcache key for specific values). Check the documentation of the corresponding client for details on how to enable.
+
   ```YAML
   client:
-    - name: Kafka Native Client (local)
-      driver: "kafka"
-      host: "localhost:9093"
-      # mTLS
+    - name: MySQL Native Client (local)
+      driver: "mysql"
+      host: "localhost:3306"
+      user: "root"
+      password: "pass"
+      data: # Optional - Data to check
+        "database:table:column:id:100": "value"
+      # mTLS - Optional
       ca: /path/to/file.ca
       cert: /path/to/file.crt
       key: /path/to/file.key
@@ -760,6 +766,8 @@ host:
 
 ### 3.7 Native Client Probe Configuration
 
+Native Client probe uses the native GO SDK to communicate with the remote endpoints. Additionally to simple connectivity checks, you can also define key and data validity checks for EaseProbe, it will query for the given keys and verify the data stored on each service.
+
 ```YAML
 # Native Client Probe
 client:
@@ -767,7 +775,9 @@ client:
     driver: "redis"  # driver is redis
     host: "localhost:6379"  # server and port
     password: "abc123" # password
-    # mTLS
+    data:         # Optional
+      key: val    # Check that `key` exists and its value is `val`
+    # mTLS - Optional
     ca: /path/to/file.ca
     cert: /path/to/file.crt
     key: /path/to/file.key
@@ -777,6 +787,16 @@ client:
     host: "localhost:3306"
     username: "root"
     password: "pass"
+    data: # Optional, check the specific column value in the table
+      #  Usage: "database:table:column:primary_key:value" : "expected_value"
+      #         transfer to : "SELECT column FROM database.table WHERE primary_key = value"
+      #         the `value` for `primary_key` must be int
+      "test:product:name:id:1" : "EaseProbe" # select name from test.product where id = 1
+      "test:employee:age:id:2" : 45          # select age from test.employee where id = 2
+    # mTLS - Optional
+    ca: /path/to/file.ca
+    cert: /path/to/file.crt
+    key: /path/to/file.key
 
   - name: MongoDB Native Client (local)
     driver: "mongo"
@@ -784,6 +804,10 @@ client:
     username: "admin"
     password: "abc123"
     timeout: 5s
+    data: # Optional, find the specific value in the table
+      #  Usage: "database:collection" : "{JSON}"
+      "test:employee" : '{"name":"Hao Chen"}' # find the employee with name "Hao Chen"
+      "test:product" : '{"name":"EaseProbe"}' # find the product with name "EaseProbe"
 
   - name: Memcache Native Client (local)
     driver: "memcache"
@@ -796,7 +820,7 @@ client:
   - name: Kafka Native Client (local)
     driver: "kafka"
     host: "localhost:9093"
-    # mTLS
+    # mTLS - Optional
     ca: /path/to/file.ca
     cert: /path/to/file.crt
     key: /path/to/file.key
@@ -806,12 +830,24 @@ client:
     host: "localhost:5432"
     username: "postgres"
     password: "pass"
+    data: # Optional, check the specific column value in the table
+      #  Usage: "database:table:column:primary_key:value" : "expected_value"
+      #         transfer to : "SELECT column FROM table WHERE primary_key = value"
+      #         the `value` for `primary_key` must be int
+      "test:product:name:id:1" : "EaseProbe" # select name from product where id = 1
+      "test:employee:age:id:2" : 45          # select age from employee where id = 2
+    # mTLS - Optional
+    ca: /path/to/file.ca
+    cert: /path/to/file.crt
+    key: /path/to/file.key
 
   - name: Zookeeper Native Client (local)
     driver: "zookeeper"
     host: "localhost:2181"
     timeout: 5s
-    # mTLS
+    data: # Optional, check the specific value in the path
+      "/path/to/key": "value" # Check that the value of the `/path/to/key` is "value"
+    # mTLS - Optional
     ca: /path/to/file.ca
     cert: /path/to/file.crt
     key: /path/to/file.key

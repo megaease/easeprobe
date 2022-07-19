@@ -20,6 +20,8 @@ package conf
 import (
 	"encoding/json"
 	"fmt"
+	"net"
+	"strconv"
 	"strings"
 
 	"github.com/megaease/easeprobe/global"
@@ -71,6 +73,21 @@ type Options struct {
 
 	//TLS
 	global.TLS `yaml:",inline"`
+}
+
+// Check do the configuration check
+func (d *Options) Check() error {
+	_, port, err := net.SplitHostPort(d.Host)
+	if err != nil {
+		return fmt.Errorf("Invalid Host: %s. %v", d.Host, err)
+	}
+	if p, err := strconv.Atoi(port); err != nil || p < 1 || p > 65535 {
+		return fmt.Errorf("Invalid Port: %s", port)
+	}
+	if d.DriverType == Unknown {
+		return fmt.Errorf("Unknown driver")
+	}
+	return nil
 }
 
 // DriverTypeMap is the map of driver [name, driver]

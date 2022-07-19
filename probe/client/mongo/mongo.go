@@ -20,9 +20,11 @@ package mongo
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/megaease/easeprobe/probe/client/conf"
 	log "github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -40,7 +42,7 @@ type Mongo struct {
 }
 
 // New create a Mongo client
-func New(opt conf.Options) Mongo {
+func New(opt conf.Options) (*Mongo, error) {
 	var conn string
 	if len(opt.Password) > 0 {
 		conn = fmt.Sprintf("mongodb://%s:%s@%s/?connectTimeoutMS=%d",
@@ -49,6 +51,8 @@ func New(opt conf.Options) Mongo {
 		conn = fmt.Sprintf("mongodb://%s/?connectTimeoutMS=%d",
 			opt.Host, opt.Timeout().Milliseconds())
 	}
+
+	log.Debugf("[%s / %s / %s] - Connection - %s", opt.ProbeKind, opt.ProbeName, opt.ProbeTag, conn)
 
 	var maxConn uint64 = 1
 	client := options.Client().ApplyURI(conn)
@@ -60,27 +64,50 @@ func New(opt conf.Options) Mongo {
 
 	tls, err := opt.TLS.Config()
 	if err != nil {
-		log.Errorf("[%s / %s / %s] - TLS Config error - %v", opt.ProbeKind, opt.ProbeName, opt.ProbeTag, err)
+		log.Errorf("[%s / %s / %s] - TLS Config Error - %v", opt.ProbeKind, opt.ProbeName, opt.ProbeTag, err)
+		return nil, fmt.Errorf("TLS Config Error - %v", err)
 	} else if tls != nil {
 		client.TLSConfig = tls
 		client.SetAuth(options.Credential{AuthMechanism: "MONGODB-X509"})
 	}
 
-	return Mongo{
+	mongo := &Mongo{
 		Options:   opt,
 		ConnStr:   conn,
 		ClientOpt: client,
 		Context:   context.Background(),
 	}
+
+	if err := mongo.checkData(); err != nil {
+		return nil, err
+	}
+
+	return mongo, nil
 }
 
 // Kind return the name of client
-func (r Mongo) Kind() string {
+func (r *Mongo) Kind() string {
 	return Kind
 }
 
+// checkData do the data checking
+func (r *Mongo) checkData() error {
+
+	for k, v := range r.Data {
+		if _, _, err := getDBCollection(k); err != nil {
+			return err
+		}
+		var bdoc interface{}
+		if err := bson.UnmarshalExtJSON([]byte(v), true, &bdoc); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // Probe do the health check
-func (r Mongo) Probe() (bool, string) {
+func (r *Mongo) Probe() (bool, string) {
 
 	ctx, cancel := context.WithTimeout(r.Context, r.Timeout())
 	defer cancel()
@@ -92,15 +119,53 @@ func (r Mongo) Probe() (bool, string) {
 
 	defer db.Disconnect(ctx)
 
-	// Call Ping to verify that the deployment is up and the Client was
-	// configured successfully. As mentioned in the Ping documentation, this
-	// reduces application resiliency as the server may be temporarily
-	// unavailable when Ping is called.
-	err = db.Ping(ctx, readpref.Primary())
-	if err != nil {
-		return false, err.Error()
+	if len(r.Data) > 0 {
+		for key, value := range r.Data {
+			log.Debugf("[%s / %s / %s] - Verifying Data - [%s]: [%s]", r.ProbeKind, r.ProbeName, r.ProbeTag, key, value)
+			dbName, collectionName, err := getDBCollection(key)
+			if err != nil {
+				return false, fmt.Sprintf("[%s] Error - %v", key, err)
+			}
+			collection := db.Database(dbName).Collection(collectionName)
+			var bdoc interface{}
+			err = bson.UnmarshalExtJSON([]byte(value), true, &bdoc)
+			if err != nil {
+				return false, fmt.Sprintf("[%s] Error - %v", value, err)
+			}
+			result := collection.FindOne(ctx, bdoc)
+			if err := result.Err(); err != nil {
+				return false, fmt.Sprintf("Find [%s] Error - %v", value, err)
+			}
+			var doc bson.M
+			result.Decode(&doc)
+			log.Debugf("[%s / %s / %s] - Find [%s] - %+v", r.ProbeKind, r.ProbeName, r.ProbeTag, value, doc)
+			log.Debugf("[%s / %s / %s] - Data Verified Successfully - [%s]: [%s]", r.ProbeKind, r.ProbeName, r.ProbeTag, key, value)
+		}
+	} else {
+		// Call Ping to verify that the deployment is up and the Client was
+		// configured successfully. As mentioned in the Ping documentation, this
+		// reduces application resiliency as the server may be temporarily
+		// unavailable when Ping is called.
+		err = db.Ping(ctx, readpref.Primary())
+		if err != nil {
+			return false, err.Error()
+		}
 	}
 
 	return true, "Check MongoDB Server Successfully!"
 
+}
+
+func getDBCollection(str string) (database, collection string, err error) {
+	if len(strings.TrimSpace(str)) == 0 {
+		return "", "", fmt.Errorf("Database Collection name is empty")
+	}
+	fields := strings.Split(str, ":")
+	if len(fields) != 2 {
+		err = fmt.Errorf("Invalid Format - [%s] (syntax: database.collection) ", str)
+		return
+	}
+	database = fields[0]
+	collection = fields[1]
+	return
 }

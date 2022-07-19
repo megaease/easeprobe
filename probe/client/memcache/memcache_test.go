@@ -36,8 +36,9 @@ func TestMemcache(t *testing.T) {
 		Data:       map[string]string{"sysconfig:event_active": "1"},
 	}
 
-	m := New(conf)
+	m, e := New(conf)
 	assert.Equal(t, "Memcache", m.Kind())
+	assert.Nil(t, e)
 
 	// since memcached is not running
 	// confirm that we get error

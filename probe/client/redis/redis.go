@@ -20,6 +20,7 @@ package redis
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/megaease/easeprobe/probe/client/conf"
@@ -37,27 +38,29 @@ type Redis struct {
 }
 
 // New create a Redis client
-func New(opt conf.Options) Redis {
+func New(opt conf.Options) (*Redis, error) {
 
 	tls, err := opt.TLS.Config()
 	if err != nil {
-		log.Errorf("[%s / %s / %s] - TLS Config error - %v", opt.ProbeKind, opt.ProbeName, opt.ProbeTag, err)
+		log.Errorf("[%s / %s / %s] - TLS Config Error - %v", opt.ProbeKind, opt.ProbeName, opt.ProbeTag, err)
+		return nil, fmt.Errorf("TLS Config Error - %v", err)
 	}
 
-	return Redis{
+	r := Redis{
 		Options: opt,
 		tls:     tls,
 		Context: context.Background(),
 	}
+	return &r, nil
 }
 
 // Kind return the name of client
-func (r Redis) Kind() string {
+func (r *Redis) Kind() string {
 	return Kind
 }
 
 // Probe do the health check
-func (r Redis) Probe() (bool, string) {
+func (r *Redis) Probe() (bool, string) {
 
 	rdb := redis.NewClient(&redis.Options{
 		Addr:        r.Host,
@@ -69,14 +72,26 @@ func (r Redis) Probe() (bool, string) {
 
 	ctx, cancel := context.WithTimeout(r.Context, r.Timeout())
 	defer cancel()
-
-	_, err := rdb.Ping(ctx).Result()
-
 	defer rdb.Close()
 
-	if err != nil {
-		return false, err.Error()
+	// Check if we need to query specific keys or not
+	if len(r.Data) > 0 {
+		for k, v := range r.Data {
+			log.Debugf("[%s / %s / %s] Verifying Data -  key = [%s], value = [%s]", r.ProbeKind, r.ProbeName, r.ProbeTag, k, v)
+			val, err := rdb.Get(ctx, k).Result()
+			if err != nil {
+				return false, fmt.Sprintf("Get Key [%s] Error - %v", k, err)
+			}
+			if val != v {
+				return false, fmt.Sprintf("Key [%s] expected [%s] got [%s]", k, v, val)
+			}
+			log.Debugf("[%s / %s / %s] Data Verified Successfully! key= [%s], value = [%s]", r.ProbeKind, r.ProbeName, r.ProbeTag, k, v)
+		}
+	} else {
+		_, err := rdb.Ping(ctx).Result()
+		if err != nil {
+			return false, err.Error()
+		}
 	}
 	return true, "Ping Redis Server Successfully!"
-
 }
