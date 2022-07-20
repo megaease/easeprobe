@@ -67,7 +67,7 @@ func toFloat(str string) (float64, error) {
 func toInt(str string) (int, error) {
 	return strconv.Atoi(str)
 }
-func getNum[T any](str string, _default T, convert func(string)(T, error) ) T {
+func getNum[T any](str string, _default T, convert func(string) (T, error)) T {
 	if str == "" {
 		return _default
 	}
