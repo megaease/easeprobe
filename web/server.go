@@ -73,7 +73,7 @@ func getNum[T any](str string, _default T, convert func(string) (T, error)) T {
 	}
 	n, err := convert(str)
 	if err != nil {
-		log.Debugf("[Web] Invalid int value: %s", err)
+		log.Debugf("[Web] Invalid number value: %s", err)
 		return _default
 	}
 	return n
