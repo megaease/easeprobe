@@ -83,7 +83,7 @@ func (e *Endpoint) SSHConfig(kind, name string, timeout time.Duration) (*ssh.Cli
 		var signer ssh.Signer
 
 		if len(e.PrivatePassword) > 0 {
-			signer, err = ssh.ParsePrivateKeyWithPassphrase([]byte(e.PrivateKey), key)
+			signer, err = ssh.ParsePrivateKeyWithPassphrase(key, []byte(e.PrivatePassword))
 		} else {
 			signer, err = ssh.ParsePrivateKey(key)
 		}
