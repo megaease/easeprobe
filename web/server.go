@@ -61,28 +61,22 @@ func getStatus(status string) *probe.Status {
 	return &s
 }
 
-func getFloat(f string, _default float64) float64 {
-	if f == "" {
-		return _default
-	}
-	flt, err := strconv.ParseFloat(f, 64)
-	if err != nil {
-		log.Debugf("[Web] Invalid float value: %s", err)
-		return _default
-	}
-	return flt
+func toFloat(str string) (float64, error) {
+	return strconv.ParseFloat(str, 64)
 }
-
-func getInt(i string, _default int) int {
-	if i == "" {
+func toInt(str string) (int, error) {
+	return strconv.Atoi(str)
+}
+func getNum[T any](str string, _default T, convert func(string) (T, error)) T {
+	if str == "" {
 		return _default
 	}
-	it, err := strconv.Atoi(i)
+	n, err := convert(str)
 	if err != nil {
-		log.Debugf("[Web] Invalid int value: %s", err)
+		log.Debugf("[Web] Invalid number value: %s", err)
 		return _default
 	}
-	return it
+	return n
 }
 
 func getFilter(req *http.Request) (*report.SLAFilter, error) {
@@ -93,10 +87,10 @@ func getFilter(req *http.Request) (*report.SLAFilter, error) {
 	filter.Endpoint = strings.TrimSpace(req.URL.Query().Get("ep"))
 	filter.Status = getStatus(req.URL.Query().Get("status"))
 	filter.Message = strings.TrimSpace(req.URL.Query().Get("msg"))
-	filter.SLAGreater = getFloat(req.URL.Query().Get("gte"), 0)
-	filter.SLALess = getFloat(req.URL.Query().Get("lte"), 100)
-	filter.PageNum = getInt(req.URL.Query().Get("pg"), 1)
-	filter.PageSize = getInt(req.URL.Query().Get("sz"), global.DefaultPageSize)
+	filter.SLAGreater = getNum(req.URL.Query().Get("gte"), 0, toFloat)
+	filter.SLALess = getNum(req.URL.Query().Get("lte"), 100, toFloat)
+	filter.PageNum = getNum(req.URL.Query().Get("pg"), 1, toInt)
+	filter.PageSize = getNum(req.URL.Query().Get("sz"), global.DefaultPageSize, toInt)
 
 	if err := filter.Check(); err != nil {
 		log.Errorf(err.Error())
