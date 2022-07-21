@@ -104,6 +104,7 @@ On application startup, the configured probes are scheduled for their initial fi
         host: ubuntu@172.10.1.1:22
         password: xxxxxxx
         key: /Users/user/.ssh/id_rsa
+        private_password: xxxxxxx
         cmd: "ps auxwe | grep easeprobe | grep -v grep"
         contain: easeprobe
   ```
@@ -679,6 +680,7 @@ ssh:
       username: ubuntu  # SSH Login username
       password: xxxxx   # SSH Login password
       key: /path/to/private.key # SSH login private file
+      private_password: xxxxxxx  # PrivateKey password
       cmd: "redis-cli"
       args:
         - "-h"

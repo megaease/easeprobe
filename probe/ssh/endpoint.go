@@ -29,11 +29,12 @@ import (
 
 // Endpoint is SSH Endpoint
 type Endpoint struct {
-	PrivateKey string      `yaml:"key"`
-	Host       string      `yaml:"host"`
-	User       string      `yaml:"username"`
-	Password   string      `yaml:"password"`
-	client     *ssh.Client `yaml:"-"`
+	PrivateKey      string      `yaml:"key"`
+	Host            string      `yaml:"host"`
+	User            string      `yaml:"username"`
+	Password        string      `yaml:"password"`
+	PrivatePassword string      `yaml:"private_password"`
+	client          *ssh.Client `yaml:"-"`
 }
 
 // ParseHost check the host is configured the port or not
@@ -79,7 +80,14 @@ func (e *Endpoint) SSHConfig(kind, name string, timeout time.Duration) (*ssh.Cli
 		}
 
 		// Create the Signer for this private key.
-		signer, err := ssh.ParsePrivateKey(key)
+		var signer ssh.Signer
+
+		if len(e.PrivatePassword) > 0 {
+			signer, err = ssh.ParsePrivateKeyWithPassphrase([]byte(e.PrivateKey), key)
+		} else {
+			signer, err = ssh.ParsePrivateKey(key)
+		}
+
 		if err != nil {
 			return nil, err
 		}
