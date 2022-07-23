@@ -41,6 +41,7 @@ import (
 type HTTP struct {
 	base.DefaultProbe `yaml:",inline"`
 	URL               string            `yaml:"url"`
+	Proxy             string            `yaml:"proxy"`
 	ContentEncoding   string            `yaml:"content_encoding,omitempty"`
 	Method            string            `yaml:"method,omitempty"`
 	Headers           map[string]string `yaml:"headers,omitempty"`
@@ -98,9 +99,22 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 	// security check
 	log.Debugf("[%s / %s] the security checks %s", h.ProbeKind, h.ProbeName, strconv.FormatBool(h.Insecure))
 
+	// proxy server
+	proxy := http.ProxyFromEnvironment
+	if len(strings.TrimSpace(h.Proxy)) > 0 {
+		proxyURL, err := url.Parse(h.Proxy)
+		if err != nil {
+			log.Errorf("[%s / %s] proxy URL is not valid - %+v", h.ProbeKind, h.ProbeName, err)
+			return err
+		}
+		proxy = http.ProxyURL(proxyURL)
+		log.Debugf("[%s / %s] proxy server is %s", h.ProbeKind, h.ProbeName, proxyURL)
+	}
+
 	h.client = &http.Client{
 		Timeout: h.Timeout(),
 		Transport: &http.Transport{
+			Proxy:             proxy,
 			TLSClientConfig:   tls,
 			DisableKeepAlives: true,
 			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
@@ -159,14 +173,13 @@ func (h *HTTP) DoProbe() (bool, string) {
 	if len(h.ContentEncoding) > 0 {
 		req.Header.Set("Content-Type", h.ContentEncoding)
 	}
+	req.Header.Set("User-Agent", global.OrgProgVer)
 	for k, v := range h.Headers {
 		req.Header.Set(k, v)
 	}
 
 	// client close the connection
 	req.Close = true
-
-	req.Header.Set("User-Agent", global.OrgProgVer)
 
 	// Tracing HTTP request
 	// set the http client trace
