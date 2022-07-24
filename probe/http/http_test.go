@@ -82,6 +82,14 @@ func TestHTTPConfig(t *testing.T) {
 	assert.NotNil(t, h.TLS)
 	assert.Equal(t, "GET", h.Method)
 
+	h.Proxy = "http://uername:password@proxy.example.com:8080"
+	err = h.Config(global.ProbeSettings{})
+	assert.NoError(t, err)
+
+	h.Proxy = "\nexample.com"
+	err = h.Config(global.ProbeSettings{})
+	assert.Error(t, err)
+
 	monkey.UnpatchAll()
 }
 

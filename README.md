@@ -548,10 +548,16 @@ http:
   # A completed HTTP Probe configuration
   - name: Special Website
     url: https://megaease.cn
+    # Proxy setting, support sock5, http, https, for example:
+    #   proxy: http://proxy.server:8080
+    #   proxy: socks5://localhost:1085
+    #   proxy: https://user:password@proxy.example.com:443
+    proxy: http://proxy.server:8080
     # Request Method
     method: GET
     # Request Header
     headers:
+      User-Agent: Customized User-Agent # default: "MegaEase EaseProbe / v1.6.0"
       X-head-one: xxxxxx
       X-head-two: yyyyyy
       X-head-THREE: zzzzzzX-
