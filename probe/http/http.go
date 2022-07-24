@@ -41,7 +41,7 @@ import (
 type HTTP struct {
 	base.DefaultProbe `yaml:",inline"`
 	URL               string            `yaml:"url"`
-	Proxy			 string            `yaml:"proxy"`
+	Proxy             string            `yaml:"proxy"`
 	ContentEncoding   string            `yaml:"content_encoding,omitempty"`
 	Method            string            `yaml:"method,omitempty"`
 	Headers           map[string]string `yaml:"headers,omitempty"`
@@ -113,8 +113,8 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 			if ok {
 				log.Debugf("[%s / %s] dial %s:%s", h.ProbeKind, h.ProbeName, network, addr)
 				tcpConn.SetLinger(0) // disable the default TCP delayed-close behavior,
-									 // which send the RST to the peer when the connection is closed.
-									 // this would remove the TIME_wAIT state of the TCP connection.
+				// which send the RST to the peer when the connection is closed.
+				// this would remove the TIME_wAIT state of the TCP connection.
 				return tcpConn, nil
 			}
 			return conn, nil
@@ -133,7 +133,7 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 	}
 
 	h.client = &http.Client{
-		Timeout: h.Timeout(),
+		Timeout:   h.Timeout(),
 		Transport: transport,
 	}
 
