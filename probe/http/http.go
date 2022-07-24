@@ -41,7 +41,7 @@ import (
 type HTTP struct {
 	base.DefaultProbe `yaml:",inline"`
 	URL               string            `yaml:"url"`
-	Proxy             string            `yaml:"proxy"`
+	Proxy			 string            `yaml:"proxy"`
 	ContentEncoding   string            `yaml:"content_encoding,omitempty"`
 	Method            string            `yaml:"method,omitempty"`
 	Headers           map[string]string `yaml:"headers,omitempty"`
@@ -99,39 +99,42 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 	// security check
 	log.Debugf("[%s / %s] the security checks %s", h.ProbeKind, h.ProbeName, strconv.FormatBool(h.Insecure))
 
+	// create http transport configuration
+	transport := &http.Transport{
+		TLSClientConfig:   tls,
+		DisableKeepAlives: true,
+		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+			d := net.Dialer{Timeout: h.Timeout()}
+			conn, err := d.DialContext(ctx, network, addr)
+			if err != nil {
+				return nil, err
+			}
+			tcpConn, ok := conn.(*net.TCPConn)
+			if ok {
+				log.Debugf("[%s / %s] dial %s:%s", h.ProbeKind, h.ProbeName, network, addr)
+				tcpConn.SetLinger(0) // disable the default TCP delayed-close behavior,
+									 // which send the RST to the peer when the connection is closed.
+									 // this would remove the TIME_wAIT state of the TCP connection.
+				return tcpConn, nil
+			}
+			return conn, nil
+		},
+	}
+
 	// proxy server
-	proxy := http.ProxyFromEnvironment
 	if len(strings.TrimSpace(h.Proxy)) > 0 {
 		proxyURL, err := url.Parse(h.Proxy)
 		if err != nil {
 			log.Errorf("[%s / %s] proxy URL is not valid - %+v", h.ProbeKind, h.ProbeName, err)
 			return err
 		}
-		proxy = http.ProxyURL(proxyURL)
+		transport.Proxy = http.ProxyURL(proxyURL)
 		log.Debugf("[%s / %s] proxy server is %s", h.ProbeKind, h.ProbeName, proxyURL)
 	}
 
 	h.client = &http.Client{
 		Timeout: h.Timeout(),
-		Transport: &http.Transport{
-			Proxy:             proxy,
-			TLSClientConfig:   tls,
-			DisableKeepAlives: true,
-			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-				d := net.Dialer{Timeout: h.Timeout()}
-				conn, err := d.DialContext(ctx, network, addr)
-				if err != nil {
-					return nil, err
-				}
-				tcpConn, ok := conn.(*net.TCPConn)
-				if ok {
-					log.Debugf("[%s / %s] dial %s:%s", h.ProbeKind, h.ProbeName, network, addr)
-					tcpConn.SetLinger(0)
-					return tcpConn, nil
-				}
-				return conn, nil
-			},
-		},
+		Transport: transport,
 	}
 
 	if !checkHTTPMethod(h.Method) {
