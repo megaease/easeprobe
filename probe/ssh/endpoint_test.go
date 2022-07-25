@@ -85,4 +85,30 @@ YWwBAg==
 	config, err = e.SSHConfig("ssh", "test", 30*time.Second)
 	assert.Nil(t, err)
 	assert.NotNil(t, config)
+
+	e.Passphrase = "123"
+	monkey.Patch(ioutil.ReadFile, func(filename string) ([]byte, error) {
+		return []byte(`
+-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAACmFlczI1Ni1jdHIAAAAGYmNyeXB0AAAAGAAAABBdkMia9n
+8kS8QhkzdcB1fcAAAAEAAAAAEAAACXAAAAB3NzaC1yc2EAAAADAQABAAAAgQCxg/1PL60U
+IQGBfMopFoMjdcujc/AvyycubRQiH2L8MVnPk7q7whRXMVHjlKX7zOnVzOMUMAwUov+rge
+mLZtYVxMuGomHwD0Lc2wrHdmwgk+3fuTPX8VBZOEmErISZHi1q/9JxzZFybmXXkIfNk6FZ
+CGXKWJ2dNBo2UxOKCxumqwAAAhAnEomH6JMqjVcnxxtUcvX+wtADoAEDh3Iw/HWK4OPHfQ
+CzuW0rJGiuOkDs24QQxHgskqPEWwgC/aTfYMX9u2jPo8w2ta2NpiP4RsQ3cVoL32i25np4
+JuYo4P/3Od3j82DnyV8NVwtN0m4EazCmY+aVM3iT/3VfhmTI4o/e0ZO/sMF8sxZTn8yUZa
+W3MLSN1j4Nc5sKnOdTF8bQslJYWL2z9Q48E+y7XTkHGMZmmRfv4EKGHu4Nle/cRsLS5WSX
+/eIUhUUI9FF4HD+Wmi+RTTBV1PdpaL6O4For6ot0i+CYotxe72++JmO51KCpKeVbWQiUgE
+EyXgVoFPqg47SKpLKneFysRH9P0rEwVjx7Q2tYc3XeOENcs0gtgS7HHtNFzO1LRNWtZ8HA
+v5v32pULoiuYtbgFeywmTGciLohsDtHfPKz0VHBdecjlYj8y/96BQ79V504QXt8j1dVdZ2
+bAh6YI/rkK6kmTfZ7DvS8+ZDw/dJYln/31hiBqomkpsm64IPdcWtAGI8LqfIhYcfz60MqT
+i/TNs5nhmqQDEcwD/Sq0YR2ItMAx7W5j1EZ72zpHa9KTjm+z/JKXlA6Cm2WN/pnO06gShZ
+DX4y9QvXoaUiQ5vB63voiqRTBT4hTYBDVi2G7NEjIczNs9S8JQM5Mg52mZsdH77g6ChUPp
+1gmeAwg2IKBY2y+HzQ/5xub5KjGDG6E=
+-----END OPENSSH PRIVATE KEY-----
+`), nil
+	})
+	config, err = e.SSHConfig("ssh", "test", 30*time.Second)
+	assert.Nil(t, err)
+	assert.NotNil(t, config)
 }
