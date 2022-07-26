@@ -33,6 +33,7 @@ type Endpoint struct {
 	Host       string      `yaml:"host"`
 	User       string      `yaml:"username"`
 	Password   string      `yaml:"password"`
+	Passphrase string      `yaml:"passphrase"`
 	client     *ssh.Client `yaml:"-"`
 }
 
@@ -79,7 +80,14 @@ func (e *Endpoint) SSHConfig(kind, name string, timeout time.Duration) (*ssh.Cli
 		}
 
 		// Create the Signer for this private key.
-		signer, err := ssh.ParsePrivateKey(key)
+		var signer ssh.Signer
+
+		if len(e.Passphrase) > 0 {
+			signer, err = ssh.ParsePrivateKeyWithPassphrase(key, []byte(e.Passphrase))
+		} else {
+			signer, err = ssh.ParsePrivateKey(key)
+		}
+
 		if err != nil {
 			return nil, err
 		}
