@@ -14,11 +14,11 @@ build_image() {
 }
 
 show_usage() {
-   printf "usage: build_image.sh [-i IMAGE_NAME] [-v IMAGE_VERSION] -d ROOT_RESPOSITORY_DIR [-f DOCKER_FILE] \n"
+   printf "usage: build_image.sh [-i IMAGE_NAME] [-v IMAGE_VERSION] -d ROOT_REPOSITORY_DIR [-f DOCKER_FILE] \n"
    printf "\t-i IMAGE_NAME the name of building image, default is megaease/easestash\n"
    printf "\t-v IMAGE_VERSION the version of building image, default is 0.1.0-alpine\n"
-   printf "\t-d ROOT_RESPOSITORY_DIR the root directory of repository\n"
-   printf "\t-f DOCKER_FILE the location of Dockerfile, if it's ommited, default location is ROOT_RESPOSITORY_DIR/resources/rootfs/Dockerfile\n"
+   printf "\t-d ROOT_REPOSITORY_DIR the root directory of repository\n"
+   printf "\t-f DOCKER_FILE the location of Dockerfile, if it's omitted, default location is ROOT_REPOSITORY_DIR/resources/rootfs/Dockerfile\n"
    printf ""
 }
 
