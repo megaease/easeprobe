@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-**Enviornment (please complete the following information):**
+**Environment (please complete the following information):**
  - OS: [Linux: uname -a]
  - EaseProbe Version [e.g. v1.2.0]
 
