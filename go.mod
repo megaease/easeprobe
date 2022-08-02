@@ -14,7 +14,7 @@ require (
 	github.com/go-zookeeper/zk v1.0.3
 	github.com/prometheus/client_golang v1.12.2
 	github.com/segmentio/kafka-go v0.4.33
-	github.com/sirupsen/logrus v1.8.1
+	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/testify v1.8.0
 	github.com/uptrace/bun/driver/pgdriver v1.1.7
 	go.mongodb.org/mongo-driver v1.10.0
