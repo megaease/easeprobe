@@ -916,6 +916,7 @@ notify:
   dingtalk:
     - name: "dingtalk alert service"
       webhook: "https://oapi.dingtalk.com/robot/send?access_token=xxxx"
+      secret: "" # sign secret if set
   # Notify to Lark
   lark:
     - name: "lark alert service"
