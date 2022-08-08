@@ -85,7 +85,7 @@ func main() {
 
 	c, err := conf.New(yamlFile)
 	if err != nil {
-		log.Fatalln("Fatal: Cannot read the YAML configuration file!")
+		log.Errorln("Fatal: Cannot read the YAML configuration file!")
 		os.Exit(-1)
 	}
 
@@ -93,7 +93,7 @@ func main() {
 	if len(strings.TrimSpace(c.Settings.PIDFile)) > 0 {
 		d, err := daemon.NewPIDFile(c.Settings.PIDFile)
 		if err != nil {
-			log.Fatalf("Fatal: Cannot create the PID file: %s!", err)
+			log.Errorf("Fatal: Cannot create the PID file: %s!", err)
 			os.Exit(-1)
 		}
 		log.Infof("Successfully created the PID file: %s", d.PIDFile)
