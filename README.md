@@ -221,6 +221,7 @@ notify:
   dingtalk:
     - name: "dingtalk alert service"
       webhook: "https://oapi.dingtalk.com/robot/send?access_token=xxxx"
+      secret: "" # sign secret if set
   lark:
     - name: "lark alert service"
       webhook: "https://open.feishu.cn/open-apis/bot/v2/hook/d5366199-xxxx-xxxx-bd81-a57d1dd95de4"
