@@ -66,7 +66,7 @@ func (c *NotifyConfig) SendDingtalkNotification(title, msg string) error {
 			"text": "%s"
 		}
 	}
-	`, title, msg)
+	`, report.JSONEscape(title), report.JSONEscape(msg))
 	req, err := http.NewRequest(http.MethodPost, addSign(c.WebhookURL, c.SignSecret), bytes.NewBuffer([]byte(msgContent)))
 	if err != nil {
 		return err
