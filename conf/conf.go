@@ -54,6 +54,7 @@ func Get() *Conf {
 // Schedule is the schedule.
 type Schedule int
 
+// Schedule enum
 const (
 	Hourly Schedule = iota
 	Daily
