@@ -26,12 +26,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-//SysLogFormatter is log custom format
+// SysLogFormatter is log custom format
 type SysLogFormatter struct {
 	Type Type `yaml:"-"`
 }
 
-//Format details
+// Format details
 func (s *SysLogFormatter) Format(entry *log.Entry) ([]byte, error) {
 	if s.Type == SysLog {
 		return []byte(fmt.Sprintf("%s\n", entry.Message)), nil

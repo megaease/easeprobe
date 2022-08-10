@@ -29,6 +29,7 @@ import (
 	"testing"
 
 	"bou.ke/monkey"
+	"github.com/megaease/easeprobe/eval"
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/base"
@@ -45,6 +46,18 @@ func createHTTP() *HTTP {
 		TextChecker: probe.TextChecker{
 			Contain:    "good",
 			NotContain: "bad",
+		},
+		Evaluator: eval.Evaluator{
+			Variables: []eval.Variable{
+				{
+					Name:  "name",
+					Type:  eval.String,
+					Query: "//name",
+					Value: nil,
+				},
+			},
+			DocType:    eval.JSON,
+			Expression: "name == 'EaseProbe'",
 		},
 		User: "user",
 		Pass: "pass",
@@ -134,12 +147,23 @@ func TestHTTPDoProbe(t *testing.T) {
 		}, nil
 	})
 	monkey.Patch(ioutil.ReadAll, func(r io.Reader) ([]byte, error) {
-		return []byte("good"), nil
+		return []byte(`{ "name": "EaseProbe", "status": "good"}`), nil
 	})
 
 	s, m := h.DoProbe()
 	assert.True(t, s)
 	assert.Contains(t, m, "200")
+
+	// evaluate error
+	h.Evaluator.Expression = "name == 'N/A'"
+	s, m = h.DoProbe()
+	assert.False(t, s)
+	assert.Contains(t, m, "Expression is evaluated to false")
+
+	h.Evaluator.Variables[0].Query = "///name"
+	s, m = h.DoProbe()
+	assert.False(t, s)
+	assert.Contains(t, m, "Evaluation Error")
 
 	// response does not contain good string
 	monkey.Patch(ioutil.ReadAll, func(r io.Reader) ([]byte, error) {
