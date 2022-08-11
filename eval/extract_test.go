@@ -86,10 +86,9 @@ func TestHTMLExtractor(t *testing.T) {
 
 	extractor.XPath = "//div[@id='person']/div[@class='birth']"
 	extractor.VarType = Time
-	extractor.TimeFormat = "2006-01-02"
 	result, err = extractor.Extract()
 	assert.Nil(t, err)
-	expected, _ := time.Parse(extractor.TimeFormat, "1984-10-12")
+	expected, _ := tryParseTime("1984-10-12")
 	assert.Equal(t, expected, result)
 
 	extractor.XPath = "//div[@id='person']/div[@class='work']"
@@ -188,10 +187,9 @@ func TestJSONExtractor(t *testing.T) {
 
 	extractor.XPath = "//company/person/*[name='Bob']/birth"
 	extractor.VarType = Time
-	extractor.TimeFormat = "2006-01-02"
 	result, err = extractor.Extract()
 	assert.Nil(t, err)
-	expected, _ := time.Parse(extractor.TimeFormat, "1984-10-12")
+	expected, _ := tryParseTime("1984-10-12")
 	assert.Equal(t, expected, result)
 
 	extractor.XPath = "//*/email[contains(.,'bob')]"
@@ -270,10 +268,9 @@ func TestXMLExtractor(t *testing.T) {
 
 	extractor.XPath = "//person[name='Bob']/birth"
 	extractor.VarType = Time
-	extractor.TimeFormat = "2006-01-02"
 	result, err = extractor.Extract()
 	assert.Nil(t, err)
-	expected, _ := time.Parse(extractor.TimeFormat, "1984-10-12")
+	expected, _ := tryParseTime("1984-10-12")
 	assert.Equal(t, expected, result)
 
 	extractor.XPath = "//person[name='Bob']/work"
@@ -313,10 +310,9 @@ func TestRegexExtractor(t *testing.T) {
 
 	extractor.Regex = "birth: (?P<birth>\\d{4}-\\d{2}-\\d{2})"
 	extractor.VarType = Time
-	extractor.TimeFormat = "2006-01-02"
 	result, err = extractor.Extract()
 	assert.Nil(t, err)
-	expected, _ := time.Parse(extractor.TimeFormat, "1984-10-12")
+	expected, _ := tryParseTime("1984-10-12")
 	assert.Equal(t, expected, result)
 
 	extractor.Regex = "work: (?P<work>\\d+[hms])"

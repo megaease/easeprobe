@@ -98,7 +98,7 @@ func TestHTMLEval(t *testing.T) {
 	assert.True(t, result)
 
 	// test duration() function
-	eval = NewEvaluator(htmlDoc, HTML, "duration(rt) < 1000")
+	eval = NewEvaluator(htmlDoc, HTML, "duration(rt) < duration('1s')")
 	eval.AddVariable(NewVariable("rt", String, "//div[@id='resp_time']"))
 	result, err = eval.Evaluate()
 	assert.Nil(t, err)
@@ -163,10 +163,11 @@ func TestJSONEval(t *testing.T) {
 }
 
 func TestXMLEval(t *testing.T) {
+	now := time.Now().Format(time.RFC3339)
 	xmlDoc := `
 	<root>
 		<name>Server</name>
-		<time>` + time.Now().Format(time.RFC3339) + `</time>
+		<time>` + now + `</time>
 		<cpu>0.88</cpu>
 		<mem_used>512</mem_used>
 		<mem_total>1024</mem_total>
@@ -178,6 +179,12 @@ func TestXMLEval(t *testing.T) {
 	v := NewVariable("name", String, "//name")
 	eval.AddVariable(v)
 	result, err := eval.Evaluate()
+	assert.Nil(t, err)
+	assert.True(t, result)
+
+	eval = NewEvaluator(xmlDoc, XML, `time == '`+now+`'`)
+	eval.AddVariable(NewVariable("time", Time, "//time"))
+	result, err = eval.Evaluate()
 	assert.Nil(t, err)
 	assert.True(t, result)
 
@@ -221,6 +228,8 @@ func TestFailure(t *testing.T) {
 	assert.False(t, result)
 
 	eval = NewEvaluator("", Unsupported, "")
+	v = NewVariable("name", String, "//name")
+	eval.AddVariable(v)
 	result, err = eval.Evaluate()
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "Unsupported")
@@ -251,4 +260,90 @@ func TestFailure(t *testing.T) {
 	assert.False(t, result)
 
 	monkey.UnpatchAll()
+}
+
+func TestExtractFunc(t *testing.T) {
+	now := time.Now().Format(time.RFC3339)
+	xmlDoc := `
+	<root>
+		<name>Server</name>
+		<time>` + now + `</time>
+		<cpu>0.88</cpu>
+		<mem_used>512</mem_used>
+		<mem_total>1024</mem_total>
+		<resp_time>500ms</resp_time>
+		<live>true</live>
+		<date>2022-08-11 10:10:10</date>
+	</root>`
+
+	eval := NewEvaluator(xmlDoc, XML, "x_str('//name') == 'Server'")
+	result, err := eval.Evaluate()
+	assert.Nil(t, err)
+	assert.True(t, result)
+
+	eval = NewEvaluator(xmlDoc, XML, "x_time('//time') == '"+now+"'")
+	result, err = eval.Evaluate()
+	assert.Nil(t, err)
+	assert.True(t, result)
+
+	eval = NewEvaluator(xmlDoc, XML, "x_float('//cpu') < 0.9")
+	result, err = eval.Evaluate()
+	assert.Nil(t, err)
+	assert.True(t, result)
+
+	eval = NewEvaluator(xmlDoc, XML, "x_int('//mem_used') < 800")
+	result, err = eval.Evaluate()
+	assert.Nil(t, err)
+	assert.True(t, result)
+
+	eval = NewEvaluator(xmlDoc, XML, "x_int('//mem_used') / x_int('//mem_total') < 0.8")
+	result, err = eval.Evaluate()
+	assert.Nil(t, err)
+	assert.True(t, result)
+
+	eval = NewEvaluator(xmlDoc, XML, "x_duration('//resp_time') < duration('1000ms')")
+	result, err = eval.Evaluate()
+	assert.Nil(t, err)
+	assert.True(t, result)
+
+	eval = NewEvaluator(xmlDoc, XML, "x_bool('//live')")
+	result, err = eval.Evaluate()
+	assert.Nil(t, err)
+	assert.True(t, result)
+
+	eval = NewEvaluator(xmlDoc, XML, "x_time('//date') == '2022-08-11 10:10:10'")
+	result, err = eval.Evaluate()
+	assert.Nil(t, err)
+	assert.True(t, result)
+
+	eval = NewEvaluator(xmlDoc, XML, "x_time('//error') == '2022-08-11 10:10:11'")
+	result, err = eval.Evaluate()
+	assert.NotNil(t, err)
+	assert.False(t, result)
+
+	eval = NewEvaluator(xmlDoc, XML, "x_int('//error') < 10")
+	result, err = eval.Evaluate()
+	assert.NotNil(t, err)
+	assert.False(t, result)
+}
+
+func TestSetDocument(t *testing.T) {
+	text := `name: Server, cpu: 0.8, mem_used: 512, mem_total: 1024, resp_time: 256ms, live: true`
+
+	eval := NewEvaluator(text, TEXT, "x_str('name: (?P<name>[a-zA-Z0-9 ]*)') == 'Server'")
+	result, err := eval.Evaluate()
+	assert.Nil(t, err)
+	assert.True(t, result)
+
+	eval.SetDocument(TEXT, "name: Server, cpu: 0.5, mem_used: 512, mem_total: 1024, resp_time: 256ms, live: true")
+	eval.Expression = "x_float('cpu: (?P<cpu>[0-9.]*)') < 0.6"
+	result, err = eval.Evaluate()
+	assert.Nil(t, err)
+	assert.True(t, result)
+
+	eval.SetDocument(JSON, `{"name": "Server", "cpu": 0.3, "mem_used": 512, "mem_total": 1024, "resp_time": "256ms", "live": true}`)
+	eval.Expression = "x_float('//cpu') < 0.4"
+	result, err = eval.Evaluate()
+	assert.Nil(t, err)
+	assert.True(t, result)
 }

@@ -162,6 +162,10 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 		return err
 	}
 
+	if err := h.Evaluator.Config(); err != nil {
+		return err
+	}
+
 	h.metrics = newMetrics(kind, tag)
 
 	log.Debugf("[%s / %s] configuration: %+v", h.ProbeKind, h.ProbeName, h)
@@ -230,10 +234,11 @@ func (h *HTTP) DoProbe() (bool, string) {
 		return false, message
 	}
 
-	if h.Evaluator.DocType != eval.Unsupported &&
+	if h.Evaluator.DocType != eval.Unsupported && h.Evaluator.Extractor != nil &&
 		len(strings.TrimSpace(h.Evaluator.Expression)) > 0 {
+
 		log.Debugf("[%s / %s] - Evaluator expression: %s", h.ProbeKind, h.ProbeName, h.Evaluator.Expression)
-		h.Evaluator.Document = string(response)
+		h.Evaluator.SetDocument(h.Evaluator.DocType, string(response))
 		result, err := h.Evaluator.Evaluate()
 		if err != nil {
 			log.Errorf("[%s / %s] - %v", h.ProbeKind, h.ProbeName, err)

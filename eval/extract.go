@@ -34,15 +34,14 @@ import (
 type Extractor interface {
 	SetQuery(string)
 	SetVarType(VarType)
-	SetTimeFormat(string)
+	SetDocument(string)
 	Extract() (interface{}, error)
 }
 
 // BaseExtractor is the base extractor
 type BaseExtractor struct {
-	Name         string  `yaml:"name"`        // variable name
-	VarType      VarType `yaml:"type"`        // variable type
-	TimeFormat   string  `yaml:"time_format"` // time format
+	Name         string  `yaml:"name"` // variable name
+	VarType      VarType `yaml:"type"` // variable type
 	Document     string  `yaml:"-"`
 	ExtractStrFn func() (string, error)
 }
@@ -52,9 +51,9 @@ func (x *BaseExtractor) SetVarType(t VarType) {
 	x.VarType = t
 }
 
-// SetTimeFormat sets the time format
-func (x *BaseExtractor) SetTimeFormat(format string) {
-	x.TimeFormat = format
+// SetDocument sets the document
+func (x *BaseExtractor) SetDocument(doc string) {
+	x.Document = doc
 }
 
 // Extract extracts the value from the document by xpath expression
@@ -109,7 +108,48 @@ func (x *BaseExtractor) ExtractTime() (time.Time, error) {
 	if err != nil {
 		return time.Time{}, err
 	}
-	return time.Parse(x.TimeFormat, s)
+	return tryParseTime(s)
+}
+
+// copy from: https://github.com/Knetic/govaluate/blob/master/parsing.go#L473
+func tryParseTime(str string) (time.Time, error) {
+
+	timeFormats := [...]string{
+		time.ANSIC,
+		time.UnixDate,
+		time.RubyDate,
+		time.Kitchen,
+		time.RFC3339,
+		time.RFC3339Nano,
+		"2006-01-02",                         // RFC 3339
+		"2006-01-02 15:04",                   // RFC 3339 with minutes
+		"2006-01-02 15:04:05",                // RFC 3339 with seconds
+		"2006-01-02 15:04:05-07:00",          // RFC 3339 with seconds and timezone
+		"2006-01-02T15Z0700",                 // ISO8601 with hour
+		"2006-01-02T15:04Z0700",              // ISO8601 with minutes
+		"2006-01-02T15:04:05Z0700",           // ISO8601 with seconds
+		"2006-01-02T15:04:05.999999999Z0700", // ISO8601 with nanoseconds
+	}
+
+	for _, format := range timeFormats {
+		ret, err := tryParseExactTime(str, format)
+		if err == nil {
+			return ret, nil
+		}
+	}
+
+	return time.Time{}, fmt.Errorf("Cannot parse the time: %s", str)
+}
+
+func tryParseExactTime(candidate string, format string) (time.Time, error) {
+	var ret time.Time
+	var err error
+
+	ret, err = time.ParseInLocation(format, candidate, time.Local)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return ret, nil
 }
 
 // ExtractDuration extracts the value from the document by xpath expression
