@@ -29,6 +29,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func assertResult(t *testing.T, eval *Evaluator, success bool) {
+	result, err := eval.Evaluate()
+	if success {
+		assert.Nil(t, err)
+		assert.True(t, result)
+	} else {
+		assert.NotNil(t, err)
+		assert.False(t, result)
+	}
+}
+
 func TestHTMLEval(t *testing.T) {
 	htmlTemp := `
 	<html>
@@ -48,68 +59,82 @@ func TestHTMLEval(t *testing.T) {
 	</html>`
 	htmlDoc := fmt.Sprintf(htmlTemp, time.Now().Format(time.RFC3339))
 
+	// ---- test message ----
 	eval := NewEvaluator(htmlDoc, HTML, "message == 'service is ok'")
-	v := NewVariable("message", String, "//div[@id='message']")
+	v := NewVariable("message", String, `//div[@id="message"]`)
 	eval.AddVariable(v)
-	result, err := eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
 
+	eval = NewEvaluator(htmlDoc, HTML, "x_str('//div[@id=\\'message\\']') == 'service is ok'")
+	assertResult(t, eval, true)
+
+	// ---- test title ----
 	eval.CleanVariable()
 	eval.AddVariable(NewVariable("title", String, "//h1"))
 	eval.Expression = "title =~ 'World'"
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
 
+	eval = NewEvaluator(htmlDoc, HTML, "x_str('//h1') =~ 'World'")
+	assertResult(t, eval, true)
+
+	// ---- test memory ----
 	eval = NewEvaluator(htmlDoc, HTML, "(mem_used / mem_total) < 0.8")
 	eval.AddVariable(NewVariable("mem_used", Int, "//div[@id='mem_used']"))
 	eval.AddVariable(NewVariable("mem_total", Int, "//div[@id='mem_total']"))
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
 
+	eval = NewEvaluator(htmlDoc, HTML, "x_int('//div[@id=\\'mem_used\\']') / x_int('//div[@id=\\'mem_total\\']') < 0.8")
+	assertResult(t, eval, true)
+
+	// ---- test time ----
 	pass := time.Now().Add(-10 * time.Second)
 	eval = NewEvaluator(htmlDoc, HTML, "time > '"+pass.Format(time.RFC3339)+"'")
 	eval.AddVariable(NewVariable("time", Time, "//div[@id='time']"))
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
 
+	eval = NewEvaluator(htmlDoc, HTML, "x_time('//div[@id=\\'time\\']') > '"+pass.Format(time.RFC3339)+"'")
+	assertResult(t, eval, true)
+
+	// ---- test live ----
 	eval = NewEvaluator(htmlDoc, HTML, "!live")
 	eval.AddVariable(NewVariable("live", Bool, "//div[@id='live']"))
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
+
+	eval = NewEvaluator(htmlDoc, HTML, "!x_bool('//div[@id=\\'live\\']')")
+	assertResult(t, eval, true)
 
 	// test  strlen() function
 	eval = NewEvaluator(htmlDoc, HTML, "strlen(title) > 10")
 	eval.AddVariable(NewVariable("title", String, "//title"))
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
+
+	eval = NewEvaluator(htmlDoc, HTML, "strlen(x_str('//title')) > 10")
+	assertResult(t, eval, true)
 
 	// test now() function
 	htmlDoc = fmt.Sprintf(htmlTemp, pass.Format(time.RFC3339))
 	eval = NewEvaluator(htmlDoc, HTML, "now() - time > 5")
 	eval.AddVariable(NewVariable("time", Time, "//div[@id='time']"))
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
+
+	eval = NewEvaluator(htmlDoc, HTML, "now() - x_time('//div[@id=\\'time\\']') > 5")
+	assertResult(t, eval, true)
 
 	// test duration() function
 	eval = NewEvaluator(htmlDoc, HTML, "duration(rt) < duration('1s')")
 	eval.AddVariable(NewVariable("rt", String, "//div[@id='resp_time']"))
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
+
+	eval = NewEvaluator(htmlDoc, HTML, "x_duration('//div[@id=\\'resp_time\\']') < duration('1s')")
+	assertResult(t, eval, true)
 
 	// test duration() function error
 	eval = NewEvaluator(htmlDoc, HTML, "duration(rt) < '1000'")
 	eval.AddVariable(NewVariable("rt", String, "//div[@id='time']"))
-	result, err = eval.Evaluate()
-	assert.NotNil(t, err)
-	assert.False(t, result)
+	assertResult(t, eval, false)
+
+	eval = NewEvaluator(htmlDoc, HTML, "duration(x_str('//div[@id=\\'time\\']')) < '1000'")
+	assertResult(t, eval, false)
 }
 
 func TestJSONEval(t *testing.T) {
@@ -121,45 +146,57 @@ func TestJSONEval(t *testing.T) {
 		"resp_time": "500ms"
 	}`
 
+	// ---- test name ----
 	eval := NewEvaluator(json, JSON, "name == 'Server'")
 	v := NewVariable("name", String, "//name")
 	eval.AddVariable(v)
-	result, err := eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
 
+	eval = NewEvaluator(json, JSON, "x_str('//name') == 'Server'")
+	assertResult(t, eval, true)
+
+	// ---- test time ----
 	eval = NewEvaluator(json, JSON, `time > '`+time.Now().Add(-10*time.Second).Format(time.RFC3339)+`'`)
 	eval.AddVariable(NewVariable("time", Time, "//time"))
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
 
+	eval = NewEvaluator(json, JSON, "x_time('//time') > '"+time.Now().Add(-10*time.Second).Format(time.RFC3339)+"'")
+	assertResult(t, eval, true)
+
+	// ---- test memory ----
 	eval = NewEvaluator(json, JSON, "(mem_used / mem_total) < 0.8")
 	eval.AddVariable(NewVariable("mem_used", Int, "//mem_used"))
 	eval.AddVariable(NewVariable("mem_total", Int, "//mem_total"))
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
 
+	eval = NewEvaluator(json, JSON, "x_int('//mem_used') / x_int('//mem_total') < 0.8")
+	assertResult(t, eval, true)
+
+	// ---- test resp_time ----
 	eval = NewEvaluator(json, JSON, "duration(rt) ")
 	eval.AddVariable(NewVariable("rt", String, "//resp_time"))
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
 
+	eval = NewEvaluator(json, JSON, "x_duration('//resp_time') < duration('1s')")
+	assertResult(t, eval, true)
+
+	// ---- test string concat ----
 	eval = NewEvaluator(json, JSON, "name + ' ' + time")
 	eval.AddVariable(NewVariable("name", String, "//name"))
 	eval.AddVariable(NewVariable("time", String, "//time"))
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
 
+	eval = NewEvaluator(json, JSON, "strlen(x_str('//name') + ' ' + x_str('//time')) > 10")
+	assertResult(t, eval, true)
+
+	// ----- test minus ----
 	eval = NewEvaluator(json, JSON, "mem_total - mem_used")
 	eval.AddVariable(NewVariable("mem_used", Int, "//mem_used"))
 	eval.AddVariable(NewVariable("mem_total", Int, "//mem_total"))
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
+
+	eval = NewEvaluator(json, JSON, "x_int('//mem_total') - x_int('//mem_used')")
+	assertResult(t, eval, true)
 }
 
 func TestXMLEval(t *testing.T) {
@@ -175,47 +212,62 @@ func TestXMLEval(t *testing.T) {
 		<live>true</live>
 	</root>`
 
+	// ---- test name ----
 	eval := NewEvaluator(xmlDoc, XML, "name == 'Server'")
 	v := NewVariable("name", String, "//name")
 	eval.AddVariable(v)
-	result, err := eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
 
-	eval = NewEvaluator(xmlDoc, XML, `time == '`+now+`'`)
-	eval.AddVariable(NewVariable("time", Time, "//time"))
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	eval = NewEvaluator(xmlDoc, XML, "x_str('//name') == 'Server'")
+	assertResult(t, eval, true)
 
+	eval.CleanVariable()
+	eval.Expression = "x_str('//name') == 'Server'"
+	assertResult(t, eval, true)
+
+	// ---- test time ----
+	eval = NewEvaluator(xmlDoc, XML, `t == '`+now+`'`)
+	eval.AddVariable(NewVariable("t", Time, "//time"))
+	assertResult(t, eval, true)
+
+	eval.CleanVariable()
+	eval.Expression = "x_time('//time') == '" + now + "'"
+	assertResult(t, eval, true)
+
+	// ---- test cpu , memory and live ----
 	eval = NewEvaluator(xmlDoc, XML, "live && (mem_used / mem_total) < 0.8 && cpu < 0.9")
 	eval.AddVariable(NewVariable("mem_used", Int, "//mem_used"))
 	eval.AddVariable(NewVariable("mem_total", Int, "//mem_total"))
 	eval.AddVariable(NewVariable("cpu", Float, "//cpu"))
 	eval.AddVariable(NewVariable("live", Bool, "//live"))
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
+
+	eval = NewEvaluator(xmlDoc, XML, "x_bool('//live') && x_float('//cpu') < 0.9 && x_int('//mem_used') / x_int('//mem_total') < 0.8")
+	assertResult(t, eval, true)
 }
 
 func TestRegexEval(t *testing.T) {
 	text := `name: Server, cpu: 0.8, mem_used: 512, mem_total: 1024, resp_time: 256ms, live: true`
 
+	// ---- test name ----
 	eval := NewEvaluator(text, TEXT, "name == 'Server'")
 	v := NewVariable("name", String, "name: (?P<name>[a-zA-Z0-9 ]*)")
 	eval.AddVariable(v)
-	result, err := eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
 
+	eval = NewEvaluator(text, TEXT, "x_str('name: (?P<name>[a-zA-Z0-9 ]*)') == 'Server'")
+	assertResult(t, eval, true)
+
+	// ---- test live memory cpu ----
 	eval = NewEvaluator(text, TEXT, "live && (mem_used / mem_total) < 0.8 && cpu < 0.9")
 	eval.AddVariable(NewVariable("mem_used", Int, "mem_used: (?P<mem_used>[0-9]*)"))
 	eval.AddVariable(NewVariable("mem_total", Int, "mem_total: (?P<mem_total>[0-9]*)"))
 	eval.AddVariable(NewVariable("cpu", Float, "cpu: (?P<cpu>[0-9.]*)"))
 	eval.AddVariable(NewVariable("live", Bool, "live: (?P<live>true|false)"))
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
+
+	eval = NewEvaluator(text, TEXT, "x_bool('live: (?P<live>true|false)') && x_float('cpu: (?P<cpu>[0-9.]*)') < 0.9 && x_int('mem_used: (?P<mem_used>[0-9]*)') / x_int('mem_total: (?P<mem_total>[0-9]*)') < 0.8")
+	assertResult(t, eval, true)
 }
 
 func TestFailure(t *testing.T) {
@@ -223,14 +275,13 @@ func TestFailure(t *testing.T) {
 	eval := NewEvaluator(htmlDoc, HTML, "name == 'Server'")
 	v := NewVariable("name", String, "///name")
 	eval.AddVariable(v)
-	result, err := eval.Evaluate()
-	assert.NotNil(t, err)
-	assert.False(t, result)
+	assertResult(t, eval, false)
 
 	eval = NewEvaluator("", Unsupported, "")
 	v = NewVariable("name", String, "//name")
 	eval.AddVariable(v)
-	result, err = eval.Evaluate()
+	assertResult(t, eval, false)
+	result, err := eval.Evaluate()
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "Unsupported")
 	assert.False(t, result)
@@ -277,73 +328,47 @@ func TestExtractFunc(t *testing.T) {
 	</root>`
 
 	eval := NewEvaluator(xmlDoc, XML, "x_str('//name') == 'Server'")
-	result, err := eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
 
 	eval = NewEvaluator(xmlDoc, XML, "x_time('//time') == '"+now+"'")
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
 
 	eval = NewEvaluator(xmlDoc, XML, "x_float('//cpu') < 0.9")
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
 
 	eval = NewEvaluator(xmlDoc, XML, "x_int('//mem_used') < 800")
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
 
 	eval = NewEvaluator(xmlDoc, XML, "x_int('//mem_used') / x_int('//mem_total') < 0.8")
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
 
 	eval = NewEvaluator(xmlDoc, XML, "x_duration('//resp_time') < duration('1000ms')")
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
 
 	eval = NewEvaluator(xmlDoc, XML, "x_bool('//live')")
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
 
 	eval = NewEvaluator(xmlDoc, XML, "x_time('//date') == '2022-08-11 10:10:10'")
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
 
 	eval = NewEvaluator(xmlDoc, XML, "x_time('//error') == '2022-08-11 10:10:11'")
-	result, err = eval.Evaluate()
-	assert.NotNil(t, err)
-	assert.False(t, result)
+	assertResult(t, eval, false)
 
 	eval = NewEvaluator(xmlDoc, XML, "x_int('//error') < 10")
-	result, err = eval.Evaluate()
-	assert.NotNil(t, err)
-	assert.False(t, result)
+	assertResult(t, eval, false)
 }
 
 func TestSetDocument(t *testing.T) {
 	text := `name: Server, cpu: 0.8, mem_used: 512, mem_total: 1024, resp_time: 256ms, live: true`
 
 	eval := NewEvaluator(text, TEXT, "x_str('name: (?P<name>[a-zA-Z0-9 ]*)') == 'Server'")
-	result, err := eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
 
 	eval.SetDocument(TEXT, "name: Server, cpu: 0.5, mem_used: 512, mem_total: 1024, resp_time: 256ms, live: true")
 	eval.Expression = "x_float('cpu: (?P<cpu>[0-9.]*)') < 0.6"
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
 
 	eval.SetDocument(JSON, `{"name": "Server", "cpu": 0.3, "mem_used": 512, "mem_total": 1024, "resp_time": "256ms", "live": true}`)
 	eval.Expression = "x_float('//cpu') < 0.4"
-	result, err = eval.Evaluate()
-	assert.Nil(t, err)
-	assert.True(t, result)
+	assertResult(t, eval, true)
 }

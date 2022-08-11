@@ -28,6 +28,24 @@ import (
 	"golang.org/x/net/html"
 )
 
+func assertExtractor(t *testing.T, extractor Extractor, query string, vt VarType, expected interface{}, success bool) {
+	extractor.SetQuery(query)
+	extractor.SetVarType(vt)
+	result, err := extractor.Extract()
+	if success {
+		assert.Nil(t, err)
+	} else {
+		assert.NotNil(t, err)
+	}
+	assert.Equal(t, expected, result)
+}
+func assertExtractorSucc(t *testing.T, extractor Extractor, query string, vt VarType, expected interface{}) {
+	assertExtractor(t, extractor, query, vt, expected, true)
+}
+func assertExtractorFail(t *testing.T, extractor Extractor, query string, vt VarType, expected interface{}) {
+	assertExtractor(t, extractor, query, vt, expected, false)
+}
+
 func TestHTMLExtractor(t *testing.T) {
 	var htmlDoc = `
 	<html>
@@ -56,71 +74,21 @@ func TestHTMLExtractor(t *testing.T) {
 	`
 	extractor := NewHTMLExtractor(htmlDoc)
 
-	extractor.XPath = "//div[@id='number']/div[@class='one']"
-	extractor.VarType = Int
-	result, err := extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, 1, result)
-
-	extractor.XPath = "//title"
-	extractor.VarType = String
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, "Hello World Example", result)
-
-	extractor.XPath = "//div[@id='person']/div[@class='name']"
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, "Bob", result)
-
-	extractor.XPath = "//div[@class='email']"
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, "bob@example.com", result)
-
-	extractor.XPath = "//div[@id='person']/div[@class='salary']"
-	extractor.VarType = Float
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, 35000.12, result)
-
-	extractor.XPath = "//div[@id='person']/div[@class='birth']"
-	extractor.VarType = Time
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
+	assertExtractorSucc(t, extractor, "//div[@id='number']/div[@class='one']", Int, 1)
+	assertExtractorSucc(t, extractor, "//title", String, "Hello World Example")
+	assertExtractorSucc(t, extractor, "//div[@id='person']/div[@class='name']", String, "Bob")
+	assertExtractorSucc(t, extractor, "//div[@id='person']/div[@class='email']", String, "bob@example.com")
+	assertExtractorSucc(t, extractor, "//div[@id='person']/div[@class='salary']", Float, 35000.12)
 	expected, _ := tryParseTime("1984-10-12")
-	assert.Equal(t, expected, result)
-
-	extractor.XPath = "//div[@id='person']/div[@class='work']"
-	extractor.VarType = Duration
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	duration, _ := time.ParseDuration("40h")
-	assert.Equal(t, duration, result)
-
-	extractor.XPath = "//div[@id='person']/div[@class='fulltime']"
-	extractor.VarType = Bool
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, true, result)
-
+	assertExtractorSucc(t, extractor, "//div[@id='person']/div[@class='birth']", Time, expected)
+	assertExtractorSucc(t, extractor, "//div[@id='person']/div[@class='work']", Duration, 40*time.Hour)
+	assertExtractorSucc(t, extractor, "//div[@id='person']/div[@class='fulltime']", Bool, true)
 	// multiple results only return the first one
-	extractor.XPath = "//div[@id='person']/div"
-	result, err = extractor.ExtractStrFn()
-	assert.Nil(t, err)
-	assert.Equal(t, "Bob", result)
-
+	assertExtractorSucc(t, extractor, "//div[@id='person']/div", String, "Bob")
 	// empty result
-	extractor.XPath = "//div[@id='person']/div[@class='none']"
-	extractor.VarType = String
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, "", result)
-
+	assertExtractorSucc(t, extractor, "//div[@id='person']/div[@class='none']", String, "")
 	// invalid xpath
-	extractor.XPath = "///ads']"
-	result, err = extractor.Extract()
-	assert.NotNil(t, err)
+	assertExtractorFail(t, extractor, "///asdf", String, "")
 }
 
 func TestJSONExtractor(t *testing.T) {
@@ -151,65 +119,20 @@ func TestJSONExtractor(t *testing.T) {
 	}`
 	extractor := NewJSONExtractor(jsonDoc)
 
-	extractor.XPath = "//name"
-	extractor.VarType = String
-	result, err := extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, "MegaEase", result)
-
-	extractor.XPath = "//email"
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, "bob@example.com", result)
-
-	extractor.XPath = "//company/person/*[1]/name"
-	extractor.VarType = String
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, "Bob", result)
-
-	extractor.XPath = "//company/person/*[last()]/name"
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, "Alice", result)
-
-	extractor.XPath = "//company/person/*[last()]/age"
-	extractor.VarType = Int
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, 25, result)
-
-	extractor.XPath = "//company/person/*[salary=25000.12]/salary"
-	extractor.VarType = Float
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, 25000.12, result)
-
-	extractor.XPath = "//company/person/*[name='Bob']/birth"
-	extractor.VarType = Time
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
+	assertExtractorSucc(t, extractor, "//name", String, "MegaEase")
+	assertExtractorSucc(t, extractor, "//company/name", String, "MegaEase")
+	assertExtractorSucc(t, extractor, "//email", String, "bob@example.com")
+	assertExtractorSucc(t, extractor, "//company/person/*[1]/name", String, "Bob")
+	assertExtractorSucc(t, extractor, "//company/person/*[2]/email", String, "alice@example.com")
+	assertExtractorSucc(t, extractor, "//company/person/*[last()]/name", String, "Alice")
+	assertExtractorSucc(t, extractor, "//company/person/*[last()]/age", Int, 25)
+	assertExtractorSucc(t, extractor, "//company/person/*[salary=25000.12]/salary", Float, 25000.12)
 	expected, _ := tryParseTime("1984-10-12")
-	assert.Equal(t, expected, result)
-
-	extractor.XPath = "//*/email[contains(.,'bob')]"
-	extractor.VarType = String
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, "bob@example.com", result)
-
-	extractor.XPath = "//work"
-	extractor.VarType = Duration
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	duration, _ := time.ParseDuration("40h")
-	assert.Equal(t, duration, result)
-
-	extractor.XPath = "//person/*[2]/fulltime"
-	extractor.VarType = Bool
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, false, result)
+	assertExtractorSucc(t, extractor, "//company/person/*[name='Bob']/birth", Time, expected)
+	assertExtractorSucc(t, extractor, "//company/person/*[name='Alice']/work", Duration, 30*time.Hour)
+	assertExtractorSucc(t, extractor, "//*/email[contains(.,'bob')]", String, "bob@example.com")
+	assertExtractorSucc(t, extractor, "//work", Duration, 40*time.Hour)
+	assertExtractorSucc(t, extractor, "//person/*[2]/fulltime", Bool, false)
 }
 
 func TestXMLExtractor(t *testing.T) {
@@ -237,154 +160,61 @@ func TestXMLExtractor(t *testing.T) {
 	</company>`
 	extractor := NewXMLExtractor(xmlDoc)
 
-	extractor.XPath = "//name"
-	extractor.VarType = String
-	result, err := extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, "MegaEase", result)
-
-	extractor.XPath = "//company/person[1]/name"
-	extractor.VarType = String
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, "Bob", result)
-
-	extractor.XPath = "//company/person[last()]/name"
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, "Alice", result)
-
-	extractor.XPath = "//person[@id='emp1002']/age"
-	extractor.VarType = Int
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, 25, result)
-
-	extractor.XPath = "//person[salary<30000]/salary"
-	extractor.VarType = Float
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, 25000.12, result)
-
-	extractor.XPath = "//person[name='Bob']/birth"
-	extractor.VarType = Time
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
+	assertExtractorSucc(t, extractor, "//name", String, "MegaEase")
+	assertExtractorSucc(t, extractor, "//company/name", String, "MegaEase")
+	assertExtractorSucc(t, extractor, "//company/person[1]/name", String, "Bob")
+	assertExtractorSucc(t, extractor, "//company/person[last()]/name", String, "Alice")
+	assertExtractorSucc(t, extractor, "//person[@id='emp1002']/age", Int, 25)
+	assertExtractorSucc(t, extractor, "//company/person[salary=35000.12]/salary", Float, 35000.12)
+	assertExtractorSucc(t, extractor, "//person[salary<30000]/salary", Float, 25000.12)
 	expected, _ := tryParseTime("1984-10-12")
-	assert.Equal(t, expected, result)
-
-	extractor.XPath = "//person[name='Bob']/work"
-	extractor.VarType = Duration
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	duration, _ := time.ParseDuration("40h")
-	assert.Equal(t, duration, result)
+	assertExtractorSucc(t, extractor, "//company/person[name='Bob']/birth", Time, expected)
+	assertExtractorSucc(t, extractor, "//company/person[name='Alice']/work", Duration, 30*time.Hour)
+	assertExtractorSucc(t, extractor, "//company/person[name='Bob']/work", Duration, 40*time.Hour)
 }
 
 func TestRegexExtractor(t *testing.T) {
 	regexDoc := `name: Bob, email: bob@example.com, age: 35, salary: 35000.12, birth: 1984-10-12, work: 40h, fulltime: true`
 
 	extractor := NewRegexExtractor(regexDoc)
-	extractor.Regex = "name: (?P<name>[a-zA-Z0-9 ]*)"
-	extractor.VarType = String
-	result, err := extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, "Bob", result)
 
-	extractor.Regex = "email: ([a-zA-Z0-9@.]*)"
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, "bob@example.com", result)
-
-	extractor.Regex = "age: (?P<age>\\d+)"
-	extractor.VarType = Int
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, 35, result)
-
-	extractor.Regex = "salary: (?P<salary>\\d+\\.\\d+)"
-	extractor.VarType = Float
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, 35000.12, result)
-
-	extractor.Regex = "birth: (?P<birth>\\d{4}-\\d{2}-\\d{2})"
-	extractor.VarType = Time
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
+	assertExtractorSucc(t, extractor, "name: (?P<name>[a-zA-Z0-9 ]*)", String, "Bob")
+	assertExtractorSucc(t, extractor, "email: (?P<email>[a-zA-Z0-9@.]*)", String, "bob@example.com")
+	assertExtractorSucc(t, extractor, "age: (?P<age>[0-9]*)", Int, 35)
+	assertExtractorSucc(t, extractor, "age: (?P<age>\\d+)", Int, 35)
+	assertExtractorSucc(t, extractor, "salary: (?P<salary>[0-9.]*)", Float, 35000.12)
+	assertExtractorSucc(t, extractor, "salary: (?P<salary>\\d+\\.\\d+)", Float, 35000.12)
 	expected, _ := tryParseTime("1984-10-12")
-	assert.Equal(t, expected, result)
-
-	extractor.Regex = "work: (?P<work>\\d+[hms])"
-	extractor.VarType = Duration
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	duration, _ := time.ParseDuration("40h")
-	assert.Equal(t, duration, result)
-
-	extractor.Regex = "fulltime: (?P<fulltime>true|false)"
-	extractor.VarType = Bool
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, true, result)
-
+	assertExtractorSucc(t, extractor, "birth: (?P<birth>[0-9-]*)", Time, expected)
+	assertExtractorSucc(t, extractor, "birth: (?P<birth>\\d{4}-\\d{2}-\\d{2})", Time, expected)
+	assertExtractorSucc(t, extractor, "work: (?P<work>\\d+[hms])", Duration, 40*time.Hour)
+	assertExtractorSucc(t, extractor, "fulltime: (?P<fulltime>true|false)", Bool, true)
 	// no Submatch
-	extractor.Regex = "name: "
-	extractor.VarType = String
-	result, err = extractor.Extract()
-	assert.Nil(t, err)
-	assert.Equal(t, extractor.Regex, result)
-
+	assertExtractorSucc(t, extractor, "name: ", String, "name: ")
 	// no match
-	extractor.Regex = "mismatch"
-	extractor.VarType = String
-	result, err = extractor.Extract()
-	assert.NotNil(t, err)
-	assert.Equal(t, "", result)
+	assertExtractorFail(t, extractor, "mismatch", String, "")
 }
 
 func TestFailed(t *testing.T) {
 	doc := "<div>hello world</div>"
 	extractor := NewHTMLExtractor(doc)
-	extractor.XPath = "///div"
-	extractor.VarType = Int
-	result, err := extractor.Extract()
-	assert.NotNil(t, err)
-	assert.Equal(t, 0, result)
-
-	extractor.VarType = Float
-	result, err = extractor.Extract()
-	assert.NotNil(t, err)
-	assert.Equal(t, 0.0, result)
-
-	extractor.VarType = Bool
-	result, err = extractor.Extract()
-	assert.NotNil(t, err)
-	assert.Equal(t, false, result)
-
-	extractor.VarType = Time
-	result, err = extractor.Extract()
-	assert.NotNil(t, err)
-	assert.Equal(t, time.Time{}, result)
-
-	extractor.VarType = Duration
-	result, err = extractor.Extract()
-	assert.NotNil(t, err)
-	assert.Equal(t, time.Duration(0), result)
-
-	extractor.VarType = Unknown
-	result, err = extractor.Extract()
-	assert.NotNil(t, err)
-	assert.Nil(t, result)
+	invalid := "///div"
+	assertExtractorFail(t, extractor, invalid, Int, 0)
+	assertExtractorFail(t, extractor, invalid, Float, 0.0)
+	assertExtractorFail(t, extractor, invalid, Bool, false)
+	assertExtractorFail(t, extractor, invalid, Time, time.Time{})
+	assertExtractorFail(t, extractor, invalid, Duration, time.Duration(0))
+	assertExtractorFail(t, extractor, invalid, Unknown, nil)
 
 	monkey.Patch(html.Parse, func(io.Reader) (*html.Node, error) {
 		return nil, errors.New("parse error")
 	})
 
 	extractor.VarType = String
-	result, err = extractor.Extract()
+	result, err := extractor.Extract()
 	assert.NotNil(t, err)
 	assert.Equal(t, "parse error", err.Error())
+	assert.Equal(t, "", result)
 
 	monkey.Unpatch(html.Parse)
 }
