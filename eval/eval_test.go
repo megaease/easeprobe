@@ -268,6 +268,15 @@ func TestRegexEval(t *testing.T) {
 
 	eval = NewEvaluator(text, TEXT, "x_bool('live: (?P<live>true|false)') && x_float('cpu: (?P<cpu>[0-9.]*)') < 0.9 && x_int('mem_used: (?P<mem_used>[0-9]*)') / x_int('mem_total: (?P<mem_total>[0-9]*)') < 0.8")
 	assertResult(t, eval, true)
+
+	// ---- test mix usage ----
+	// - retrieve name and mem_used from extract function
+	// - set live, cpu and mem_total as the variables
+	eval = NewEvaluator(text, TEXT, "x_str('name: (?P<name>[a-zA-Z0-9 ]*)')  == 'Server' && live && (x_int('mem_used: (?P<mem_used>[0-9]*)') / mem_total) < 0.8 && cpu < 0.9")
+	eval.AddVariable(NewVariable("mem_total", Int, "mem_total: (?P<mem_total>[0-9]*)"))
+	eval.AddVariable(NewVariable("cpu", Float, "cpu: (?P<cpu>[0-9.]*)"))
+	eval.AddVariable(NewVariable("live", Bool, "live: (?P<live>true|false)"))
+	assertResult(t, eval, true)
 }
 
 func TestFailure(t *testing.T) {
