@@ -603,7 +603,7 @@ tcp:
     host: example.com:22
     timeout: 10s # default is 30 seconds
     interval: 2m # default is 60 seconds
-    proxy: socks5://proxy.server:1080 # Optional. Only support sock5.
+    proxy: socks5://proxy.server:1080 # Optional. Only support socks5.
                                       # Also support the `ALL_PROXY` environment.
   - name: Kafka
     host: kafka.server:9093
@@ -723,7 +723,7 @@ TLS ping to remote endpoint, can probe for revoked or expired certificates
   tls:
     - name: expired test
       host: expired.badssl.com:443
-      proxy: socks5://proxy.server:1080 # Optional. Only support sock5.
+      proxy: socks5://proxy.server:1080 # Optional. Only support socks5.
                                         # Also support the `ALL_PROXY` environment.
       insecure_skip_verify: true # dont check cert validity
       expire_skip_verify: true # dont check cert expire date
