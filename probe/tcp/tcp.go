@@ -30,6 +30,7 @@ import (
 type TCP struct {
 	base.DefaultProbe `yaml:",inline"`
 	Host              string `yaml:"host"`
+	Proxy             string `yaml:"proxy"`
 }
 
 // Config HTTP Config Object
@@ -45,7 +46,7 @@ func (t *TCP) Config(gConf global.ProbeSettings) error {
 
 // DoProbe return the checking result
 func (t *TCP) DoProbe() (bool, string) {
-	conn, err := net.DialTimeout("tcp", t.Host, t.Timeout())
+	conn, err := t.GetProxyConnection(t.Proxy, t.Host)
 	status := true
 	message := ""
 	if err != nil {

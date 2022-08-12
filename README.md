@@ -554,6 +554,7 @@ http:
     #   proxy: http://proxy.server:8080
     #   proxy: socks5://localhost:1085
     #   proxy: https://user:password@proxy.example.com:443
+    # Also support `HTTP_PROXY` & `HTTPS_PROXY` environment variables
     proxy: http://proxy.server:8080
     # Request Method
     method: GET
@@ -602,7 +603,8 @@ tcp:
     host: example.com:22
     timeout: 10s # default is 30 seconds
     interval: 2m # default is 60 seconds
-
+    proxy: socks5://proxy.server:1080 # Optional. Only support sock5.
+                                      # Also support the `ALL_PROXY` environment.
   - name: Kafka
     host: kafka.server:9093
 ```
@@ -721,6 +723,8 @@ TLS ping to remote endpoint, can probe for revoked or expired certificates
   tls:
     - name: expired test
       host: expired.badssl.com:443
+      proxy: socks5://proxy.server:1080 # Optional. Only support sock5.
+                                        # Also support the `ALL_PROXY` environment.
       insecure_skip_verify: true # dont check cert validity
       expire_skip_verify: true # dont check cert expire date
       alert_expire_before: 168h # alert if cert expire date is before X, the value is a Duration, see https://pkg.go.dev/time#ParseDuration. example: 1h, 1m, 1s. expire_skip_verify must be false to use this feature.
