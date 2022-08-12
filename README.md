@@ -968,15 +968,19 @@ notify:
         - "KEY=Value"
 ```
 
-**Note**: All of the notifications support the following optional configuration parameters.
-
-```YAML
-  dry: true # dry notification, print the Discord JSON in log(STDOUT)
-  timeout: 20s # the timeout send out notification, default: 30s
-  retry: # somehow the network is not good and needs to retry.
-    times: 3 # default: 3
-    interval: 10s # default: 5s
-```
+> **Note**:
+>
+> 1) Setting the environment variables - `$HTTP_PROXY` & `$HTTPS_PROX` to configure the proxy for HTTP Webhook notification.
+>
+> 2) All of the notifications support the following optional configuration parameters.
+>
+>     ```YAML
+>     dry: true # dry notification, print the Discord JSON in log(STDOUT)
+>     timeout: 20s # the timeout send out notification, default: 30s
+>     retry: # somehow the network is not good and needs to retry.
+>       times: 3 # default: 3
+>       interval: 10s # default: 5s
+>     ```
 
 
 ### 3.9 Global Setting Configuration
