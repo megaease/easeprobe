@@ -970,7 +970,7 @@ notify:
 
 > **Note**:
 >
-> 1) Setting the environment variables - `$HTTP_PROXY` & `$HTTPS_PROX` to configure the proxy for HTTP Webhook notification.
+> 1) Setting the environment variables `$HTTP_PROXY` & `$HTTPS_PROXY` allows for configuring the proxy settings for all HTTP related webhook notifications such as discord, slack, telegram etc.
 >
 > 2) All of the notifications support the following optional configuration parameters.
 >
