@@ -177,7 +177,9 @@ func TestCleanDataFile(t *testing.T) {
 	// create data file with backups
 	n := 5
 	for i := 0; i < 5; i++ {
-		newDataFile(file)
+		if err := newDataFile(file); err != nil {
+			t.Fatal(err)
+		}
 		if err := LoadDataFromFile(file); err != nil {
 			t.Fatal(err)
 		}
