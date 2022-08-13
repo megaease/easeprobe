@@ -18,6 +18,7 @@
 package probe
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -166,6 +167,7 @@ func TestLoadDataFile(t *testing.T) {
 
 func numOfBackup(file string) int {
 	files, _ := filepath.Glob(file + "-*")
+	fmt.Println(files)
 	return len(files)
 }
 
