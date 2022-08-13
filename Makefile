@@ -27,7 +27,7 @@ all: ${TARGET}
 ${TARGET}: ${SOURCE}
 	mkdir -p ${RELEASE_DIR}
 	go mod tidy
-	CGO_ENABLED=0 go build -a -ldflags '-s -w -extldflags "-static"' -gcflags=-G=3 -o ${TARGET} ${MKFILE_DIR}cmd/easeprobe
+	CGO_ENABLED=0 go build -a -ldflags '-s -w -extldflags "-static"' -o ${TARGET} ${MKFILE_DIR}cmd/easeprobe
 
 build: all
 
