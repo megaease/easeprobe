@@ -167,7 +167,6 @@ func TestLoadDataFile(t *testing.T) {
 
 func numOfBackup(file string) int {
 	files, _ := filepath.Glob(file + "-*")
-	fmt.Println(files)
 	return len(files)
 }
 
@@ -178,13 +177,15 @@ func TestCleanDataFile(t *testing.T) {
 
 	// create data file with backups
 	n := 5
-	for i := 0; i < 5; i++ {
+	for i := 0; i < n; i++ {
 		if err := newDataFile(file); err != nil {
 			t.Fatal(err)
 		}
 		if err := LoadDataFromFile(file); err != nil {
 			t.Fatal(err)
 		}
+		files, _ := filepath.Glob(file + "-*")
+		fmt.Printf("n=%d, files=%v\n", n, files)
 	}
 	assert.Equal(t, n, numOfBackup(file))
 
