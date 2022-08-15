@@ -64,7 +64,7 @@ func (s Status) String() string {
 	return "unknown"
 }
 
-//Status convert the string to Status
+// Status convert the string to Status
 func (s *Status) Status(status string) {
 	if val, ok := toStatus[strings.ToLower(status)]; ok {
 		*s = val

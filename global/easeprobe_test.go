@@ -51,7 +51,8 @@ func TestEaseProbe(t *testing.T) {
 
 // If you use VSCode run the test,
 // make sure add the following test flag in settings.json
-//	    "go.testFlags": ["-gcflags=-l"],
+//
+//	"go.testFlags": ["-gcflags=-l"],
 func TestEaseProbeFail(t *testing.T) {
 	monkey.Patch(os.Hostname, func() (string, error) {
 		return "", fmt.Errorf("error")

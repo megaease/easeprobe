@@ -34,7 +34,7 @@ import (
 	"github.com/megaease/easeprobe/probe"
 )
 
-//Config is the notify configuration
+// Config is the notify configuration
 type Config struct {
 	Log      []log.NotifyConfig      `yaml:"log"`
 	Email    []email.NotifyConfig    `yaml:"email"`

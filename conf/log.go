@@ -178,7 +178,7 @@ func (l *Log) GetWriter() io.Writer {
 	return (io.Writer)(l.Writer)
 }
 
-//Rotate rotate the log file
+// Rotate rotate the log file
 func (l *Log) Rotate() {
 	if l.Writer == nil || l.IsStdout == true {
 		return

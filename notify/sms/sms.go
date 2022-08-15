@@ -29,7 +29,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-//NotifyConfig implements the structure of Sms
+// NotifyConfig implements the structure of Sms
 type NotifyConfig struct {
 	//Embed structure
 	conf.Options `yaml:",inline"`

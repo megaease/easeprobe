@@ -62,8 +62,8 @@ type Fields struct {
 }
 
 // Footer allows you to add footer to embed. footer is an object which includes two values:
-//  - text - sets name for author object. Markdown is disabled here!!!
-//  - icon_url - sets icon for author object. Requires text value.
+//   - text - sets name for author object. Markdown is disabled here!!!
+//   - icon_url - sets icon for author object. Requires text value.
 type Footer struct {
 	Text    string `json:"text"`
 	IconURL string `json:"icon_url"`

@@ -29,6 +29,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/megaease/easeprobe/eval"
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/base"
@@ -49,6 +50,9 @@ type HTTP struct {
 
 	// Output Text Checker
 	probe.TextChecker `yaml:",inline"`
+
+	// Evaluator
+	Evaluator eval.Evaluator `yaml:"eval,omitempty"`
 
 	// Option - HTTP Basic Auth Credentials
 	User string `yaml:"username,omitempty"`
@@ -158,6 +162,10 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 		return err
 	}
 
+	if err := h.Evaluator.Config(); err != nil {
+		return err
+	}
+
 	h.metrics = newMetrics(kind, tag)
 
 	log.Debugf("[%s / %s] configuration: %+v", h.ProbeKind, h.ProbeName, h)
@@ -224,6 +232,25 @@ func (h *HTTP) DoProbe() (bool, string) {
 		log.Errorf("[%s / %s] - %v", h.ProbeKind, h.ProbeName, err)
 		message += fmt.Sprintf(". Error: %v", err)
 		return false, message
+	}
+
+	if h.Evaluator.DocType != eval.Unsupported && h.Evaluator.Extractor != nil &&
+		len(strings.TrimSpace(h.Evaluator.Expression)) > 0 {
+
+		log.Debugf("[%s / %s] - Evaluator expression: %s", h.ProbeKind, h.ProbeName, h.Evaluator.Expression)
+		h.Evaluator.SetDocument(h.Evaluator.DocType, string(response))
+		result, err := h.Evaluator.Evaluate()
+		if err != nil {
+			log.Errorf("[%s / %s] - %v", h.ProbeKind, h.ProbeName, err)
+			message += fmt.Sprintf(". Evaluation Error: %v", err)
+			return false, message
+		}
+		if !result {
+			log.Errorf("[%s / %s] - expression is evaluated to false!", h.ProbeKind, h.ProbeName)
+			message += fmt.Sprintf(". Expression is evaluated to false!")
+			return false, message
+		}
+		log.Debugf("[%s / %s] - expression is evaluated to true!", h.ProbeKind, h.ProbeName)
 	}
 
 	return true, message

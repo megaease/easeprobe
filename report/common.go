@@ -124,7 +124,7 @@ func SlackTimeFormation(t time.Time, act string, format string) string {
 		t.Unix(), act, act, t.UTC().Format(format))
 }
 
-//JSONEscape escape the string
+// JSONEscape escape the string
 func JSONEscape(str string) string {
 	b, err := json.Marshal(str)
 	if err != nil {
