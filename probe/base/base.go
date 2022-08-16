@@ -19,11 +19,15 @@ package base
 
 import (
 	"fmt"
+	"net"
+	"net/url"
+	"os"
 	"time"
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/prometheus/client_golang/prometheus"
+	"golang.org/x/net/proxy"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -190,4 +194,40 @@ func (d *DefaultProbe) DownTimeCalculation(status probe.Status) {
 	if d.ProbeResult.PreStatus == probe.StatusDown && status == probe.StatusUp {
 		d.ProbeResult.RecoveryDuration = time.Since(d.ProbeResult.LatestDownTime)
 	}
+}
+
+// GetProxyConnection return the proxy connection
+func (d *DefaultProbe) GetProxyConnection(socks5 string, host string) (net.Conn, error) {
+	proxyDialer := proxy.FromEnvironment()
+	env := true
+	if socks5 != "" {
+		log.Debugf("[%s / %s] - Proxy Setting found - %s", d.ProbeKind, d.ProbeName, socks5)
+		proxyURL, err := url.Parse(socks5)
+		if err != nil {
+			log.Errorf("[%s / %s] Invalid proxy: %s", d.ProbeKind, d.ProbeName, socks5)
+			return nil, fmt.Errorf("Invalid proxy: %s, %v", socks5, err)
+		}
+		proxyDialer, err = proxy.FromURL(proxyURL, &net.Dialer{Timeout: d.ProbeTimeout})
+		if err != nil {
+			log.Errorf("[%s / %s] Invalid proxy: %s", d.ProbeKind, d.ProbeName, socks5)
+			return nil, fmt.Errorf("Invalid proxy: %s, %v", socks5, err)
+		}
+		env = false
+	}
+
+	if proxyDialer != proxy.Direct {
+		if env {
+			names := []string{"ALL_PROXY", "all_proxy"}
+			for _, n := range names {
+				socks5 = os.Getenv(n)
+				if socks5 != "" {
+					break
+				}
+			}
+		}
+
+		log.Debugf("[%s / %s] - Using the proxy server [%s] for connection", d.ProbeKind, d.ProbeName, socks5)
+		return proxyDialer.Dial("tcp", host)
+	}
+	return net.DialTimeout("tcp", host, d.ProbeTimeout)
 }

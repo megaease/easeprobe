@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	bou.ke/monkey v1.0.2
+	github.com/Knetic/govaluate v3.0.0+incompatible
 	github.com/antchfx/htmlquery v1.2.5
 	github.com/antchfx/jsonquery v1.3.0
 	github.com/antchfx/xmlquery v1.3.12
@@ -23,6 +24,7 @@ require (
 	go.mongodb.org/mongo-driver v1.10.0
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
 	golang.org/x/exp v0.0.0-20220328175248-053ad81199eb
+	golang.org/x/net v0.0.0-20220811182439-13a9a731de15
 	golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -30,7 +32,6 @@ require (
 
 require (
 	github.com/BurntSushi/toml v1.1.0 // indirect
-	github.com/Knetic/govaluate v3.0.0+incompatible // indirect
 	github.com/antchfx/xpath v1.2.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
@@ -54,7 +55,6 @@ require (
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/rogpeppe/go-internal v1.8.1 // indirect
-	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc // indirect
 	github.com/uptrace/bun v1.1.7 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
@@ -63,18 +63,9 @@ require (
 	github.com/xdg-go/scram v1.1.1 // indirect
 	github.com/xdg-go/stringprep v1.0.3 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
-	golang.org/x/exp/typeparams v0.0.0-20220218215828-6cf2b201936e // indirect
-	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
-	golang.org/x/net v0.0.0-20220809012201-f428fae20770 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/tools v0.1.12-0.20220713141851-7464a5a40219 // indirect
-	golang.org/x/tools/gopls v0.9.1 // indirect
-	golang.org/x/vuln v0.0.0-20220613164644-4eb5ba49563c // indirect
 	golang.org/x/xerrors v0.0.0-20220411194840-2f41105eb62f // indirect
 	google.golang.org/protobuf v1.26.0 // indirect
-	honnef.co/go/tools v0.3.2 // indirect
 	mellium.im/sasl v0.2.1 // indirect
-	mvdan.cc/gofumpt v0.3.0 // indirect
-	mvdan.cc/xurls/v2 v2.4.0 // indirect
 )

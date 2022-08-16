@@ -123,6 +123,7 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 			}
 			return conn, nil
 		},
+		Proxy: http.ProxyFromEnvironment, // use proxy from environment variables
 	}
 
 	// proxy server

@@ -19,11 +19,17 @@ package base
 
 import (
 	"math/rand"
+	"net"
+	"os"
+	"reflect"
 	"testing"
+	"time"
 
+	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/net/proxy"
 )
 
 var (
@@ -96,4 +102,48 @@ func TestBase(t *testing.T) {
 	p.ProbeFunc = nil
 	r := p.Probe()
 	assert.Equal(t, *p.ProbeResult, r)
+}
+
+func TestProxyConnection(t *testing.T) {
+	p := newDummyProber("probe")
+	p.Config(global.ProbeSettings{})
+
+	os.Setenv("ALL_PROXY", "socks5://localhost:1080")
+
+	conn, err := p.GetProxyConnection("sock://localhost:8080", "host:80")
+	assert.NotNil(t, err)
+	assert.Nil(t, conn)
+
+	conn, err = p.GetProxyConnection("sock5://\n\r", "host:80")
+	assert.NotNil(t, err)
+	assert.Nil(t, conn)
+
+	monkey.Patch(proxy.SOCKS5, func(network string, address string, auth *proxy.Auth, forward proxy.Dialer) (proxy.Dialer, error) {
+		return &net.Dialer{}, nil
+	})
+	var dialer *net.Dialer
+	monkey.PatchInstanceMethod(reflect.TypeOf(dialer), "Dial", func(_ *net.Dialer, network, address string) (net.Conn, error) {
+		return &net.TCPConn{}, nil
+	})
+
+	conn, err = p.GetProxyConnection("", "host:80")
+	assert.Nil(t, err)
+	assert.NotNil(t, conn)
+
+	conn, err = p.GetProxyConnection("socks5://localhost:8080", "host:80")
+	assert.Nil(t, err)
+	assert.NotNil(t, conn)
+
+	monkey.Patch(proxy.FromEnvironment, func() proxy.Dialer {
+		return proxy.Direct
+	})
+
+	monkey.Patch(net.DialTimeout, func(string, string, time.Duration) (net.Conn, error) {
+		return &net.TCPConn{}, nil
+	})
+	conn, err = p.GetProxyConnection("", "host:80")
+	assert.Nil(t, err)
+	assert.NotNil(t, conn)
+
+	monkey.UnpatchAll()
 }

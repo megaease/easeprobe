@@ -38,6 +38,7 @@ import (
 type TLS struct {
 	base.DefaultProbe  `yaml:",inline"`
 	Host               string `yaml:"host"`
+	Proxy              string `yaml:"proxy"`
 	InsecureSkipVerify bool   `yaml:"insecure_skip_verify"`
 
 	RootCAPemPath string `yaml:"root_ca_pem_path"`
@@ -83,7 +84,7 @@ func (t *TLS) Config(gConf global.ProbeSettings) error {
 // DoProbe return the checking result
 func (t *TLS) DoProbe() (bool, string) {
 	addr := t.Host
-	conn, err := net.DialTimeout("tcp", addr, t.Timeout())
+	conn, err := t.GetProxyConnection(t.Proxy, addr)
 	if err != nil {
 		log.Errorf("[%s / %s] tcp dial error: %v", t.ProbeKind, t.ProbeName, err)
 		return false, fmt.Sprintf("tcp dial error: %v", err)
