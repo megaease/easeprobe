@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-gipackage sms
+package sms
 
 import (
 	"errors"
