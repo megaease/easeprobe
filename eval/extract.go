@@ -201,7 +201,7 @@ func Query[T XPathNode](document, xpath string,
 	return inner(n), nil
 }
 
-// ExtractString extracts the value from the document by xpath expression
+// ExtractStr extracts the value from the document by xpath expression
 func (x *XPathExtractor[T]) ExtractStr() (string, error) {
 	return Query(x.Document, x.XPath, x.Parser, x.Query, x.Inner)
 }

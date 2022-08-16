@@ -41,7 +41,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var ca *x509.Certificate = &x509.Certificate{
+var ca = &x509.Certificate{
 	Subject: pkix.Name{
 		Organization: []string{"FAKE EASE PROBE"},
 	},
