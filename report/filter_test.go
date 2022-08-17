@@ -104,10 +104,19 @@ func TestFilter(t *testing.T) {
 	assert.Equal(t, len(_probes), len(probes))
 	assert.Equal(t, _probes, probes)
 
+	filter.PageSize = -1
+	err := filter.Check()
+	assert.NotNil(t, err)
+
+	filter.PageNum = -1
+	err = filter.Check()
+	assert.NotNil(t, err)
+
+	filter = NewEmptyFilter()
 	// sla >= 60  && sla <= 40
 	filter.SLAGreater = 60
 	filter.SLALess = 40
-	err := filter.Check()
+	err = filter.Check()
 	assert.NotNil(t, err)
 	// sla >= 60  && sla <= 200
 	filter.SLALess = 200
@@ -255,5 +264,4 @@ func TestPage(t *testing.T) {
 	probes = filter.Filter(_probes)
 	assert.Equal(t, 1, len(probes))
 	assert.Equal(t, _probes[3], probes[0])
-
 }

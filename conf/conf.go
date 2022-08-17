@@ -18,6 +18,7 @@
 package conf
 
 import (
+	"fmt"
 	"io/ioutil"
 	httpClient "net/http"
 	netUrl "net/url"
@@ -56,12 +57,30 @@ type Schedule int
 
 // Schedule enum
 const (
-	Hourly Schedule = iota
+	None Schedule = iota
+	Hourly
 	Daily
 	Weekly
 	Monthly
-	None
 )
+
+var scheduleToString = map[Schedule]string{
+	Hourly:  "hourly",
+	Daily:   "daily",
+	Weekly:  "weekly",
+	Monthly: "monthly",
+	None:    "none",
+}
+
+var stringToSchedule = global.ReverseMap(scheduleToString)
+
+// MarshalYAML marshal the configuration to yaml
+func (s Schedule) MarshalYAML() (interface{}, error) {
+	if s, ok := scheduleToString[s]; ok {
+		return s, nil
+	}
+	return nil, fmt.Errorf("unknown schedule %d", s)
+}
 
 // UnmarshalYAML is unmarshal the debug level
 func (s *Schedule) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -69,17 +88,9 @@ func (s *Schedule) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err := unmarshal(&level); err != nil {
 		return err
 	}
-	switch strings.ToLower(level) {
-	case "hourly":
-		*s = Hourly
-	case "daily":
-		*s = Daily
-	case "weekly":
-		*s = Weekly
-	case "monthly":
-		*s = Monthly
-	default:
-		*s = None
+	var ok bool
+	if *s, ok = stringToSchedule[strings.ToLower(level)]; !ok {
+		return fmt.Errorf("unknown schedule %s", level)
 	}
 	return nil
 }

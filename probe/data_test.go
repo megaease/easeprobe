@@ -79,13 +79,13 @@ var testResults = []Result{
 }
 
 func newDataFile(file string) error {
-	makeAll(file)
+	makeAllDir(file)
 	SetResultsData(testResults)
 	return SaveDataToFile(file)
 }
 
 func newDataFileWithOutMeta(file string) error {
-	makeAll(file)
+	makeAllDir(file)
 	SetResultsData(testResults)
 	buf, err := yaml.Marshal(resultData)
 	if err != nil {
@@ -108,7 +108,7 @@ func removeDataFile(file string) {
 	os.Remove(file)
 }
 
-func makeAll(file string) {
+func makeAllDir(file string) {
 	dir, _ := filepath.Split(file)
 	os.MkdirAll(dir, 0755)
 }
@@ -142,7 +142,7 @@ func TestNewDataFile(t *testing.T) {
 
 	//custom data file
 	file = "x/y/z/mydata.yaml"
-	makeAll(file)
+	makeAllDir(file)
 	newDataFile(file)
 	assert.True(t, isDataFileExisted(file))
 	removeAll("x/")
@@ -185,7 +185,8 @@ func TestCleanDataFile(t *testing.T) {
 			t.Fatal(err)
 		}
 		files, _ := filepath.Glob(file + "-*")
-		fmt.Printf("n=%d, files=%v\n", n, files)
+		fmt.Printf("i=%d, files=%v\n", i, files)
+		time.Sleep(100 * time.Millisecond)
 	}
 	assert.Equal(t, n, numOfBackup(file))
 

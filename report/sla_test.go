@@ -18,10 +18,14 @@
 package report
 
 import (
+	"encoding/csv"
+	"encoding/json"
 	"fmt"
 	"math/rand"
+	"reflect"
 	"testing"
 
+	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/base"
@@ -72,6 +76,8 @@ func setResultData(probes []probe.Prober) {
 func TestSLA(t *testing.T) {
 	global.InitEaseProbe("DummyProbe", "icon")
 	probes := getProbers()
+	probes[0].Result().Status = probe.StatusDown
+	probe.SetResultData(probes[0].Name(), probes[0].Result())
 	for f, fn := range FormatFuncs {
 		sla := fn.StatFn(probes)
 		assert.NotEmpty(t, sla)
@@ -91,6 +97,50 @@ func TestSLAJSONSection(t *testing.T) {
 	assert.NotEmpty(t, sla)
 	assert.Contains(t, sla, "\"name\":\"probe1\"")
 	assert.Contains(t, sla, "\"status\":\"up\"")
+
+	monkey.Patch(json.Marshal, func(v any) ([]byte, error) {
+		return nil, fmt.Errorf("error")
+	})
+	sla = SLAJSONSection(p.Result())
+	assert.Empty(t, sla)
+
+	sla = SLAJSON([]probe.Prober{p})
+	assert.Empty(t, sla)
+
+	monkey.UnpatchAll()
+}
+
+func TestSLAStatusText(t *testing.T) {
+	p := newDummyProber("probe1")
+	str := SLAStatusText(p.Probe().Stat, MarkdownSocial)
+	assert.Contains(t, str, "`")
+	str = SLAStatusText(p.Probe().Stat, Markdown)
+	assert.Contains(t, str, "`")
+	assert.Contains(t, str, "**")
+	str = SLAStatusText(p.Probe().Stat, HTML)
+	assert.Contains(t, str, "<b>")
+	str = SLAStatusText(p.Probe().Stat, Log)
+	assert.NotContains(t, str, "<b>")
+	assert.NotContains(t, str, "`")
+	assert.NotContains(t, str, "**")
+}
+
+func TestFailed(t *testing.T) {
+	probes := getProbers()
+	var w *csv.Writer
+	monkey.PatchInstanceMethod(reflect.TypeOf(w), "WriteAll", func(_ *csv.Writer, _ [][]string) error {
+		return fmt.Errorf("error")
+	})
+	sla := SLACSV(probes)
+	assert.Empty(t, sla)
+
+	monkey.Patch(json.Marshal, func(v any) ([]byte, error) {
+		return nil, fmt.Errorf("error")
+	})
+	sla = SLAShell(probes)
+	assert.Empty(t, sla)
+
+	monkey.UnpatchAll()
 }
 
 func TestSLAFilter(t *testing.T) {

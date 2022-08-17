@@ -65,3 +65,10 @@ func TestFormatYAML(t *testing.T) {
 	testFormatYAML(t, SMS, "sms\n")
 	testFormatYAML(t, Unknown, "unknown\n")
 }
+
+func TestBadFormat(t *testing.T) {
+	buf := ([]byte)("- asdf::")
+	var f Format
+	err := yaml.Unmarshal(buf, &f)
+	assert.NotNil(t, err)
+}

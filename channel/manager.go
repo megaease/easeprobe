@@ -19,6 +19,7 @@ package channel
 
 import (
 	"sync"
+	"sync/atomic"
 
 	"github.com/megaease/easeprobe/notify"
 	"github.com/megaease/easeprobe/probe"
@@ -26,11 +27,16 @@ import (
 
 var channel = make(map[string]*Channel)
 var wg sync.WaitGroup
-var dryNotify bool
+var dryNotify atomic.Value
 
 // SetDryNotify sets the global dry run flag
 func SetDryNotify(dry bool) {
-	dryNotify = dry
+	dryNotify.Store(dry)
+}
+
+// GetDryNotify returns the dry run flag
+func GetDryNotify() bool {
+	return dryNotify.Load().(bool)
 }
 
 // GetAllChannels returns all channels
@@ -107,6 +113,7 @@ func GetNotifiers(channel []string) map[string]notify.Notify {
 
 // ConfigAllChannels config all channels
 func ConfigAllChannels() {
+	SetDryNotify(false)
 	for _, c := range channel {
 		c.Config()
 	}

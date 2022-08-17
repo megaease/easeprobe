@@ -186,5 +186,16 @@ func TestManager(t *testing.T) {
 	time.Sleep(200 * time.Millisecond)
 	assert.Equal(t, nGoroutine, runtime.NumGoroutine())
 
+	// test the dry notification
+	SetDryNotify(true)
+	assert.True(t, GetDryNotify())
+	for _, ch := range chs {
+		for _, p := range ch.Probers {
+			res := p.Probe()
+			assert.NotNil(t, res)
+			ch.Send(res)
+		}
+	}
+
 	AllDone()
 }
