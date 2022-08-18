@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package conf is the configuration of the application
 package conf
 
 import (

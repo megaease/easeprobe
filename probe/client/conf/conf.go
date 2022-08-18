@@ -119,7 +119,11 @@ func (d *DriverType) DriverType(name string) DriverType {
 
 // MarshalYAML is marshal the driver type
 func (d DriverType) MarshalYAML() (interface{}, error) {
-	return d.String(), nil
+	v := d.String()
+	if v == "unknown" {
+		return nil, fmt.Errorf("Unknown driver")
+	}
+	return v, nil
 }
 
 // UnmarshalYAML is unmarshal the driver type
@@ -128,7 +132,9 @@ func (d *DriverType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err := unmarshal(&s); err != nil {
 		return err
 	}
-	*d = d.DriverType(strings.ToLower(s))
+	if *d = d.DriverType(strings.ToLower(s)); *d == Unknown {
+		return fmt.Errorf("Unknown driver: %s", s)
+	}
 	return nil
 }
 
@@ -138,11 +144,17 @@ func (d *DriverType) UnmarshalJSON(b []byte) (err error) {
 	if err = json.Unmarshal(b, &s); err != nil {
 		return err
 	}
-	*d = d.DriverType(strings.ToLower(s))
+	if *d = d.DriverType(strings.ToLower(s)); *d == Unknown {
+		return fmt.Errorf("Unknown driver: %s", s)
+	}
 	return nil
 }
 
 // MarshalJSON is marshal the driver
 func (d DriverType) MarshalJSON() (b []byte, err error) {
-	return []byte(fmt.Sprintf(`"%s"`, d.String())), nil
+	v := d.String()
+	if v == "unknown" {
+		return nil, fmt.Errorf("Unknown driver")
+	}
+	return []byte(fmt.Sprintf(`"%s"`, v)), nil
 }
