@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package probe contains the probe implementation.
 package probe
 
 import (

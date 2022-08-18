@@ -107,13 +107,10 @@ func main() {
 	// if dry notification mode is specified in command line, overwrite the configuration
 	if *dryNotify {
 		c.Settings.Notify.Dry = *dryNotify
+		log.Infoln("Dry Notification Mode...")
 	}
 	// set the dry notify flag to channel
 	channel.SetDryNotify(c.Settings.Notify.Dry)
-
-	if c.Settings.Notify.Dry {
-		log.Infoln("Dry Notification Mode...")
-	}
 
 	////////////////////////////////////////////////////////////////////////////
 	//                          Start the HTTP Server                         //

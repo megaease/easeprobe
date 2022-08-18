@@ -113,7 +113,6 @@ func GetNotifiers(channel []string) map[string]notify.Notify {
 
 // ConfigAllChannels config all channels
 func ConfigAllChannels() {
-	SetDryNotify(false)
 	for _, c := range channel {
 		c.Config()
 	}
