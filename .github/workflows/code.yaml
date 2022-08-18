@@ -11,7 +11,7 @@ on:
       - ".github/workflows/code.yml"
 
 env:
-  GO_VERSION: 1.18
+  GO_VERSION: 1.19
 
 jobs:
 
@@ -34,7 +34,7 @@ jobs:
       - name: Spelling Check
         uses: reviewdog/action-misspell@v1.12.2
       - name: Revive Action
-        uses: morphy2k/revive-action@v2.3.1
+        uses: morphy2k/revive-action@v2
       - name: "Restore Permissions"
         run: |
           sudo chown -R $(id -u) $GITHUB_WORKSPACE

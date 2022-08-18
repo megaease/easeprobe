@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package yunpian is the yunpian sms notification.
 package yunpian
 
 import (

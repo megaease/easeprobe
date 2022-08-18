@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package redis is the native client probe for Redis
 package redis
 
 import (

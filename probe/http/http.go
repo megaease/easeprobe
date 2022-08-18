@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package http is the HTTP probe package.
 package http
 
 import (

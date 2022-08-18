@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package kafka is the native client probe for kafka.
 package kafka
 
 import (

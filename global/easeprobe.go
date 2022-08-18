@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package global is the package for EaseProbe
 package global
 
 import (

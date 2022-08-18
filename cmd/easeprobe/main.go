@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package main is the entry point for the easeprobe command.
 package main
 
 import (

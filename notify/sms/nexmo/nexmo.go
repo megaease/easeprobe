@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package nexmo is the nexmo sms notification package
 package nexmo
 
 import (

@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package web is the web server of easeprobe.
 package web
 
 import (

@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package discord is the notification for Discord
 package discord
 
 import (

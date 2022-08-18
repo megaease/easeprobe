@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package client is the native client probe package
 package client
 
 import (

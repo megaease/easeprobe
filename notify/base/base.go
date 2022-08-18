@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package base is the base implementation of the notification.
 package base
 
 import (

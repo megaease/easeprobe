@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package notify contains the notify implementation.
 package notify
 
 import (
