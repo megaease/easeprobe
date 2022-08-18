@@ -22,9 +22,11 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 	"time"
 
+	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/global"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
@@ -146,6 +148,24 @@ func TestNewDataFile(t *testing.T) {
 	newDataFile(file)
 	assert.True(t, isDataFileExisted(file))
 	removeAll("x/")
+
+	// errors
+	monkey.Patch(ioutil.WriteFile, func(filename string, data []byte, perm os.FileMode) error {
+		return fmt.Errorf("error")
+	})
+	file = "data.yaml"
+	err := newDataFile(file)
+	assert.Error(t, err)
+	removeAll(file)
+
+	monkey.Patch(yaml.Marshal, func(v interface{}) ([]byte, error) {
+		return nil, fmt.Errorf("error")
+	})
+	err = newDataFile(file)
+	assert.Error(t, err)
+	removeAll(file)
+
+	monkey.UnpatchAll()
 }
 
 func TestLoadDataFile(t *testing.T) {
@@ -163,6 +183,47 @@ func TestLoadDataFile(t *testing.T) {
 	assert.True(t, isDataFileExisted(metaData.backup))
 	removeAll(metaData.backup)
 	checkData(t)
+
+	// errors - backup file
+	monkey.Patch(os.Rename, func(oldpath, newpath string) error {
+		return fmt.Errorf("error")
+	})
+	newDataFile(file)
+	err = LoadDataFromFile(file)
+	assert.Nil(t, err)
+	assert.False(t, isDataFileExisted(metaData.backup))
+	removeAll(file)
+
+	// errors - unmarshal error
+	newDataFile(file)
+	monkey.Patch(yaml.Unmarshal, func(in []byte, out interface{}) error {
+		return fmt.Errorf("error")
+	})
+	err = LoadDataFromFile(file)
+	assert.Error(t, err)
+	removeAll(file)
+	monkey.UnpatchAll()
+
+	// errors - decode error
+	newDataFile(file)
+	var dec *yaml.Decoder
+	monkey.PatchInstanceMethod(reflect.TypeOf(dec), "Decode", func(*yaml.Decoder, interface{}) error {
+		return fmt.Errorf("error")
+	})
+	err = LoadDataFromFile(file)
+	assert.Error(t, err)
+	removeAll(file)
+
+	// errors - read error
+	newDataFile(file)
+	monkey.Patch(ioutil.ReadFile, func(filename string) ([]byte, error) {
+		return nil, fmt.Errorf("error")
+	})
+	err = LoadDataFromFile(file)
+	assert.Error(t, err)
+	removeAll(file)
+
+	monkey.UnpatchAll()
 }
 
 func numOfBackup(file string) int {
@@ -190,6 +251,17 @@ func TestCleanDataFile(t *testing.T) {
 	}
 	assert.Equal(t, n, numOfBackup(file))
 
+	monkey.Patch(os.Remove, func(filename string) error {
+		return fmt.Errorf("error")
+	})
+	CleanDataFile(file, 3)
+	assert.Equal(t, n, numOfBackup(file))
+
+	monkey.UnpatchAll()
+
+	CleanDataFile(file, 10)
+	assert.Equal(t, n, numOfBackup(file))
+
 	n = 3
 	CleanDataFile(file, n)
 	assert.Equal(t, n, numOfBackup(file))
@@ -200,6 +272,23 @@ func TestCleanDataFile(t *testing.T) {
 
 	// clean data file
 	removeAll("data/")
+
+	// disable data file
+	file = "-"
+	CleanDataFile(file, n)
+	assert.Equal(t, 0, numOfBackup(file))
+
+	file = "data.yaml"
+	CleanDataFile(file, -1)
+	assert.Equal(t, 0, numOfBackup(file))
+
+	monkey.Patch(filepath.Glob, func(pattern string) ([]string, error) {
+		return nil, fmt.Errorf("error")
+	})
+	CleanDataFile(file, n)
+	assert.Equal(t, 0, numOfBackup(file))
+
+	monkey.UnpatchAll()
 }
 
 func TestMetaData(t *testing.T) {
@@ -235,6 +324,17 @@ func TestMetaData(t *testing.T) {
 	assert.Equal(t, m.ver, "v1.0.0")
 
 	removeAll("data/")
+
+	// case four: set empty meta
+	SetMetaData("", "")
+	newDataFile(file)
+	err := LoadDataFromFile(file)
+	assert.Nil(t, err)
+	m = GetMetaData()
+	assert.Equal(t, m.Name, global.DefaultProg)
+	assert.Equal(t, m.Ver, global.Ver)
+	removeAll("data/")
+
 }
 
 type DummyProbe struct {
@@ -287,7 +387,11 @@ func TestCleanData(t *testing.T) {
 			MyName:   testResults[1].Name,
 			MyResult: &Result{Name: testResults[1].Name},
 		},
+		&DummyProbe{
+			MyName:   "dummy3",
+			MyResult: &Result{Name: "dummy3"},
+		},
 	}
 	CleanData(p)
-	assert.Equal(t, len(resultData), 2)
+	assert.Equal(t, len(resultData), 3)
 }
