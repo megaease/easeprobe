@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package channel implements the channel interface
 package channel
 
 import (
