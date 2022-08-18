@@ -33,7 +33,6 @@ func init() {
 	SetDryNotify(false)
 }
 
-
 // SetDryNotify sets the global dry run flag
 func SetDryNotify(dry bool) {
 	dryNotify.Store(dry)
