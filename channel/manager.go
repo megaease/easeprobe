@@ -29,6 +29,11 @@ var channel = make(map[string]*Channel)
 var wg sync.WaitGroup
 var dryNotify atomic.Value
 
+func init() {
+	SetDryNotify(false)
+}
+
+
 // SetDryNotify sets the global dry run flag
 func SetDryNotify(dry bool) {
 	dryNotify.Store(dry)
