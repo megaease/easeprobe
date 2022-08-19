@@ -38,8 +38,8 @@ func SetDryNotify(dry bool) {
 	dryNotify.Store(dry)
 }
 
-// GetDryNotify returns the dry run flag
-func GetDryNotify() bool {
+// IsDryNotify returns the dry run flag
+func IsDryNotify() bool {
 	return dryNotify.Load().(bool)
 }
 

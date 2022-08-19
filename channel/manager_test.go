@@ -188,7 +188,7 @@ func TestManager(t *testing.T) {
 
 	// test the dry notification
 	SetDryNotify(true)
-	assert.True(t, GetDryNotify())
+	assert.True(t, IsDryNotify())
 	for _, ch := range chs {
 		for _, p := range ch.Probers {
 			res := p.Probe()

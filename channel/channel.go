@@ -160,7 +160,7 @@ func (c *Channel) WatchEvent(wg *sync.WaitGroup) {
 			log.Infof("[%s / %s]: %s (%s) - Status changed [%s] ==> [%s]",
 				kind, c.Name, result.Name, result.Endpoint, result.PreStatus, result.Status)
 			for _, n := range c.Notifiers {
-				if GetDryNotify() == true {
+				if IsDryNotify() == true {
 					n.DryNotify(result)
 				} else {
 					go n.Notify(result)
