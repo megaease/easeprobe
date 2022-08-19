@@ -22,6 +22,7 @@ import (
 	"io/ioutil"
 	"net"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -88,7 +89,7 @@ func createSSHConfig() *SSH {
 				},
 				Command:   "test",
 				Args:      []string{},
-				Env:       []string{},
+				Env:       []string{"TEST=test"},
 				BastionID: "none",
 			},
 		},
@@ -224,6 +225,25 @@ YWwBAg==
 		}
 	}
 
+	checkServer := func(s bool, m string) {
+		for _, server := range _ssh.Servers {
+			status, message := server.DoProbe()
+			assert.Equal(t, s, status)
+			assert.Contains(t, message, m)
+		}
+	}
+	// session.Run failed
+	monkey.PatchInstanceMethod(reflect.TypeOf(ss), "Run", func(s *ssh.Session, cmd string) error {
+		return errors.New("session.Run failed")
+	})
+	checkServer(false, "session.Run failed")
+
+	// client.NewSession failed
+	monkey.PatchInstanceMethod(reflect.TypeOf(client), "NewSession", func(c *ssh.Client) (*ssh.Session, error) {
+		return nil, errors.New("client.NewSession failed")
+	})
+	checkServer(false, "client.NewSession failed")
+
 	// NewClientConn failed
 	monkey.Patch(ssh.NewClientConn, func(c net.Conn, addr string, config *ssh.ClientConfig) (ssh.Conn, <-chan ssh.NewChannel, <-chan *ssh.Request, error) {
 		return &ssh.Client{}, nil, nil, errors.New("NewClientConn failed")
@@ -248,25 +268,50 @@ YWwBAg==
 		}
 	}
 
+	// SSHConfig failed - no bastion
+	var guard *monkey.PatchGuard
+	var ed *Endpoint
+	guard = monkey.PatchInstanceMethod(reflect.TypeOf(ed), "SSHConfig", func(e *Endpoint, kind, name string, timeout time.Duration) (*ssh.ClientConfig, error) {
+		guard.Unpatch()
+		defer guard.Restore()
+		if strings.Contains(e.Host, "bastion") {
+			return e.SSHConfig(kind, name, timeout)
+		}
+		return nil, errors.New("SSHConfig failed")
+	})
+	checkServer(false, "SSHConfig failed")
+
+	// SSHConfig failed
+	monkey.PatchInstanceMethod(reflect.TypeOf(ed), "SSHConfig", func(e *Endpoint, kind, name string, timeout time.Duration) (*ssh.ClientConfig, error) {
+		return nil, errors.New("SSHConfig failed")
+	})
+	checkServer(false, "SSHConfig failed")
+
 	// ssh Dial failed
+	monkey.UnpatchInstanceMethod(reflect.TypeOf(ed), "SSHConfig")
 	monkey.Patch(ssh.Dial, func(network, addr string, config *ssh.ClientConfig) (*ssh.Client, error) {
 		return nil, errors.New("ssh Dial failed")
 	})
-	for _, s := range _ssh.Servers {
-		status, message := s.DoProbe()
-		assert.Equal(t, false, status)
-		assert.Contains(t, message, "ssh Dial failed")
-	}
+	checkServer(false, "ssh Dial failed")
 
-	// SSHConfig failed
-	var ed *Endpoint
-	monkey.PatchInstanceMethod(reflect.TypeOf(ed), "SSHConfig", func(e *Endpoint, _, _ string, _ time.Duration) (*ssh.ClientConfig, error) {
-		return nil, errors.New("SSHConfig failed")
+	var s *Server
+	monkey.PatchInstanceMethod(reflect.TypeOf(s), "RunSSHCmd", func(s *Server) (string, error) {
+		if s.bastion != nil {
+			return "ExitMissingError", &ssh.ExitMissingError{}
+		}
+		return "ExitError", &ssh.ExitError{
+			Waitmsg: ssh.Waitmsg{},
+		}
 	})
 	for _, s := range _ssh.Servers {
 		status, message := s.DoProbe()
-		assert.Equal(t, false, status)
-		assert.Contains(t, message, "SSHConfig failed")
+		if s.bastion != nil {
+			assert.Equal(t, false, status)
+			assert.Contains(t, message, "ExitMissingError")
+		} else {
+			assert.Equal(t, false, status)
+			assert.Contains(t, message, "ExitError")
+		}
 	}
 
 	monkey.UnpatchAll()

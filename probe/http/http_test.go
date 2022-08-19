@@ -99,6 +99,13 @@ func TestHTTPConfig(t *testing.T) {
 	err = h.Config(global.ProbeSettings{})
 	assert.NoError(t, err)
 
+	var e *eval.Evaluator
+	monkey.PatchInstanceMethod(reflect.TypeOf(e), "Config", func(_ *eval.Evaluator) error {
+		return fmt.Errorf("Eval Config Error")
+	})
+	err = h.Config(global.ProbeSettings{})
+	assert.Error(t, err)
+
 	h.Proxy = "\nexample.com"
 	err = h.Config(global.ProbeSettings{})
 	assert.Error(t, err)
