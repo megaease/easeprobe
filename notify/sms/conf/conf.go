@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package conf is the configuration package for SMS notification
 package conf
 
 import (

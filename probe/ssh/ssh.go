@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package ssh is the ssh probe package
 package ssh
 
 import (

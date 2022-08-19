@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package sms contains the sms implementation.
 package sms
 
 import (

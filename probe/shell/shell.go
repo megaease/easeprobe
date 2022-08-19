@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package shell is the shell probe package
 package shell
 
 import (

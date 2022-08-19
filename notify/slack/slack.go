@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package slack is the slack notification package.
 package slack
 
 import (

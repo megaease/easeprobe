@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package tcp is the tcp probe package
 package tcp
 
 import (

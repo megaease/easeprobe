@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package aws is the AWS notification package
 package aws
 
 import (

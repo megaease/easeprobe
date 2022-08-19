@@ -25,7 +25,43 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func TestDirverType(t *testing.T) {
+func testMarshalUnmarshal(
+	t *testing.T, str string, driver DriverType, good bool,
+	marshal func(in interface{}) ([]byte, error),
+	unmarshal func(in []byte, out interface{}) (err error)) {
+
+	var d DriverType
+	err := unmarshal([]byte(str), &d)
+	if good {
+		assert.Nil(t, err)
+		assert.Equal(t, driver, d)
+	} else {
+		assert.Error(t, err)
+		assert.Equal(t, Unknown, d)
+	}
+
+	buf, err := marshal(driver)
+	if good {
+		assert.Nil(t, err)
+		assert.Equal(t, str, string(buf))
+	} else {
+		assert.Error(t, err)
+		assert.Nil(t, buf)
+	}
+}
+
+func testYamlJSON(t *testing.T, str string, drive DriverType, good bool) {
+	testYaml(t, str+"\n", drive, good)
+	testJSON(t, `"`+str+`"`, drive, good)
+}
+func testYaml(t *testing.T, str string, drive DriverType, good bool) {
+	testMarshalUnmarshal(t, str, drive, good, yaml.Marshal, yaml.Unmarshal)
+}
+func testJSON(t *testing.T, str string, drive DriverType, good bool) {
+	testMarshalUnmarshal(t, str, drive, good, json.Marshal, json.Unmarshal)
+}
+
+func TestDriverType(t *testing.T) {
 	assert.Equal(t, "mysql", MySQL.String())
 	assert.Equal(t, "redis", Redis.String())
 	assert.Equal(t, "memcache", Memcache.String())
@@ -36,35 +72,22 @@ func TestDirverType(t *testing.T) {
 	assert.Equal(t, Redis, d.DriverType("redis"))
 	assert.Equal(t, Memcache, d.DriverType("memcache"))
 
-	d = d.DriverType("postgres")
-	buf, err := yaml.Marshal(d)
-	assert.Nil(t, err)
-	assert.Equal(t, "postgres\n", string(buf))
-
-	err = yaml.Unmarshal([]byte("zookeeper"), &d)
-	assert.Nil(t, err)
-	assert.Equal(t, Zookeeper, d)
-
-	err = yaml.Unmarshal([]byte("xxx"), &d)
-	assert.Nil(t, err)
-	assert.Equal(t, Unknown, d)
-
-	d = MySQL
-	buf, err = json.Marshal(d)
-	assert.Nil(t, err)
-	assert.Equal(t, "\"mysql\"", string(buf))
-
-	err = json.Unmarshal([]byte("\"mongo\""), &d)
-	assert.Nil(t, err)
-	assert.Equal(t, Mongo, d)
-
-	d = Memcache
-	buf, err = json.Marshal(d)
-	assert.Nil(t, err)
-	assert.Equal(t, "\"memcache\"", string(buf))
-
 	d = 10
 	assert.Equal(t, "unknown", d.String())
+
+	testYamlJSON(t, "mysql", MySQL, true)
+	testYamlJSON(t, "redis", Redis, true)
+	testYamlJSON(t, "memcache", Memcache, true)
+	testYamlJSON(t, "kafka", Kafka, true)
+	testYamlJSON(t, "mongo", Mongo, true)
+	testYamlJSON(t, "postgres", PostgreSQL, true)
+	testYamlJSON(t, "zookeeper", Zookeeper, true)
+	testYamlJSON(t, "unknown", Unknown, false)
+
+	testJSON(t, "", Unknown, false)
+	testJSON(t, `{"x":"y"}`, Unknown, false)
+	testJSON(t, `"xyz"`, Unknown, false)
+	testYaml(t, "- mysql::", Unknown, false)
 
 }
 

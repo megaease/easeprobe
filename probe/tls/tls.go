@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package tls is the tls probe package
 package tls
 
 import (

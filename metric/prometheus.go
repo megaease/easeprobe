@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package metric is the package to report the metrics to Prometheus
 package metric
 
 import (

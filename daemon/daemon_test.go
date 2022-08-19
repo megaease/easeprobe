@@ -142,3 +142,35 @@ func TestPIDFileFailed(t *testing.T) {
 
 	monkey.UnpatchAll()
 }
+
+func TestCheckPIDFile(t *testing.T) {
+	file := "dir/easedprobe.pid"
+	conf, err := NewPIDFile(file)
+	assert.Nil(t, err)
+	assert.FileExists(t, file)
+
+	pid, err := conf.CheckPIDFile()
+	assert.Equal(t, os.Getpid(), pid)
+	assert.NotNil(t, err)
+
+	monkey.Patch(processExists, func(int) bool {
+		return false
+	})
+	pid, err = conf.CheckPIDFile()
+	assert.Equal(t, -1, pid)
+	assert.Nil(t, err)
+
+	os.WriteFile(conf.PIDFile, []byte("invalid pid"), 0644)
+	pid, err = conf.CheckPIDFile()
+	assert.Equal(t, -1, pid)
+	assert.Nil(t, err)
+
+	conf.RemovePIDFile()
+	os.RemoveAll("dir")
+
+	pid, err = conf.CheckPIDFile()
+	assert.Equal(t, -1, pid)
+	assert.Nil(t, err)
+
+	monkey.UnpatchAll()
+}

@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package email is the email notification package
 package email
 
 import (

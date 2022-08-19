@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package dingtalk is the notification package for dingtalk.
 package dingtalk
 
 import (

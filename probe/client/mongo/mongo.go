@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package mongo implements a probe client for the MongoDB database.
 package mongo
 
 import (

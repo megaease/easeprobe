@@ -111,4 +111,11 @@ DX4y9QvXoaUiQ5vB63voiqRTBT4hTYBDVi2G7NEjIczNs9S8JQM5Mg52mZsdH77g6ChUPp
 	config, err = e.SSHConfig("ssh", "test", 30*time.Second)
 	assert.Nil(t, err)
 	assert.NotNil(t, config)
+
+	monkey.Patch(ioutil.ReadFile, func(filename string) ([]byte, error) {
+		return []byte(``), nil
+	})
+	config, err = e.SSHConfig("ssh", "test", 30*time.Second)
+	assert.Nil(t, config)
+	assert.NotNil(t, err)
 }

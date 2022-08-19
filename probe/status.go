@@ -19,6 +19,7 @@ package probe
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/megaease/easeprobe/global"
@@ -84,29 +85,43 @@ func (s *Status) Emoji() string {
 // UnmarshalYAML is Unmarshal the status
 func (s *Status) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var status string
+	*s = StatusUnknown
 	if err := unmarshal(&status); err != nil {
 		return err
 	}
-	s.Status(status)
-	return nil
+	if val, ok := toStatus[strings.ToLower(status)]; ok {
+		*s = val
+		return nil
+	}
+	return fmt.Errorf("Unknown status: %s", status)
 }
 
 // MarshalYAML is Marshal the status
 func (s Status) MarshalYAML() (interface{}, error) {
-	return s.String(), nil
+	if val, ok := toString[s]; ok {
+		return val, nil
+	}
+	return "unknown", fmt.Errorf("Unknown status: %s", s)
 }
 
 // UnmarshalJSON is Unmarshal the status
 func (s *Status) UnmarshalJSON(b []byte) (err error) {
 	var str string
+	*s = StatusUnknown
 	if err = json.Unmarshal(b, &str); err != nil {
 		return err
 	}
-	s.Status(str)
-	return nil
+	if val, ok := toStatus[strings.ToLower(str)]; ok {
+		*s = val
+		return nil
+	}
+	return fmt.Errorf("Unknown status: %s", str)
 }
 
 // MarshalJSON is marshal the status
 func (s Status) MarshalJSON() (b []byte, err error) {
-	return json.Marshal(s.String())
+	if val, ok := toString[s]; ok {
+		return []byte(fmt.Sprintf(`"%s"`, val)), nil
+	}
+	return []byte("unknown"), fmt.Errorf("Unknown status: %s", s)
 }

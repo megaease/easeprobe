@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package daemon is the daemon implementation.
 package daemon
 
 import (

@@ -24,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	"bou.ke/monkey"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 )
@@ -211,6 +212,20 @@ func TestDebug(t *testing.T) {
 	if str != expected {
 		t.Errorf("%s != %s", str, expected)
 	}
+
+	monkey.Patch(json.Marshal, func(v interface{}) ([]byte, error) {
+		return nil, fmt.Errorf("marshal error")
+	})
+	monkey.Patch(json.MarshalIndent, func(v any, prefix string, indent string) ([]byte, error) {
+		return nil, fmt.Errorf("marshal error")
+	})
+
+	str = r.DebugJSON()
+	assert.Empty(t, str)
+	str = r.DebugJSONIndent()
+	assert.Empty(t, str)
+
+	monkey.UnpatchAll()
 }
 
 func TestSLAPercent(t *testing.T) {

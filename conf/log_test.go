@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"bou.ke/monkey"
@@ -30,17 +31,55 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+func testLogYaml(t *testing.T, name string, level LogLevel, good bool) {
+	var l LogLevel
+	err := yaml.Unmarshal([]byte(name), &l)
+	if good {
+		assert.Nil(t, err)
+		assert.Equal(t, level, l)
+	} else {
+		assert.NotNil(t, err)
+		assert.Equal(t, LogLevel(log.PanicLevel), l)
+	}
+
+	buf, err := yaml.Marshal(level)
+	if good {
+		assert.Nil(t, err)
+		assert.Equal(t, name+"\n", string(buf))
+	} else {
+		assert.NotNil(t, err)
+		assert.Nil(t, buf)
+	}
+
+}
+
+func TestLogLevelYaml(t *testing.T) {
+	testLogYaml(t, "debug", LogLevel(log.DebugLevel), true)
+	testLogYaml(t, "info", LogLevel(log.InfoLevel), true)
+	testLogYaml(t, "warn", LogLevel(log.WarnLevel), true)
+	testLogYaml(t, "error", LogLevel(log.ErrorLevel), true)
+	testLogYaml(t, "fatal", LogLevel(log.FatalLevel), true)
+	testLogYaml(t, "panic", LogLevel(log.PanicLevel), true)
+	testLogYaml(t, "none", LogLevel(log.Level(100)), false)
+	testLogYaml(t, "- none", LogLevel(log.Level(100)), false)
+}
+
 func TestLogLevel(t *testing.T) {
 	l := LogLevel(log.DebugLevel)
 	buf, err := yaml.Marshal(l)
 	assert.Nil(t, err)
 	assert.Equal(t, "debug\n", string(buf))
 
-	err = yaml.Unmarshal([]byte("painc"), &l)
+	err = yaml.Unmarshal([]byte("panic"), &l)
 	assert.Nil(t, err)
 	assert.Equal(t, LogLevel(log.PanicLevel), l)
 
 	assert.Equal(t, l.GetLevel(), log.PanicLevel)
+
+	// test error yaml format
+	err = yaml.Unmarshal([]byte("- log::error"), &l)
+	assert.NotNil(t, err)
+	assert.Equal(t, log.PanicLevel, l.GetLevel())
 }
 
 func testLogs(t *testing.T, name string, new bool, app bool, selfRotate bool) {
@@ -101,7 +140,6 @@ func TestOpenLogFail(t *testing.T) {
 	monkey.Patch(os.OpenFile, func(name string, flag int, perm os.FileMode) (*os.File, error) {
 		return nil, fmt.Errorf("error")
 	})
-	defer monkey.UnpatchAll()
 
 	l := NewLog()
 	l.File = "test.log"
@@ -109,4 +147,52 @@ func TestOpenLogFail(t *testing.T) {
 	l.InitLog(nil)
 	assert.Equal(t, true, l.IsStdout)
 	assert.Equal(t, os.Stdout, l.GetWriter())
+
+	l.Close()
+	l.Writer = nil
+	l.Rotate()
+
+	w := l.GetWriter()
+	assert.Equal(t, os.Stdout, w)
+
+	monkey.UnpatchAll()
+
+	// test rotate error - log file
+	l = NewLog()
+	l.File = "test.log"
+	l.SelfRotate = false
+	l.InitLog(nil)
+	assert.Equal(t, false, l.IsStdout)
+
+	var fp *os.File
+	monkey.PatchInstanceMethod(reflect.TypeOf(fp), "Close", func(_ *os.File) error {
+		return fmt.Errorf("error")
+	})
+
+	l.Rotate()
+	files, _ := filepath.Glob("test*")
+	fmt.Println(files)
+	assert.Equal(t, 1, len(files))
+	l.Close()
+	os.Remove(l.File)
+
+	// test rotate error - lumberjackLogger
+	l = NewLog()
+	l.File = "test.log"
+	l.SelfRotate = true
+	l.InitLog(nil)
+	assert.Equal(t, false, l.IsStdout)
+
+	var lum *lumberjack.Logger
+	monkey.PatchInstanceMethod(reflect.TypeOf(lum), "Rotate", func(_ *lumberjack.Logger) error {
+		return fmt.Errorf("error")
+	})
+	l.Rotate()
+	files, _ = filepath.Glob("test*")
+	fmt.Println(files)
+	assert.Equal(t, 1, len(files))
+	l.Close()
+	os.Remove(l.File)
+
+	monkey.UnpatchAll()
 }

@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package host is the host probe package
 package host
 
 import (

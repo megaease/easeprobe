@@ -22,10 +22,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
 
+	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/stretchr/testify/assert"
@@ -104,6 +106,7 @@ func checkResult(t *testing.T, r probe.Result, rDTO resultDTO) {
 	assert.Equal(t, r.PreStatus, rDTO.PreStatus)
 	assert.Equal(t, r.Message, rDTO.Message)
 }
+
 func TestResultToJSON(t *testing.T) {
 	r := newDummyResult("dummy")
 	str := ToJSON(r)
@@ -115,6 +118,21 @@ func TestResultToJSON(t *testing.T) {
 	err = json.Unmarshal([]byte(str), &rDTO)
 	assert.Nil(t, err)
 	checkResult(t, r, rDTO)
+
+	monkey.Patch(json.Marshal, func(v interface{}) ([]byte, error) {
+		return nil, fmt.Errorf("marshal error")
+	})
+	str = ToJSON(r)
+	assert.Empty(t, str)
+
+	monkey.Patch(json.MarshalIndent, func(interface{}, string, string) ([]byte, error) {
+		return nil, fmt.Errorf("marshal error")
+	})
+	str = ToJSONIndent(r)
+	assert.Empty(t, str)
+
+	monkey.UnpatchAll()
+
 }
 
 func TestResultToHTML(t *testing.T) {
@@ -226,4 +244,18 @@ func TestResultToShell(t *testing.T) {
 	assert.Equal(t, data[1][6], FormatTime(r.StartTime))
 	assert.Equal(t, data[1][7], fmt.Sprintf("%d", r.StartTimestamp))
 	assert.Equal(t, data[1][8], r.Message)
+
+	var w *csv.Writer
+	monkey.PatchInstanceMethod(reflect.TypeOf(w), "WriteAll", func(_ *csv.Writer, _ [][]string) error {
+		return fmt.Errorf("error")
+	})
+	assert.Empty(t, ToCSV(r))
+
+	monkey.Patch(json.Marshal, func(v any) ([]byte, error) {
+		return nil, fmt.Errorf("error")
+	})
+	assert.Empty(t, ToShell(r))
+
+	monkey.UnpatchAll()
+
 }

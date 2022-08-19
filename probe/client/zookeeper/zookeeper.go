@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package zookeeper is the zookeeper client probe
 package zookeeper
 
 import (

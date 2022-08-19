@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package wecom is the wecom notification package.
 package wecom
 
 import (

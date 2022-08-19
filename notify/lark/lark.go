@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package lark is the lark notification package.
 package lark
 
 import (

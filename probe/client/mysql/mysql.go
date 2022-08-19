@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package mysql is the client probe for MySQL.
 package mysql
 
 import (

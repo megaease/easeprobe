@@ -18,9 +18,11 @@
 package report
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 
+	"bou.ke/monkey"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -74,6 +76,14 @@ func TestJSONEscape(t *testing.T) {
 	expected = `hello\\nworld`
 	result = JSONEscape(`hello\nworld`)
 	assert.Equal(t, expected, result)
+
+	monkey.Patch(json.Marshal, func(v interface{}) ([]byte, error) {
+		return nil, fmt.Errorf("error")
+	})
+	expected = `{hello}`
+	result = JSONEscape(`{hello}`)
+	assert.Equal(t, expected, result)
+	monkey.UnpatchAll()
 }
 
 func TestAutoRefreshJS(t *testing.T) {

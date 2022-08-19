@@ -18,9 +18,12 @@
 package conf
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
+	httpClient "net/http"
 	"os"
 	"testing"
 	"time"
@@ -41,6 +44,7 @@ import (
 	"github.com/megaease/easeprobe/probe/tcp"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v3"
 )
 
 func testisExternalURL(url string, expects bool, t *testing.T) {
@@ -62,6 +66,34 @@ func TestPathAndURL(t *testing.T) {
 	testisExternalURL("hTtP://127.0.0.1", true, t)
 	testisExternalURL("localhost", false, t)
 	testisExternalURL("ftp://127.0.0.1", false, t)
+}
+
+func testScheduleYaml(t *testing.T, name string, sch Schedule, good bool) {
+	var s Schedule
+	err := yaml.Unmarshal([]byte(name), &s)
+	if good {
+		assert.Nil(t, err)
+		assert.Equal(t, sch, s)
+	} else {
+		assert.NotNil(t, err)
+	}
+
+	buf, err := yaml.Marshal(sch)
+	if good {
+		assert.Nil(t, err)
+		assert.Equal(t, name+"\n", string(buf))
+	} else {
+		assert.NotNil(t, err)
+	}
+}
+func TestScheduleYaml(t *testing.T) {
+	testScheduleYaml(t, "hourly", Hourly, true)
+	testScheduleYaml(t, "daily", Daily, true)
+	testScheduleYaml(t, "weekly", Weekly, true)
+	testScheduleYaml(t, "monthly", Monthly, true)
+	testScheduleYaml(t, "none", None, true)
+	testScheduleYaml(t, "yearly", 100, false)
+	testScheduleYaml(t, "- bad", 100, false)
 }
 
 func TestGetYamlFileFromFile(t *testing.T) {
@@ -107,6 +139,8 @@ http:
     interval: 30s
     channels:
       - "telegram#Dev"
+  - name: Env Variables
+    url: $WEB_SITE
 `
 
 func checkHTTPProbe(t *testing.T, probe httpProbe.HTTP) {
@@ -124,6 +158,8 @@ func checkHTTPProbe(t *testing.T, probe httpProbe.HTTP) {
 		assert.Equal(t, probe.ProbeTimeout, 2*time.Minute)
 		assert.Equal(t, probe.ProbeTimeInterval, 30*time.Second)
 		assert.Equal(t, probe.Channels(), []string{"telegram#Dev"})
+	case "Env Variables":
+		assert.Equal(t, probe.URL, os.Getenv("WEB_SITE"))
 	default:
 		t.Errorf("unexpected probe name %s", probe.ProbeName)
 	}
@@ -557,8 +593,15 @@ func TestConfig(t *testing.T) {
 	err := writeConfig(file, confYAML)
 	assert.Nil(t, err)
 
-	conf, err := New(&file)
+	// bad config
+	os.Setenv("WEB_SITE", "\n - x::")
+	_, err = New(&file)
+	assert.NotNil(t, err)
+
+	os.Setenv("WEB_SITE", "https://easeprobe.com")
+	_, err = New(&file)
 	assert.Nil(t, err)
+	conf := Get()
 
 	assert.Equal(t, "EaseProbeBot", conf.Settings.Name)
 	assert.Equal(t, "0.1.0", conf.Version)
@@ -583,7 +626,7 @@ func TestConfig(t *testing.T) {
 
 	conf.InitAllLogs()
 	probers := conf.AllProbers()
-	assert.Equal(t, 8, len(probers))
+	assert.Equal(t, 9, len(probers))
 	notifiers := conf.AllNotifiers()
 	assert.Equal(t, 6, len(notifiers))
 
@@ -597,12 +640,30 @@ func TestConfig(t *testing.T) {
 	assert.Equal(t, "0.1.0", httpConf.Version)
 
 	probers = conf.AllProbers()
-	assert.Equal(t, 8, len(probers))
+	assert.Equal(t, 9, len(probers))
 	notifiers = conf.AllNotifiers()
 	assert.Equal(t, 6, len(notifiers))
 
 	os.RemoveAll(file)
 	os.RemoveAll("data")
+
+	// error test
+	url = "http://localhost:65534"
+	_, err = New(&url)
+	assert.NotNil(t, err)
+
+	os.Setenv("HTTP_TIMEOUT", "invalid")
+	_, err = New(&url)
+	assert.NotNil(t, err)
+
+	monkey.Patch(httpClient.NewRequest, func(method, url string, body io.Reader) (*http.Request, error) {
+		return nil, errors.New("error")
+	})
+	url = "http://localhost"
+	_, err = New(&url)
+	assert.NotNil(t, err)
+
+	monkey.UnpatchAll()
 }
 
 func TestInitData(t *testing.T) {

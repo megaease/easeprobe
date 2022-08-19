@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package log is the log package for easeprobe.
 package log
 
 import (

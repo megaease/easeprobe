@@ -18,6 +18,7 @@
 package conf
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -40,18 +41,14 @@ var levelToString = map[LogLevel]string{
 	LogLevel(log.PanicLevel): "panic",
 }
 
-var stringToLevel = map[string]LogLevel{
-	"debug": LogLevel(log.DebugLevel),
-	"info":  LogLevel(log.InfoLevel),
-	"warn":  LogLevel(log.WarnLevel),
-	"error": LogLevel(log.ErrorLevel),
-	"fatal": LogLevel(log.FatalLevel),
-	"panic": LogLevel(log.PanicLevel),
-}
+var stringToLevel = global.ReverseMap(levelToString)
 
 // MarshalYAML is marshal the format
 func (l LogLevel) MarshalYAML() (interface{}, error) {
-	return levelToString[l], nil
+	if s, ok := levelToString[l]; ok {
+		return s, nil
+	}
+	return nil, fmt.Errorf("invalid log level: %d", l)
 }
 
 // UnmarshalYAML is unmarshal the debug level
@@ -60,7 +57,10 @@ func (l *LogLevel) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err := unmarshal(&level); err != nil {
 		return err
 	}
-	*l = stringToLevel[strings.ToLower(level)]
+	var ok bool
+	if *l, ok = stringToLevel[strings.ToLower(level)]; !ok {
+		return fmt.Errorf("invalid log level: %s", level)
+	}
 	return nil
 }
 
@@ -197,7 +197,6 @@ func (l *Log) Rotate() {
 		l.Open()            // open another writer
 		l.ConfigureLogger() // set the new logger writer.
 	}
-
 }
 
 // ConfigureLogger configure the logger

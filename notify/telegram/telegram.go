@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package telegram is the telegram notification package.
 package telegram
 
 import (

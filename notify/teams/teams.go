@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Package teams is the teams notification
 package teams
 
 import (
