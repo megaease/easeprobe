@@ -188,7 +188,11 @@ func (h *HTTP) DoProbe() (bool, string) {
 	}
 	req.Header.Set("User-Agent", global.OrgProgVer)
 	for k, v := range h.Headers {
-		req.Header.Set(k, v)
+		if strings.EqualFold(k, "host") {
+			req.Host = v
+		} else {
+			req.Header.Set(k, v)
+		}
 	}
 
 	// client close the connection
