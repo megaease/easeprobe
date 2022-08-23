@@ -141,8 +141,10 @@ func TestOpenLogFail(t *testing.T) {
 		return nil, fmt.Errorf("error")
 	})
 
+	file := "failed"
+
 	l := NewLog()
-	l.File = "test.log"
+	l.File = file + ".log"
 	l.SelfRotate = false
 	l.InitLog(nil)
 	assert.Equal(t, true, l.IsStdout)
@@ -159,7 +161,7 @@ func TestOpenLogFail(t *testing.T) {
 
 	// test rotate error - log file
 	l = NewLog()
-	l.File = "test.log"
+	l.File = file + ".log"
 	l.SelfRotate = false
 	l.InitLog(nil)
 	assert.Equal(t, false, l.IsStdout)
@@ -170,7 +172,7 @@ func TestOpenLogFail(t *testing.T) {
 	})
 
 	l.Rotate()
-	files, _ := filepath.Glob("test*")
+	files, _ := filepath.Glob(file + "*")
 	fmt.Println(files)
 	assert.Equal(t, 1, len(files))
 	l.Close()
@@ -178,7 +180,7 @@ func TestOpenLogFail(t *testing.T) {
 
 	// test rotate error - lumberjackLogger
 	l = NewLog()
-	l.File = "test.log"
+	l.File = file + ".log"
 	l.SelfRotate = true
 	l.InitLog(nil)
 	assert.Equal(t, false, l.IsStdout)
@@ -188,7 +190,7 @@ func TestOpenLogFail(t *testing.T) {
 		return fmt.Errorf("error")
 	})
 	l.Rotate()
-	files, _ = filepath.Glob("test*")
+	files, _ = filepath.Glob(file + "*")
 	fmt.Println(files)
 	assert.Equal(t, 1, len(files))
 	l.Close()
