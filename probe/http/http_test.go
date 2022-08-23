@@ -39,9 +39,9 @@ import (
 func createHTTP() *HTTP {
 	return &HTTP{
 		DefaultProbe:    base.DefaultProbe{ProbeName: "dummy http"},
-		URL:             "http://example.com",
+		URL:             "http://localhost:8888",
 		ContentEncoding: "text/json",
-		Headers:         map[string]string{"header1": "value1", "header2": "value2"},
+		Headers:         map[string]string{"header1": "value1", "header2": "value2", "Host": "host.com"},
 		Body:            "{ \"key1\": \"value1\", \"key2\": \"value2\" }",
 		TextChecker: probe.TextChecker{
 			Contain:    "good",
@@ -186,8 +186,29 @@ func TestHTTPDoProbe(t *testing.T) {
 	assert.False(t, s)
 	assert.Contains(t, m, "bad")
 
+	// DialContext error
+	monkey.UnpatchInstanceMethod(reflect.TypeOf(client), "Do")
+	var dialer *net.Dialer
+	monkey.PatchInstanceMethod(reflect.TypeOf(dialer), "DialContext", func(_ *net.Dialer, _ context.Context, network, address string) (net.Conn, error) {
+		return nil, fmt.Errorf("DialContext Error")
+	})
+	s, m = h.DoProbe()
+	assert.False(t, s)
+	assert.Contains(t, m, "DialContext Error")
+
+	monkey.PatchInstanceMethod(reflect.TypeOf(dialer), "DialContext", func(_ *net.Dialer, _ context.Context, network, address string) (net.Conn, error) {
+		return &net.UnixConn{}, nil
+	})
+	s, m = h.DoProbe()
+	assert.False(t, s)
+	assert.Contains(t, m, "invalid argument")
+
 	// response is 503
 	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Do", func(_ *http.Client, req *http.Request) (*http.Response, error) {
+		assert.Equal(t, "GET", req.Method)
+		assert.Equal(t, "value1", req.Header.Get("header1"))
+		assert.Equal(t, "value2", req.Header.Get("header2"))
+		assert.Equal(t, "host.com", req.Host)
 		return &http.Response{
 			StatusCode: 503,
 			Body:       io.NopCloser(ioutil.NopCloser(nil)),
