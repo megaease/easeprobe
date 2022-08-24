@@ -84,7 +84,9 @@ func (c *NotifyConfig) SendLarkNotification(msg string) error {
 	// Server returns {"Extra":null,"StatusCode":0,"StatusMessage":"success"} on success
 	// otherwise it returns {"code":9499,"msg":"Bad Request","data":{}}
 	if statusCode, ok := ret["StatusCode"].(float64); !ok || statusCode != 0 {
-		return fmt.Errorf("Error response from Lark [%d] - [%s]", int(ret["code"].(float64)), ret["msg"])
+		code, _ := ret["code"].(float64)
+		msg, _ := ret["msg"].(string)
+		return fmt.Errorf("Error response from Lark - code [%d] - msg [%v]", int(code), msg)
 	}
 	return nil
 }

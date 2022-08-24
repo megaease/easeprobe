@@ -19,6 +19,7 @@
 package conf
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -75,7 +76,7 @@ func (d ProviderType) String() string {
 }
 
 // ProviderType convert the string to ProviderType
-func (d *ProviderType) ProviderType(name string) ProviderType {
+func (d ProviderType) ProviderType(name string) ProviderType {
 	if val, ok := ProviderTypeMap[name]; ok {
 		return val
 	}
@@ -83,8 +84,11 @@ func (d *ProviderType) ProviderType(name string) ProviderType {
 }
 
 // MarshalYAML is marshal the provider type
-func (d *ProviderType) MarshalYAML() ([]byte, error) {
-	return []byte(d.String()), nil
+func (d ProviderType) MarshalYAML() (interface{}, error) {
+	if val, ok := ProviderMap[d]; ok {
+		return val, nil
+	}
+	return nil, fmt.Errorf("unknown provider type: %v", d)
 }
 
 // UnmarshalYAML is unmarshal the provider type
@@ -93,17 +97,30 @@ func (d *ProviderType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err := unmarshal(&s); err != nil {
 		return err
 	}
-	*d = d.ProviderType(strings.ToLower(s))
-	return nil
+	if val, ok := ProviderTypeMap[strings.ToLower(s)]; ok {
+		*d = val
+		return nil
+	}
+	return fmt.Errorf("unknown provider type: %s", s)
+}
+
+// MarshalJSON is marshal the provider
+func (d ProviderType) MarshalJSON() (b []byte, err error) {
+	if val, ok := ProviderMap[d]; ok {
+		return []byte(fmt.Sprintf(`"%s"`, val)), nil
+	}
+	return nil, fmt.Errorf("unknown provider type: %v", d)
 }
 
 // UnmarshalJSON is Unmarshal the provider type
 func (d *ProviderType) UnmarshalJSON(b []byte) (err error) {
-	*d = d.ProviderType(strings.ToLower(string(b)))
-	return nil
-}
-
-// MarshalJSON is marshal the provider
-func (d *ProviderType) MarshalJSON() (b []byte, err error) {
-	return []byte(fmt.Sprintf(`"%s"`, d.String())), nil
+	var str string
+	if err = json.Unmarshal(b, &str); err != nil {
+		return err
+	}
+	if val, ok := ProviderTypeMap[strings.ToLower(str)]; ok {
+		*d = val
+		return nil
+	}
+	return fmt.Errorf("unknown provider type: %s", string(b))
 }

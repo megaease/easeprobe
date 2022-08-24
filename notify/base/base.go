@@ -101,6 +101,7 @@ func (c *DefaultNotify) SendWithRetry(title string, message string, tag string) 
 		log.Debugf("[%s / %s / %s] - %s", c.NotifyKind, c.NotifyName, tag, title)
 		if c.NotifySendFunc == nil {
 			log.Errorf("[%s / %s / %s] - %s SendFunc is nil", c.NotifyKind, c.NotifyName, tag, title)
+			return &global.ErrNoRetry{Message: "SendFunc is nil"}
 		}
 		return c.NotifySendFunc(title, message)
 	}
@@ -116,6 +117,6 @@ func (c *DefaultNotify) DryNotify(result probe.Result) {
 
 // DryNotifyStat just log the notification message
 func (c *DefaultNotify) DryNotifyStat(probers []probe.Prober) {
-	log.Infof("[%s / %s / dry_notify ] - %s", c.NotifyKind, c.NotifyName,
+	log.Infof("[%s / %s / dry_notify] - %s", c.NotifyKind, c.NotifyName,
 		report.FormatFuncs[c.NotifyFormat].StatFn(probers))
 }

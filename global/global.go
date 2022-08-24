@@ -171,13 +171,23 @@ func (t *TLS) Config() (*tls.Config, error) {
 	}, nil
 }
 
+// ErrNoRetry is the error need not retry
+type ErrNoRetry struct {
+	Message string
+}
+
+func (e *ErrNoRetry) Error() string {
+	return e.Message
+}
+
 // DoRetry is a help function to retry the function if it returns error
 func DoRetry(kind, name, tag string, r Retry, fn func() error) error {
 	var err error
 	for i := 0; i < r.Times; i++ {
 		err = fn()
-		if err == nil {
-			return nil
+		_, ok := err.(*ErrNoRetry)
+		if err == nil || ok {
+			return err
 		}
 		log.Warnf("[%s / %s / %s] Retried to send %d/%d - %v", kind, name, tag, i+1, r.Times, err)
 

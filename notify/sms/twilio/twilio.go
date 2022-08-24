@@ -52,10 +52,11 @@ func (c Twilio) Notify(title, text string) error {
 
 	log.Debugf("[%s] - API %s - Form %s", c.Kind(), api, form)
 	req, err := http.NewRequest(http.MethodPost, api, strings.NewReader(form.Encode()))
-	req.SetBasicAuth(c.Key, c.Secret)
 	if err != nil {
 		return err
 	}
+	req.SetBasicAuth(c.Key, c.Secret)
+
 	req.Close = true
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 

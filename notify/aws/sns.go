@@ -36,14 +36,9 @@ type SNSNotifyConfig struct {
 	context  context.Context `yaml:"-"`
 }
 
-// Kind return the type of Notify
-func (c *SNSNotifyConfig) Kind() string {
-	return c.NotifyKind
-}
-
 // Config configures the slack notification
 func (c *SNSNotifyConfig) Config(gConf global.NotifySettings) error {
-	c.NotifyKind = "AWS-SNS"
+	c.NotifyKind = "aws-sns"
 	if c.Format == report.Unknown {
 		c.Format = report.Text
 	}

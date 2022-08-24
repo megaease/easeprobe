@@ -256,6 +256,16 @@ func TestRetry(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, r.Times, cnt)
 
+	f = func() error {
+		cnt++
+		return &ErrNoRetry{"No Retry Error"}
+	}
+	cnt = 0
+	err = DoRetry("test", "dummy", "tag", r, f)
+	assert.NotNil(t, err)
+	assert.Equal(t, 1, cnt)
+	assert.Equal(t, err.Error(), "No Retry Error")
+
 }
 
 func TestGetWritableDir(t *testing.T) {
