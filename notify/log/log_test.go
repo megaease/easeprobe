@@ -39,6 +39,7 @@ func assertError(t *testing.T, err error, msg string, contain bool) {
 
 func TestLogFile(t *testing.T) {
 	conf := &NotifyConfig{}
+	conf.NotifyName = "test"
 	conf.File = "notify.log"
 	err := conf.Config(global.NotifySettings{})
 	assert.NoError(t, err)

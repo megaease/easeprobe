@@ -27,6 +27,10 @@ import (
 // ConfigLog is the config for log
 // Windows platform only support log file notification
 func (c *NotifyConfig) ConfigLog() error {
+	c.NotifyKind = "log"
+	c.NotifyFormat = report.Log
+	c.NotifySendFunc = c.Log
+
 	c.logger = log.New()
 	return c.configLogFile()
 }
