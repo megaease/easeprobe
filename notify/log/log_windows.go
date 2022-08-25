@@ -20,8 +20,13 @@
 
 package log
 
+import (
+	log "github.com/sirupsen/logrus"
+)
+
 // ConfigLog is the config for log
 // Windows platform only support log file notification
 func (c *NotifyConfig) ConfigLog() error {
+	c.logger = log.New()
 	return c.configLogFile()
 }
