@@ -38,21 +38,21 @@ const (
 
 func (c *NotifyConfig) checkNetworkProtocol() error {
 	if strings.TrimSpace(c.Network) == "" {
-		return fmt.Errorf("protocol is required")
+		return fmt.Errorf("[%s / %s] protocol is required", c.Kind(), c.Name())
 	}
 	if strings.TrimSpace(c.Host) == "" {
-		return fmt.Errorf("host is required")
+		return fmt.Errorf("[%s / %s] host is required", c.Kind(), c.Name())
 	}
 	if c.Network != TCP && c.Network != UDP {
-		return fmt.Errorf("[%s] invalid protocol: %s", c.NotifyKind, c.Network)
+		return fmt.Errorf("[%s / %s] invalid protocol: %s", c.Kind(), c.Name(), c.Network)
 	}
 	_, port, err := net.SplitHostPort(c.Host)
 	if err != nil {
-		return fmt.Errorf("[%s] invalid host: %s", c.NotifyKind, c.Host)
+		return fmt.Errorf("[%s / %s] invalid host: %s", c.Kind(), c.Name(), c.Host)
 	}
 	_, err = strconv.Atoi(port)
 	if err != nil {
-		return fmt.Errorf("[%s] invalid port: %s", c.NotifyKind, port)
+		return fmt.Errorf("[%s / %s] invalid port: %s", c.Kind(), c.Name(), port)
 	}
 	return nil
 }
@@ -63,20 +63,16 @@ func (c *NotifyConfig) IsSyslog() bool {
 }
 
 // HasNetwork returns true if the log has network configuration
-func (c *NotifyConfig) HasNetwork() (bool, error) {
+func (c *NotifyConfig) HasNetwork() bool {
 	// if is not syslog, then return false
 	if c.IsSyslog() == false {
-		return false, nil
+		return false
 	}
 	// if is syslog, but not configured network, then return false
 	if strings.TrimSpace(c.Network) == "" || strings.TrimSpace(c.Host) == "" {
-		return false, nil
+		return false
 	}
-	// if the network is configured error, then return false
-	if err := c.checkNetworkProtocol(); err != nil {
-		return false, err
-	}
-	return true, nil
+	return true
 }
 
 // ConfigLog configures the log
@@ -89,10 +85,8 @@ func (c *NotifyConfig) ConfigLog() error {
 	c.logger = log.New()
 
 	isSyslog := c.IsSyslog()
-	hasNetwork, err := c.HasNetwork()
-	if err != nil {
-		return err
-	}
+	hasNetwork := c.HasNetwork()
+
 	// syslog && network configuration error
 	if isSyslog == true && hasNetwork == true { // remote syslog
 		c.NotifyKind = syslogIdentifier
@@ -102,21 +96,21 @@ func (c *NotifyConfig) ConfigLog() error {
 		}
 		writer, err := syslog.Dial(c.Network, c.Host, syslog.LOG_NOTICE, global.GetEaseProbe().Name)
 		if err != nil {
-			log.Errorf("[%s] cannot dial syslog network: %s", c.NotifyKind, err)
+			log.Errorf("[%s / %s] cannot dial syslog network: %s", c.Kind(), c.Name(), err)
 			return err
 		}
 		c.logger.SetOutput(writer)
-		log.Infof("[%s] %s - remote syslog (%s:%s) configured", c.NotifyKind, c.NotifyName, c.Network, c.Host)
+		log.Infof("[%s / %s] - remote syslog (%s:%s) configured", c.Kind(), c.Name(), c.Network, c.Host)
 	} else if isSyslog == true { // only for local syslog
 		c.NotifyKind = syslogIdentifier
 		c.Type = SysLog
 		writer, err := syslog.New(syslog.LOG_NOTICE, global.GetEaseProbe().Name)
 		if err != nil {
-			log.Errorf("[%s] cannot open syslog: %s", c.NotifyKind, err)
+			log.Errorf("[%s / %s] cannot open syslog: %s", c.Kind(), c.Name(), err)
 			return err
 		}
 		c.logger.SetOutput(writer)
-		log.Infof("[%s] %s - local syslog configured!", c.NotifyKind, c.NotifyName)
+		log.Infof("[%s / %s] - local syslog configured!", c.Kind(), c.Name())
 	} else { // just log file
 		if err := c.configLogFile(); err != nil {
 			return err

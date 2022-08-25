@@ -1,6 +1,3 @@
-//go:build windows
-// +build windows
-
 /*
  * Copyright (c) 2022, MegaEase
  * All rights reserved.
@@ -18,20 +15,24 @@
  * limitations under the License.
  */
 
-package log
+package notify
 
 import (
-	"github.com/megaease/easeprobe/report"
-	log "github.com/sirupsen/logrus"
+	"reflect"
+	"testing"
+
+	"github.com/megaease/easeprobe/notify/base"
+	"github.com/stretchr/testify/assert"
 )
 
-// ConfigLog is the config for log
-// Windows platform only support log file notification
-func (c *NotifyConfig) ConfigLog() error {
-	c.NotifyKind = "log"
-	c.NotifyFormat = report.Log
-	c.NotifySendFunc = c.Log
+func TestNotify(t *testing.T) {
+	n := &base.DefaultNotify{}
+	assert.Implements(t, (*Notify)(nil), n)
 
-	c.logger = log.New()
-	return c.configLogFile()
+	v := reflect.ValueOf(Config{})
+	for i := 0; i < v.NumField(); i++ {
+		assert.IsType(t, reflect.Slice, v.Field(i).Kind())
+		n := reflect.TypeOf(v.Field(i).Interface()).Elem()
+		assert.Implements(t, (*Notify)(nil), reflect.New(n).Interface())
+	}
 }

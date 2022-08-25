@@ -19,7 +19,6 @@
 package conf
 
 import (
-	"fmt"
 	"io/ioutil"
 	httpClient "net/http"
 	netUrl "net/url"
@@ -77,23 +76,12 @@ var stringToSchedule = global.ReverseMap(scheduleToString)
 
 // MarshalYAML marshal the configuration to yaml
 func (s Schedule) MarshalYAML() (interface{}, error) {
-	if s, ok := scheduleToString[s]; ok {
-		return s, nil
-	}
-	return nil, fmt.Errorf("unknown schedule %d", s)
+	return global.EnumMarshalYaml(scheduleToString, s, "Schedule")
 }
 
 // UnmarshalYAML is unmarshal the debug level
 func (s *Schedule) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var level string
-	if err := unmarshal(&level); err != nil {
-		return err
-	}
-	var ok bool
-	if *s, ok = stringToSchedule[strings.ToLower(level)]; !ok {
-		return fmt.Errorf("unknown schedule %s", level)
-	}
-	return nil
+	return global.EnumUnmarshalYaml(unmarshal, stringToSchedule, s, None, "Schedule")
 }
 
 // Notify is the settings of notification
@@ -275,6 +263,7 @@ func New(conf *string) (*Conf, error) {
 	}
 
 	// Initialization
+	c.Settings.Log.InitLog(nil)
 	global.InitEaseProbeWithTime(c.Settings.Name, c.Settings.IconURL,
 		c.Settings.TimeFormat, c.Settings.TimeZone)
 	c.initData()

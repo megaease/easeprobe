@@ -59,11 +59,11 @@ func (c *NotifyConfig) configLogFile() error {
 	c.Type = FileLog
 	file, err := os.OpenFile(c.File, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
-		log.Errorf("[%s] cannot open file: %s", c.NotifyKind, err)
+		log.Errorf("[%s / %s] cannot open file: %s", c.Kind(), c.Name(), err)
 		return err
 	}
 	c.logger.SetOutput(file)
-	log.Infof("[%s] %s - local log file(%s) configured", c.NotifyKind, c.NotifyName, c.File)
+	log.Infof("[%s / %s] - local log file(%s) configured", c.Kind(), c.Name(), c.File)
 	return nil
 }
 

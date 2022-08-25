@@ -20,6 +20,7 @@ package global
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -131,6 +132,50 @@ func ReverseMap[K comparable, V comparable](m map[K]V) map[V]K {
 	return n
 }
 
+// EnumMarshalYaml is a help function to marshal the enum to yaml
+func EnumMarshalYaml[T comparable](m map[T]string, v T, typename string) (interface{}, error) {
+	if val, ok := m[v]; ok {
+		return val, nil
+	}
+	return nil, fmt.Errorf("%v is not a valid %s", v, typename)
+}
+
+// EnumMarshalJSON is a help function to marshal the enum to JSON
+func EnumMarshalJSON[T comparable](m map[T]string, v T, typename string) ([]byte, error) {
+	if val, ok := m[v]; ok {
+		return []byte(fmt.Sprintf(`"%s"`, val)), nil
+	}
+	return nil, fmt.Errorf("%v is not a valid %s", v, typename)
+}
+
+// EnumUnmarshalYaml is a help function to unmarshal the enum from yaml
+func EnumUnmarshalYaml[T comparable](unmarshal func(interface{}) error, m map[string]T, v *T, init T, typename string) error {
+	var str string
+	*v = init
+	if err := unmarshal(&str); err != nil {
+		return err
+	}
+	if val, ok := m[strings.ToLower(str)]; ok {
+		*v = val
+		return nil
+	}
+	return fmt.Errorf("%v is not a valid %s", str, typename)
+}
+
+// EnumUnmarshalJSON is a help function to unmarshal the enum from JSON
+func EnumUnmarshalJSON[T comparable](b []byte, m map[string]T, v *T, init T, typename string) error {
+	var str string
+	*v = init
+	if err := json.Unmarshal(b, &str); err != nil {
+		return err
+	}
+	if val, ok := m[strings.ToLower(str)]; ok {
+		*v = val
+		return nil
+	}
+	return fmt.Errorf("%v is not a valid %s", str, typename)
+}
+
 // Config return a tls.Config object
 func (t *TLS) Config() (*tls.Config, error) {
 	if len(t.CA) <= 0 {
@@ -171,13 +216,23 @@ func (t *TLS) Config() (*tls.Config, error) {
 	}, nil
 }
 
+// ErrNoRetry is the error need not retry
+type ErrNoRetry struct {
+	Message string
+}
+
+func (e *ErrNoRetry) Error() string {
+	return e.Message
+}
+
 // DoRetry is a help function to retry the function if it returns error
 func DoRetry(kind, name, tag string, r Retry, fn func() error) error {
 	var err error
 	for i := 0; i < r.Times; i++ {
 		err = fn()
-		if err == nil {
-			return nil
+		_, ok := err.(*ErrNoRetry)
+		if err == nil || ok {
+			return err
 		}
 		log.Warnf("[%s / %s / %s] Retried to send %d/%d - %v", kind, name, tag, i+1, r.Times, err)
 

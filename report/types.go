@@ -72,17 +72,12 @@ func (f *Format) Format(s string) {
 
 // MarshalYAML is marshal the format
 func (f Format) MarshalYAML() (interface{}, error) {
-	return f.String(), nil
+	return global.EnumMarshalYaml(fmtToStr, f, "Format")
 }
 
 // UnmarshalYAML is unmarshal the format
 func (f *Format) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var format string
-	if err := unmarshal(&format); err != nil {
-		return err
-	}
-	f.Format(format)
-	return nil
+	return global.EnumUnmarshalYaml(unmarshal, strToFmt, f, Unknown, "Format")
 }
 
 // FormatFuncType is the format function

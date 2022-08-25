@@ -28,6 +28,9 @@ func testFormat(t *testing.T, except Format, str string) {
 	var result Format
 	result.Format(str)
 	assert.Equal(t, except, result)
+
+	s := result.String()
+	assert.Equal(t, str, s)
 }
 
 func TestFormat(t *testing.T) {

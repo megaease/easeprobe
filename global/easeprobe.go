@@ -40,6 +40,10 @@ type EaseProbe struct {
 
 var easeProbe *EaseProbe
 
+func init() {
+	InitEaseProbe(DefaultProg, DefaultIconURL)
+}
+
 // InitEaseProbe the EaseProbe
 func InitEaseProbe(name, icon string) {
 	InitEaseProbeWithTime(name, icon, DefaultTimeFormat, DefaultTimeZone)
@@ -72,10 +76,8 @@ func GetEaseProbe() *EaseProbe {
 
 // GetTimeFormat return the time format
 func GetTimeFormat() string {
-	if easeProbe == nil {
-		InitEaseProbe(DefaultProg, DefaultIconURL)
-	}
-	return easeProbe.TimeFormat
+	e := GetEaseProbe()
+	return e.TimeFormat
 }
 
 // SetTimeFormat set the time format
@@ -83,15 +85,14 @@ func SetTimeFormat(tf string) {
 	if strings.TrimSpace(tf) == "" {
 		tf = DefaultTimeFormat
 	}
-	easeProbe.TimeFormat = tf
+	e := GetEaseProbe()
+	e.TimeFormat = tf
 }
 
 // GetTimeLocation return the time zone
 func GetTimeLocation() *time.Location {
-	if easeProbe == nil {
-		InitEaseProbe(DefaultProg, DefaultIconURL)
-	}
-	return easeProbe.TimeLoc
+	e := GetEaseProbe()
+	return e.TimeLoc
 }
 
 // SetTimeZone set the time zone
@@ -102,12 +103,14 @@ func SetTimeZone(tz string) {
 		tz = "UTC"
 		loc = time.UTC
 	}
-	easeProbe.TimeZone = tz
-	easeProbe.TimeLoc = loc
+	e := GetEaseProbe()
+	e.TimeZone = tz
+	e.TimeLoc = loc
 }
 
 // FooterString return the footer string
 // e.g. "EaseProbe v1.0.0 @ localhost"
 func FooterString() string {
-	return easeProbe.Name + " " + easeProbe.Version + " @ " + easeProbe.Host
+	e := GetEaseProbe()
+	return e.Name + " " + e.Version + " @ " + e.Host
 }

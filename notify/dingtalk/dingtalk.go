@@ -68,7 +68,7 @@ func (c *NotifyConfig) SendDingtalkNotification(title, msg string) error {
 		}
 	}
 	`, report.JSONEscape(title), report.JSONEscape(msg))
-	req, err := http.NewRequest(http.MethodPost, addSign(c.WebhookURL, c.SignSecret), bytes.NewBuffer([]byte(msgContent)))
+	req, err := http.NewRequest(http.MethodPost, c.addSign(c.WebhookURL, c.SignSecret), bytes.NewBuffer([]byte(msgContent)))
 	if err != nil {
 		return err
 	}
@@ -91,24 +91,24 @@ func (c *NotifyConfig) SendDingtalkNotification(title, msg string) error {
 	}
 	ret := make(map[string]interface{})
 	err = json.Unmarshal(buf, &ret)
-	if err != nil {
-		return fmt.Errorf("Error response from Dingtalk [%d] - [%s]", resp.StatusCode, string(buf))
-	}
-	if ret["errmsg"] != "ok" {
-		return fmt.Errorf("Error response from Dingtalk [%d] - [%s]", ret["errcode"], string(buf))
+	if err != nil || ret["errmsg"] != "ok" {
+		return fmt.Errorf("[%s / %s] - Error response from Dingtalk [%d] - [%s]",
+			c.Kind(), c.Name(), resp.StatusCode, string(buf))
 	}
 	return nil
 }
 
 // add sign for url by secret
-func addSign(webhookURL string, secret string) string {
+func (c *NotifyConfig) addSign(webhookURL string, secret string) string {
+	webhook := webhookURL
 	if secret != "" {
 		timestamp := time.Now().UnixMilli()
 		stringToSign := fmt.Sprint(timestamp, "\n", secret)
 		h := hmac.New(sha256.New, []byte(secret))
 		h.Write([]byte(stringToSign))
 		sign := url.QueryEscape(base64.StdEncoding.EncodeToString(h.Sum(nil)))
-		return fmt.Sprint(webhookURL, "&timestamp=", timestamp, "&sign="+sign)
+		webhook = fmt.Sprint(webhookURL, "&timestamp=", timestamp, "&sign="+sign)
 	}
-	return webhookURL
+	log.Debugf("[%s / %s] - Dingtalk webhook: %s", c.Kind(), c.Name(), webhook)
+	return webhook
 }

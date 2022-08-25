@@ -25,6 +25,15 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+func testDriverType(t *testing.T, str string, driver DriverType) {
+	var d DriverType
+	d.DriverType(str)
+	assert.Equal(t, driver, d)
+
+	s := driver.String()
+	assert.Equal(t, str, s)
+}
+
 func testMarshalUnmarshal(
 	t *testing.T, str string, driver DriverType, good bool,
 	marshal func(in interface{}) ([]byte, error),
@@ -62,10 +71,14 @@ func testJSON(t *testing.T, str string, drive DriverType, good bool) {
 }
 
 func TestDriverType(t *testing.T) {
-	assert.Equal(t, "mysql", MySQL.String())
-	assert.Equal(t, "redis", Redis.String())
-	assert.Equal(t, "memcache", Memcache.String())
-	assert.Equal(t, "mongo", Mongo.String())
+	testDriverType(t, "mysql", MySQL)
+	testDriverType(t, "redis", Redis)
+	testDriverType(t, "memcache", Memcache)
+	testDriverType(t, "kafka", Kafka)
+	testDriverType(t, "mongo", Mongo)
+	testDriverType(t, "postgres", PostgreSQL)
+	testDriverType(t, "zookeeper", Zookeeper)
+	testDriverType(t, "unknown", Unknown)
 
 	d := Unknown
 	assert.Equal(t, MySQL, d.DriverType("mysql"))
@@ -74,6 +87,7 @@ func TestDriverType(t *testing.T) {
 
 	d = 10
 	assert.Equal(t, "unknown", d.String())
+	assert.Equal(t, Unknown, d.DriverType("bad"))
 
 	testYamlJSON(t, "mysql", MySQL, true)
 	testYamlJSON(t, "redis", Redis, true)
@@ -82,13 +96,12 @@ func TestDriverType(t *testing.T) {
 	testYamlJSON(t, "mongo", Mongo, true)
 	testYamlJSON(t, "postgres", PostgreSQL, true)
 	testYamlJSON(t, "zookeeper", Zookeeper, true)
-	testYamlJSON(t, "unknown", Unknown, false)
+	testYamlJSON(t, "unknown", Unknown, true)
 
-	testJSON(t, "", Unknown, false)
-	testJSON(t, `{"x":"y"}`, Unknown, false)
-	testJSON(t, `"xyz"`, Unknown, false)
-	testYaml(t, "- mysql::", Unknown, false)
-
+	testJSON(t, "", 10, false)
+	testJSON(t, `{"x":"y"}`, 10, false)
+	testJSON(t, `"xyz"`, 10, false)
+	testYaml(t, "- mysql::", 10, false)
 }
 
 func TestOptionsCheck(t *testing.T) {

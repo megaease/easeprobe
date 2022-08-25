@@ -78,7 +78,7 @@ func (c *NotifyConfig) SendTelegramNotification(text string) error {
 		return err
 	}
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("Error response from Telegram [%d] - [%s]", resp.StatusCode, string(buf))
+		return fmt.Errorf("Error response from Telegram - code [%d] - msg [%s]", resp.StatusCode, string(buf))
 	}
 	return nil
 }
