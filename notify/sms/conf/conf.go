@@ -19,10 +19,6 @@
 package conf
 
 import (
-	"encoding/json"
-	"fmt"
-	"strings"
-
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify/base"
 )
@@ -85,42 +81,20 @@ func (d ProviderType) ProviderType(name string) ProviderType {
 
 // MarshalYAML is marshal the provider type
 func (d ProviderType) MarshalYAML() (interface{}, error) {
-	if val, ok := ProviderMap[d]; ok {
-		return val, nil
-	}
-	return nil, fmt.Errorf("unknown provider type: %v", d)
+	return global.EnumMarshalYaml(ProviderMap, d, "SMS Provider")
 }
 
 // UnmarshalYAML is unmarshal the provider type
 func (d *ProviderType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var s string
-	if err := unmarshal(&s); err != nil {
-		return err
-	}
-	if val, ok := ProviderTypeMap[strings.ToLower(s)]; ok {
-		*d = val
-		return nil
-	}
-	return fmt.Errorf("unknown provider type: %s", s)
+	return global.EnumUnmarshalYaml(unmarshal, ProviderTypeMap, d, Unknown, "SMS Provider")
 }
 
 // MarshalJSON is marshal the provider
 func (d ProviderType) MarshalJSON() (b []byte, err error) {
-	if val, ok := ProviderMap[d]; ok {
-		return []byte(fmt.Sprintf(`"%s"`, val)), nil
-	}
-	return nil, fmt.Errorf("unknown provider type: %v", d)
+	return global.EnumMarshalJSON(ProviderMap, d, "SMS Provider")
 }
 
 // UnmarshalJSON is Unmarshal the provider type
 func (d *ProviderType) UnmarshalJSON(b []byte) (err error) {
-	var str string
-	if err = json.Unmarshal(b, &str); err != nil {
-		return err
-	}
-	if val, ok := ProviderTypeMap[strings.ToLower(str)]; ok {
-		*d = val
-		return nil
-	}
-	return fmt.Errorf("unknown provider type: %s", string(b))
+	return global.EnumUnmarshalJSON(b, ProviderTypeMap, d, Unknown, "SMS Provider")
 }

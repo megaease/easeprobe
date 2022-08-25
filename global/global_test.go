@@ -24,6 +24,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/json"
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
@@ -35,6 +36,7 @@ import (
 
 	"bou.ke/monkey"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v3"
 )
 
 func TestReverseMap(t *testing.T) {
@@ -47,6 +49,91 @@ func TestReverseMap(t *testing.T) {
 	assert.Equal(t, 1, n["a"])
 	assert.Equal(t, 2, n["b"])
 	assert.Equal(t, 3, n["c"])
+}
+
+type TestEnum int
+
+const (
+	Unknown TestEnum = iota
+	Test1
+	Test2
+	Test3
+	Test4
+)
+
+var testEnumToString = map[TestEnum]string{
+	Unknown: "unknown",
+	Test1:   "test1",
+	Test2:   "test2",
+	Test3:   "test3",
+	Test4:   "test4",
+}
+var strToTestEnum = ReverseMap(testEnumToString)
+
+// MarshalYAML is marshal the provider type
+func (d TestEnum) MarshalYAML() (interface{}, error) {
+	return EnumMarshalYaml(testEnumToString, d, "Test")
+}
+
+// UnmarshalYAML is unmarshal the provider type
+func (d *TestEnum) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return EnumUnmarshalYaml(unmarshal, strToTestEnum, d, Unknown, "Test")
+}
+
+// MarshalJSON is marshal the provider
+func (d TestEnum) MarshalJSON() (b []byte, err error) {
+	return EnumMarshalJSON(testEnumToString, d, "Test")
+}
+
+// UnmarshalJSON is Unmarshal the provider type
+func (d *TestEnum) UnmarshalJSON(b []byte) (err error) {
+	return EnumUnmarshalJSON(b, strToTestEnum, d, Unknown, "Test")
+}
+
+func testMarshalUnmarshal(t *testing.T, str string, te TestEnum, good bool,
+	marshal func(in interface{}) ([]byte, error),
+	unmarshal func(in []byte, out interface{}) (err error)) {
+
+	var s TestEnum
+	err := unmarshal([]byte(str), &s)
+	if good {
+		assert.Nil(t, err)
+		assert.Equal(t, te, s)
+	} else {
+		assert.Error(t, err)
+		assert.Equal(t, Unknown, s)
+	}
+
+	buf, err := marshal(te)
+	if good {
+		assert.Nil(t, err)
+		assert.Equal(t, str, string(buf))
+	} else {
+		assert.Error(t, err)
+		assert.Nil(t, buf)
+	}
+}
+func testYamlJSON(t *testing.T, str string, te TestEnum, good bool) {
+	testYaml(t, str+"\n", te, good)
+	testJSON(t, `"`+str+`"`, te, good)
+}
+func testYaml(t *testing.T, str string, te TestEnum, good bool) {
+	testMarshalUnmarshal(t, str, te, good, yaml.Marshal, yaml.Unmarshal)
+}
+func testJSON(t *testing.T, str string, te TestEnum, good bool) {
+	testMarshalUnmarshal(t, str, te, good, json.Marshal, json.Unmarshal)
+}
+
+func TestEnmuMarshalUnMarshal(t *testing.T) {
+	testYamlJSON(t, "test1", Test1, true)
+	testYamlJSON(t, "test2", Test2, true)
+	testYamlJSON(t, "test3", Test3, true)
+	testYamlJSON(t, "test4", Test4, true)
+	testYamlJSON(t, "unknown", Unknown, true)
+
+	testYamlJSON(t, "bad", 10, false)
+	testJSON(t, `{"x":"y"}`, 10, false)
+	testYaml(t, "-bad::", 10, false)
 }
 
 func makeCA(path string, subject *pkix.Name) (*x509.Certificate, *rsa.PrivateKey, error) {

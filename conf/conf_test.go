@@ -599,6 +599,13 @@ func TestConfig(t *testing.T) {
 	assert.NotNil(t, err)
 
 	os.Setenv("WEB_SITE", "https://easeprobe.com")
+	monkey.Patch(yaml.Marshal, func(v interface{}) ([]byte, error) {
+		return nil, errors.New("marshal error")
+	})
+	_, err = New(&file)
+	assert.Nil(t, err)
+	monkey.UnpatchAll()
+
 	_, err = New(&file)
 	assert.Nil(t, err)
 	conf := Get()
@@ -686,7 +693,7 @@ func TestInitData(t *testing.T) {
 	assert.Equal(t, "mydata/sla.yaml", c.Settings.SLAReport.DataFile)
 	assert.DirExists(t, "mydata")
 
-	os.WriteFile("mydata/sla.yaml", []byte(""), 0644)
+	os.WriteFile("mydata/sla.yaml", []byte("key : value"), 0644)
 	c.initData()
 	os.RemoveAll("mydata")
 

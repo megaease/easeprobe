@@ -19,11 +19,9 @@
 package conf
 
 import (
-	"encoding/json"
 	"fmt"
 	"net"
 	"strconv"
-	"strings"
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe/base"
@@ -113,6 +111,7 @@ func (d DriverType) String() string {
 // DriverType convert the string to DriverType
 func (d *DriverType) DriverType(name string) DriverType {
 	if val, ok := DriverTypeMap[name]; ok {
+		*d = val
 		return val
 	}
 	return Unknown
@@ -120,42 +119,20 @@ func (d *DriverType) DriverType(name string) DriverType {
 
 // MarshalYAML is marshal the driver type
 func (d DriverType) MarshalYAML() (interface{}, error) {
-	v := d.String()
-	if v == "unknown" {
-		return nil, fmt.Errorf("Unknown driver")
-	}
-	return v, nil
+	return global.EnumMarshalYaml(DriverMap, d, "Client Driver")
 }
 
 // UnmarshalYAML is unmarshal the driver type
 func (d *DriverType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var s string
-	if err := unmarshal(&s); err != nil {
-		return err
-	}
-	if *d = d.DriverType(strings.ToLower(s)); *d == Unknown {
-		return fmt.Errorf("Unknown driver: %s", s)
-	}
-	return nil
-}
-
-// UnmarshalJSON is Unmarshal the driver type
-func (d *DriverType) UnmarshalJSON(b []byte) (err error) {
-	var s string
-	if err = json.Unmarshal(b, &s); err != nil {
-		return err
-	}
-	if *d = d.DriverType(strings.ToLower(s)); *d == Unknown {
-		return fmt.Errorf("Unknown driver: %s", s)
-	}
-	return nil
+	return global.EnumUnmarshalYaml(unmarshal, DriverTypeMap, d, Unknown, "Client Driver")
 }
 
 // MarshalJSON is marshal the driver
 func (d DriverType) MarshalJSON() (b []byte, err error) {
-	v := d.String()
-	if v == "unknown" {
-		return nil, fmt.Errorf("Unknown driver")
-	}
-	return []byte(fmt.Sprintf(`"%s"`, v)), nil
+	return global.EnumMarshalJSON(DriverMap, d, "Client Driver")
+}
+
+// UnmarshalJSON is Unmarshal the driver type
+func (d *DriverType) UnmarshalJSON(b []byte) (err error) {
+	return global.EnumUnmarshalJSON(b, DriverTypeMap, d, Unknown, "Client Driver")
 }

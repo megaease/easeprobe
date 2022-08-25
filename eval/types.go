@@ -59,17 +59,12 @@ func (t *DocType) Type(s string) {
 
 // MarshalYAML is marshal the type
 func (t DocType) MarshalYAML() (interface{}, error) {
-	return t.String(), nil
+	return global.EnumMarshalYaml(docTypeToStr, t, "DocType")
 }
 
 // UnmarshalYAML is unmarshal the type
 func (t *DocType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var str string
-	if err := unmarshal(&str); err != nil {
-		return err
-	}
-	t.Type(str)
-	return nil
+	return global.EnumUnmarshalYaml(unmarshal, strToDocType, t, Unsupported, "DocType")
 }
 
 // -----------------------------------------------------------------------------
@@ -112,15 +107,10 @@ func (t *VarType) Type(s string) {
 
 // MarshalYAML is marshal the type
 func (t VarType) MarshalYAML() (interface{}, error) {
-	return t.String(), nil
+	return global.EnumMarshalYaml(varTypeToStr, t, "Variable")
 }
 
 // UnmarshalYAML is unmarshal the type
 func (t *VarType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var str string
-	if err := unmarshal(&str); err != nil {
-		return err
-	}
-	t.Type(str)
-	return nil
+	return global.EnumUnmarshalYaml(unmarshal, strToVarType, t, Unknown, "Variable")
 }
