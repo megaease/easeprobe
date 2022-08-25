@@ -40,6 +40,10 @@ type EaseProbe struct {
 
 var easeProbe *EaseProbe
 
+func init() {
+	InitEaseProbe(DefaultProg, DefaultIconURL)
+}
+
 // InitEaseProbe the EaseProbe
 func InitEaseProbe(name, icon string) {
 	InitEaseProbeWithTime(name, icon, DefaultTimeFormat, DefaultTimeZone)
