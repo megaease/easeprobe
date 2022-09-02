@@ -121,6 +121,8 @@ settings:
     timeout: 30s # the time out for all probes
     interval: 1m # probe every minute for all probes
 ```
+Or using this configuration template:
+https://github.com/megaease/easeprobe/resources/config.yaml
 
 ## 2.3 Run
 
