@@ -34,39 +34,42 @@ EaseProbe is designed to do three kinds of work - **Probe**, **Notify**, and **R
 
 ## 1.1 Probe
 
-EaseProbe supports the following probing methods:
+EaseProbe supports a variety of methods to perform its probes such as:
 
 - **HTTP**. Checking the HTTP status code, Support mTLS, HTTP Basic Auth, and can set the Request Header/Body. ( [HTTP Probe Configuration](./docs/Manual.md#71-http-probe-configuration) )
-- **TCP**. Just simply check whether the TCP connection can be established or not. ( [TCP Probe Configuration](./docs/Manual.md#72-tcp-probe-configuration) )
+- **TCP**. Check whether a TCP connection can be established or not. ( [TCP Probe Configuration](./docs/Manual.md#72-tcp-probe-configuration) )
 - **Shell**. Run a Shell command and check the result. ( [Shell Command Probe Configuration](./docs/Manual.md#73-shell-command-probe-configuration) )
-- **SSH**. Run a remote command via SSH and check the result. Support the bastion/jump server  ([SSH Command Probe Configuration](./docs/Manual.md#74-ssh-command-probe-configuration))
-- **TLS**. Ping the remote endpoint, can probe for revoked or expired certificates ( [TLS Probe Configuration](./docs/Manual.md#75-tls-probe-configuration) )
+- **SSH**. Run a remote command via SSH and check the result. Support the bastion/jump server ([SSH Command Probe Configuration](./docs/Manual.md#74-ssh-command-probe-configuration))
+- **TLS**. Connect to a given port using TLS and (optionally) validate for revoked or expired certificates ( [TLS Probe Configuration](./docs/Manual.md#75-tls-probe-configuration) )
 - **Host**. Run an SSH command on a remote host and check the CPU, Memory, and Disk usage. ( [Host Load Probe](./docs/Manual.md#76-host-resource-usage-probe-configuration) )
-- **Client**. Currently, support the following native client. Support the mTLS. ( refer to: [Native Client Probe Configuration](./docs/Manual.md#77-native-client-probe-configuration) )
-  - **MySQL**. Connect to the MySQL server and run the `SHOW STATUS` SQL.
-  - **Redis**. Connect to the Redis server and run the `PING` command.
-  - **Memcache**. Connect to a Memcache server and run the `version` command or check based on key/value checks.
-  - **MongoDB**. Connect to MongoDB server and just ping server.
-  - **Kafka**. Connect to Kafka server and list all topics.
-  - **PostgreSQL**. Connect to PostgreSQL server and run `SELECT 1` SQL.
-  - **Zookeeper**. Connect to Zookeeper server and run `get /` command.
+- **Client**. The following native clients are supported. For mTLS refer to [Native Client Probe Configuration](./docs/Manual.md#77-native-client-probe-configuration)
+  - **MySQL**. Connect to a MySQL server and run the `SHOW STATUS` SQL.
+  - **Redis**. Connect to a Redis server and run the `PING` command.
+  - **Memcache**. Connect to a Memcache server and run the `version` command or validate a given key/value pair.
+  - **MongoDB**. Connect to a MongoDB server and perform a ping.
+  - **Kafka**. Connect to a Kafka server and perform a list of all topics.
+  - **PostgreSQL**. Connect to a PostgreSQL server and run `SELECT 1` SQL.
+  - **Zookeeper**. Connect to a Zookeeper server and run `get /` command.
 
 ## 1.2 Notification
 
-EaseProbe supports the following notifications:
+EaseProbe supports notification delivery to the following:
 
-- **Slack**. Using Webhook for notification
-- **Discord**. Using Webhook for notification
-- **Telegram**. Using Telegram Bot for notification
-- **Teams**. Support the [Microsoft Teams](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using?tabs=cURL#setting-up-a-custom-incoming-webhook) notification.
-- **Email**. Support multiple email addresses.
-- **AWS SNS**. Support AWS Simple Notification Service.
-- **WeChat Work**. Support Enterprise WeChat Work notification.
-- **DingTalk**. Support the DingTalk notification.
-- **Lark**. Support the Lark(Feishu) notification.
-- **SMS**. Support SMS notification with multiple SMS service providers - [Twilio](https://www.twilio.com/sms), [Vonage(Nexmo)](https://developer.vonage.com/messaging/sms/overview), [YunPain](https://www.yunpian.com/doc/en/domestic/list.html)
+- **Slack**. Using Slack Webhook for notification delivery
+- **Discord**. Using Discord Webhook for notification delivery
+- **Telegram**. Using Telegram Bot for notification delivery
+- **Teams**. Support the [Microsoft Teams](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using?tabs=cURL#setting-up-a-custom-incoming-webhook) notification delivery
+- **Email**. Support email notification delivery to one or more email addresses
+- **AWS SNS**. Support the AWS Simple Notification Service
+- **WeChat Work**. Support Enterprise WeChat Work notification delivery
+- **DingTalk**. Support the DingTalk notification delivery
+- **Lark**. Support the Lark(Feishu) notification delivery
+- **SMS**. SMS notification delivery with support for multiple SMS service providers
+  - [Twilio](https://www.twilio.com/sms)
+  - [Vonage(Nexmo)](https://developer.vonage.com/messaging/sms/overview)
+  - [YunPain](https://www.yunpian.com/doc/en/domestic/list.html)
 - **Log**. Write the notification into a log file or syslog.
-- **Shell**. Run a shell command to notify the result. (see [example](resources/scripts/notify/notify.sh))
+- **Shell**. Run a shell command to deliver the notification (see [example](resources/scripts/notify/notify.sh))
 
 > **Note**:
 >
@@ -74,13 +77,13 @@ EaseProbe supports the following notifications:
 >
 > Windows platforms do not support syslog as notification method.
 
-Check the  [Notification Configuration](./docs/Manual.md#78-notification-configuration) to see how to configure it.
+Check the [Notification Configuration](./docs/Manual.md#78-notification-configuration) to see how to configure it.
 
 ## 1.3 Report
 
-- **SLA Report Notify**. EaseProbe would send the daily, weekly, or monthly SLA report.
-- **SLA Live Report**. The EaseProbe would listen on the `0.0.0.0:8181` port by default. And you can access the Live SLA report by the following URL: HTML: `http://localhost:8181/`& JSON: `http://localhost:8181/api/v1/sla`
-- **SLA Data Persistence**. The SLA data would be persisted in `$CWD/data/data.yaml` by default. If you want to configure the path, you can do it in the `settings` section.
+- **SLA Report Notify**. EaseProbe would send the daily, weekly, or monthly SLA report using the defined **`notify:`** methods.
+- **SLA Live Report**. The EaseProbe would listen on the `0.0.0.0:8181` port by default. By accessing this service you will be provided with Live SLA report either as HTML at `http://localhost:8181/` or as JSON at `http://localhost:8181/api/v1/sla`
+- **SLA Data Persistence**. The SLA data will be persisted in `$CWD/data/data.yaml` by default. You can configure this path by editing the `settings` section of your configuration file.
 
 For more information, please check the [Global Setting Configuration](./docs/Manual.md#79-global-setting-configuration)
 
@@ -102,12 +105,11 @@ $ make
 ```
 ## 2.2 Configure
 
-Read the [User Manual](./docs/Manual.md) to learn how to configure EaseProbe.
+Read the [User Manual](./docs/Manual.md) for detailed instructions on how to configure all EaseProbe parameters.
 
-Create the configuration file - `$CWD/config.yaml`.
+Create a configuration file (eg. `$CWD/config.yaml`) using the configuration template at https://github.com/megaease/easeprobe/resources/config.yaml
 
-The following is an example of a simple configuration file to get started:
-
+The following simple configuration example can be used to get started:
 ```YAML
 http: # http probes
   - name: EaseProbe Github
@@ -121,12 +123,10 @@ settings:
     timeout: 30s # the time out for all probes
     interval: 1m # probe every minute for all probes
 ```
-Or using this configuration template:
-https://github.com/megaease/easeprobe/resources/config.yaml
 
 ## 2.3 Run
 
-Running the following command for the local test
+You can run the following command to start easeprobe once built
 
 ```shell
 $ build/bin/easeprobe -f config.yaml
@@ -137,16 +137,15 @@ $ build/bin/easeprobe -f config.yaml
 
 # 3. User Manual
 
-Refer to - [User Manual](./docs/Manual.md)
+For detailed instructions and features please refer to - [User Manual](./docs/Manual.md)
 
 # 4. Benchmark
 
-Refer to - [Benchmark Report](./docs/Benchmark.md)
+We have performed an extensive benchmark on EaseProbe. For the benchmark results please refer to - [Benchmark Report](./docs/Benchmark.md)
 
 # 5. Contributing
 
 If you're interested in contributing to the project, please spare a moment to read our [CONTRIBUTING Guide](./docs/CONTRIBUTING.md)
-
 
 # 6. Community
 
