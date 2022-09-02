@@ -10,8 +10,18 @@ EaseProbe is a simple, standalone, and lightweight tool that can do health/statu
   - [1.1 Overview](#11-overview)
   - [1.2 Initial Fire Up](#12-initial-fire-up)
 - [2. Notification](#2-notification)
-  - [2.1 Overview](#21-overview)
-  - [2.2 Example](#22-example)
+  - [2.1 Slack](#21-slack)
+  - [2.2 Discord](#22-discord)
+  - [2.3 Telegram](#23-telegram)
+  - [2.4 Teams](#24-teams)
+  - [2.5 Email](#25-email)
+  - [2.6 AWS SNS](#26-aws-sns)
+  - [2.7 WeChat Work](#27-wechat-work)
+  - [2.8 DingTalk](#28-dingtalk)
+  - [2.9 Lark](#29-lark)
+  - [2.10 SMS](#210-sms)
+  - [2.11 Log](#211-log)
+  - [2.12 Shell](#212-shell)
 - [3. Report](#3-report)
   - [3.1 SLA Report Notification](#31-sla-report-notification)
   - [3.2 SLA Live Report](#32-sla-live-report)
@@ -76,28 +86,224 @@ On application startup, the configured probes are scheduled for their initial fi
 
 
 # 2. Notification
+EaseProbe supports a variety of notifications. The notifications are **Edge-Triggered**, this means that these notifications are triggered when the status changes.
 
-## 2.1 Overview
+Each notification is identified by the delivery it supports (eg `slack`), a unique name (across all notifies in the configuration file) and (optionaly) the notify specific parameters.
 
-EaseProbe supports the following notifications:
+For a complete list of examples using all the notifications please check the [Notification Configuration](#78-notification-configuration) section.
 
-- **Slack**. Using Webhook for notification
-- **Discord**. Using Webhook for notification
-- **Telegram**. Using Telegram Bot for notification
-- **Teams**. Support the [Microsoft Teams](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using?tabs=cURL#setting-up-a-custom-incoming-webhook) notification.
-- **Email**. Support multiple email addresses.
-- **AWS SNS**. Support AWS Simple Notification Service.
-- **WeChat Work**. Support Enterprise WeChat Work notification.
-- **DingTalk**. Support the DingTalk notification.
-- **Lark**. Support the Lark(Feishu) notification.
-- **SMS**. Support SMS notification with multiple SMS service providers - [Twilio](https://www.twilio.com/sms), [Vonage(Nexmo)](https://developer.vonage.com/messaging/sms/overview), [YunPain](https://www.yunpian.com/doc/en/domestic/list.html)
-- **Log**. Write the notification into a log file or syslog.
-- **Shell**. Run a shell command to notify the result. (see [example](resources/scripts/notify/notify.sh))
+## 2.1 Slack
+This notification method utilizes the Slack webhooks to deliver status updates as messages.
 
-Check the  [Notification Configuration](#78-notification-configuration) to see how to configure it.
+The plugin supports the following parameters:
+ - `name`: A unique name for this notification endpoint
+ - `webhook`: The URL for the webhook
 
-## 2.2 Example
+Example:
+```YAML
+# Notification Configuration
+notify:
+  slack:
+    - name: "MegaEase#Alert"
+      webhook: "https://hooks.slack.com/services/........../....../....../"
+```
 
+For more details you can visit the [Slack Webhooks API](https://api.slack.com/messaging/webhooks)
+
+## 2.2 Discord
+This notification method utilizes the Discord webhooks to deliver status updates as messages.
+
+The plugin supports the following parameters:
+ - `name`: A unique name for this notification endpoint
+ - `webhook`: The URL for the webhook
+
+Example:
+```YAML
+# Notification Configuration
+notify:
+  discord:
+    - name: "MegaEase#Alert"
+      webhook: "https://discord.com/api/webhooks/...../....../"
+```
+
+For more details you can visit the [Discord Intro to Webhooks](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
+
+## 2.3 Telegram
+This notification method utilizes a Telegram Bot to deliver status updates as messages to a Channel or Group.
+
+The plugin supports the following parameters:
+ - `name`: A unique name for this notification endpoint
+ - `token`: The authorization token for the bot
+ - `chat_id`: The Telegram Channel or Group ID
+
+Example:
+```YAML
+# Notification Configuration
+notify:
+  telegram:
+    - name: "MegaEase Alert Group"
+      token: 1234567890:ABCDEFGHIJKLMNOPQRSTUVWXYZ # Bot Token
+      chat_id: -123456789 # Channel / Group ID
+```
+
+## 2.4 Teams
+This notification method utilizes the Microsoft Teams connectors to deliver status updates as messages.
+
+Support the  notification.
+
+The plugin supports the following parameters:
+ - `name`: A unique name for this notification endpoint
+ - `webhook`: The URL for the webhook
+
+Example:
+```YAML
+# Notification Configuration
+notify:
+  teams:
+      - name: "teams alert service"
+        webhook: "https://outlook.office365.com/webhook/a1269812-6d10-44b1-abc5-b84f93580ba0@9e7b80c7-d1eb-4b52-8582-76f921e416d9/IncomingWebhook/3fdd6767bae44ac58e5995547d66a4e4/f332c8d9-3397-4ac5-957b-b8e3fc465a8c"
+```
+For more details you can visit:
+   - [Microsoft Teams Create and send messages](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using?tabs=cURL#setting-up-a-custom-incoming-webhook)
+   - [Microsoft Teams actionable messages](https://docs.microsoft.com/en-us/outlook/actionable-messages/send-via-connectors)
+
+## 2.5 Email
+This notification method utilizes an SMTP server to deliver status updates as mail messages.
+
+The plugin supports the following parameters:
+ - `name`: A unique name for this notification endpoint
+ - `server`: The server hostname or IP and port that accepts SMTP messages
+ - `username`: A username to authenticate to the remote mail server
+ - `passord`: The password
+ - `to`: List of email addresses, separated by **`;`**, for the notification messages to be send
+
+Example:
+```YAML
+# Notification Configuration
+notify:
+  email:
+    - name: "DevOps Mailing List"
+      server: smtp.email.example.com:465
+      username: user@example.com
+      password: ********
+      to: "user1@example.com;user2@example.com"
+```
+
+## 2.6 AWS SNS
+Support AWS Simple Notification Service.
+
+The plugin supports the following parameters:
+ - `name`: A unique name for this notification endpoint
+ - `region`: The region to use
+ - `arn`: The ARN
+ - `endpoint`: The endpoint URL
+ - `credential`: Credential section
+   - `id`: The AWS ID
+   - `key`: The AWS authorization key
+
+Example:
+```YAML
+# Notification Configuration
+notify:
+  aws_sns:
+    - name: AWS SNS
+      region: us-west-2
+      arn: arn:aws:sns:us-west-2:298305261856:xxxxx
+      endpoint: https://sns.us-west-2.amazonaws.com
+      credential:
+        id: AWSXXXXXXXID
+        key: XXXXXXXX/YYYYYYY
+```
+
+## 2.7 WeChat Work
+Support Enterprise WeChat Work notification.
+
+The plugin supports the following parameters:
+ - `name`: A unique name for this notification endpoint
+ - `webhook`: The URL for the webhook
+
+Example:
+```YAML
+# Notification Configuration
+notify:
+  wecom:
+    - name: "wecom alert service"
+      webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=589f9674-a2aa-xxxxxxxx-16bb6c43034a" # wecom robot webhook
+```
+
+## 2.8 DingTalk
+Support the DingTalk notification.
+
+The plugin supports the following parameters:
+ - `name`: A unique name for this notification endpoint
+ - `webhook`: The URL for the webhook
+ - `secret`: Optionally a secret key to use
+
+Example:
+```YAML
+# Notification Configuration
+notify:
+  dingtalk:
+    - name: "dingtalk alert service"
+      webhook: "https://oapi.dingtalk.com/robot/send?access_token=xxxx"
+      secret: "" # sign secret if set
+```
+
+## 2.9 Lark
+Support the Lark (Feishu) notification.
+
+The plugin supports the following parameters:
+ - `name`: A unique name for this notification endpoint
+ - `webhook`: The URL for the webhook
+
+Example:
+```YAML
+# Notification Configuration
+notify:
+  lark:
+    - name: "lark alert service"
+      webhook: "https://open.feishu.cn/open-apis/bot/v2/hook/d5366199-xxxx-xxxx-bd81-a57d1dd95de4"
+```
+
+## 2.10 SMS
+Support SMS notification with multiple SMS service providers
+
+- [Twilio](https://www.twilio.com/sms)
+- [Vonage(Nexmo)](https://developer.vonage.com/messaging/sms/overview)
+- [YunPian](https://www.yunpian.com/doc/en/domestic/list.html)
+
+The plugin supports the following parameters:
+ - `name`: A unique name for this notification endpoint
+ - `provider`: SMS provider to use: **`yunpian`**, **`twilio`**, **`nexmo`**
+ - `key`: An API key to use for the SMS service
+ - `mobile`: The list of mobile numbers, separated by **`,`**, to send the notification
+ - `sign`: Sign name, needed to register; usually the brand name
+
+Example:
+```YAML
+# Notification Configuration
+notify:
+  sms:
+    - name: "sms alert service"
+      provider: "yunpian"
+      key: xxxxxxxxxxxx # yunpian apikey
+      mobile: 123456789,987654321 # mobile phone number, multiple phone number joint by `,`
+      sign: "xxxxxxxx" # need to register; usually brand name
+```
+
+## 2.11 Log
+Write notifications into a log file or send through syslog.
+
+The plugin supports the following parameters:
+ - `name`: A unique name for this notification endpoint
+ - `file`: The path to the file that will hold the logs or **`syslog`**
+ - `host`: Optionally the hostname or IP and port that your syslog server accepts messages, _syslog delivery is **NOT** supported on Windows hosts_
+ - `network`: Optionally the network transport to use **`tcp`**, **`udp`**
+
+**NOTE:**
+> Windows platforms do not support syslog as notification method
+
+Example:
 ```YAML
 # Notification Configuration
 notify:
@@ -108,49 +314,21 @@ notify:
       file: syslog # <-- must be "syslog" keyword
       host: 127.0.0.1:514 # remote syslog server - optional
       network: udp #remote syslog network [tcp, udp] - optional
-  slack:
-    - name: "MegaEase#Alert"
-      webhook: "https://hooks.slack.com/services/........../....../....../"
-  discord:
-    - name: "MegaEase#Alert"
-      webhook: "https://discord.com/api/webhooks/...../....../"
-  telegram:
-    - name: "MegaEase Alert Group"
-      token: 1234567890:ABCDEFGHIJKLMNOPQRSTUVWXYZ # Bot Token
-      chat_id: -123456789 # Channel / Group ID
-  email:
-    - name: "DevOps Mailing List"
-      server: smtp.email.example.com:465
-      username: user@example.com
-      password: ********
-      to: "user1@example.com;user2@example.com"
-  aws_sns:
-    - name: AWS SNS
-      region: us-west-2
-      arn: arn:aws:sns:us-west-2:298305261856:xxxxx
-      endpoint: https://sns.us-west-2.amazonaws.com
-      credential:
-        id: AWSXXXXXXXID
-        key: XXXXXXXX/YYYYYYY
-  wecom:
-    - name: "wecom alert service"
-      webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=589f9674-a2aa-xxxxxxxx-16bb6c43034a" # wecom robot webhook
-  dingtalk:
-    - name: "dingtalk alert service"
-      webhook: "https://oapi.dingtalk.com/robot/send?access_token=xxxx"
-      secret: "" # sign secret if set
-  lark:
-    - name: "lark alert service"
-      webhook: "https://open.feishu.cn/open-apis/bot/v2/hook/d5366199-xxxx-xxxx-bd81-a57d1dd95de4"
-  sms:
-    - name: "sms alert service"
-      provider: "yunpian"
-      key: xxxxxxxxxxxx # yunpian apikey
-      mobile: 123456789,987654321 # mobile phone number, multiple phone number joint by `,`
-      sign: "xxxxxxxx" # need to register; usually brand name
-  teams:
-      - name: "teams alert service"
-        webhook: "https://outlook.office365.com/webhook/a1269812-6d10-44b1-abc5-b84f93580ba0@9e7b80c7-d1eb-4b52-8582-76f921e416d9/IncomingWebhook/3fdd6767bae44ac58e5995547d66a4e4/f332c8d9-3397-4ac5-957b-b8e3fc465a8c" # see https://docs.microsoft.com/en-us/outlook/actionable-messages/send-via-connectors
+```
+
+## 2.12 Shell
+Run a shell command to notify the result. (see [example](resources/scripts/notify/notify.sh))
+
+The plugin supports the following parameters:
+ - `name`: A unique name for this notification endpoint
+ - `cmd`: The command to execute
+ - `args`: Optional list of arguments as child items (see example below)
+ - `env`: Optional list of environment variables to set when he command is executed (see example below)
+
+Example:
+```YAML
+# Notification Configuration
+notify:
   shell: # EaseProbe set the environment variables -
          # (see the example: resources/scripts/notify/notify.sh)
     - name: "shell alert service"
@@ -161,12 +339,6 @@ notify:
       env: # set the env to the notification command
         - "EASEPROBE=1"
 ```
-
-> **Note**:
->
-> The notification is **Edge-Triggered Mode**, this means that these notifications are triggered when the status changes.
->
-> Windows platforms do not support syslog as notification method.
 
 # 3. Report
 
