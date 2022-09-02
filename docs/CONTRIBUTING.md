@@ -97,6 +97,10 @@ Examples
 * `channel`. Channel object and management
     * `channel.go` - The channel object.
     * `manager.go` - manage all of channels
+* `eval`. This package is for evaluating the expression.
+    * `eval.go` - The expression evaluation.
+    * `extract.go` - Extract the value from the document.(using XPath or Regex)
+    * `types.go` - The value's type.
 * `notify`. All of notifiers
     * `notify.go` - The notify interface definition.
     * `base/` - The notify framework for all notify.
