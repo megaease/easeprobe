@@ -1,4 +1,4 @@
 .idea/
 .vscode/
 build/*
-./config.yaml
+*.yaml
