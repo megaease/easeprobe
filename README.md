@@ -16,7 +16,7 @@ EaseProbe is a simple, standalone, and lightweight tool that can do health/statu
 - [1. Introduction](#1-introduction)
   - [1.1 Probe](#11-probe)
   - [1.2 Notification](#12-notification)
-  - [1.3 Report](#13-report)
+  - [1.3 Report & Metrics](#13-report--metrics)
 - [2. Getting Started](#2-getting-started)
   - [2.1 Build](#21-build)
   - [2.2 Configure](#22-configure)
@@ -79,13 +79,19 @@ EaseProbe supports notification delivery to the following:
 
 Check the [Notification Configuration](./docs/Manual.md#78-notification-configuration) to see how to configure it.
 
-## 1.3 Report
+## 1.3 Report & Metrics
+
+EaseProbe supports the following report and metrics:
 
 - **SLA Report Notify**. EaseProbe would send the daily, weekly, or monthly SLA report using the defined **`notify:`** methods.
-- **SLA Live Report**. The EaseProbe would listen on the `0.0.0.0:8181` port by default. By accessing this service you will be provided with Live SLA report either as HTML at `http://localhost:8181/` or as JSON at `http://localhost:8181/api/v1/sla`
+- **SLA Live Report**. The EaseProbe would listen on the `0.0.0.0:8181` port by default. By accessing this service you will be provided with live SLA report either as HTML at `http://localhost:8181/` or as JSON at `http://localhost:8181/api/v1/sla`
 - **SLA Data Persistence**. The SLA data will be persisted in `$CWD/data/data.yaml` by default. You can configure this path by editing the `settings` section of your configuration file.
 
 For more information, please check the [Global Setting Configuration](./docs/Manual.md#79-global-setting-configuration)
+
+- **Prometheus Metrics**. The EaseProbe would listen on the `8181` port by default. By accessing this service you will be provided with Prometheus metrics at `http://easeprobe:8181/metrics`.
+
+The metrics are prefixed with `easeprobe_` and are documented in [Prometheus Metrics Exporter](./docs/Manual.md#6-prometheus-metrics-exporter)
 
 # 2. Getting Started
 
@@ -126,7 +132,7 @@ settings:
 
 ## 2.3 Run
 
-You can run the following command to start easeprobe once built
+You can run the following command to start EaseProbe once built
 
 ```shell
 $ build/bin/easeprobe -f config.yaml
@@ -137,7 +143,7 @@ $ build/bin/easeprobe -f config.yaml
 
 # 3. User Manual
 
-For detailed instructions and features please refer to - [User Manual](./docs/Manual.md)
+For detailed instructions and features please refer to the [User Manual](./docs/Manual.md)
 
 # 4. Benchmark
 

@@ -88,7 +88,40 @@ On application startup, the configured probes are scheduled for their initial fi
 # 2. Notification
 EaseProbe supports a variety of notifications. The notifications are **Edge-Triggered**, this means that these notifications are triggered when the status changes.
 
-Each notification is identified by the delivery it supports (eg `slack`), a unique name (across all notifies in the configuration file) and (optionaly) the notify specific parameters.
+Each notification is identified by the delivery it supports (eg `slack`), a unique name (across all notifies in the configuration file) and (optionally) the notify specific parameters.
+
+And please be aware that the following configuration:
+
+1) Setting the environment variables `$HTTP_PROXY` & `$HTTPS_PROXY` allows for configuring the proxy settings for all HTTP related webhook notifications such as discord, slack, telegram etc.
+
+    ```shell
+    export HTTPS_PROXY=socks5://127.0.0.1:1080
+    ```
+
+2) All of the notifications support the `dry`, `timeout`, and `retry` optional configuration parameters. For example:
+
+    ```YAML
+    notify:
+      - name: "slack"
+        webhook: "https://hooks.slack.com/services/xxxxxx"
+        dry: true # dry notification, print the Discord JSON in log(STDOUT)
+        timeout: 20s # the timeout send out notification, default: 30s
+        retry: # somehow the network is not good and needs to retry.
+          times: 3 # default: 3
+          interval: 10s # default: 5s
+    ```
+3) We can configure the general notification settings in the `notify` section of the configuration file.
+
+    The following configuration is effective for all notification, unless the notification has its own configuration.
+
+    ```yaml
+    settings:
+      notify:
+        dry: true # Global settings for dry run, default is false
+        retry: # the retry setting to send the notification
+          times: 5 # retry times, default is 3
+          interval: 10s # retry interval, default is 5s
+    ```
 
 For a complete list of examples using all the notifications please check the [Notification Configuration](#78-notification-configuration) section.
 
@@ -339,6 +372,7 @@ notify:
       env: # set the env to the notification command
         - "EASEPROBE=1"
 ```
+
 
 # 3. Report
 
@@ -724,11 +758,11 @@ eval:
     doc: HTML
     espression: "duration(rt) < duration('1s')"
     variables:
-        - name: rt
-            type: duration
-            query: "//div[@id=\\'time\\']"
+        - name: rt # variable name `rt` will be used in expression.
+            type: duration # variable type is `duration`
+            query: "//div[@id=\\'time\\']" # the XPath query the value.
 ```
-or
+Or
 
 ```yaml
 eval:
