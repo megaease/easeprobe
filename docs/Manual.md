@@ -747,7 +747,7 @@ check the `time` from response is 5 seconds later than the current time.
 ```yaml
 eval:
    doc: HTML
-   espression: "now() - x_time('//div[@id=\\'time\\']') > 5"
+   expression: "now() - x_time('//div[@id=\\'time\\']') > 5"
 ```
 
 
@@ -756,7 +756,7 @@ Check the duration from response is less than 1 second.
 ```yaml
 eval:
     doc: HTML
-    espression: "duration(rt) < duration('1s')"
+    expression: "duration(rt) < duration('1s')"
     variables:
         - name: rt # variable name `rt` will be used in expression.
             type: duration # variable type is `duration`
@@ -767,7 +767,7 @@ Or
 ```yaml
 eval:
     doc: HTML
-    espression: "x_duration('//div[@id=\\'resp_time\\']') < duration('1s')"
+    expression: "x_duration('//div[@id=\\'resp_time\\']') < duration('1s')"
 ```
 
 
