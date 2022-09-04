@@ -53,7 +53,7 @@ func (c Nexmo) Notify(title, text string) error {
 	form.Add("api_key", c.Key)
 	form.Add("api_secret", c.Secret)
 
-	log.Debugf("[%s] - API %s - Form %s", c.Kind(), api, form)
+	log.Debugf("[%s / %s] - API %s - Form %s", c.Kind(), c.Name(), api, form)
 	req, err := http.NewRequest(http.MethodPost, api, strings.NewReader(form.Encode()))
 	if err != nil {
 		return err
