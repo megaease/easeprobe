@@ -42,7 +42,7 @@ EaseProbe supports a variety of methods to perform its probes such as:
 - **SSH**. Run a remote command via SSH and check the result. Support the bastion/jump server ([SSH Command Probe Configuration](./docs/Manual.md#74-ssh-command-probe-configuration))
 - **TLS**. Connect to a given port using TLS and (optionally) validate for revoked or expired certificates ( [TLS Probe Configuration](./docs/Manual.md#75-tls-probe-configuration) )
 - **Host**. Run an SSH command on a remote host and check the CPU, Memory, and Disk usage. ( [Host Load Probe](./docs/Manual.md#76-host-resource-usage-probe-configuration) )
-- **Client**. The following native clients are supported. For mTLS refer to [Native Client Probe Configuration](./docs/Manual.md#77-native-client-probe-configuration)
+- **Client**. The following native clients are supported. They all supports the mTLS and the data checking, please refer to [Native Client Probe Configuration](./docs/Manual.md#77-native-client-probe-configuration)
   - **MySQL**. Connect to a MySQL server and run the `SHOW STATUS` SQL.
   - **Redis**. Connect to a Redis server and run the `PING` command.
   - **Memcache**. Connect to a Memcache server and run the `version` command or validate a given key/value pair.
@@ -73,9 +73,9 @@ EaseProbe supports notification delivery to the following:
 
 > **Note**:
 >
-> The notification is **Edge-Triggered Mode**, this means that these notifications are triggered when the status changes.
+> 1) The notification is **Edge-Triggered Mode**, this means that these notifications are triggered when the status changes.
 >
-> Windows platforms do not support syslog as notification method.
+> 2) Windows platforms do not support syslog as notification method.
 
 Check the [Notification Configuration](./docs/Manual.md#78-notification-configuration) to see how to configure it.
 
@@ -102,9 +102,9 @@ You can get started with EaseProbe, by any of the following methods:
 
 ## 2.1 Build
 
-Compiler `Go 1.18+` (Generics Programming Support)
+Compiler `Go 1.18+` (Generics Programming Support), checking the [Go Installation](https://go.dev/doc/install) to see how to install Go on your platform.
 
-Use `make` to build and produce the `easeprobe` binary file. The executable is produced under the `build/bin` directory
+Use `make` to build and produce the `easeprobe` binary file. The executable is produced under the `build/bin` directory.
 
 ```shell
 $ make
@@ -113,9 +113,10 @@ $ make
 
 Read the [User Manual](./docs/Manual.md) for detailed instructions on how to configure all EaseProbe parameters.
 
-Create a configuration file (eg. `$CWD/config.yaml`) using the configuration template at https://github.com/megaease/easeprobe/resources/config.yaml
+Create a configuration file (eg. `$CWD/config.yaml`) using the configuration template at [./resources/config.yaml](https://raw.githubusercontent.com/megaease/easeprobe/main/resources/config.yaml), which includes the complete list of configuration parameters.
 
 The following simple configuration example can be used to get started:
+
 ```YAML
 http: # http probes
   - name: EaseProbe Github
