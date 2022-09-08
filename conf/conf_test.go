@@ -18,6 +18,7 @@
 package conf
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -734,4 +735,18 @@ func TestEmptyProbes(t *testing.T) {
 
 	os.RemoveAll(file)
 	os.RemoveAll("data")
+}
+
+func TestJSONSchema(t *testing.T) {
+	schema, err := JSONSchema()
+	assert.Nil(t, err)
+	assert.NotEmpty(t, schema)
+
+	monkey.Patch(json.MarshalIndent, func(v interface{}, prefix, indent string) ([]byte, error) {
+		return nil, fmt.Errorf("error")
+	})
+	schema, err = JSONSchema()
+	assert.NotNil(t, err)
+	assert.Empty(t, schema)
+	monkey.UnpatchAll()
 }

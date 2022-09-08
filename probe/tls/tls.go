@@ -38,16 +38,16 @@ import (
 // TLS implements a config for TLS
 type TLS struct {
 	base.DefaultProbe  `yaml:",inline"`
-	Host               string `yaml:"host"`
-	Proxy              string `yaml:"proxy"`
-	InsecureSkipVerify bool   `yaml:"insecure_skip_verify"`
+	Host               string `yaml:"host" json:"host" jsonschema:"required,format=hostname,title=Host,description=The host to probe"`
+	Proxy              string `yaml:"proxy" json:"proxy,omitempty" jsonschema:"format=hostname,title=Proxy,description=The proxy to use for the TLS connection"`
+	InsecureSkipVerify bool   `yaml:"insecure_skip_verify" json:"insecure_skip_verify,omitempty" jsonschema:"title=Insecure Skip Verify,description=Whether to skip verifying the certificate chain and host name"`
 
-	RootCAPemPath string `yaml:"root_ca_pem_path"`
-	RootCaPem     string `yaml:"root_ca_pem"`
-	rootCAs       *x509.CertPool
+	RootCAPemPath string         `yaml:"root_ca_pem_path" json:"root_ca_pem_path,omitempty" jsonschema:"title=Root CA PEM Path,description=The path to the root CA PEM file"`
+	RootCaPem     string         `yaml:"root_ca_pem" json:"root_ca_pem,omitempty" jsonschema:"title=Root CA PEM,description=The root CA PEM"`
+	rootCAs       *x509.CertPool `yaml:"-" json:"-"`
 
-	ExpireSkipVerify  bool          `yaml:"expire_skip_verify"`
-	AlertExpireBefore time.Duration `yaml:"alert_expire_before"`
+	ExpireSkipVerify  bool          `yaml:"expire_skip_verify" json:"expire_skip_verify,omitempty" jsonschema:"title=Expire Skip Verify,description=Whether to skip verifying the certificate expire time"`
+	AlertExpireBefore time.Duration `yaml:"alert_expire_before" json:"alert_expire_before,omitempty" jsonschema:"title=Alert Expire Before,description=The alert expire before time"`
 
 	metrics *metrics
 }

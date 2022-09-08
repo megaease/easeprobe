@@ -19,6 +19,7 @@
 package conf
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	httpClient "net/http"
 	netUrl "net/url"
@@ -41,6 +42,7 @@ import (
 	"github.com/megaease/easeprobe/probe/tcp"
 	"github.com/megaease/easeprobe/probe/tls"
 
+	"github.com/invopop/jsonschema"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
@@ -86,60 +88,90 @@ func (s *Schedule) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // Notify is the settings of notification
 type Notify struct {
-	Retry global.Retry `yaml:"retry"`
-	Dry   bool         `yaml:"dry"`
+	Retry global.Retry `yaml:"retry" json:"retry,omitempty" jsonschema:"title=retry,description=the retry settings"`
+	Dry   bool         `yaml:"dry" json:"dry,omitempty" jsonschema:"title=dry,description=if true, the notification will not be sent,default=false"`
 }
 
 // Probe is the settings of prober
 type Probe struct {
-	Interval time.Duration `yaml:"interval"`
-	Timeout  time.Duration `yaml:"timeout"`
+	Interval time.Duration `yaml:"interval" json:"interval,omitempty" jsonschema:"type=string,format=duration,title=Probe Interval,description=the interval of probe,default=1m"`
+	Timeout  time.Duration `yaml:"timeout" json:"timeout,omitempty" jsonschema:"type=string,format=duration,title=Probe Timeout,description=the timeout of probe,default=30s"`
 }
 
 // SLAReport is the settings for SLA report
 type SLAReport struct {
-	Schedule Schedule `yaml:"schedule"`
-	Time     string   `yaml:"time"`
-	Debug    bool     `yaml:"debug"`
-	DataFile string   `yaml:"data"`
-	Backups  int      `yaml:"backups"`
-	Channels []string `yaml:"channels"`
+	Schedule Schedule `yaml:"schedule" json:"schedule" jsonschema:"type=string,enum=none,enum=hourly,enum=daily,enum=weekly,enum=monthly,title=Schedule,description=the schedule of SLA report"`
+	Time     string   `yaml:"time" json:"time,omitempty" jsonschema:"format=time,title=Time,description=the time of SLA report need to send out,example=23:59:59+08:00"`
+	Debug    bool     `yaml:"debug" json:"debug,omitempty" jsonschema:"title=Debug,description=if true, the SLA report will be printed to stdout,default=false"`
+	DataFile string   `yaml:"data" json:"data,omitempty" jsonschema:"title=Data File,description=the data file of SLA report, absolute path"`
+	Backups  int      `yaml:"backups" json:"backups,omitempty" jsonschema:"title=Backups,description=the number of backups of SLA report,default=5"`
+	Channels []string `yaml:"channels" json:"channels,omitempty" jsonschema:"title=Channels,description=the channels of SLA report"`
 }
 
 // HTTPServer is the settings of http server
 type HTTPServer struct {
-	IP              string        `yaml:"ip"`
-	Port            string        `yaml:"port"`
-	AutoRefreshTime time.Duration `yaml:"refresh"`
-	AccessLog       Log           `yaml:"log"`
+	IP              string        `yaml:"ip" json:"ip" jsonschema:"title=Web Server IP,description=the local ip address of the http server need to listen on,example=0.0.0.0"`
+	Port            string        `yaml:"port" json:"port" jsonschema:"type=integer,title=Web Server Port,description=port of the http server,default=8181"`
+	AutoRefreshTime time.Duration `yaml:"refresh" json:"refresh,omitempty" jsonschema:"type=string,title=Auto Refresh Time,description=auto refresh time of the http server,example=5s"`
+	AccessLog       Log           `yaml:"log" json:"log,omitempty" jsonschema:"title=Access Log,description=access log of the http server"`
 }
 
 // Settings is the EaseProbe configuration
 type Settings struct {
-	Name       string     `yaml:"name"`
-	IconURL    string     `yaml:"icon"`
-	PIDFile    string     `yaml:"pid"`
-	Log        Log        `yaml:"log"`
-	TimeFormat string     `yaml:"timeformat"`
-	TimeZone   string     `yaml:"timezone"`
-	Probe      Probe      `yaml:"probe"`
-	Notify     Notify     `yaml:"notify"`
-	SLAReport  SLAReport  `yaml:"sla"`
-	HTTPServer HTTPServer `yaml:"http"`
+	Name       string     `yaml:"name" json:"name,omitempty" jsonschema:"title=EaseProbe Name,description=The name of the EaseProbe instance,default=EaseProbe"`
+	IconURL    string     `yaml:"icon" json:"icon,omitempty" jsonschema:"title=Icon URL,description=The URL of the icon of the EaseProbe instance"`
+	PIDFile    string     `yaml:"pid" json:"pid,omitempty" jsonschema:"title=PID File,description=The PID file of the EaseProbe instance, '-' means no PID file"`
+	Log        Log        `yaml:"log" json:"log,omitempty" jsonschema:"title=EaseProbe Log,description=The log settings of the EaseProbe instance"`
+	TimeFormat string     `yaml:"timeformat" json:"timeformat,omitempty" jsonschema:"title=Time Format,description=The time format of the EaseProbe instance,default=2006-01-02 15:04:05Z07:00"`
+	TimeZone   string     `yaml:"timezone" json:"timezone,omitempty" jsonschema:"title=Time Zone,description=The time zone of the EaseProbe instance,example=Asia/Shanghai,example=Europe/Berlin,default=UTC"`
+	Probe      Probe      `yaml:"probe" json:"probe,omitempty" jsonschema:"title=Probe Settings,description=The global probe settings of the EaseProbe instance"`
+	Notify     Notify     `yaml:"notify" json:"notify,omitempty" jsonschema:"title=Notify Settings,description=The global notify settings of the EaseProbe instance"`
+	SLAReport  SLAReport  `yaml:"sla" json:"sla,omitempty" jsonschema:"title=SLA Report Settings,description=The SLA report settings of the EaseProbe instance"`
+	HTTPServer HTTPServer `yaml:"http" json:"http,omitempty" jsonschema:"title=HTTP Server Settings,description=The HTTP server settings of the EaseProbe instance"`
 }
 
 // Conf is Probe configuration
 type Conf struct {
-	Version  string          `yaml:"version"`
-	HTTP     []http.HTTP     `yaml:"http"`
-	TCP      []tcp.TCP       `yaml:"tcp"`
-	Shell    []shell.Shell   `yaml:"shell"`
-	Client   []client.Client `yaml:"client"`
-	SSH      ssh.SSH         `yaml:"ssh"`
-	TLS      []tls.TLS       `yaml:"tls"`
-	Host     host.Host       `yaml:"host"`
-	Notify   notify.Config   `yaml:"notify"`
-	Settings Settings        `yaml:"settings"`
+	Version  string          `yaml:"version" json:"version,omitempty" jsonschema:"title=Version,description=Version of the EaseProbe configuration"`
+	HTTP     []http.HTTP     `yaml:"http" json:"http,omitempty" jsonschema:"title=HTTP Probe,description=HTTP Probe Configuration"`
+	TCP      []tcp.TCP       `yaml:"tcp" json:"tcp,omitempty" jsonschema:"title=TCP Probe,description=TCP Probe Configuration"`
+	Shell    []shell.Shell   `yaml:"shell" json:"shell,omitempty" jsonschema:"title=Shell Probe,description=Shell Probe Configuration"`
+	Client   []client.Client `yaml:"client" json:"client,omitempty" jsonschema:"title=Native Client Probe,description=Native Client Probe Configuration"`
+	SSH      ssh.SSH         `yaml:"ssh" json:"ssh,omitempty" jsonschema:"title=SSH Probe,description=SSH Probe Configuration"`
+	TLS      []tls.TLS       `yaml:"tls" json:"tls,omitempty" jsonschema:"title=TLS Probe,description=TLS Probe Configuration"`
+	Host     host.Host       `yaml:"host" json:"host,omitempty" jsonschema:"title=Host Probe,description=Host Probe Configuration"`
+	Notify   notify.Config   `yaml:"notify" json:"notify,omitempty" jsonschema:"title=Notification,description=Notification Configuration"`
+	Settings Settings        `yaml:"settings" json:"settings,omitempty" jsonschema:"title=Global Settings,description=EaseProbe Global configuration"`
+}
+
+// JSONSchema return the json schema of the configuration
+func JSONSchema() (string, error) {
+	r := new(jsonschema.Reflector)
+
+	// The Struct name could be same, but the package name is different
+	// For example, all of the notification plugins have the same struct name - `NotifyConfig`
+	// This would cause the json schema to be wrong `$ref` to the same name.
+	// the following code is to fix this issue by adding the package name to the struct name
+	r.Namer = func(t reflect.Type) string {
+		name := t.Name()
+		if t.Kind() == reflect.Struct {
+			v := reflect.New(t)
+			vt := v.Elem().Type()
+			name = vt.PkgPath() + "/" + vt.Name()
+			name = strings.TrimPrefix(name, "github.com/megaease/easeprobe/")
+			name = strings.ReplaceAll(name, "/", "_")
+			log.Debugf("The struct name has been replaced [%s ==> %s]", t.Name(), name)
+		}
+		return name
+	}
+
+	schema := r.Reflect(&Conf{})
+
+	resBytes, err := json.MarshalIndent(schema, "", "  ")
+	if err != nil {
+		return "", err
+	}
+	return string(resBytes), nil
 }
 
 // Check if string is a url

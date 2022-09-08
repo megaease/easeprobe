@@ -94,16 +94,16 @@ const (
 
 // Retry is the settings of retry
 type Retry struct {
-	Times    int           `yaml:"times"`
-	Interval time.Duration `yaml:"interval"`
+	Times    int           `yaml:"times" json:"times,omitempty" jsonschema:"title=Retry Times,description=how many times need to retry,minimum=1"`
+	Interval time.Duration `yaml:"interval" json:"interval,omitempty" jsonschema:"type=string,format=duration,title=Retry Interval,description=the interval between each retry,minimum=1"`
 }
 
 // TLS is the configuration for TLS files
 type TLS struct {
-	CA       string `yaml:"ca"`
-	Cert     string `yaml:"cert"`
-	Key      string `yaml:"key"`
-	Insecure bool   `yaml:"insecure"`
+	CA       string `yaml:"ca" json:"ca,omitempty" jsonschema:"title=CA File,description=the CA file path"`
+	Cert     string `yaml:"cert" json:"cert,omitempty" jsonschema:"title=Cert File,description=the Cert file path"`
+	Key      string `yaml:"key" json:"key,omitempty" jsonschema:"title=Key File,description=the Key file path"`
+	Insecure bool   `yaml:"insecure" json:"insecure,omitempty" jsonschema:"title=Insecure,description=whether to skip the TLS verification"`
 }
 
 // The normalize() function logic as below:

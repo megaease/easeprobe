@@ -39,26 +39,26 @@ const Kind string = "ssh"
 type Server struct {
 	base.DefaultProbe `yaml:",inline"`
 	Endpoint          `yaml:",inline"`
-	Command           string   `yaml:"cmd"`
-	Args              []string `yaml:"args,omitempty"`
-	Env               []string `yaml:"env,omitempty"`
+	Command           string   `yaml:"cmd" json:"cmd,omitempty" jsonschema:"title=Shell Command,description=command to run"`
+	Args              []string `yaml:"args,omitempty" json:"args,omitempty" jsonschema:"title=Shell Command Arguments,description=arguments for the command"`
+	Env               []string `yaml:"env,omitempty" json:"env,omitempty" jsonschema:"title=Environment Variables,description=environment variables for the command"`
 
 	// Output Text Checker
 	probe.TextChecker `yaml:",inline"`
 
-	BastionID string    `yaml:"bastion"`
-	bastion   *Endpoint `yaml:"-"`
+	BastionID string    `yaml:"bastion" json:"bastion,omitempty" jsonschema:"title=Bastion Server,description=the bastion host id"`
+	bastion   *Endpoint `yaml:"-" json:"-"`
 
-	exitCode  int `yaml:"-"`
-	outputLen int `yaml:"-"`
+	exitCode  int `yaml:"-" json:"-"`
+	outputLen int `yaml:"-" json:"-"`
 
-	metrics *metrics `yaml:"-"`
+	metrics *metrics `yaml:"-" json:"-"`
 }
 
 // SSH is the SSH probe Configuration
 type SSH struct {
-	Bastion *BastionMapType `yaml:"bastion"`
-	Servers []Server        `yaml:"servers"`
+	Bastion *BastionMapType `yaml:"bastion" json:"bastion,omitempty" jsonschema:"title=Bastion Servers,description=the bastion hosts configuration"`
+	Servers []Server        `yaml:"servers" json:"servers" jsonschema:"required,title=SSH Servers,description=SSH servers to probe"`
 }
 
 // BastionMapType is the type of bastion

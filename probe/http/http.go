@@ -42,35 +42,35 @@ import (
 // HTTP implements a config for HTTP.
 type HTTP struct {
 	base.DefaultProbe `yaml:",inline"`
-	URL               string            `yaml:"url"`
-	Proxy             string            `yaml:"proxy"`
-	ContentEncoding   string            `yaml:"content_encoding,omitempty"`
-	Method            string            `yaml:"method,omitempty"`
-	Headers           map[string]string `yaml:"headers,omitempty"`
-	Body              string            `yaml:"body,omitempty"`
+	URL               string            `yaml:"url" json:"url" jsonschema:"format=uri,title=HTTP URL,description=HTTP URL to probe"`
+	Proxy             string            `yaml:"proxy" json:"proxy,omitempty" jsonschema:"format=url,title=Proxy Server,description=proxy to use for HTTP requests"`
+	ContentEncoding   string            `yaml:"content_encoding,omitempty" json:"content_encoding,omitempty" jsonschema:"title=Content Encoding,description=content encoding to use for HTTP requests"`
+	Method            string            `yaml:"method,omitempty" json:"method,omitempty" jsonschema:"enum=GET,enum=POST,enum=DELETE,enum=PUT,enum=HEAD,enum=OPTIONS,enum=PATCH,enum=TRACE,enum=CONNECT,title=HTTP Method,description=HTTP method to use for HTTP requests"`
+	Headers           map[string]string `yaml:"headers,omitempty" json:"headers,omitempty" jsonschema:"title=HTTP Headers,description=HTTP headers to use for HTTP requests"`
+	Body              string            `yaml:"body,omitempty" json:"body,omitempty" jsonschema:"title=HTTP Body,description=HTTP body to use for HTTP requests"`
 
 	// Output Text Checker
 	probe.TextChecker `yaml:",inline"`
 
 	// Evaluator
-	Evaluator eval.Evaluator `yaml:"eval,omitempty"`
+	Evaluator eval.Evaluator `yaml:"eval,omitempty" json:"eval,omitempty" jsonschema:"title=HTTP Evaluator,description=HTTP evaluator to use for HTTP requests"`
 
 	// Option - HTTP Basic Auth Credentials
-	User string `yaml:"username,omitempty"`
-	Pass string `yaml:"password,omitempty"`
+	User string `yaml:"username,omitempty" json:"username,omitempty" jsonschema:"title=HTTP Basic Auth Username,description=HTTP Basic Auth Username"`
+	Pass string `yaml:"password,omitempty" json:"password,omitempty" jsonschema:"title=HTTP Basic Auth Password,description=HTTP Basic Auth Password"`
 
 	// Option - Preferred HTTP response code ranges, only HTTP standard codes(smaller than 500) are supported;
 	// If no set, default is [0, 499].
-	SuccessCode [][]int `yaml:"success_code,omitempty"`
+	SuccessCode [][]int `yaml:"success_code,omitempty" json:"success_code,omitempty" jsonschema:"title=HTTP Success Code,description=Preferred HTTP response code ranges, only HTTP standard codes(smaller than 500) are supported, If no set, default is [0, 499]."`
 
 	// Option - TLS Config
 	global.TLS `yaml:",inline"`
 
-	client *http.Client `yaml:"-"`
+	client *http.Client `yaml:"-" json:"-"`
 
-	traceStats *TraceStats `yaml:"-"`
+	traceStats *TraceStats `yaml:"-" json:"-"`
 
-	metrics *metrics `yaml:"-"`
+	metrics *metrics `yaml:"-" json:"-"`
 }
 
 func checkHTTPMethod(m string) bool {

@@ -35,7 +35,7 @@ import (
 // NotifyConfig is the teams notification configuration
 type NotifyConfig struct {
 	base.DefaultNotify `yaml:",inline"`
-	WebhookURL         string `yaml:"webhook"`
+	WebhookURL         string `yaml:"webhook"  json:"webhook" jsonschema:"required,format=url,title=Webhook URL,description=The Microsoft Teams Robot Webhook URL"`
 }
 
 // Config configures the teams notification

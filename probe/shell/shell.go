@@ -34,18 +34,18 @@ import (
 // Shell implements a config for shell command (os.Exec)
 type Shell struct {
 	base.DefaultProbe `yaml:",inline"`
-	Command           string   `yaml:"cmd"`
-	Args              []string `yaml:"args,omitempty"`
-	Env               []string `yaml:"env,omitempty"`
-	CleanEnv          bool     `yaml:"clean_env,omitempty"`
+	Command           string   `yaml:"cmd" json:"cmd" jsonschema:"required,title=Command Line,description=Command Line"`
+	Args              []string `yaml:"args,omitempty" json:"args,omitempty" jsonschema:"title=Command Line Arguments,description=Command Line Arguments"`
+	Env               []string `yaml:"env,omitempty" json:"env,omitempty" jsonschema:"title=Environment Variables,description=Environment Variables,example=[\"PATH=/usr/local/bin\"]"`
+	CleanEnv          bool     `yaml:"clean_env,omitempty" json:"clean_env,omitempty" jsonschema:"title=Clean Environment,description=set it to true to keep the environment variables of the current process"`
 
 	// Output Text Checker
 	probe.TextChecker `yaml:",inline"`
 
-	exitCode  int `yaml:"-"`
-	outputLen int `yaml:"-"`
+	exitCode  int `yaml:"-" json:"-"`
+	outputLen int `yaml:"-" json:"-"`
 
-	metrics *metrics `yaml:"-"`
+	metrics *metrics `yaml:"-" json:"-"`
 }
 
 // Config Shell Config Object

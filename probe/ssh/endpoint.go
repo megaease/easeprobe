@@ -29,12 +29,12 @@ import (
 
 // Endpoint is SSH Endpoint
 type Endpoint struct {
-	PrivateKey string      `yaml:"key"`
-	Host       string      `yaml:"host"`
-	User       string      `yaml:"username"`
-	Password   string      `yaml:"password"`
-	Passphrase string      `yaml:"passphrase"`
-	client     *ssh.Client `yaml:"-"`
+	PrivateKey string      `yaml:"key" json:"key,omitempty" jsonschema:"title=Private Key,description=the private key file path for ssh login"`
+	Passphrase string      `yaml:"passphrase" json:"passphrase,omitempty" jsonschema:"title=Passphrase,description=the passphrase for ssh private key"`
+	Host       string      `yaml:"host" json:"host" jsonschema:"required,format=hostname,title=Host,description=the host for ssh probe"`
+	User       string      `yaml:"username" json:"username,omitempty" jsonschema:"title=User,description=the username for ssh probe"`
+	Password   string      `yaml:"password" json:"password,omitempty" jsonschema:"title=Password,description=the password for ssh probe"`
+	client     *ssh.Client `yaml:"-" json:"-"`
 }
 
 // ParseHost check the host is configured the port or not

@@ -33,8 +33,8 @@ import (
 // NotifyConfig is the telegram notification configuration
 type NotifyConfig struct {
 	base.DefaultNotify `yaml:",inline"`
-	Token              string `yaml:"token"`
-	ChatID             string `yaml:"chat_id"`
+	Token              string `yaml:"token" json:"token" jsonschema:"required,title=Telegram Bot Token,description=Telegram Bot Token"`
+	ChatID             string `yaml:"chat_id" json:"chat_id" jsonschema:"required,title=Telegram Chat ID,description=Telegram Group ID or Channel ID"`
 }
 
 // Config configures the telegram configuration

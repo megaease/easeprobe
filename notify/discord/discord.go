@@ -105,10 +105,10 @@ type Discord struct {
 // NotifyConfig is the slack notification configuration
 type NotifyConfig struct {
 	base.DefaultNotify `yaml:",inline"`
-	Username           string `yaml:"username"`
-	WebhookURL         string `yaml:"webhook"`
-	Avatar             string `yaml:"avatar"`
-	Thumbnail          string `yaml:"thumbnail"`
+	Username           string `yaml:"username,omitempty" json:"username,omitempty" jsonschema:"title=Username,description=Discord Username for the notification"`
+	WebhookURL         string `yaml:"webhook" json:"webhook" jsonschema:"format=uri,title=Webhook URL,description=Discord Webhook URL for the notification"`
+	Avatar             string `yaml:"avatar,omitempty" json:"avatar,omitempty" jsonschema:"format=uri,title=Avatar,description=Discord Avatar for the notification,example=https://example.com/avatar.png"`
+	Thumbnail          string `yaml:"thumbnail,omitempty" json:"thumbnail,omitempty" jsonschema:"format=uri,title=Thumbnail,description=Discord Thumbnail for the notification,example=https://example.com/thumbnail.png"`
 }
 
 // Config configures the log files

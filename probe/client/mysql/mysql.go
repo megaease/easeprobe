@@ -38,8 +38,8 @@ const Kind string = "MySQL"
 // MySQL is the MySQL client
 type MySQL struct {
 	conf.Options `yaml:",inline"`
-	tls          *tls.Config `yaml:"-"`
-	ConnStr      string      `yaml:"conn_str"`
+	tls          *tls.Config `yaml:"-" json:"-"`
+	ConnStr      string      `yaml:"conn_str,omitempty" json:"conn_str,omitempty"`
 }
 
 // New create a Mysql client

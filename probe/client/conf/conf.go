@@ -64,11 +64,11 @@ var DriverMap = map[DriverType]string{
 type Options struct {
 	base.DefaultProbe `yaml:",inline"`
 
-	Host       string            `yaml:"host"`
-	DriverType DriverType        `yaml:"driver"`
-	Username   string            `yaml:"username"`
-	Password   string            `yaml:"password"`
-	Data       map[string]string `yaml:"data"`
+	Host       string            `yaml:"host" json:"host" jsonschema:"required,format=hostname,title=Host,description=The host of the client,example=10.1.1.1:9000"`
+	DriverType DriverType        `yaml:"driver" json:"driver" jsonschema:"required,type=string,enum=mysql,enum=redis,enum=memcache,enum=kafka,enum=mongo,enum=postgres,enum=zookeeper,title=Driver,description=The driver of the client,example=mysql"`
+	Username   string            `yaml:"username,omitempty" json:"username,omitempty" jsonschema:"title=Username,description=The username of the client,example=root"`
+	Password   string            `yaml:"password,omitempty" json:"password,omitempty" jsonschema:"title=Password,description=The password of the client,example=123456"`
+	Data       map[string]string `yaml:"data,omitempty" json:"data,omitempty" jsonschema:"title=Data,description=The data of the client,example={\"key\":\"value\"}"`
 
 	//TLS
 	global.TLS `yaml:",inline"`

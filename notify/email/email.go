@@ -34,11 +34,11 @@ import (
 // NotifyConfig is the email notification configuration
 type NotifyConfig struct {
 	base.DefaultNotify `yaml:",inline"`
-	Server             string `yaml:"server"`
-	User               string `yaml:"username"`
-	Pass               string `yaml:"password"`
-	To                 string `yaml:"to"`
-	From               string `yaml:"from"`
+	Server             string `yaml:"server" json:"server" jsonschema:"required,format=hostname,title=SMTP Server,description=SMTP server with port,example=\"smtp.example.com:465\""`
+	User               string `yaml:"username" json:"username" jsonschema:"required,title=SMTP Username,description=SMTP username,example=\"name@example.com\""`
+	Pass               string `yaml:"password" json:"password" jsonschema:"required,title=SMTP Password,description=SMTP password,example=\"password\""`
+	To                 string `yaml:"to" json:"to" jsonschema:"required,title=To,description=Email address to send,example=\"usera@example.com;userb@example.com\""`
+	From               string `yaml:"from,omitempty" json:"from,omitempty" jsonschema:"title=From,description=Email address from,example=\"from@example.com\""`
 }
 
 // Config configures the log files

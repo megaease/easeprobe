@@ -35,7 +35,7 @@ type NotifyConfig struct {
 	//Embed structure
 	conf.Options `yaml:",inline"`
 
-	Provider conf.Provider `yaml:"-"`
+	Provider conf.Provider `yaml:"-" json:"-"`
 }
 
 // Config Sms Config Object

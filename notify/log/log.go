@@ -47,11 +47,11 @@ const (
 type NotifyConfig struct {
 	base.DefaultNotify `yaml:",inline"`
 
-	File    string `yaml:"file"`
-	Host    string `yaml:"host"`
-	Network string `yaml:"network"`
-	Type    Type   `yaml:"-"`
-	logger  *log.Logger
+	File    string      `yaml:"file" json:"file,omitempty" jsonschema:"title=Log File,description=The log file to write the notification message"`
+	Host    string      `yaml:"host" json:"host,omitempty" jsonschema:"title=Syslog Host,description=The log host to write the notification message"`
+	Network string      `yaml:"network" json:"network,omitempty" jsonschema:"title=enum=tcp,enum=udp,Syslog Network,description=The log network to write the notification message"`
+	Type    Type        `yaml:"-" json:"-"`
+	logger  *log.Logger `yaml:"-" json:"-"`
 }
 
 func (c *NotifyConfig) configLogFile() error {

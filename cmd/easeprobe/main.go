@@ -76,11 +76,21 @@ func main() {
 
 	dryNotify := flag.Bool("d", os.Getenv("PROBE_DRY") == "true", "dry notification mode")
 	yamlFile := flag.String("f", getEnvOrDefault("PROBE_CONFIG", "config.yaml"), "configuration file")
+	jsonSchema := flag.Bool("j", false, "show JSON schema")
 	version := flag.Bool("v", false, "prints version")
 	flag.Parse()
 
 	if *version {
 		showVersion()
+		os.Exit(0)
+	}
+
+	if *jsonSchema {
+		schema, err := conf.JSONSchema()
+		if err != nil {
+			log.Fatalf("failed to show JSON schema: %v", err)
+		}
+		fmt.Println(schema)
 		os.Exit(0)
 	}
 
