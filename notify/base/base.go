@@ -34,7 +34,7 @@ type DefaultNotify struct {
 	NotifySendFunc func(string, string) error `yaml:"-" json:"-"`
 	NotifyName     string                     `yaml:"name" json:"name" jsonschema:"required,title=Notification Name,description=The name of the notification"`
 	NotifyChannels []string                   `yaml:"channels,omitempty" json:"channels,omitempty" jsonschema:"title=Notification Channels,description=The channels of the notification"`
-	Dry            bool                       `yaml:"dry,omitempty" json:"dry,omitempty" jsonschema:"title=Dry Run,description=If true, the notification will not send the message"`
+	Dry            bool                       `yaml:"dry,omitempty" json:"dry,omitempty" jsonschema:"title=Dry Run,description=If true the notification will not send the message"`
 	Timeout        time.Duration              `yaml:"timeout,omitempty" json:"timeout,omitempty" jsonschema:"format=duration,title=Timeout,description=The timeout of the notification"`
 	Retry          global.Retry               `yaml:"retry,omitempty" json:"retry,omitempty" jsonschema:"title=Retry,description=The retry of the notification"`
 }

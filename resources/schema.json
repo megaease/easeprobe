@@ -178,7 +178,7 @@
         "dry": {
           "type": "boolean",
           "title": "dry",
-          "description": "if true",
+          "description": "set true to make the notification dry run and will not be sent the message",
           "default": false
         }
       },
@@ -228,7 +228,7 @@
         "debug": {
           "type": "boolean",
           "title": "Debug",
-          "description": "if true",
+          "description": "if true the SLA report will be printed to stdout",
           "default": false
         },
         "data": {
@@ -546,7 +546,7 @@
         "dry": {
           "type": "boolean",
           "title": "Dry Run",
-          "description": "If true"
+          "description": "If true the notification will not send the message"
         },
         "timeout": {
           "type": "integer",
@@ -630,7 +630,7 @@
         "dry": {
           "type": "boolean",
           "title": "Dry Run",
-          "description": "If true"
+          "description": "If true the notification will not send the message"
         },
         "timeout": {
           "type": "integer",
@@ -679,7 +679,7 @@
         "dry": {
           "type": "boolean",
           "title": "Dry Run",
-          "description": "If true"
+          "description": "If true the notification will not send the message"
         },
         "timeout": {
           "type": "integer",
@@ -746,7 +746,7 @@
         "dry": {
           "type": "boolean",
           "title": "Dry Run",
-          "description": "If true"
+          "description": "If true the notification will not send the message"
         },
         "timeout": {
           "type": "integer",
@@ -828,7 +828,7 @@
         "dry": {
           "type": "boolean",
           "title": "Dry Run",
-          "description": "If true"
+          "description": "If true the notification will not send the message"
         },
         "timeout": {
           "type": "integer",
@@ -872,7 +872,7 @@
         "dry": {
           "type": "boolean",
           "title": "Dry Run",
-          "description": "If true"
+          "description": "If true the notification will not send the message"
         },
         "timeout": {
           "type": "integer",
@@ -926,7 +926,7 @@
         "dry": {
           "type": "boolean",
           "title": "Dry Run",
-          "description": "If true"
+          "description": "If true the notification will not send the message"
         },
         "timeout": {
           "type": "integer",
@@ -990,7 +990,7 @@
         "dry": {
           "type": "boolean",
           "title": "Dry Run",
-          "description": "If true"
+          "description": "If true the notification will not send the message"
         },
         "timeout": {
           "type": "integer",
@@ -1034,7 +1034,7 @@
         "dry": {
           "type": "boolean",
           "title": "Dry Run",
-          "description": "If true"
+          "description": "If true the notification will not send the message"
         },
         "timeout": {
           "type": "integer",
@@ -1118,7 +1118,7 @@
         "dry": {
           "type": "boolean",
           "title": "Dry Run",
-          "description": "If true"
+          "description": "If true the notification will not send the message"
         },
         "timeout": {
           "type": "integer",
@@ -1161,7 +1161,7 @@
         "dry": {
           "type": "boolean",
           "title": "Dry Run",
-          "description": "If true"
+          "description": "If true the notification will not send the message"
         },
         "timeout": {
           "type": "integer",
@@ -1210,7 +1210,7 @@
         "dry": {
           "type": "boolean",
           "title": "Dry Run",
-          "description": "If true"
+          "description": "If true the notification will not send the message"
         },
         "timeout": {
           "type": "integer",
@@ -1240,7 +1240,7 @@
         "name": {
           "type": "string",
           "title": "Probe Name",
-          "description": "the name of probe"
+          "description": "the name of probe must be unique"
         },
         "channels": {
           "items": {
@@ -1368,7 +1368,7 @@
         "name": {
           "type": "string",
           "title": "Probe Name",
-          "description": "the name of probe"
+          "description": "the name of probe must be unique"
         },
         "channels": {
           "items": {
@@ -1505,7 +1505,7 @@
         "name": {
           "type": "string",
           "title": "Probe Name",
-          "description": "the name of probe"
+          "description": "the name of probe must be unique"
         },
         "channels": {
           "items": {
@@ -1646,7 +1646,7 @@
         "name": {
           "type": "string",
           "title": "Probe Name",
-          "description": "the name of probe"
+          "description": "the name of probe must be unique"
         },
         "channels": {
           "items": {
@@ -1777,7 +1777,7 @@
         "name": {
           "type": "string",
           "title": "Probe Name",
-          "description": "the name of probe"
+          "description": "the name of probe must be unique"
         },
         "channels": {
           "items": {
@@ -1877,7 +1877,7 @@
         "name": {
           "type": "string",
           "title": "Probe Name",
-          "description": "the name of probe"
+          "description": "the name of probe must be unique"
         },
         "channels": {
           "items": {
@@ -1922,7 +1922,7 @@
         "name": {
           "type": "string",
           "title": "Probe Name",
-          "description": "the name of probe"
+          "description": "the name of probe must be unique"
         },
         "channels": {
           "items": {

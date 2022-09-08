@@ -89,7 +89,7 @@ func (s *Schedule) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // Notify is the settings of notification
 type Notify struct {
 	Retry global.Retry `yaml:"retry" json:"retry,omitempty" jsonschema:"title=retry,description=the retry settings"`
-	Dry   bool         `yaml:"dry" json:"dry,omitempty" jsonschema:"title=dry,description=if true, the notification will not be sent,default=false"`
+	Dry   bool         `yaml:"dry" json:"dry,omitempty" jsonschema:"title=dry,description=set true to make the notification dry run and will not be sent the message,default=false"`
 }
 
 // Probe is the settings of prober
@@ -102,7 +102,7 @@ type Probe struct {
 type SLAReport struct {
 	Schedule Schedule `yaml:"schedule" json:"schedule" jsonschema:"type=string,enum=none,enum=hourly,enum=daily,enum=weekly,enum=monthly,title=Schedule,description=the schedule of SLA report"`
 	Time     string   `yaml:"time" json:"time,omitempty" jsonschema:"format=time,title=Time,description=the time of SLA report need to send out,example=23:59:59+08:00"`
-	Debug    bool     `yaml:"debug" json:"debug,omitempty" jsonschema:"title=Debug,description=if true, the SLA report will be printed to stdout,default=false"`
+	Debug    bool     `yaml:"debug" json:"debug,omitempty" jsonschema:"title=Debug,description=if true the SLA report will be printed to stdout,default=false"`
 	DataFile string   `yaml:"data" json:"data,omitempty" jsonschema:"title=Data File,description=the data file of SLA report, absolute path"`
 	Backups  int      `yaml:"backups" json:"backups,omitempty" jsonschema:"title=Backups,description=the number of backups of SLA report,default=5"`
 	Channels []string `yaml:"channels" json:"channels,omitempty" jsonschema:"title=Channels,description=the channels of SLA report"`
