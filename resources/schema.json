@@ -1061,7 +1061,7 @@
           "title": "Mobile",
           "description": "The mobile number to send the notification message",
           "examples": [
-            "\"123456789"
+            "\"123456789,987654321\""
           ]
         },
         "from": {
@@ -1481,20 +1481,17 @@
         "cpu": {
           "type": "number",
           "title": "CPU threshold",
-          "description": "CPU threshold",
-          "default": 0
+          "description": "CPU threshold (default: 0.8)"
         },
         "mem": {
           "type": "number",
           "title": "Memory threshold",
-          "description": "Memory threshold",
-          "default": 0
+          "description": "Memory threshold (default: 0.8)"
         },
         "disk": {
           "type": "number",
           "title": "Disk threshold",
-          "description": "Disk threshold",
-          "default": 0
+          "description": "Disk threshold (default: 0.95)"
         }
       },
       "additionalProperties": false,

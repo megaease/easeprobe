@@ -39,9 +39,9 @@ const (
 
 // Threshold is the threshold of a probe
 type Threshold struct {
-	CPU  float64 `yaml:"cpu,omitempty" json:"cpu,omitempty" jsonschema:"title=CPU threshold,description=CPU threshold,minimum=0.0,maximum=1.0,default=0.8"`
-	Mem  float64 `yaml:"mem,omitempty" json:"mem,omitempty" jsonschema:"title=Memory threshold,description=Memory threshold,minimum=0.0,maximum=1.0,default=0.8"`
-	Disk float64 `yaml:"disk,omitempty" json:"disk,omitempty" jsonschema:"title=Disk threshold,description=Disk threshold,minimum=0.0,maximum=1.0,default=0.95"`
+	CPU  float64 `yaml:"cpu,omitempty" json:"cpu,omitempty" jsonschema:"title=CPU threshold,description=CPU threshold (default: 0.8)"`
+	Mem  float64 `yaml:"mem,omitempty" json:"mem,omitempty" jsonschema:"title=Memory threshold,description=Memory threshold (default: 0.8)"`
+	Disk float64 `yaml:"disk,omitempty" json:"disk,omitempty" jsonschema:"title=Disk threshold,description=Disk threshold (default: 0.95)"`
 }
 
 func (t *Threshold) String() string {
@@ -52,7 +52,7 @@ func (t *Threshold) String() string {
 type Server struct {
 	ssh.Server `yaml:",inline"`
 	Threshold  Threshold `yaml:"threshold,omitempty" json:"threshold,omitempty" jsonschema:"title=Threshold,description=the threshold of the probe for cpu/memory/disk"`
-	Disks      []string  `yaml:"disks,omitempty" json:"disks,omitempty" jsonschema:"title=Disks,description=the disks to be monitored,example=[\"/\"\\,\"/data\"]"`
+	Disks      []string  `yaml:"disks,omitempty" json:"disks,omitempty" jsonschema:"title=Disks,description=the disks to be monitored,example=[\"/\", \"/data\"]"`
 	metrics    *metrics  `yaml:"-" json:"-"`
 }
 

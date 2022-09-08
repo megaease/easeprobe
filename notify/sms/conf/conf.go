@@ -52,7 +52,7 @@ type Options struct {
 	base.DefaultNotify `yaml:",inline"`
 
 	ProviderType ProviderType `yaml:"provider" json:"provider" jsonschema:"type=string,enum=yunpian,enum=twilio,enum=nexmo,title=SMS Provider,description=The SMS provider to send the notification message"`
-	Mobile       string       `yaml:"mobile" json:"mobile" jsonschema:"title=Mobile,description=The mobile number to send the notification message,example=\"123456789,987654321\""`
+	Mobile       string       `yaml:"mobile" json:"mobile" jsonschema:"title=Mobile,description=The mobile number to send the notification message,example=\"123456789\\,987654321\""`
 	From         string       `yaml:"from,omitempty" json:"from,omitempty" jsonschema:"title=From,description=The sender of the notification message"`
 	Key          string       `yaml:"key" json:"key" jsonschema:"title=Key,description=The key of the SMS provider"`
 	Secret       string       `yaml:"secret,omitempty" json:"secret,omitempty" jsonschema:"title=Secret,description=The secret of the SMS provider"`

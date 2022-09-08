@@ -95,7 +95,7 @@ const (
 // Retry is the settings of retry
 type Retry struct {
 	Times    int           `yaml:"times" json:"times,omitempty" jsonschema:"title=Retry Times,description=how many times need to retry,minimum=1"`
-	Interval time.Duration `yaml:"interval" json:"interval,omitempty" jsonschema:"type=string,format=duration,title=Retry Interval,description=the interval between each retry,minimum=1"`
+	Interval time.Duration `yaml:"interval" json:"interval,omitempty" jsonschema:"type=string,format=duration,title=Retry Interval,description=the interval between each retry"`
 }
 
 // TLS is the configuration for TLS files
