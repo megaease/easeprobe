@@ -147,17 +147,17 @@
         "size": {
           "type": "integer",
           "title": "Max Size",
-          "description": "the max size of the log file"
+          "description": "the max size of the log file. the log file will be rotated if the size is larger than this value"
         },
         "age": {
           "type": "integer",
           "title": "Max Age",
-          "description": "the max age of the log file"
+          "description": "the max age of the log file. the log file will be rotated if the age is larger than this value"
         },
         "backups": {
           "type": "integer",
           "title": "Max Backups",
-          "description": "the max backups of the log file"
+          "description": "the max backups of the log file. the rotated log file will be deleted if the backups is larger than this value"
         },
         "compress": {
           "type": "boolean",
@@ -273,7 +273,7 @@
         "pid": {
           "type": "string",
           "title": "PID File",
-          "description": "The PID file of the EaseProbe instance"
+          "description": "The PID file of the EaseProbe instance ('-' means no PID file)"
         },
         "log": {
           "$ref": "#/$defs/conf_Log",
@@ -1610,8 +1610,8 @@
             "type": "array"
           },
           "type": "array",
-          "title": "HTTP Success Code",
-          "description": "Preferred HTTP response code ranges"
+          "title": "HTTP Success Code Range",
+          "description": "Preferred HTTP response code ranges.  If not set the default is [0, 499]."
         },
         "ca": {
           "type": "string",

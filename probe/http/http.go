@@ -59,9 +59,9 @@ type HTTP struct {
 	User string `yaml:"username,omitempty" json:"username,omitempty" jsonschema:"title=HTTP Basic Auth Username,description=HTTP Basic Auth Username"`
 	Pass string `yaml:"password,omitempty" json:"password,omitempty" jsonschema:"title=HTTP Basic Auth Password,description=HTTP Basic Auth Password"`
 
-	// Option - Preferred HTTP response code ranges, only HTTP standard codes(smaller than 500) are supported;
-	// If no set, default is [0, 499].
-	SuccessCode [][]int `yaml:"success_code,omitempty" json:"success_code,omitempty" jsonschema:"title=HTTP Success Code,description=Preferred HTTP response code ranges, only HTTP standard codes(smaller than 500) are supported, If no set, default is [0, 499]."`
+	// Option - Preferred HTTP response code ranges
+	// If not set, default is [0, 499].
+	SuccessCode [][]int `yaml:"success_code,omitempty" json:"success_code,omitempty" jsonschema:"title=HTTP Success Code Range,description=Preferred HTTP response code ranges.  If not set the default is [0\\, 499]."`
 
 	// Option - TLS Config
 	global.TLS `yaml:",inline"`

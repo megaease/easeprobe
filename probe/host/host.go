@@ -52,7 +52,7 @@ func (t *Threshold) String() string {
 type Server struct {
 	ssh.Server `yaml:",inline"`
 	Threshold  Threshold `yaml:"threshold,omitempty" json:"threshold,omitempty" jsonschema:"title=Threshold,description=the threshold of the probe for cpu/memory/disk"`
-	Disks      []string  `yaml:"disks,omitempty" json:"disks,omitempty" jsonschema:"title=Disks,description=the disks to be monitored,example=[\"/\",\"/data\"]"`
+	Disks      []string  `yaml:"disks,omitempty" json:"disks,omitempty" jsonschema:"title=Disks,description=the disks to be monitored,example=[\"/\"\\,\"/data\"]"`
 	metrics    *metrics  `yaml:"-" json:"-"`
 }
 
