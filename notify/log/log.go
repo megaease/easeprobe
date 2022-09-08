@@ -49,7 +49,7 @@ type NotifyConfig struct {
 
 	File    string      `yaml:"file" json:"file,omitempty" jsonschema:"title=Log File,description=The log file to write the notification message"`
 	Host    string      `yaml:"host" json:"host,omitempty" jsonschema:"title=Syslog Host,description=The log host to write the notification message"`
-	Network string      `yaml:"network" json:"network,omitempty" jsonschema:"title=enum=tcp,enum=udp,Syslog Network,description=The log network to write the notification message"`
+	Network string      `yaml:"network" json:"network,omitempty" jsonschema:"enum=tcp,enum=udp,title=Syslog Network,description=The syslog network to write the notification message"`
 	Type    Type        `yaml:"-" json:"-"`
 	logger  *log.Logger `yaml:"-" json:"-"`
 }

@@ -897,9 +897,11 @@
         "network": {
           "type": "string",
           "enum": [
+            "tcp",
             "udp"
           ],
-          "description": "The log network to write the notification message"
+          "title": "Syslog Network",
+          "description": "The syslog network to write the notification message"
         }
       },
       "additionalProperties": false,
@@ -1437,18 +1439,18 @@
         },
         "contain": {
           "type": "string",
-          "title": "contain",
+          "title": "Contain Text",
           "description": "the string must be contained"
         },
         "not_contain": {
           "type": "string",
-          "title": "not contain",
+          "title": "Not Contain Text",
           "description": "the string must not be contained"
         },
         "regex": {
           "type": "boolean",
           "title": "regex",
-          "description": "use regular expression"
+          "description": "use regular expression to check the contain or not contain"
         },
         "bastion": {
           "type": "string",
@@ -1571,18 +1573,18 @@
         },
         "contain": {
           "type": "string",
-          "title": "contain",
+          "title": "Contain Text",
           "description": "the string must be contained"
         },
         "not_contain": {
           "type": "string",
-          "title": "not contain",
+          "title": "Not Contain Text",
           "description": "the string must not be contained"
         },
         "regex": {
           "type": "boolean",
           "title": "regex",
-          "description": "use regular expression"
+          "description": "use regular expression to check the contain or not contain"
         },
         "eval": {
           "$ref": "#/$defs/eval_Evaluator",
@@ -1691,18 +1693,18 @@
         },
         "contain": {
           "type": "string",
-          "title": "contain",
+          "title": "Contain Text",
           "description": "the string must be contained"
         },
         "not_contain": {
           "type": "string",
-          "title": "not contain",
+          "title": "Not Contain Text",
           "description": "the string must not be contained"
         },
         "regex": {
           "type": "boolean",
           "title": "regex",
-          "description": "use regular expression"
+          "description": "use regular expression to check the contain or not contain"
         }
       },
       "additionalProperties": false,
@@ -1843,18 +1845,18 @@
         },
         "contain": {
           "type": "string",
-          "title": "contain",
+          "title": "Contain Text",
           "description": "the string must be contained"
         },
         "not_contain": {
           "type": "string",
-          "title": "not contain",
+          "title": "Not Contain Text",
           "description": "the string must not be contained"
         },
         "regex": {
           "type": "boolean",
           "title": "regex",
-          "description": "use regular expression"
+          "description": "use regular expression to check the contain or not contain"
         },
         "bastion": {
           "type": "string",
