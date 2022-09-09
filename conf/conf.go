@@ -152,6 +152,7 @@ func JSONSchema() (string, error) {
 	// For example, all of the notification plugins have the same struct name - `NotifyConfig`
 	// This would cause the json schema to be wrong `$ref` to the same name.
 	// the following code is to fix this issue by adding the package name to the struct name
+	// p.s. this issue has been reported in: https://github.com/invopop/jsonschema/issues/42
 	r.Namer = func(t reflect.Type) string {
 		name := t.Name()
 		if t.Kind() == reflect.Struct {
