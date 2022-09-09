@@ -30,7 +30,7 @@ import (
 // NotifyConfig is the AWS SNS notification configuration
 type NotifyConfig struct {
 	Options  `yaml:",inline"`
-	Format   report.Format   `yaml:"format,omitempty" json:"format,omitempty" jsonschema:"title=Format of the Notification,description=Format of the notification,enum=text,enum=html,enum=markdown,enum=json,default=text"`
+	Format   report.Format   `yaml:"format,omitempty" json:"format,omitempty" jsonschema:"type=string,enum=text,enum=html,enum=markdown,enum=json,title=Format of the Notification,description=Format of the notification,default=text"`
 	TopicARN string          `yaml:"arn" json:"arn" jsonschema:"title=Topic ARN,description=The ARN of the SNS topic"`
 	client   *sns.SNS        `yaml:"-" json:"-"`
 	context  context.Context `yaml:"-" json:"-"`

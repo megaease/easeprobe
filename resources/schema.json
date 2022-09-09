@@ -585,16 +585,16 @@
           "description": "AWS Profile"
         },
         "format": {
-          "type": "integer",
+          "type": "string",
           "enum": [
-            0,
-            0,
-            0,
-            0
+            "text",
+            "html",
+            "markdown",
+            "json"
           ],
           "title": "Format of the Notification",
           "description": "Format of the notification",
-          "default": 0
+          "default": "text"
         },
         "arn": {
           "type": "string",
