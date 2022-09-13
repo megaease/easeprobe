@@ -58,16 +58,16 @@ func (l *LogLevel) GetLevel() log.Level {
 
 // Log is the log settings
 type Log struct {
-	Level      LogLevel    `yaml:"level"`
-	File       string      `yaml:"file"`
-	SelfRotate bool        `yaml:"self_rotate"`
-	MaxSize    int         `yaml:"size"`
-	MaxAge     int         `yaml:"age"`
-	MaxBackups int         `yaml:"backups"`
-	Compress   bool        `yaml:"compress"`
-	Writer     io.Writer   `yaml:"-"`
-	Logger     *log.Logger `yaml:"-"`
-	IsStdout   bool        `yaml:"-"`
+	Level      LogLevel    `yaml:"level" json:"level,omitempty" jsonschema:"type=string,enum=debug,enum=info,enum=warn,enum=error,enum=fatal,enum=panic,title=Log Level,description=Log Level"`
+	File       string      `yaml:"file" json:"file,omitempty" jsonschema:"title=Log File,description=the file to save the log"`
+	SelfRotate bool        `yaml:"self_rotate" json:"self_rotate,omitempty" jsonschema:"title=Self Rotate,description=whether to rotate the log file by self"`
+	MaxSize    int         `yaml:"size" json:"size,omitempty" jsonschema:"title=Max Size,description=the max size of the log file. the log file will be rotated if the size is larger than this value"`
+	MaxAge     int         `yaml:"age" json:"age,omitempty" jsonschema:"title=Max Age,description=the max age of the log file. the log file will be rotated if the age is larger than this value"`
+	MaxBackups int         `yaml:"backups" json:"backups,omitempty" jsonschema:"title=Max Backups,description=the max backups of the log file. the rotated log file will be deleted if the backups is larger than this value"`
+	Compress   bool        `yaml:"compress" json:"compress,omitempty" jsonschema:"title=Compress,description=whether to compress the rotated log file"`
+	Writer     io.Writer   `yaml:"-" json:"-"`
+	Logger     *log.Logger `yaml:"-" json:"-"`
+	IsStdout   bool        `yaml:"-" json:"-"`
 }
 
 // NewLog create a new Log

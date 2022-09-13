@@ -37,9 +37,9 @@ const Kind string = "Mongo"
 // Mongo is the Mongo client
 type Mongo struct {
 	conf.Options `yaml:",inline"`
-	ConnStr      string                 `yaml:"conn_str"`
-	ClientOpt    *options.ClientOptions `yaml:"-"`
-	Context      context.Context        `yaml:"-"`
+	ConnStr      string                 `yaml:"conn_str,omitempty" json:"conn_str,omitempty"`
+	ClientOpt    *options.ClientOptions `yaml:"-" json:"-"`
+	Context      context.Context        `yaml:"-" json:"-"`
 }
 
 // New create a Mongo client

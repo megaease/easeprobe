@@ -27,17 +27,17 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// SNSNotifyConfig is the AWS SNS notification configuration
-type SNSNotifyConfig struct {
+// NotifyConfig is the AWS SNS notification configuration
+type NotifyConfig struct {
 	Options  `yaml:",inline"`
-	Format   report.Format   `yaml:"format"`
-	TopicARN string          `yaml:"arn"`
-	client   *sns.SNS        `yaml:"-"`
-	context  context.Context `yaml:"-"`
+	Format   report.Format   `yaml:"format,omitempty" json:"format,omitempty" jsonschema:"type=string,enum=text,enum=html,enum=markdown,enum=json,title=Format of the Notification,description=Format of the notification,default=text"`
+	TopicARN string          `yaml:"arn" json:"arn" jsonschema:"title=Topic ARN,description=The ARN of the SNS topic"`
+	client   *sns.SNS        `yaml:"-" json:"-"`
+	context  context.Context `yaml:"-" json:"-"`
 }
 
 // Config configures the slack notification
-func (c *SNSNotifyConfig) Config(gConf global.NotifySettings) error {
+func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 	c.NotifyKind = "aws-sns"
 	if c.Format == report.Unknown {
 		c.Format = report.Text
@@ -57,12 +57,12 @@ func (c *SNSNotifyConfig) Config(gConf global.NotifySettings) error {
 }
 
 // SendSNS is the warp function of SendSNSNotification
-func (c *SNSNotifyConfig) SendSNS(title, msg string) error {
+func (c *NotifyConfig) SendSNS(title, msg string) error {
 	return c.SendSNSNotification(msg)
 }
 
 // SendSNSNotification sends the message to SNS
-func (c *SNSNotifyConfig) SendSNSNotification(msg string) error {
+func (c *NotifyConfig) SendSNSNotification(msg string) error {
 	ctx, cancel := context.WithTimeout(c.context, c.Timeout)
 	defer cancel()
 

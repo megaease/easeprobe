@@ -25,12 +25,12 @@ import (
 
 // TextChecker is the struct to check the output
 type TextChecker struct {
-	Contain    string `yaml:"contain,omitempty"`
-	NotContain string `yaml:"not_contain,omitempty"`
-	RegExp     bool   `yaml:"regex,omitempty"`
+	Contain    string `yaml:"contain,omitempty" json:"contain,omitempty" jsonschema:"title=Contain Text,description=the string must be contained"`
+	NotContain string `yaml:"not_contain,omitempty" json:"not_contain,omitempty" jsonschema:"title=Not Contain Text,description=the string must not be contained"`
+	RegExp     bool   `yaml:"regex,omitempty" json:"regex,omitempty" jsonschema:"title=regex,description=use regular expression to check the contain or not contain"`
 
-	containReg    *regexp.Regexp `yaml:"-"`
-	notContainReg *regexp.Regexp `yaml:"-"`
+	containReg    *regexp.Regexp `yaml:"-" json:"-"`
+	notContainReg *regexp.Regexp `yaml:"-" json:"-"`
 }
 
 // Config the text checker initialize the regexp

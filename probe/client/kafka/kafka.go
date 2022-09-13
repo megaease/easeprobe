@@ -35,8 +35,8 @@ const Kind string = "Kafka"
 // Kafka is the Kafka client
 type Kafka struct {
 	conf.Options `yaml:",inline"`
-	tls          *tls.Config     `yaml:"-"`
-	Context      context.Context `yaml:"-"`
+	tls          *tls.Config     `yaml:"-" json:"-"`
+	Context      context.Context `yaml:"-" json:"-"`
 }
 
 // New create a Kafka client

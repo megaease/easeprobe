@@ -37,11 +37,11 @@ import (
 type NotifyConfig struct {
 	base.DefaultNotify `yaml:",inline"`
 
-	Cmd  string   `yaml:"cmd"`
-	Args []string `yaml:"args"`
-	Env  []string `yaml:"env"`
+	Cmd  string   `yaml:"cmd" json:"cmd" jsonschema:"required,title=Command,description=the command to run"`
+	Args []string `yaml:"args,omitempty" json:"args,omitempty" jsonschema:"title=Arguments,description=the arguments for command"`
+	Env  []string `yaml:"env,omitempty" json:"env,omitempty" jsonschema:"title=Environment variables,description=the environment variables for command"`
 
-	CleanEnv bool `yaml:"clean_env"`
+	CleanEnv bool `yaml:"clean_env,omitempty" json:"clean_env,omitempty" jsonschema:"title=Clean Environment Variables,description=set it to true to keep the environment variables of the current process"`
 }
 
 // Config is the config for shell probe

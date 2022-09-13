@@ -1,0 +1,1990 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/megaease/easeprobe/conf/conf_-conf",
+  "$ref": "#/$defs/conf_Conf",
+  "$defs": {
+    "BastionMapType": {
+      "patternProperties": {
+        ".*": {
+          "$ref": "#/$defs/probe_ssh_Endpoint"
+        }
+      },
+      "type": "object"
+    },
+    "conf_Conf": {
+      "properties": {
+        "version": {
+          "type": "string",
+          "title": "Version",
+          "description": "Version of the EaseProbe configuration"
+        },
+        "http": {
+          "items": {
+            "$ref": "#/$defs/probe_http_HTTP"
+          },
+          "type": "array",
+          "title": "HTTP Probe",
+          "description": "HTTP Probe Configuration"
+        },
+        "tcp": {
+          "items": {
+            "$ref": "#/$defs/probe_tcp_TCP"
+          },
+          "type": "array",
+          "title": "TCP Probe",
+          "description": "TCP Probe Configuration"
+        },
+        "shell": {
+          "items": {
+            "$ref": "#/$defs/probe_shell_Shell"
+          },
+          "type": "array",
+          "title": "Shell Probe",
+          "description": "Shell Probe Configuration"
+        },
+        "client": {
+          "items": {
+            "$ref": "#/$defs/probe_client_Client"
+          },
+          "type": "array",
+          "title": "Native Client Probe",
+          "description": "Native Client Probe Configuration"
+        },
+        "ssh": {
+          "$ref": "#/$defs/probe_ssh_SSH",
+          "title": "SSH Probe",
+          "description": "SSH Probe Configuration"
+        },
+        "tls": {
+          "items": {
+            "$ref": "#/$defs/probe_tls_TLS"
+          },
+          "type": "array",
+          "title": "TLS Probe",
+          "description": "TLS Probe Configuration"
+        },
+        "host": {
+          "$ref": "#/$defs/probe_host_Host",
+          "title": "Host Probe",
+          "description": "Host Probe Configuration"
+        },
+        "notify": {
+          "$ref": "#/$defs/notify_Config",
+          "title": "Notification",
+          "description": "Notification Configuration"
+        },
+        "settings": {
+          "$ref": "#/$defs/conf_Settings",
+          "title": "Global Settings",
+          "description": "EaseProbe Global configuration"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "conf_HTTPServer": {
+      "properties": {
+        "ip": {
+          "type": "string",
+          "title": "Web Server IP",
+          "description": "the local ip address of the http server need to listen on",
+          "examples": [
+            "0.0.0.0"
+          ]
+        },
+        "port": {
+          "type": "integer",
+          "title": "Web Server Port",
+          "description": "port of the http server",
+          "default": 8181
+        },
+        "refresh": {
+          "type": "string",
+          "title": "Auto Refresh Time",
+          "description": "auto refresh time of the http server",
+          "examples": [
+            "5s"
+          ]
+        },
+        "log": {
+          "$ref": "#/$defs/conf_Log",
+          "title": "Access Log",
+          "description": "access log of the http server"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "ip",
+        "port"
+      ]
+    },
+    "conf_Log": {
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": [
+            "debug",
+            "info",
+            "warn",
+            "error",
+            "fatal",
+            "panic"
+          ],
+          "title": "Log Level",
+          "description": "Log Level"
+        },
+        "file": {
+          "type": "string",
+          "title": "Log File",
+          "description": "the file to save the log"
+        },
+        "self_rotate": {
+          "type": "boolean",
+          "title": "Self Rotate",
+          "description": "whether to rotate the log file by self"
+        },
+        "size": {
+          "type": "integer",
+          "title": "Max Size",
+          "description": "the max size of the log file. the log file will be rotated if the size is larger than this value"
+        },
+        "age": {
+          "type": "integer",
+          "title": "Max Age",
+          "description": "the max age of the log file. the log file will be rotated if the age is larger than this value"
+        },
+        "backups": {
+          "type": "integer",
+          "title": "Max Backups",
+          "description": "the max backups of the log file. the rotated log file will be deleted if the backups is larger than this value"
+        },
+        "compress": {
+          "type": "boolean",
+          "title": "Compress",
+          "description": "whether to compress the rotated log file"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "conf_Notify": {
+      "properties": {
+        "retry": {
+          "$ref": "#/$defs/global_Retry",
+          "title": "retry",
+          "description": "the retry settings"
+        },
+        "dry": {
+          "type": "boolean",
+          "title": "dry",
+          "description": "set true to make the notification dry run and will not be sent the message",
+          "default": false
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "conf_Probe": {
+      "properties": {
+        "interval": {
+          "type": "string",
+          "title": "Probe Interval",
+          "description": "the interval of probe",
+          "default": "1m"
+        },
+        "timeout": {
+          "type": "string",
+          "title": "Probe Timeout",
+          "description": "the timeout of probe",
+          "default": "30s"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "conf_SLAReport": {
+      "properties": {
+        "schedule": {
+          "type": "string",
+          "enum": [
+            "none",
+            "hourly",
+            "daily",
+            "weekly",
+            "monthly"
+          ],
+          "title": "Schedule",
+          "description": "the schedule of SLA report"
+        },
+        "time": {
+          "type": "string",
+          "title": "Time",
+          "description": "the time of SLA report need to send out",
+          "examples": [
+            "23:59:59+08:00"
+          ]
+        },
+        "debug": {
+          "type": "boolean",
+          "title": "Debug",
+          "description": "if true the SLA report will be printed to stdout",
+          "default": false
+        },
+        "data": {
+          "type": "string",
+          "title": "Data File",
+          "description": "the data file of SLA report"
+        },
+        "backups": {
+          "type": "integer",
+          "title": "Backups",
+          "description": "the number of backups of SLA report",
+          "default": 5
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Channels",
+          "description": "the channels of SLA report"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "schedule"
+      ]
+    },
+    "conf_Settings": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "EaseProbe Name",
+          "description": "The name of the EaseProbe instance",
+          "default": "EaseProbe"
+        },
+        "icon": {
+          "type": "string",
+          "title": "Icon URL",
+          "description": "The URL of the icon of the EaseProbe instance"
+        },
+        "pid": {
+          "type": "string",
+          "title": "PID File",
+          "description": "The PID file of the EaseProbe instance ('-' means no PID file)"
+        },
+        "log": {
+          "$ref": "#/$defs/conf_Log",
+          "title": "EaseProbe Log",
+          "description": "The log settings of the EaseProbe instance"
+        },
+        "timeformat": {
+          "type": "string",
+          "title": "Time Format",
+          "description": "The time format of the EaseProbe instance",
+          "default": "2006-01-02 15:04:05Z07:00"
+        },
+        "timezone": {
+          "type": "string",
+          "title": "Time Zone",
+          "description": "The time zone of the EaseProbe instance",
+          "default": "UTC",
+          "examples": [
+            "Asia/Shanghai",
+            "Europe/Berlin"
+          ]
+        },
+        "probe": {
+          "$ref": "#/$defs/conf_Probe",
+          "title": "Probe Settings",
+          "description": "The global probe settings of the EaseProbe instance"
+        },
+        "notify": {
+          "$ref": "#/$defs/conf_Notify",
+          "title": "Notify Settings",
+          "description": "The global notify settings of the EaseProbe instance"
+        },
+        "sla": {
+          "$ref": "#/$defs/conf_SLAReport",
+          "title": "SLA Report Settings",
+          "description": "The SLA report settings of the EaseProbe instance"
+        },
+        "http": {
+          "$ref": "#/$defs/conf_HTTPServer",
+          "title": "HTTP Server Settings",
+          "description": "The HTTP server settings of the EaseProbe instance"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "eval_Evaluator": {
+      "properties": {
+        "variables": {
+          "items": {
+            "$ref": "#/$defs/eval_Variable"
+          },
+          "type": "array",
+          "title": "Variables Definition",
+          "description": "define the variables used in the expression"
+        },
+        "doc": {
+          "type": "string",
+          "enum": [
+            "html",
+            "xml",
+            "json",
+            "text"
+          ],
+          "title": "Document Type",
+          "description": "Document Type"
+        },
+        "expression": {
+          "type": "string",
+          "title": "Expression",
+          "description": "Expression need to be evaluated"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "doc",
+        "expression"
+      ]
+    },
+    "eval_Variable": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Variable Name",
+          "description": "Variable Name"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "int",
+            "string",
+            "bool",
+            "float",
+            "bool",
+            "time",
+            "duration"
+          ],
+          "title": "Variable Type",
+          "description": "Variable Type"
+        },
+        "query": {
+          "type": "string",
+          "title": "Query",
+          "description": "XPath/Regex Expression to extract the value"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "type",
+        "query"
+      ]
+    },
+    "global_Retry": {
+      "properties": {
+        "times": {
+          "type": "integer",
+          "minimum": 1,
+          "title": "Retry Times",
+          "description": "how many times need to retry"
+        },
+        "interval": {
+          "type": "string",
+          "title": "Retry Interval",
+          "description": "the interval between each retry"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "notify_Config": {
+      "properties": {
+        "log": {
+          "items": {
+            "$ref": "#/$defs/notify_log_NotifyConfig"
+          },
+          "type": "array",
+          "title": "Log Notification",
+          "description": "Log Notification Configuration"
+        },
+        "email": {
+          "items": {
+            "$ref": "#/$defs/notify_email_NotifyConfig"
+          },
+          "type": "array",
+          "title": "Email Notification",
+          "description": "Email Notification Configuration"
+        },
+        "slack": {
+          "items": {
+            "$ref": "#/$defs/notify_slack_NotifyConfig"
+          },
+          "type": "array",
+          "title": "Slack Notification",
+          "description": "Slack Notification Configuration"
+        },
+        "discord": {
+          "items": {
+            "$ref": "#/$defs/notify_discord_NotifyConfig"
+          },
+          "type": "array",
+          "title": "Discord Notification",
+          "description": "Discord Notification Configuration"
+        },
+        "telegram": {
+          "items": {
+            "$ref": "#/$defs/notify_telegram_NotifyConfig"
+          },
+          "type": "array",
+          "title": "Telegram Notification",
+          "description": "Telegram Notification Configuration"
+        },
+        "aws_sns": {
+          "items": {
+            "$ref": "#/$defs/notify_aws_NotifyConfig"
+          },
+          "type": "array",
+          "title": "AWS SNS Notification",
+          "description": "AWS SNS Notification Configuration"
+        },
+        "wecom": {
+          "items": {
+            "$ref": "#/$defs/notify_wecom_NotifyConfig"
+          },
+          "type": "array",
+          "title": "WeCom Notification",
+          "description": "WeCom Notification Configuration"
+        },
+        "dingtalk": {
+          "items": {
+            "$ref": "#/$defs/notify_dingtalk_NotifyConfig"
+          },
+          "type": "array",
+          "title": "DingTalk Notification",
+          "description": "DingTalk Notification Configuration"
+        },
+        "lark": {
+          "items": {
+            "$ref": "#/$defs/notify_lark_NotifyConfig"
+          },
+          "type": "array",
+          "title": "Lark Notification",
+          "description": "Lark Notification Configuration"
+        },
+        "sms": {
+          "items": {
+            "$ref": "#/$defs/notify_sms_NotifyConfig"
+          },
+          "type": "array",
+          "title": "SMS Notification",
+          "description": "SMS Notification Configuration"
+        },
+        "teams": {
+          "items": {
+            "$ref": "#/$defs/notify_teams_NotifyConfig"
+          },
+          "type": "array",
+          "title": "Teams Notification",
+          "description": "Teams Notification Configuration"
+        },
+        "shell": {
+          "items": {
+            "$ref": "#/$defs/notify_shell_NotifyConfig"
+          },
+          "type": "array",
+          "title": "Shell Notification",
+          "description": "Shell Notification Configuration"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "notify_aws_Credentials": {
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "AWS Access Key ID",
+          "description": "AWS Access Key ID"
+        },
+        "key": {
+          "type": "string",
+          "title": "AWS Access Key Secret",
+          "description": "AWS Access Key Secret"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "id",
+        "key"
+      ]
+    },
+    "notify_aws_NotifyConfig": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Notification Name",
+          "description": "The name of the notification"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Notification Channels",
+          "description": "The channels of the notification"
+        },
+        "dry": {
+          "type": "boolean",
+          "title": "Dry Run",
+          "description": "If true the notification will not send the message"
+        },
+        "timeout": {
+          "type": "integer",
+          "title": "Timeout",
+          "description": "The timeout of the notification"
+        },
+        "retry": {
+          "$ref": "#/$defs/global_Retry",
+          "title": "Retry",
+          "description": "The retry of the notification"
+        },
+        "region": {
+          "type": "string",
+          "title": "AWS Region ID",
+          "description": "AWS Region ID",
+          "examples": [
+            "\"us-west-2\""
+          ]
+        },
+        "endpoint": {
+          "type": "string",
+          "title": "AWS Endpoint",
+          "description": "AWS Endpoint",
+          "examples": [
+            "\"https://sns.us-west-2.amazonaws.com\""
+          ]
+        },
+        "credential": {
+          "$ref": "#/$defs/notify_aws_Credentials",
+          "title": "AWS Credential",
+          "description": "AWS Credential"
+        },
+        "profile": {
+          "type": "string",
+          "title": "AWS Profile",
+          "description": "AWS Profile"
+        },
+        "format": {
+          "type": "string",
+          "enum": [
+            "text",
+            "html",
+            "markdown",
+            "json"
+          ],
+          "title": "Format of the Notification",
+          "description": "Format of the notification",
+          "default": "text"
+        },
+        "arn": {
+          "type": "string",
+          "title": "Topic ARN",
+          "description": "The ARN of the SNS topic"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "region",
+        "endpoint",
+        "credential",
+        "arn"
+      ]
+    },
+    "notify_dingtalk_NotifyConfig": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Notification Name",
+          "description": "The name of the notification"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Notification Channels",
+          "description": "The channels of the notification"
+        },
+        "dry": {
+          "type": "boolean",
+          "title": "Dry Run",
+          "description": "If true the notification will not send the message"
+        },
+        "timeout": {
+          "type": "integer",
+          "title": "Timeout",
+          "description": "The timeout of the notification"
+        },
+        "retry": {
+          "$ref": "#/$defs/global_Retry",
+          "title": "Retry",
+          "description": "The retry of the notification"
+        },
+        "webhook": {
+          "type": "string",
+          "format": "uri",
+          "title": "Webhook URL",
+          "description": "The Dingtalk Robot Webhook URL"
+        },
+        "secret": {
+          "type": "string",
+          "title": "Secret",
+          "description": "The Dingtalk Robot Secret"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "webhook"
+      ]
+    },
+    "notify_discord_NotifyConfig": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Notification Name",
+          "description": "The name of the notification"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Notification Channels",
+          "description": "The channels of the notification"
+        },
+        "dry": {
+          "type": "boolean",
+          "title": "Dry Run",
+          "description": "If true the notification will not send the message"
+        },
+        "timeout": {
+          "type": "integer",
+          "title": "Timeout",
+          "description": "The timeout of the notification"
+        },
+        "retry": {
+          "$ref": "#/$defs/global_Retry",
+          "title": "Retry",
+          "description": "The retry of the notification"
+        },
+        "username": {
+          "type": "string",
+          "title": "Username",
+          "description": "Discord Username for the notification"
+        },
+        "webhook": {
+          "type": "string",
+          "format": "uri",
+          "title": "Webhook URL",
+          "description": "Discord Webhook URL for the notification"
+        },
+        "avatar": {
+          "type": "string",
+          "format": "uri",
+          "title": "Avatar",
+          "description": "Discord Avatar for the notification",
+          "examples": [
+            "https://example.com/avatar.png"
+          ]
+        },
+        "thumbnail": {
+          "type": "string",
+          "format": "uri",
+          "title": "Thumbnail",
+          "description": "Discord Thumbnail for the notification",
+          "examples": [
+            "https://example.com/thumbnail.png"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "webhook"
+      ]
+    },
+    "notify_email_NotifyConfig": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Notification Name",
+          "description": "The name of the notification"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Notification Channels",
+          "description": "The channels of the notification"
+        },
+        "dry": {
+          "type": "boolean",
+          "title": "Dry Run",
+          "description": "If true the notification will not send the message"
+        },
+        "timeout": {
+          "type": "integer",
+          "title": "Timeout",
+          "description": "The timeout of the notification"
+        },
+        "retry": {
+          "$ref": "#/$defs/global_Retry",
+          "title": "Retry",
+          "description": "The retry of the notification"
+        },
+        "server": {
+          "type": "string",
+          "format": "hostname",
+          "title": "SMTP Server",
+          "description": "SMTP server with port",
+          "examples": [
+            "\"smtp.example.com:465\""
+          ]
+        },
+        "username": {
+          "type": "string",
+          "title": "SMTP Username",
+          "description": "SMTP username",
+          "examples": [
+            "\"name@example.com\""
+          ]
+        },
+        "password": {
+          "type": "string",
+          "title": "SMTP Password",
+          "description": "SMTP password",
+          "examples": [
+            "\"password\""
+          ]
+        },
+        "to": {
+          "type": "string",
+          "title": "To",
+          "description": "Email address to send",
+          "examples": [
+            "\"usera@example.com;userb@example.com\""
+          ]
+        },
+        "from": {
+          "type": "string",
+          "title": "From",
+          "description": "Email address from",
+          "examples": [
+            "\"from@example.com\""
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "server",
+        "username",
+        "password",
+        "to"
+      ]
+    },
+    "notify_lark_NotifyConfig": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Notification Name",
+          "description": "The name of the notification"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Notification Channels",
+          "description": "The channels of the notification"
+        },
+        "dry": {
+          "type": "boolean",
+          "title": "Dry Run",
+          "description": "If true the notification will not send the message"
+        },
+        "timeout": {
+          "type": "integer",
+          "title": "Timeout",
+          "description": "The timeout of the notification"
+        },
+        "retry": {
+          "$ref": "#/$defs/global_Retry",
+          "title": "Retry",
+          "description": "The retry of the notification"
+        },
+        "webhook": {
+          "type": "string",
+          "format": "uri",
+          "title": "Webhook URL",
+          "description": "The Lark Robot Webhook URL"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "webhook"
+      ]
+    },
+    "notify_log_NotifyConfig": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Notification Name",
+          "description": "The name of the notification"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Notification Channels",
+          "description": "The channels of the notification"
+        },
+        "dry": {
+          "type": "boolean",
+          "title": "Dry Run",
+          "description": "If true the notification will not send the message"
+        },
+        "timeout": {
+          "type": "integer",
+          "title": "Timeout",
+          "description": "The timeout of the notification"
+        },
+        "retry": {
+          "$ref": "#/$defs/global_Retry",
+          "title": "Retry",
+          "description": "The retry of the notification"
+        },
+        "file": {
+          "type": "string",
+          "title": "Log File",
+          "description": "The log file to write the notification message"
+        },
+        "host": {
+          "type": "string",
+          "title": "Syslog Host",
+          "description": "The log host to write the notification message"
+        },
+        "network": {
+          "type": "string",
+          "enum": [
+            "tcp",
+            "udp"
+          ],
+          "title": "Syslog Network",
+          "description": "The syslog network to write the notification message"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name"
+      ]
+    },
+    "notify_shell_NotifyConfig": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Notification Name",
+          "description": "The name of the notification"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Notification Channels",
+          "description": "The channels of the notification"
+        },
+        "dry": {
+          "type": "boolean",
+          "title": "Dry Run",
+          "description": "If true the notification will not send the message"
+        },
+        "timeout": {
+          "type": "integer",
+          "title": "Timeout",
+          "description": "The timeout of the notification"
+        },
+        "retry": {
+          "$ref": "#/$defs/global_Retry",
+          "title": "Retry",
+          "description": "The retry of the notification"
+        },
+        "cmd": {
+          "type": "string",
+          "title": "Command",
+          "description": "the command to run"
+        },
+        "args": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Arguments",
+          "description": "the arguments for command"
+        },
+        "env": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Environment variables",
+          "description": "the environment variables for command"
+        },
+        "clean_env": {
+          "type": "boolean",
+          "title": "Clean Environment Variables",
+          "description": "set it to true to keep the environment variables of the current process"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "cmd"
+      ]
+    },
+    "notify_slack_NotifyConfig": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Notification Name",
+          "description": "The name of the notification"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Notification Channels",
+          "description": "The channels of the notification"
+        },
+        "dry": {
+          "type": "boolean",
+          "title": "Dry Run",
+          "description": "If true the notification will not send the message"
+        },
+        "timeout": {
+          "type": "integer",
+          "title": "Timeout",
+          "description": "The timeout of the notification"
+        },
+        "retry": {
+          "$ref": "#/$defs/global_Retry",
+          "title": "Retry",
+          "description": "The retry of the notification"
+        },
+        "webhook": {
+          "type": "string",
+          "format": "uri",
+          "title": "Webhook URL",
+          "description": "The Slack webhook URL"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "webhook"
+      ]
+    },
+    "notify_sms_NotifyConfig": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Notification Name",
+          "description": "The name of the notification"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Notification Channels",
+          "description": "The channels of the notification"
+        },
+        "dry": {
+          "type": "boolean",
+          "title": "Dry Run",
+          "description": "If true the notification will not send the message"
+        },
+        "timeout": {
+          "type": "integer",
+          "title": "Timeout",
+          "description": "The timeout of the notification"
+        },
+        "retry": {
+          "$ref": "#/$defs/global_Retry",
+          "title": "Retry",
+          "description": "The retry of the notification"
+        },
+        "provider": {
+          "type": "string",
+          "enum": [
+            "yunpian",
+            "twilio",
+            "nexmo"
+          ],
+          "title": "SMS Provider",
+          "description": "The SMS provider to send the notification message"
+        },
+        "mobile": {
+          "type": "string",
+          "title": "Mobile",
+          "description": "The mobile number to send the notification message",
+          "examples": [
+            "\"123456789,987654321\""
+          ]
+        },
+        "from": {
+          "type": "string",
+          "title": "From",
+          "description": "The sender of the notification message"
+        },
+        "key": {
+          "type": "string",
+          "title": "Key",
+          "description": "The key of the SMS provider"
+        },
+        "secret": {
+          "type": "string",
+          "title": "Secret",
+          "description": "The secret of the SMS provider"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "title": "URL",
+          "description": "The URL of the SMS provider"
+        },
+        "sign": {
+          "type": "string",
+          "title": "Sign",
+          "description": "The sign of the SMS provider"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "provider",
+        "mobile",
+        "key"
+      ]
+    },
+    "notify_teams_NotifyConfig": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Notification Name",
+          "description": "The name of the notification"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Notification Channels",
+          "description": "The channels of the notification"
+        },
+        "dry": {
+          "type": "boolean",
+          "title": "Dry Run",
+          "description": "If true the notification will not send the message"
+        },
+        "timeout": {
+          "type": "integer",
+          "title": "Timeout",
+          "description": "The timeout of the notification"
+        },
+        "retry": {
+          "$ref": "#/$defs/global_Retry",
+          "title": "Retry",
+          "description": "The retry of the notification"
+        },
+        "webhook": {
+          "type": "string",
+          "title": "Webhook URL",
+          "description": "The Microsoft Teams Robot Webhook URL"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "webhook"
+      ]
+    },
+    "notify_telegram_NotifyConfig": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Notification Name",
+          "description": "The name of the notification"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Notification Channels",
+          "description": "The channels of the notification"
+        },
+        "dry": {
+          "type": "boolean",
+          "title": "Dry Run",
+          "description": "If true the notification will not send the message"
+        },
+        "timeout": {
+          "type": "integer",
+          "title": "Timeout",
+          "description": "The timeout of the notification"
+        },
+        "retry": {
+          "$ref": "#/$defs/global_Retry",
+          "title": "Retry",
+          "description": "The retry of the notification"
+        },
+        "token": {
+          "type": "string",
+          "title": "Telegram Bot Token",
+          "description": "Telegram Bot Token"
+        },
+        "chat_id": {
+          "type": "string",
+          "title": "Telegram Chat ID",
+          "description": "Telegram Group ID or Channel ID"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "token",
+        "chat_id"
+      ]
+    },
+    "notify_wecom_NotifyConfig": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Notification Name",
+          "description": "The name of the notification"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Notification Channels",
+          "description": "The channels of the notification"
+        },
+        "dry": {
+          "type": "boolean",
+          "title": "Dry Run",
+          "description": "If true the notification will not send the message"
+        },
+        "timeout": {
+          "type": "integer",
+          "title": "Timeout",
+          "description": "The timeout of the notification"
+        },
+        "retry": {
+          "$ref": "#/$defs/global_Retry",
+          "title": "Retry",
+          "description": "The retry of the notification"
+        },
+        "webhook": {
+          "type": "string",
+          "title": "Webhook URL",
+          "description": "The Webhook URL of Wecom"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "webhook"
+      ]
+    },
+    "probe_client_Client": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Probe Name",
+          "description": "the name of probe must be unique"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Probe Channels",
+          "description": "the channels of probe message need to send to"
+        },
+        "timeout": {
+          "type": "string",
+          "title": "Probe Timeout",
+          "description": "the timeout of probe"
+        },
+        "interval": {
+          "type": "string",
+          "title": "Probe Interval",
+          "description": "the interval of probe"
+        },
+        "host": {
+          "type": "string",
+          "format": "hostname",
+          "title": "Host",
+          "description": "The host of the client",
+          "examples": [
+            "10.1.1.1:9000"
+          ]
+        },
+        "driver": {
+          "type": "string",
+          "enum": [
+            "mysql",
+            "redis",
+            "memcache",
+            "kafka",
+            "mongo",
+            "postgres",
+            "zookeeper"
+          ],
+          "title": "Driver",
+          "description": "The driver of the client",
+          "examples": [
+            "mysql"
+          ]
+        },
+        "username": {
+          "type": "string",
+          "title": "Username",
+          "description": "The username of the client",
+          "examples": [
+            "root"
+          ]
+        },
+        "password": {
+          "type": "string",
+          "title": "Password",
+          "description": "The password of the client",
+          "examples": [
+            "123456"
+          ]
+        },
+        "data": {
+          "patternProperties": {
+            ".*": {
+              "type": "string"
+            }
+          },
+          "type": "object",
+          "title": "Data",
+          "description": "The data of the client"
+        },
+        "ca": {
+          "type": "string",
+          "title": "CA File",
+          "description": "the CA file path"
+        },
+        "cert": {
+          "type": "string",
+          "title": "Cert File",
+          "description": "the Cert file path"
+        },
+        "key": {
+          "type": "string",
+          "title": "Key File",
+          "description": "the Key file path"
+        },
+        "insecure": {
+          "type": "boolean",
+          "title": "Insecure",
+          "description": "whether to skip the TLS verification"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "host",
+        "driver"
+      ]
+    },
+    "probe_host_Host": {
+      "properties": {
+        "bastion": {
+          "$ref": "#/$defs/BastionMapType",
+          "title": "Bastion Servers",
+          "description": "the bastion server for ssh login"
+        },
+        "servers": {
+          "items": {
+            "$ref": "#/$defs/probe_host_Server"
+          },
+          "type": "array",
+          "title": "Host Servers",
+          "description": "the host servers to be monitored"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "servers"
+      ]
+    },
+    "probe_host_Server": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Probe Name",
+          "description": "the name of probe must be unique"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Probe Channels",
+          "description": "the channels of probe message need to send to"
+        },
+        "timeout": {
+          "type": "string",
+          "title": "Probe Timeout",
+          "description": "the timeout of probe"
+        },
+        "interval": {
+          "type": "string",
+          "title": "Probe Interval",
+          "description": "the interval of probe"
+        },
+        "key": {
+          "type": "string",
+          "title": "Private Key",
+          "description": "the private key file path for ssh login"
+        },
+        "passphrase": {
+          "type": "string",
+          "title": "Passphrase",
+          "description": "the passphrase for ssh private key"
+        },
+        "host": {
+          "type": "string",
+          "format": "hostname",
+          "title": "Host",
+          "description": "the host for ssh probe"
+        },
+        "username": {
+          "type": "string",
+          "title": "User",
+          "description": "the username for ssh probe"
+        },
+        "password": {
+          "type": "string",
+          "title": "Password",
+          "description": "the password for ssh probe"
+        },
+        "cmd": {
+          "type": "string",
+          "title": "Shell Command",
+          "description": "command to run"
+        },
+        "args": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Shell Command Arguments",
+          "description": "arguments for the command"
+        },
+        "env": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Environment Variables",
+          "description": "environment variables for the command"
+        },
+        "contain": {
+          "type": "string",
+          "title": "Contain Text",
+          "description": "the string must be contained"
+        },
+        "not_contain": {
+          "type": "string",
+          "title": "Not Contain Text",
+          "description": "the string must not be contained"
+        },
+        "regex": {
+          "type": "boolean",
+          "title": "regex",
+          "description": "use regular expression to check the contain or not contain"
+        },
+        "bastion": {
+          "type": "string",
+          "title": "Bastion Server",
+          "description": "the bastion host id"
+        },
+        "threshold": {
+          "$ref": "#/$defs/probe_host_Threshold",
+          "title": "Threshold",
+          "description": "the threshold of the probe for cpu/memory/disk"
+        },
+        "disks": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Disks",
+          "description": "the disks to be monitored"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "host"
+      ]
+    },
+    "probe_host_Threshold": {
+      "properties": {
+        "cpu": {
+          "type": "number",
+          "title": "CPU threshold",
+          "description": "CPU threshold (default: 0.8)"
+        },
+        "mem": {
+          "type": "number",
+          "title": "Memory threshold",
+          "description": "Memory threshold (default: 0.8)"
+        },
+        "disk": {
+          "type": "number",
+          "title": "Disk threshold",
+          "description": "Disk threshold (default: 0.95)"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "probe_http_HTTP": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Probe Name",
+          "description": "the name of probe must be unique"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Probe Channels",
+          "description": "the channels of probe message need to send to"
+        },
+        "timeout": {
+          "type": "string",
+          "title": "Probe Timeout",
+          "description": "the timeout of probe"
+        },
+        "interval": {
+          "type": "string",
+          "title": "Probe Interval",
+          "description": "the interval of probe"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "title": "HTTP URL",
+          "description": "HTTP URL to probe"
+        },
+        "proxy": {
+          "type": "string",
+          "title": "Proxy Server",
+          "description": "proxy to use for HTTP requests"
+        },
+        "content_encoding": {
+          "type": "string",
+          "title": "Content Encoding",
+          "description": "content encoding to use for HTTP requests"
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "GET",
+            "POST",
+            "DELETE",
+            "PUT",
+            "HEAD",
+            "OPTIONS",
+            "PATCH",
+            "TRACE",
+            "CONNECT"
+          ],
+          "title": "HTTP Method",
+          "description": "HTTP method to use for HTTP requests"
+        },
+        "headers": {
+          "patternProperties": {
+            ".*": {
+              "type": "string"
+            }
+          },
+          "type": "object",
+          "title": "HTTP Headers",
+          "description": "HTTP headers to use for HTTP requests"
+        },
+        "body": {
+          "type": "string",
+          "title": "HTTP Body",
+          "description": "HTTP body to use for HTTP requests"
+        },
+        "contain": {
+          "type": "string",
+          "title": "Contain Text",
+          "description": "the string must be contained"
+        },
+        "not_contain": {
+          "type": "string",
+          "title": "Not Contain Text",
+          "description": "the string must not be contained"
+        },
+        "regex": {
+          "type": "boolean",
+          "title": "regex",
+          "description": "use regular expression to check the contain or not contain"
+        },
+        "eval": {
+          "$ref": "#/$defs/eval_Evaluator",
+          "title": "HTTP Evaluator",
+          "description": "HTTP evaluator to use for HTTP requests"
+        },
+        "username": {
+          "type": "string",
+          "title": "HTTP Basic Auth Username",
+          "description": "HTTP Basic Auth Username"
+        },
+        "password": {
+          "type": "string",
+          "title": "HTTP Basic Auth Password",
+          "description": "HTTP Basic Auth Password"
+        },
+        "success_code": {
+          "items": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "type": "array",
+          "title": "HTTP Success Code Range",
+          "description": "Preferred HTTP response code ranges.  If not set the default is [0, 499]."
+        },
+        "ca": {
+          "type": "string",
+          "title": "CA File",
+          "description": "the CA file path"
+        },
+        "cert": {
+          "type": "string",
+          "title": "Cert File",
+          "description": "the Cert file path"
+        },
+        "key": {
+          "type": "string",
+          "title": "Key File",
+          "description": "the Key file path"
+        },
+        "insecure": {
+          "type": "boolean",
+          "title": "Insecure",
+          "description": "whether to skip the TLS verification"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "url"
+      ]
+    },
+    "probe_shell_Shell": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Probe Name",
+          "description": "the name of probe must be unique"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Probe Channels",
+          "description": "the channels of probe message need to send to"
+        },
+        "timeout": {
+          "type": "string",
+          "title": "Probe Timeout",
+          "description": "the timeout of probe"
+        },
+        "interval": {
+          "type": "string",
+          "title": "Probe Interval",
+          "description": "the interval of probe"
+        },
+        "cmd": {
+          "type": "string",
+          "title": "Command Line",
+          "description": "Command Line"
+        },
+        "args": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Command Line Arguments",
+          "description": "Command Line Arguments"
+        },
+        "env": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Environment Variables",
+          "description": "Environment Variables"
+        },
+        "clean_env": {
+          "type": "boolean",
+          "title": "Clean Environment",
+          "description": "set it to true to keep the environment variables of the current process"
+        },
+        "contain": {
+          "type": "string",
+          "title": "Contain Text",
+          "description": "the string must be contained"
+        },
+        "not_contain": {
+          "type": "string",
+          "title": "Not Contain Text",
+          "description": "the string must not be contained"
+        },
+        "regex": {
+          "type": "boolean",
+          "title": "regex",
+          "description": "use regular expression to check the contain or not contain"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "cmd"
+      ]
+    },
+    "probe_ssh_Endpoint": {
+      "properties": {
+        "key": {
+          "type": "string",
+          "title": "Private Key",
+          "description": "the private key file path for ssh login"
+        },
+        "passphrase": {
+          "type": "string",
+          "title": "Passphrase",
+          "description": "the passphrase for ssh private key"
+        },
+        "host": {
+          "type": "string",
+          "format": "hostname",
+          "title": "Host",
+          "description": "the host for ssh probe"
+        },
+        "username": {
+          "type": "string",
+          "title": "User",
+          "description": "the username for ssh probe"
+        },
+        "password": {
+          "type": "string",
+          "title": "Password",
+          "description": "the password for ssh probe"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "host"
+      ]
+    },
+    "probe_ssh_SSH": {
+      "properties": {
+        "bastion": {
+          "$ref": "#/$defs/BastionMapType",
+          "title": "Bastion Servers",
+          "description": "the bastion hosts configuration"
+        },
+        "servers": {
+          "items": {
+            "$ref": "#/$defs/probe_ssh_Server"
+          },
+          "type": "array",
+          "title": "SSH Servers",
+          "description": "SSH servers to probe"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "servers"
+      ]
+    },
+    "probe_ssh_Server": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Probe Name",
+          "description": "the name of probe must be unique"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Probe Channels",
+          "description": "the channels of probe message need to send to"
+        },
+        "timeout": {
+          "type": "string",
+          "title": "Probe Timeout",
+          "description": "the timeout of probe"
+        },
+        "interval": {
+          "type": "string",
+          "title": "Probe Interval",
+          "description": "the interval of probe"
+        },
+        "key": {
+          "type": "string",
+          "title": "Private Key",
+          "description": "the private key file path for ssh login"
+        },
+        "passphrase": {
+          "type": "string",
+          "title": "Passphrase",
+          "description": "the passphrase for ssh private key"
+        },
+        "host": {
+          "type": "string",
+          "format": "hostname",
+          "title": "Host",
+          "description": "the host for ssh probe"
+        },
+        "username": {
+          "type": "string",
+          "title": "User",
+          "description": "the username for ssh probe"
+        },
+        "password": {
+          "type": "string",
+          "title": "Password",
+          "description": "the password for ssh probe"
+        },
+        "cmd": {
+          "type": "string",
+          "title": "Shell Command",
+          "description": "command to run"
+        },
+        "args": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Shell Command Arguments",
+          "description": "arguments for the command"
+        },
+        "env": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Environment Variables",
+          "description": "environment variables for the command"
+        },
+        "contain": {
+          "type": "string",
+          "title": "Contain Text",
+          "description": "the string must be contained"
+        },
+        "not_contain": {
+          "type": "string",
+          "title": "Not Contain Text",
+          "description": "the string must not be contained"
+        },
+        "regex": {
+          "type": "boolean",
+          "title": "regex",
+          "description": "use regular expression to check the contain or not contain"
+        },
+        "bastion": {
+          "type": "string",
+          "title": "Bastion Server",
+          "description": "the bastion host id"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "host"
+      ]
+    },
+    "probe_tcp_TCP": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Probe Name",
+          "description": "the name of probe must be unique"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Probe Channels",
+          "description": "the channels of probe message need to send to"
+        },
+        "timeout": {
+          "type": "string",
+          "title": "Probe Timeout",
+          "description": "the timeout of probe"
+        },
+        "interval": {
+          "type": "string",
+          "title": "Probe Interval",
+          "description": "the interval of probe"
+        },
+        "host": {
+          "type": "string",
+          "format": "hostname",
+          "title": "Host",
+          "description": "The host to probe"
+        },
+        "proxy": {
+          "type": "string",
+          "format": "hostname",
+          "title": "Proxy",
+          "description": "The proxy to use"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "host"
+      ]
+    },
+    "probe_tls_TLS": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Probe Name",
+          "description": "the name of probe must be unique"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Probe Channels",
+          "description": "the channels of probe message need to send to"
+        },
+        "timeout": {
+          "type": "string",
+          "title": "Probe Timeout",
+          "description": "the timeout of probe"
+        },
+        "interval": {
+          "type": "string",
+          "title": "Probe Interval",
+          "description": "the interval of probe"
+        },
+        "host": {
+          "type": "string",
+          "format": "hostname",
+          "title": "Host",
+          "description": "The host to probe"
+        },
+        "proxy": {
+          "type": "string",
+          "format": "hostname",
+          "title": "Proxy",
+          "description": "The proxy to use for the TLS connection"
+        },
+        "insecure_skip_verify": {
+          "type": "boolean",
+          "title": "Insecure Skip Verify",
+          "description": "Whether to skip verifying the certificate chain and host name"
+        },
+        "root_ca_pem_path": {
+          "type": "string",
+          "title": "Root CA PEM Path",
+          "description": "The path to the root CA PEM file"
+        },
+        "root_ca_pem": {
+          "type": "string",
+          "title": "Root CA PEM",
+          "description": "The root CA PEM"
+        },
+        "expire_skip_verify": {
+          "type": "boolean",
+          "title": "Expire Skip Verify",
+          "description": "Whether to skip verifying the certificate expire time"
+        },
+        "alert_expire_before": {
+          "type": "integer",
+          "title": "Alert Expire Before",
+          "description": "The alert expire before time"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "host"
+      ]
+    }
+  }
+}

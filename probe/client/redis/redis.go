@@ -34,8 +34,8 @@ const Kind string = "Redis"
 // Redis is the Redis client
 type Redis struct {
 	conf.Options `yaml:",inline"`
-	tls          *tls.Config     `yaml:"-"`
-	Context      context.Context `yaml:"-"`
+	tls          *tls.Config     `yaml:"-" json:"-"`
+	Context      context.Context `yaml:"-" json:"-"`
 }
 
 // New create a Redis client

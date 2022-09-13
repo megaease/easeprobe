@@ -39,7 +39,7 @@ type Client struct {
 	//Embed structure
 	conf.Options `yaml:",inline"`
 
-	client conf.Driver `yaml:"-"`
+	client conf.Driver `yaml:"-" json:"-"`
 }
 
 // Config Client Config Object

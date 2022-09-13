@@ -28,17 +28,17 @@ import (
 
 // Credentials is AWS access id and access token
 type Credentials struct {
-	ID     string `yaml:"id"`
-	Secret string `yaml:"key"`
+	ID     string `yaml:"id" json:"id" jsonschema:"required,title=AWS Access Key ID,description=AWS Access Key ID"`
+	Secret string `yaml:"key" json:"key" jsonschema:"required,title=AWS Access Key Secret,description=AWS Access Key Secret"`
 }
 
 // Options is AWS Configuration
 type Options struct {
 	base.DefaultNotify `yaml:",inline"`
-	Region             string      `yaml:"region"`
-	Endpoint           string      `yaml:"endpoint"`
-	Credentials        Credentials `yaml:"credential"`
-	Profile            string      `yaml:"profile"`
+	Region             string      `yaml:"region" json:"region" jsonschema:"required,title=AWS Region ID,description=AWS Region ID,example=\"us-west-2\""`
+	Endpoint           string      `yaml:"endpoint" json:"endpoint" jsonschema:"required,title=AWS Endpoint,description=AWS Endpoint,example=\"https://sns.us-west-2.amazonaws.com\""`
+	Credentials        Credentials `yaml:"credential" json:"credential" jsonschema:"required,title=AWS Credential,description=AWS Credential"`
+	Profile            string      `yaml:"profile,omitempty" json:"profile,omitempty" jsonschema:"title=AWS Profile,description=AWS Profile"`
 
 	session *session.Session `yaml:"-"`
 }

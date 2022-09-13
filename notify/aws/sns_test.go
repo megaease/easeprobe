@@ -33,7 +33,7 @@ import (
 )
 
 func TestSNSConfig(t *testing.T) {
-	conf := &SNSNotifyConfig{}
+	conf := &NotifyConfig{}
 	err := conf.Config(global.NotifySettings{})
 	assert.NoError(t, err)
 	assert.Equal(t, "aws-sns", conf.Kind())

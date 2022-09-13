@@ -28,10 +28,10 @@ import (
 
 // Variable is the variable type
 type Variable struct {
-	Name  string  `yaml:"name"`
-	Type  VarType `yaml:"type"`
-	Query string  `yaml:"query"`
-	Value interface{}
+	Name  string      `yaml:"name" json:"name" jsonschema:"required,title=Variable Name,description=Variable Name"`
+	Type  VarType     `yaml:"type" json:"type" jsonschema:"required,type=string,enum=int,enum=string,enum=bool,enum=float,enum=bool,enum=time,enum=duration,title=Variable Type,description=Variable Type"`
+	Query string      `yaml:"query" json:"query" jsonschema:"required,title=Query,description=XPath/Regex Expression to extract the value"`
+	Value interface{} `yaml:"-" json:"-"`
 }
 
 // NewVariable is the function to create a variable
@@ -46,12 +46,12 @@ func NewVariable(name string, t VarType, query string) *Variable {
 
 // Evaluator is the structure of evaluator
 type Evaluator struct {
-	Variables  []Variable                              `yaml:"variables"`
-	DocType    DocType                                 `yaml:"doc"`
-	Expression string                                  `yaml:"expression"`
-	Document   string                                  `yaml:"-"`
-	Extractor  Extractor                               `yaml:"-"`
-	EvalFuncs  map[string]govaluate.ExpressionFunction `yaml:"-"`
+	Variables  []Variable                              `yaml:"variables,omitempty" json:"variables,omitempty" jsonschema:"title=Variables Definition,description=define the variables used in the expression"`
+	DocType    DocType                                 `yaml:"doc" json:"doc" jsonschema:"required,type=string,enum=html,enum=xml,enum=json,enum=text,title=Document Type,description=Document Type"`
+	Expression string                                  `yaml:"expression" json:"expression" jsonschema:"required,title=Expression,description=Expression need to be evaluated"`
+	Document   string                                  `yaml:"-" json:"-"`
+	Extractor  Extractor                               `yaml:"-" json:"-"`
+	EvalFuncs  map[string]govaluate.ExpressionFunction `yaml:"-" json:"-"`
 }
 
 // NewEvaluator is the function to create a evaluator

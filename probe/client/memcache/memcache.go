@@ -34,7 +34,7 @@ const Kind string = "Memcache"
 // Memcache is the Memcache client
 type Memcache struct {
 	conf.Options `yaml:",inline"`
-	Context      context.Context `yaml:"-"`
+	Context      context.Context `yaml:"-" json:"-"`
 }
 
 // New create a Memcache client

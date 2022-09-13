@@ -30,8 +30,8 @@ import (
 // TCP implements a config for TCP
 type TCP struct {
 	base.DefaultProbe `yaml:",inline"`
-	Host              string `yaml:"host"`
-	Proxy             string `yaml:"proxy"`
+	Host              string `yaml:"host" json:"host" jsonschema:"required,format=hostname,title=Host,description=The host to probe"`
+	Proxy             string `yaml:"proxy" json:"proxy,omitempty" jsonschema:"format=hostname,title=Proxy,description=The proxy to use"`
 }
 
 // Config HTTP Config Object

@@ -38,7 +38,7 @@ const Kind string = "PostgreSQL"
 // PostgreSQL is the PostgreSQL client
 type PostgreSQL struct {
 	conf.Options  `yaml:",inline"`
-	ClientOptions []pgdriver.Option `yaml:"-"`
+	ClientOptions []pgdriver.Option `yaml:"-" json:"-"`
 }
 
 // revive:enable

@@ -39,8 +39,8 @@ import (
 // NotifyConfig is the dingtalk notification configuration
 type NotifyConfig struct {
 	base.DefaultNotify `yaml:",inline"`
-	WebhookURL         string `yaml:"webhook"`
-	SignSecret         string `yaml:"secret"`
+	WebhookURL         string `yaml:"webhook" json:"webhook" jsonschema:"required,format=uri,title=Webhook URL,description=The Dingtalk Robot Webhook URL"`
+	SignSecret         string `yaml:"secret,omitempty" json:"secret,omitempty" jsonschema:"format=string,title=Secret,description=The Dingtalk Robot Secret"`
 }
 
 // Config configures the dingtalk notification

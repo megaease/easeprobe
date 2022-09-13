@@ -36,8 +36,8 @@ const Kind string = "ZooKeeper"
 // Zookeeper is the Zookeeper client
 type Zookeeper struct {
 	conf.Options `yaml:",inline"`
-	tls          *tls.Config     `yaml:"-"`
-	Context      context.Context `yaml:"conn_str"`
+	tls          *tls.Config     `yaml:"-" json:"-"`
+	Context      context.Context `yaml:"conn_str,omitempty" json:"conn_str,omitempty"`
 }
 
 // New create a Zookeeper client

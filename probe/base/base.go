@@ -44,15 +44,15 @@ type ProbeFuncType func() (bool, string)
 
 // DefaultProbe is the default options for all probe
 type DefaultProbe struct {
-	ProbeKind         string        `yaml:"-"`
-	ProbeTag          string        `yaml:"-"`
-	ProbeName         string        `yaml:"name"`
-	ProbeChannels     []string      `yaml:"channels"`
-	ProbeTimeout      time.Duration `yaml:"timeout,omitempty"`
-	ProbeTimeInterval time.Duration `yaml:"interval,omitempty"`
-	ProbeFunc         ProbeFuncType `yaml:"-"`
-	ProbeResult       *probe.Result `yaml:"-"`
-	metrics           *metrics      `yaml:"-"`
+	ProbeKind         string        `yaml:"-" json:"-"`
+	ProbeTag          string        `yaml:"-" json:"-"`
+	ProbeName         string        `yaml:"name" json:"name" jsonschema:"required,title=Probe Name,description=the name of probe must be unique"`
+	ProbeChannels     []string      `yaml:"channels" json:"channels,omitempty" jsonschema:"title=Probe Channels,description=the channels of probe message need to send to"`
+	ProbeTimeout      time.Duration `yaml:"timeout,omitempty" json:"timeout,omitempty" jsonschema:"type=string,format=duration,title=Probe Timeout,description=the timeout of probe"`
+	ProbeTimeInterval time.Duration `yaml:"interval,omitempty" json:"interval,omitempty" jsonschema:"type=string,format=duration,title=Probe Interval,description=the interval of probe"`
+	ProbeFunc         ProbeFuncType `yaml:"-" json:"-"`
+	ProbeResult       *probe.Result `yaml:"-" json:"-"`
+	metrics           *metrics      `yaml:"-" json:"-"`
 }
 
 // Kind return the probe kind

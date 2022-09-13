@@ -131,6 +131,8 @@ settings:
     interval: 1m # probe every minute for all probes
 ```
 
+You can check the [EaseProbe JSON Schema](./docs/Manual.md#81-easeprobe-json-schema) section to use a JSON Scheme file to make your life easier when you edit the configuration file.
+
 ## 2.3 Run
 
 You can run the following command to start EaseProbe once built

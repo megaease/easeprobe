@@ -29,14 +29,14 @@ import (
 
 // DefaultNotify is the base struct of the Notify
 type DefaultNotify struct {
-	NotifyKind     string                     `yaml:"-"`
-	NotifyFormat   report.Format              `yaml:"-"`
-	NotifySendFunc func(string, string) error `yaml:"-"`
-	NotifyName     string                     `yaml:"name"`
-	NotifyChannels []string                   `yaml:"channels"`
-	Dry            bool                       `yaml:"dry"`
-	Timeout        time.Duration              `yaml:"timeout"`
-	Retry          global.Retry               `yaml:"retry"`
+	NotifyKind     string                     `yaml:"-" json:"-"`
+	NotifyFormat   report.Format              `yaml:"-" json:"-"`
+	NotifySendFunc func(string, string) error `yaml:"-" json:"-"`
+	NotifyName     string                     `yaml:"name" json:"name" jsonschema:"required,title=Notification Name,description=The name of the notification"`
+	NotifyChannels []string                   `yaml:"channels,omitempty" json:"channels,omitempty" jsonschema:"title=Notification Channels,description=The channels of the notification"`
+	Dry            bool                       `yaml:"dry,omitempty" json:"dry,omitempty" jsonschema:"title=Dry Run,description=If true the notification will not send the message"`
+	Timeout        time.Duration              `yaml:"timeout,omitempty" json:"timeout,omitempty" jsonschema:"format=duration,title=Timeout,description=The timeout of the notification"`
+	Retry          global.Retry               `yaml:"retry,omitempty" json:"retry,omitempty" jsonschema:"title=Retry,description=The retry of the notification"`
 }
 
 // Kind returns the kind of the notification

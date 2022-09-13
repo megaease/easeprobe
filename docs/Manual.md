@@ -46,6 +46,8 @@ EaseProbe is a simple, standalone, and lightweight tool that can do health/statu
   - [7.7 Native Client Probe Configuration](#77-native-client-probe-configuration)
   - [7.8 Notification Configuration](#78-notification-configuration)
   - [7.9 Global Setting Configuration](#79-global-setting-configuration)
+- [8. Tools](#8-tools)
+  - [8.1 EaseProbe JSON Schema](#81-easeprobe-json-schema)
 
 
 
@@ -1329,4 +1331,27 @@ settings:
   # check the following link to see the time zone list
   # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
   timezone: "America/New_York" #  default: UTC
+```
+# 8. Tools
+
+## 8.1 EaseProbe JSON Schema
+
+We have a JSON schema that can be used to validate your EaseProbe configuration. The schema can be found at [resources/schema.json](https://raw.githubusercontent.com/megaease/easeprobe/main/resources/schema.json).
+
+The schema file can be generated at any time by running the following command:
+
+```bash
+$ easeprobe -j > schema.json
+```
+
+In order to use the schema with VSCode for validating your configuration, you need to install the [YAML extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) and add the following configuration to your `settings.json` file:
+
+```json
+{
+  "yaml.schemas": {
+    "https://raw.githubusercontent.com/megaease/easeprobe/main/resources/schema.json": [
+      "/path/to/config.yaml"
+    ]
+  }
+}
 ```

@@ -34,7 +34,7 @@ import (
 // NotifyConfig is the slack notification configuration
 type NotifyConfig struct {
 	base.DefaultNotify `yaml:",inline"`
-	WebhookURL         string `yaml:"webhook"`
+	WebhookURL         string `yaml:"webhook"  json:"webhook" jsonschema:"required,format=uri,title=Webhook URL,description=The Lark Robot Webhook URL"`
 }
 
 // Config configures the slack notification
