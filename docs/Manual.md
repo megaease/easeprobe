@@ -1338,7 +1338,7 @@ settings:
 
 We have a JSON schema that can be used to validate your EaseProbe configuration. The schema can be found at [resources/schema.json](https://raw.githubusercontent.com/megaease/easeprobe/main/resources/schema.json).
 
-The schema file can be generated at any time running the following command:
+The schema file can be generated at any time by running the following command:
 
 ```bash
 $ easeprobe -j > schema.json
