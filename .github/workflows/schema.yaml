@@ -1,0 +1,41 @@
+name: JSON Schema
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**/*.go"
+      - ".github/workflows/schema.yaml"
+
+env:
+  GO_VERSION: 1.18
+
+jobs:
+    schema:
+      name: JSON Schema
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout Source Code
+          uses: actions/checkout@v3
+          with:
+            token: ${{ secrets.MEGAEASE_BOT }}
+
+        - name: Setup Go Environment
+          uses: actions/setup-go@v3
+          with:
+            go-version: ${{ env.GO_VERSION }}
+
+        - name: Build EaseProbe
+          run: make
+
+        - name: Generate JSON Schema
+          run: ./build/bin/easeprobe -j > resources/schema.json
+
+        - name: Commit JSON Schema
+          uses: EndBug/add-and-commit@v7
+          with:
+            message: "Update JSON Schema"
+            add: "resources/schema.json"
+            author_name: "GitHub Actions"
+            author_email: "actions@github.com"

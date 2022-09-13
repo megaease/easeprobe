@@ -2,3 +2,4 @@
 .vscode/
 build/*
 *.yaml
+!.github/workflows/*.yaml
