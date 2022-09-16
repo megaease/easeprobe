@@ -75,10 +75,18 @@ func main() {
 	////////////////////////////////////////////////////////////////////////////
 
 	dryNotify := flag.Bool("d", os.Getenv("PROBE_DRY") == "true", "dry notification mode")
-	yamlFile := flag.String("f", getEnvOrDefault("PROBE_CONFIG", "config.yaml"), "configuration file")
+
+	var yamlFiles conf.FFlags
+	flag.Var(&yamlFiles, "f", "configuration file")
+
 	jsonSchema := flag.Bool("j", false, "show JSON schema")
 	version := flag.Bool("v", false, "prints version")
 	flag.Parse()
+
+	defaultYaml := getEnvOrDefault("PROBE_CONFIG", "config.yaml")
+	if len(yamlFiles) == 0 {
+		yamlFiles = append(yamlFiles, defaultYaml)
+	}
 
 	if *version {
 		showVersion()
@@ -94,7 +102,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	c, err := conf.New(yamlFile)
+	c, err := conf.New(yamlFiles)
 	if err != nil {
 		log.Errorln("Fatal: Cannot read the YAML configuration file!")
 		os.Exit(-1)

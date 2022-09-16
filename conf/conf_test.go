@@ -674,6 +674,32 @@ func TestConfig(t *testing.T) {
 	monkey.UnpatchAll()
 }
 
+func TestConfigS(t *testing.T) {
+	myConf1 := confYAML
+	file1 := "./config_1.yaml"
+	err1 := writeConfig(file1, myConf1)
+	assert.Nil(t, err1)
+
+	myConf2 := confYAML
+	file2 := "./config_2.yaml"
+	err2 := writeConfig(file2, myConf2)
+	assert.Nil(t, err2)
+
+	ff := []string{file1, file2}
+	f := FFlags{}
+	f = ff
+
+	conf, err := New(f)
+
+	assert.Nil(t, err)
+	assert.Equal(t, 8, len(conf.HTTP))
+
+	os.RemoveAll(file1)
+	os.RemoveAll(file2)
+	os.RemoveAll("data")
+
+}
+
 func TestInitData(t *testing.T) {
 	c := Conf{}
 

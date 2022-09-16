@@ -594,6 +594,15 @@ easeprobe -f path/to/config.yaml
 easeprobe -f https://example.com/config
 ```
 
+You can use multi `-f` parameters at the same time. 
+The all YAML files provide `HTTP` `TCP` `Shell` `Client` `TLS` configuration. 
+The first YAML file provides other configuration.
+
+```shell
+easeprobe -f path/to/config.yaml -f https://example.com/config
+```
+
+
 The following environment variables can be used to fine-tune the request to the configuration file
 
 * `HTTP_AUTHORIZATION`

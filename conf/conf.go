@@ -20,6 +20,7 @@ package conf
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	httpClient "net/http"
 	netUrl "net/url"
@@ -232,7 +233,7 @@ func getYamlFile(path string) ([]byte, error) {
 }
 
 // New read the configuration from yaml
-func New(conf *string) (*Conf, error) {
+func NewSingle(conf *string) (*Conf, error) {
 	c := Conf{
 		HTTP:   []http.HTTP{},
 		TCP:    []tcp.TCP{},
@@ -320,6 +321,60 @@ func New(conf *string) (*Conf, error) {
 	}
 
 	return &c, err
+}
+
+type FFlags []string
+
+// Value ...
+func (i *FFlags) String() string {
+	return fmt.Sprint(*i)
+}
+
+// Set 方法是flag.Value接口, 设置flag Value的方法.
+// 通过多个flag指定的值， 所以我们追加到最终的数组上.
+func (i *FFlags) Set(value string) error {
+	*i = append(*i, value)
+	return nil
+}
+
+func New(param interface{}) (*Conf, error) {
+
+	switch param.(type) {
+	case *string:
+		p, ok := param.(*string)
+		if ok == false {
+			return nil, nil
+		}
+		return NewSingle(p)
+	}
+
+	var ps []string
+	ps = param.(FFlags)
+
+	if len(ps) == 1 {
+		return NewSingle(&ps[0])
+	}
+
+	c, err := NewSingle(&ps[0])
+	if err != nil {
+		return nil, err
+	}
+
+	for i := 1; i < len(ps); i++ {
+		cTemp, errTemp := NewSingle(&ps[i])
+		if errTemp != nil {
+			return c, err
+		}
+		// merge c and cTemp
+		c.HTTP = append(c.HTTP, cTemp.HTTP...)
+		c.TCP = append(c.TCP, cTemp.TCP...)
+		c.Shell = append(c.Shell, cTemp.Shell...)
+		c.Client = append(c.Client, cTemp.Client...)
+		c.TLS = append(c.TLS, cTemp.TLS...)
+	}
+
+	return c, err
+
 }
 
 // InitAllLogs initialize all logs
