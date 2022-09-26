@@ -320,6 +320,9 @@ http: # http probes
 #         - "/path/to/script.sh"
 #       env: # set the env to the notification command
 #         - "EASEPROBE=1"
+#   ringcentral:
+#     - name: "RingCentral alert service"
+#       webhook: "https://hooks.ringcentral.com/webhook/v2/.........."
 notify:
   log:
     - name: log file # local log file
