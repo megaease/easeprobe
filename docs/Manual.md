@@ -22,6 +22,7 @@ EaseProbe is a simple, standalone, and lightweight tool that can do health/statu
   - [2.10 SMS](#210-sms)
   - [2.11 Log](#211-log)
   - [2.12 Shell](#212-shell)
+  - [2.13 RingCentral](#213-ringcentral)
 - [3. Report](#3-report)
   - [3.1 SLA Report Notification](#31-sla-report-notification)
   - [3.2 SLA Live Report](#32-sla-live-report)
@@ -375,6 +376,21 @@ notify:
         - "EASEPROBE=1"
 ```
 
+## 2.13 RingCentral
+This notification method utilizes the RingCentral webhooks to deliver status updates as messages.
+
+The plugin supports the following parameters:
+ - `name`: A unique name for this notification endpoint
+ - `webhook`: The URL for the webhook
+
+Example:
+```YAML
+# Notification Configuration
+notify:
+  ringcentral:
+    - name: "MegaEase#Alert"
+      webhook: "https://hooks.ringcentral.com/webhook/v2/.........."
+```
 
 # 3. Report
 

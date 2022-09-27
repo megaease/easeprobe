@@ -503,6 +503,14 @@
           "type": "array",
           "title": "Shell Notification",
           "description": "Shell Notification Configuration"
+        },
+        "ringcentral": {
+          "items": {
+            "$ref": "#/$defs/notify_ringcentral_NotifyConfig"
+          },
+          "type": "array",
+          "title": "RingCentral Notification",
+          "description": "RingCentral Notification Configuration"
         }
       },
       "additionalProperties": false,
@@ -908,6 +916,50 @@
       "type": "object",
       "required": [
         "name"
+      ]
+    },
+    "notify_ringcentral_NotifyConfig": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Notification Name",
+          "description": "The name of the notification"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Notification Channels",
+          "description": "The channels of the notification"
+        },
+        "dry": {
+          "type": "boolean",
+          "title": "Dry Run",
+          "description": "If true the notification will not send the message"
+        },
+        "timeout": {
+          "type": "integer",
+          "title": "Timeout",
+          "description": "The timeout of the notification"
+        },
+        "retry": {
+          "$ref": "#/$defs/global_Retry",
+          "title": "Retry",
+          "description": "The retry of the notification"
+        },
+        "webhook": {
+          "type": "string",
+          "format": "uri",
+          "title": "Webhook URL",
+          "description": "The RingCentral webhook URL"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "webhook"
       ]
     },
     "notify_shell_NotifyConfig": {
