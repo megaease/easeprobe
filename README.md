@@ -70,6 +70,7 @@ EaseProbe supports notification delivery to the following:
   - [YunPain](https://www.yunpian.com/doc/en/domestic/list.html)
 - **Log**. Write the notification into a log file or syslog.
 - **Shell**. Run a shell command to deliver the notification (see [example](resources/scripts/notify/notify.sh))
+- **RingCentral**. Using RingCentral Webhook for notification delivery
 
 > **Note**:
 >
