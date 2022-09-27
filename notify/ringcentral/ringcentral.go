@@ -32,6 +32,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// NotifyConfig is the ringcentral notification configuration
 type NotifyConfig struct {
 	base.DefaultNotify `yaml:",inline"`
 	WebhookURL         string `yaml:"webhook" json:"webhook" jsonschema:"required,format=uri,title=Webhook URL,description=The RingCentral webhook URL"`
@@ -47,6 +48,7 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 	return nil
 }
 
+// SendRingCentral will compose a message with title and msg, then post it to the 'Incoming Webhook' URL configured in RingCentral App.
 func (c *NotifyConfig) SendRingCentral(title, msg string) error {
 	msgContent := fmt.Sprintf(`
 	{
