@@ -221,7 +221,10 @@ func getYamlFileFromFile(path string) ([]byte, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return nil, err
 	}
-	return ioutil.ReadFile(path)
+	if strings.HasSuffix(path, ".yaml") {
+		return ioutil.ReadFile(path)
+	}
+	return mergeYamlFiles(path)
 }
 
 func getYamlFile(path string) ([]byte, error) {
