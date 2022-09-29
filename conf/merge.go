@@ -39,12 +39,14 @@ type (
 // priority over earlier ones.
 //
 // Maps are deep-merged. For example,
-//   {"one": 1, "two": 2} + {"one": 42, "three": 3}
-//   == {"one": 42, "two": 2, "three": 3}
-// Arrays are appended. For example,
-//   {"foo": [1, 2, 3]} + {"foo": [4, 5, 6]}
-//   == {"foo": [1, 2, 3, 4, 5, 6]}
 //
+//	{"one": 1, "two": 2} + {"one": 42, "three": 3}
+//	== {"one": 42, "two": 2, "three": 3}
+//
+// Arrays are appended. For example,
+//
+//	{"foo": [1, 2, 3]} + {"foo": [4, 5, 6]}
+//	== {"foo": [1, 2, 3, 4, 5, 6]}
 func mergeYamlFiles(path string) ([]byte, error) {
 	var merged interface{}
 	var hasContent bool
@@ -97,6 +99,7 @@ func mergeYamlFiles(path string) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// merge merges different types using different rules
 func merge(into, from interface{}) (interface{}, error) {
 	// It's possible to handle this with a mass of reflection, but we only need
 	// to merge whole YAML files. Since we're always unmarshaling into
@@ -165,6 +168,7 @@ func IsScalar(i interface{}) bool {
 	return !IsMapping(i) && !IsArray(i)
 }
 
+// describe describes data type
 func describe(i interface{}) string {
 	if IsMapping(i) {
 		return "mapping"
