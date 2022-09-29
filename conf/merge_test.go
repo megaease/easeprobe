@@ -20,6 +20,7 @@ package conf
 import (
 	"bytes"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -43,13 +44,13 @@ func mergeString(intoStr, fromStr string) (string, error) {
 	var into, from interface{}
 	yaml.NewDecoder(bytes.NewReader([]byte(format(intoStr)))).Decode(&into)
 	yaml.NewDecoder(bytes.NewReader([]byte(format(fromStr)))).Decode(&from)
-	if r, err := merge(into, from); err == nil {
-		buf := &bytes.Buffer{}
-		yaml.NewEncoder(buf).Encode(r)
-		return buf.String(), nil
-	} else {
+	r, err := merge(into, from)
+	if err != nil {
 		return "", err
 	}
+	buf := &bytes.Buffer{}
+	yaml.NewEncoder(buf).Encode(r)
+	return buf.String(), nil
 }
 
 func assertMerge(t *testing.T, into, from, expected string) {
@@ -112,7 +113,7 @@ func TestMergeMapping(t *testing.T) {
 }
 
 func TestMergePath(t *testing.T) {
-	dir := os.TempDir() + "easeprobe_merge_test"
+	dir := filepath.Join(os.TempDir(), "easeprobe_merge_test")
 	os.Mkdir(dir, 0755)
 
 	config1 := `http:
