@@ -63,13 +63,13 @@ func TestSameProbeMerge(t *testing.T) {
 	into := `
 http:
   - name: "test 1"
-     url: "http://localhost:8080"
-     method: "GET"`
+    url: "http://localhost:8080"
+    method: "GET"`
 	from := `
 http:
   - name: "test 2"
-     url: "http://localhost:8181"
-     method: "GET"`
+    url: "http://localhost:8181"
+    method: "GET"`
 	expected := `
 http:
   - name: "test 1"

@@ -24,6 +24,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
 
@@ -65,7 +66,8 @@ func mergeYamlFiles(path string) ([]byte, error) {
 	for _, f := range files {
 		b, err := ioutil.ReadFile(f)
 		if err != nil {
-			return nil, err
+			log.Errorf("Failed to read file: %v by: %v", f, err)
+			continue
 		}
 		d := yaml.NewDecoder(bytes.NewReader(b))
 
@@ -75,7 +77,8 @@ func mergeYamlFiles(path string) ([]byte, error) {
 			// differently from explicit nils.
 			continue
 		} else if err != nil {
-			return nil, fmt.Errorf("couldn't decode source: %v", err)
+			log.Errorf("Failed to decode file: %v by: %v", f, err)
+			continue
 		}
 
 		hasContent = true
@@ -109,8 +112,7 @@ func merge(into, from interface{}) (interface{}, error) {
 		return from, nil
 	}
 	if from == nil {
-		// Allow higher-priority YAML to explicitly nil out lower-priority entries.
-		return nil, nil
+		return into, nil
 	}
 	if IsArray(into) && IsArray(from) {
 		return mergeArray(into.(array), from.(array))
