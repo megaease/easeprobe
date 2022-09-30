@@ -19,6 +19,7 @@ package conf
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -28,105 +29,158 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func format(s string) string {
-	s = strings.ReplaceAll(s, "\t", "  ")
-	return s
-}
+func TestSectionMerge(t *testing.T) {
+	into := `
+http:
+  - name: "test 1"
+    url: "http://localhost:8080"
+    method: "GET"
+tcp:
+  - name: "test 2"
+    host: "localhost:8080"`
+	from := `
+notify:
+  slack:
+    - name: "slack"
+      webhook: "https://hooks.slack.com/services/xxxxxx"`
+	expected := `
+http:
+  - name: "test 1"
+    url: "http://localhost:8080"
+    method: "GET"
+tcp:
+  - name: "test 2"
+    host: "localhost:8080"
+notify:
+  slack:
+    - name: "slack"
+      webhook: "https://hooks.slack.com/services/xxxxxx"`
 
-func clean(s string) string {
-	s = strings.ReplaceAll(s, " ", "")
-	s = strings.ReplaceAll(s, "\n", "")
-	s = strings.ReplaceAll(s, "\t", "")
-	return s
-}
-
-func mergeString(intoStr, fromStr string) (string, error) {
-	var into, from interface{}
-	yaml.NewDecoder(bytes.NewReader([]byte(format(intoStr)))).Decode(&into)
-	yaml.NewDecoder(bytes.NewReader([]byte(format(fromStr)))).Decode(&from)
-	r, err := merge(into, from)
-	if err != nil {
-		return "", err
-	}
-	buf := &bytes.Buffer{}
-	yaml.NewEncoder(buf).Encode(r)
-	return buf.String(), nil
-}
-
-func assertMerge(t *testing.T, into, from, expected string) {
-	actual, err := mergeString(into, from)
-	assert.Nil(t, err)
-	assert.Equal(t, clean(expected), clean(actual))
-}
-
-func TestMergeArray(t *testing.T) {
-	into := `http:
-	- name: name
-		url: url`
-	from := `http:
-	- name: name
-		url: url`
-	expected := `http:
-	- name: name
-		url: url
-	- name: name
-		url: url`
-	assertMerge(t, into, from, expected)
-
-	into = `http:
-  sub:
-    - name: name
-      url: url`
-	from = `http:
-  sub:
-    - name: name
-      url: url`
-	expected = `http:
-  sub:
-    - name: name
-      url: url
-    - name: name
-      url: url`
 	assertMerge(t, into, from, expected)
 }
 
-func TestMergeMapping(t *testing.T) {
-	into := `key: v1`
-	from := `key: v2`
-	expected := `key: v2`
-	assertMerge(t, into, from, expected)
+func TestSameProbeMerge(t *testing.T) {
+	into := `
+http:
+	- name: "test 1"
+		url: "http://localhost:8080"
+		method: "GET"`
+	from := `
+http:
+	- name: "test 2"
+		url: "http://localhost:8181"
+		method: "GET"`
+	expected := `
+http:
+  - name: "test 1"
+    url: "http://localhost:8080"
+    method: "GET"
+  - name: "test 2"
+    url: "http://localhost:8181"
+    method: "GET"`
 
-	into = `key1: v1`
-	from = `key2: v2`
-	expected = `key1: v1
-  key2: v2`
-	assertMerge(t, into, from, expected)
-
-	into = `key:
-  sub1: 1`
-	from = `key:
-  sub2: 2`
-	expected = `key:
-	sub1: 1
-	sub2: 2`
 	assertMerge(t, into, from, expected)
 }
 
-func TestMergePath(t *testing.T) {
+func TestNotifyMerge(t *testing.T) {
+	into := `
+notify:
+  slack:
+    - name: slack
+      webhook: "https://hooks.slack.com/services/xxxxxx"`
+	from := `
+notify:
+  discord:
+    - name: discord
+      webhook: "https://discord.com/api/webhooks/xxxxxx"`
+	expected := `
+notify:
+  slack:
+    - name: slack
+      webhook: "https://hooks.slack.com/services/xxxxxx"
+  discord:
+    - name: discord
+      webhook: "https://discord.com/api/webhooks/xxxxxx"`
+
+	assertMerge(t, into, from, expected)
+}
+
+func TestNotifyArrayMerge(t *testing.T) {
+	into := `
+notify:
+  slack:
+    - name: slack1
+      webhook: "https://hooks.slack.com/services/xxxxxx"`
+	from := `
+notify:
+  slack:
+    - name: slack1
+      webhook: "https://hooks.slack.com/services/xxxxxx"`
+	expected := `
+notify:
+  slack:
+    - name: slack1
+      webhook: "https://hooks.slack.com/services/xxxxxx"
+    - name: slack1
+      webhook: "https://hooks.slack.com/services/xxxxxx"`
+
+	assertMerge(t, into, from, expected)
+}
+
+func TestSettingsMerge(t *testing.T) {
+	into := `
+settings:
+  name: easeprobe
+  sla:
+    schedule: "daily"
+    time: "00:00"
+  notify:
+    retry:
+      times: 5
+      interval: 10`
+	from := `
+settings:
+  name: easeprobe_from
+  probe:
+    timeout: 10s
+    interval: 30s
+  sla:
+    schedule: "weekly"`
+	expected := `
+settings:
+  name: easeprobe_from
+  probe:
+    timeout: 10s
+    interval: 30s
+  notify:
+    retry:
+      times: 5
+      interval: 10
+  sla:
+    schedule: "weekly"
+		time: "00:00"`
+
+	assertMerge(t, into, from, expected)
+}
+
+func TestPathMerge(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), "easeprobe_merge_test")
 	os.Mkdir(dir, 0755)
 
-	config1 := `http:
+	config1 := `
+http:
   - name: name
-		url: url`
-	config2 := `http:
-	- name: name
-		url: url`
-	expected := `http:
-	- name: name
-		url: url
-	- name: name
-		url: url`
+    url: url`
+	config2 := `
+http:
+  - name: name
+    url: url`
+	expected := `
+http:
+  - name: name
+    url: url
+  - name: name
+    url: url`
 	os.Chdir(dir)
 	err := os.WriteFile("config1.yaml", []byte(format(config1)), 0755)
 	assert.Nil(t, err)
@@ -135,7 +189,29 @@ func TestMergePath(t *testing.T) {
 
 	r, err := mergeYamlFiles(dir)
 	assert.Nil(t, err)
-	assert.Equal(t, clean(expected), clean(string(r)))
+	assert.Equal(t, decode(expected), decode(string(r)))
 
 	os.RemoveAll(dir)
+}
+
+func assertMerge(t *testing.T, into, from, expected string) {
+	i, f, e := decode(into), decode(from), decode(expected)
+	assert.NotNil(t, i, fmt.Sprintf("wrong yaml content: %v", into))
+	assert.NotNil(t, f, fmt.Sprintf("wrong yaml content: %v", from))
+	assert.NotNil(t, e, fmt.Sprintf("wrong yaml content: %v", expected))
+
+	actual, err := merge(i, f)
+	assert.Nil(t, err)
+	assert.NotNil(t, actual)
+	assert.Equal(t, e, actual)
+}
+
+func decode(s string) interface{} {
+	var v interface{}
+	yaml.NewDecoder(bytes.NewReader([]byte(format(s)))).Decode(&v)
+	return v
+}
+
+func format(s string) string {
+	return strings.ReplaceAll(s, "\t", "  ")
 }
