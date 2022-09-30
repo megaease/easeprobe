@@ -62,14 +62,14 @@ notify:
 func TestSameProbeMerge(t *testing.T) {
 	into := `
 http:
-	- name: "test 1"
-		url: "http://localhost:8080"
-		method: "GET"`
+  - name: "test 1"
+     url: "http://localhost:8080"
+     method: "GET"`
 	from := `
 http:
-	- name: "test 2"
-		url: "http://localhost:8181"
-		method: "GET"`
+  - name: "test 2"
+     url: "http://localhost:8181"
+     method: "GET"`
 	expected := `
 http:
   - name: "test 1"
@@ -114,14 +114,14 @@ notify:
 	from := `
 notify:
   slack:
-    - name: slack1
+    - name: slack2
       webhook: "https://hooks.slack.com/services/xxxxxx"`
 	expected := `
 notify:
   slack:
     - name: slack1
       webhook: "https://hooks.slack.com/services/xxxxxx"
-    - name: slack1
+    - name: slack2
       webhook: "https://hooks.slack.com/services/xxxxxx"`
 
 	assertMerge(t, into, from, expected)
