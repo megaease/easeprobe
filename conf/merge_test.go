@@ -158,7 +158,7 @@ settings:
       interval: 10
   sla:
     schedule: "weekly"
-		time: "00:00"`
+    time: "00:00"`
 
 	assertMerge(t, into, from, expected)
 }
