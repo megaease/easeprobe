@@ -35,6 +35,9 @@ func assertMerge(t *testing.T, into, from, expected string) {
 	assert.NotNil(t, e, fmt.Sprintf("wrong yaml content: %v", expected))
 
 	dir := t.TempDir()
+	// workaround for testing issue: https://github.com/golang/go/issues/51442
+	defer os.RemoveAll(dir)
+
 	err := os.WriteFile(dir+"/config1.yaml", []byte(into), 0755)
 	assert.Nil(t, err)
 	err = os.WriteFile(dir+"/config2.yaml", []byte(from), 0755)
@@ -43,9 +46,6 @@ func assertMerge(t *testing.T, into, from, expected string) {
 	actual, err := mergeYamlFiles(dir)
 	assert.Nil(t, err)
 	assert.Equal(t, decode(expected), decode(string(actual)))
-
-	// workaround for testing issue: https://github.com/golang/go/issues/51442
-	os.RemoveAll(dir)
 }
 
 func decode(s string) interface{} {
@@ -198,6 +198,11 @@ func TestFailed(t *testing.T) {
 	_, err := mergeYamlFiles("[]")
 	assert.NotNil(t, err)
 
-	_, err = mergeYamlFiles("nonexistent")
+	dir := t.TempDir()
+	defer os.RemoveAll(dir)
+	err = os.WriteFile(dir+"/config.yaml", []byte("wrong yaml"), 0755)
+	assert.Nil(t, err)
+
+	_, err = mergeYamlFiles(dir)
 	assert.NotNil(t, err)
 }
