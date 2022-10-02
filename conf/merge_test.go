@@ -43,6 +43,9 @@ func assertMerge(t *testing.T, into, from, expected string) {
 	actual, err := mergeYamlFiles(dir)
 	assert.Nil(t, err)
 	assert.Equal(t, decode(expected), decode(string(actual)))
+
+	// workaround for testing issue: https://github.com/golang/go/issues/51442
+	os.RemoveAll(dir)
 }
 
 func decode(s string) interface{} {
