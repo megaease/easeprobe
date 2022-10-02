@@ -42,9 +42,9 @@ func mergeYamlFiles(path string) ([]byte, error) {
 		err = yqlib.NewAllAtOnceEvaluator().EvaluateFiles(". as $item ireduce ({}; . *+ $item )", files, printer, true, decoder)
 		if err != nil {
 			return nil, err
-		} else {
-			log.Warnf("yaml files not found for %v", path)
 		}
+	} else {
+		log.Warnf("yaml files not found for %v", path)
 	}
 
 	return buf.Bytes(), nil
