@@ -21,13 +21,41 @@ import (
 	"bytes"
 	"fmt"
 	"os"
-	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/op/go-logging.v1"
 	"gopkg.in/yaml.v3"
 )
+
+func assertMerge(t *testing.T, into, from, expected string) {
+	i, f, e := decode(into), decode(from), decode(expected)
+	assert.NotNil(t, i, fmt.Sprintf("wrong yaml content: %v", into))
+	assert.NotNil(t, f, fmt.Sprintf("wrong yaml content: %v", from))
+	assert.NotNil(t, e, fmt.Sprintf("wrong yaml content: %v", expected))
+
+	dir := t.TempDir()
+	err := os.WriteFile(dir+"/config1.yaml", []byte(into), 0755)
+	assert.Nil(t, err)
+	err = os.WriteFile(dir+"/config2.yaml", []byte(from), 0755)
+	assert.Nil(t, err)
+
+	actual, err := mergeYamlFiles(dir)
+	assert.Nil(t, err)
+	assert.Equal(t, decode(expected), decode(string(actual)))
+}
+
+func decode(s string) interface{} {
+	var v interface{}
+	yaml.NewDecoder(bytes.NewReader([]byte(s))).Decode(&v)
+	return v
+}
+
+func TestMain(m *testing.M) {
+	logging.SetLevel(logging.INFO, "yq-lib")
+	exitCode := m.Run()
+	os.Exit(exitCode)
+}
 
 func TestSectionMerge(t *testing.T) {
 	into := `
@@ -163,55 +191,10 @@ settings:
 	assertMerge(t, into, from, expected)
 }
 
-func TestPathMerge(t *testing.T) {
-	dir := filepath.Join(os.TempDir(), "easeprobe_merge_test")
-	os.Mkdir(dir, 0755)
+func TestFailed(t *testing.T) {
+	_, err := mergeYamlFiles("[]")
+	assert.NotNil(t, err)
 
-	config1 := `
-http:
-  - name: name
-    url: url`
-	config2 := `
-http:
-  - name: name
-    url: url`
-	expected := `
-http:
-  - name: name
-    url: url
-  - name: name
-    url: url`
-	os.Chdir(dir)
-	err := os.WriteFile("config1.yaml", []byte(format(config1)), 0755)
-	assert.Nil(t, err)
-	err = os.WriteFile("config2.yaml", []byte(format(config2)), 0755)
-	assert.Nil(t, err)
-
-	r, err := mergeYamlFiles(dir)
-	assert.Nil(t, err)
-	assert.Equal(t, decode(expected), decode(string(r)))
-
-	os.RemoveAll(dir)
-}
-
-func assertMerge(t *testing.T, into, from, expected string) {
-	i, f, e := decode(into), decode(from), decode(expected)
-	assert.NotNil(t, i, fmt.Sprintf("wrong yaml content: %v", into))
-	assert.NotNil(t, f, fmt.Sprintf("wrong yaml content: %v", from))
-	assert.NotNil(t, e, fmt.Sprintf("wrong yaml content: %v", expected))
-
-	actual, err := merge(i, f)
-	assert.Nil(t, err)
-	assert.NotNil(t, actual)
-	assert.Equal(t, e, actual)
-}
-
-func decode(s string) interface{} {
-	var v interface{}
-	yaml.NewDecoder(bytes.NewReader([]byte(format(s)))).Decode(&v)
-	return v
-}
-
-func format(s string) string {
-	return strings.ReplaceAll(s, "\t", "  ")
+	_, err = mergeYamlFiles("nonexistent")
+	assert.NotNil(t, err)
 }

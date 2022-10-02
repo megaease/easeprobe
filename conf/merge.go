@@ -18,166 +18,29 @@
 package conf
 
 import (
+	"bufio"
 	"bytes"
-	"fmt"
-	"io"
-	"os"
 	"path/filepath"
 
-	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v3"
+	"github.com/mikefarah/yq/v4/pkg/yqlib"
 )
 
-type (
-	// YAML has three fundamental types. When unmarshaled into interface{},
-	// they're represented like this.
-	mapping = map[string]interface{}
-	array   = []interface{}
-	scalar  = interface{}
-)
-
-// mergeYamlFiles deep-merges any number of mergeYamlFiles sources, with later sources taking
-// priority over earlier ones.
-//
-// Maps are deep-merged. For example,
-//
-//	{"one": 1, "two": 2} + {"one": 42, "three": 3}
-//	== {"one": 42, "two": 2, "three": 3}
-//
-// Arrays are appended. For example,
-//
-//	{"foo": [1, 2, 3]} + {"foo": [4, 5, 6]}
-//	== {"foo": [1, 2, 3, 4, 5, 6]}
+// mergeYamlFiles merges yaml files using yq(https://github.com/mikefarah/yq)
 func mergeYamlFiles(path string) ([]byte, error) {
-	var merged interface{}
-	var hasContent bool
-
-	apath, err := filepath.Abs(path)
+	files, err := filepath.Glob(path + "/*.yaml")
 	if err != nil {
 		return nil, err
 	}
-	files, err := filepath.Glob(apath + "/*.yaml")
+
+	var buf bytes.Buffer
+	decoder := yqlib.NewYamlDecoder()
+	encoder := yqlib.NewYamlEncoder(2, false, !false, true)
+	printer := yqlib.NewPrinter(encoder, yqlib.NewSinglePrinterWriter(bufio.NewWriter(&buf)))
+	// use evaluate merge, reference https://mikefarah.gitbook.io/yq/operators/multiply-merge
+	err = yqlib.NewAllAtOnceEvaluator().EvaluateFiles(". as $item ireduce ({}; . *+ $item )", files, printer, true, decoder)
 	if err != nil {
 		return nil, err
 	}
-	for _, f := range files {
-		log.Infof("Find file: %v", f)
-		b, err := os.ReadFile(f)
-		if err != nil {
-			log.Errorf("Failed to read file: %v by: %v", f, err)
-			continue
-		}
-		d := yaml.NewDecoder(bytes.NewReader(b))
 
-		var contents interface{}
-		if err := d.Decode(&contents); err == io.EOF {
-			// Skip empty and comment-only sources, which we should handle
-			// differently from explicit nils.
-			continue
-		} else if err != nil {
-			log.Errorf("Failed to decode file: %v by: %v", f, err)
-			continue
-		}
-
-		hasContent = true
-		pair, err := merge(merged, contents)
-		if err != nil {
-			return nil, err // error is already descriptive enough
-		}
-		merged = pair
-		log.Debugf("Merged result: %v", merged)
-	}
-
-	buf := &bytes.Buffer{}
-	if !hasContent {
-		// No sources had any content. To distinguish this from a source with just
-		// an explicit top-level null, return an empty buffer.
-		log.Infof("yaml content is empty")
-		return buf.Bytes(), nil
-	}
-	enc := yaml.NewEncoder(buf)
-	if err := enc.Encode(merged); err != nil {
-		return nil, fmt.Errorf("couldn't re-serialize merged YAML: %v", err)
-	}
 	return buf.Bytes(), nil
-}
-
-// merge merges different types using different rules
-func merge(into, from interface{}) (interface{}, error) {
-	// It's possible to handle this with a mass of reflection, but we only need
-	// to merge whole YAML files. Since we're always unmarshaling into
-	// interface{}, we only need to handle a few types. This ends up being
-	// cleaner if we just handle each case explicitly.
-	log.Debugf("Merge %v into %v", from, into)
-	if into == nil {
-		return from, nil
-	}
-	if from == nil {
-		return into, nil
-	}
-	if IsArray(into) && IsArray(from) {
-		return mergeArray(into.(array), from.(array))
-	}
-	if IsScalar(into) && IsScalar(from) {
-		return from, nil
-	}
-	if IsMapping(into) && IsMapping(from) {
-		return mergeMapping(into.(mapping), from.(mapping))
-	}
-	return nil, fmt.Errorf("can't merge a %s into a %s", describe(from), describe(into))
-}
-
-// mergeArray appends arrays in from to into
-func mergeArray(into, from []interface{}) ([]interface{}, error) {
-	var arr []interface{}
-	for _, i := range from {
-		arr = append(into, i)
-	}
-	return arr, nil
-}
-
-// mergeMapping merges by key and merged value
-func mergeMapping(into, from mapping) (mapping, error) {
-	merged := make(mapping, len(into))
-	for k, v := range into {
-		merged[k] = v
-	}
-	for k := range from {
-		m, err := merge(merged[k], from[k])
-		if err != nil {
-			return nil, err
-		}
-		merged[k] = m
-	}
-	return merged, nil
-}
-
-// IsMapping reports whether a type is a mapping in YAML, represented as a
-// map[interface{}]interface{}.
-func IsMapping(i interface{}) bool {
-	_, is := i.(mapping)
-	return is
-}
-
-// IsArray reports whether a type is a Array in YAML, represented as an
-// []interface{}.
-func IsArray(i interface{}) bool {
-	_, is := i.(array)
-	return is
-}
-
-// IsScalar reports whether a type is a scalar value in YAML.
-func IsScalar(i interface{}) bool {
-	return !IsMapping(i) && !IsArray(i)
-}
-
-// describe describes data type
-func describe(i interface{}) string {
-	if IsMapping(i) {
-		return "mapping"
-	}
-	if IsArray(i) {
-		return "array"
-	}
-	return "scalar"
 }
