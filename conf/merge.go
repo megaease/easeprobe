@@ -21,7 +21,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	log "github.com/sirupsen/logrus"
@@ -60,11 +60,9 @@ func mergeYamlFiles(path string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(files) == 0 {
-		return nil, fmt.Errorf("yaml file not found")
-	}
 	for _, f := range files {
-		b, err := ioutil.ReadFile(f)
+		log.Infof("Find file: %v", f)
+		b, err := os.ReadFile(f)
 		if err != nil {
 			log.Errorf("Failed to read file: %v by: %v", f, err)
 			continue
@@ -87,12 +85,14 @@ func mergeYamlFiles(path string) ([]byte, error) {
 			return nil, err // error is already descriptive enough
 		}
 		merged = pair
+		log.Debugf("Merged result: %v", merged)
 	}
 
 	buf := &bytes.Buffer{}
 	if !hasContent {
 		// No sources had any content. To distinguish this from a source with just
 		// an explicit top-level null, return an empty buffer.
+		log.Infof("yaml content is empty")
 		return buf.Bytes(), nil
 	}
 	enc := yaml.NewEncoder(buf)
@@ -108,6 +108,7 @@ func merge(into, from interface{}) (interface{}, error) {
 	// to merge whole YAML files. Since we're always unmarshaling into
 	// interface{}, we only need to handle a few types. This ends up being
 	// cleaner if we just handle each case explicitly.
+	log.Debugf("Merge %v into %v", from, into)
 	if into == nil {
 		return from, nil
 	}
