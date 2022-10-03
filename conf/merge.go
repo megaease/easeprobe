@@ -33,19 +33,17 @@ func mergeYamlFiles(path string) ([]byte, error) {
 		return nil, err
 	}
 
-	var buf bytes.Buffer
-	if len(files) > 0 {
-		decoder := yqlib.NewYamlDecoder()
-		encoder := yqlib.NewYamlEncoder(2, false, !false, true)
-		printer := yqlib.NewPrinter(encoder, yqlib.NewSinglePrinterWriter(bufio.NewWriter(&buf)))
-		// use evaluate merge, reference https://mikefarah.gitbook.io/yq/operators/multiply-merge
-		err = yqlib.NewAllAtOnceEvaluator().EvaluateFiles(". as $item ireduce ({}; . *+ $item )", files, printer, true, decoder)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		log.Warnf("yaml files not found for %v", path)
+	if len(files) <= 0 {
+		return nil, fmt.Errorf("yaml files not found for %v", path)
 	}
-
+	var buf bytes.Buffer
+	decoder := yqlib.NewYamlDecoder()
+	encoder := yqlib.NewYamlEncoder(2, false, !false, true)
+	printer := yqlib.NewPrinter(encoder, yqlib.NewSinglePrinterWriter(bufio.NewWriter(&buf)))
+	// use evaluate merge, reference https://mikefarah.gitbook.io/yq/operators/multiply-merge
+	err = yqlib.NewAllAtOnceEvaluator().EvaluateFiles(". as $item ireduce ({}; . *+ $item )", files, printer, true, decoder)
+	if err != nil {
+		return nil, err
+	}
 	return buf.Bytes(), nil
 }
