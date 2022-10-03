@@ -218,13 +218,14 @@ func getYamlFileFromInternet(url string) ([]byte, error) {
 }
 
 func getYamlFileFromFile(path string) ([]byte, error) {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
+	f, err := os.Stat(path)
+	if os.IsNotExist(err) {
 		return nil, err
 	}
-	if strings.HasSuffix(path, ".yaml") {
-		return ioutil.ReadFile(path)
+	if f.IsDir() {
+		return mergeYamlFiles(path)
 	}
-	return mergeYamlFiles(path)
+	return ioutil.ReadFile(path)
 }
 
 func getYamlFile(path string) ([]byte, error) {

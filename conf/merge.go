@@ -20,15 +20,15 @@ package conf
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"path/filepath"
 
 	"github.com/mikefarah/yq/v4/pkg/yqlib"
-	log "github.com/sirupsen/logrus"
 )
 
 // mergeYamlFiles merges yaml files using yq(https://github.com/mikefarah/yq)
 func mergeYamlFiles(path string) ([]byte, error) {
-	files, err := filepath.Glob(path + "/*.yaml")
+	files, err := filepath.Glob(filepath.Join(path, "*.yaml"))
 	if err != nil {
 		return nil, err
 	}

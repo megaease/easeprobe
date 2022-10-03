@@ -126,15 +126,8 @@ func TestGetYamlFileFromPath(t *testing.T) {
 	defer os.RemoveAll(tmpDir)
 
 	// test empty dir
-	data, err := getYamlFileFromFile(tmpDir)
-	if err != nil {
-		t.Errorf("getYamlFileFromFile(\"%s\") = %v, expected nil", tmpDir, err)
-	}
-
-	//confirm we read empty data
-	if string(data) != "" {
-		t.Errorf("getYamlFileFromFile(\"%s\") got data %s, expected nil", tmpDir, data)
-	}
+	_, err := getYamlFileFromFile(tmpDir)
+	assert.NotNil(t, err)
 }
 
 const confVer = "version: 0.1.0\n"
