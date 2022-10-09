@@ -33,7 +33,7 @@ jobs:
           run: ./build/bin/easeprobe -j > resources/schema.json
 
         - name: Commit JSON Schema
-          uses: EndBug/add-and-commit@v7
+          uses: EndBug/add-and-commit@v9
           with:
             message: "Update JSON Schema"
             add: "resources/schema.json"
