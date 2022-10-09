@@ -121,6 +121,15 @@ func TestGetYamlFileFromFile(t *testing.T) {
 	}
 }
 
+func TestGetYamlFileFromPath(t *testing.T) {
+	tmpDir := t.TempDir()
+	defer os.RemoveAll(tmpDir)
+
+	// test empty dir
+	_, err := getYamlFileFromFile(tmpDir)
+	assert.NotNil(t, err)
+}
+
 const confVer = "version: 0.1.0\n"
 
 const confHTTP = `
