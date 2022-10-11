@@ -22,11 +22,25 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/op/go-logging.v1"
 	"gopkg.in/yaml.v3"
 )
+
+// on Windows platform, TempDir RemoveAll cleanup failures with
+// "The process cannot access the file because it is being used by another process."
+// refer to https://github.com/golang/go/issues/51442
+// using the workaround to remove the directory by a retry loop
+func removeDir(dir string) {
+	for i := 0; i < 10; i++ {
+		if err := os.RemoveAll(dir); err == nil {
+			return
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+}
 
 func assertMerge(t *testing.T, into, from, expected string) {
 	i, f, e := decode(into), decode(from), decode(expected)
@@ -35,8 +49,7 @@ func assertMerge(t *testing.T, into, from, expected string) {
 	assert.NotNil(t, e, fmt.Sprintf("wrong yaml content: %v", expected))
 
 	dir := t.TempDir()
-	// workaround for testing issue: https://github.com/golang/go/issues/51442
-	defer os.RemoveAll(dir)
+	defer removeDir(dir)
 
 	err := os.WriteFile(dir+"/config1.yaml", []byte(into), 0755)
 	assert.Nil(t, err)
@@ -199,7 +212,7 @@ func TestFailed(t *testing.T) {
 	assert.NotNil(t, err)
 
 	dir := t.TempDir()
-	defer os.RemoveAll(dir)
+	defer removeDir(dir)
 	err = os.WriteFile(dir+"/config.yaml", []byte("wrong yaml"), 0755)
 	assert.Nil(t, err)
 
