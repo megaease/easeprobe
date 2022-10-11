@@ -62,7 +62,7 @@ require (
 	github.com/klauspost/compress v1.15.7 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
-	github.com/mikefarah/yq/v4 v4.27.5
+	github.com/mikefarah/yq/v4 v4.28.1
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
 	github.com/pierrec/lz4/v4 v4.1.15 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
