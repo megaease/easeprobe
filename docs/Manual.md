@@ -1221,7 +1221,7 @@ notify:
   # and offer two formats of string
   #  - EASEPROBE_JSON: the JSON format
   #  - EASEPROBE_CSV: the CSV format
-  # The CVS format would be set for STDIN for the shell command.
+  # The CSV format would be set for STDIN for the shell command.
   # (see the example: resources/scripts/notify/notify.sh)
   shell:
     - name: "shell alert service"
