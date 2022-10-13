@@ -1215,6 +1215,7 @@ notify:
   #  - EASEPROBE_NAME: probe name
   #  - EASEPROBE_STATUS: "up" or "down"
   #  - EASEPROBE_RTT: round trip time in milliseconds
+  #  - EASEPROBE_TIME: time of probe time(formatted by timeformat configured in settings section)
   #  - EASEPROBE_TIMESTAMP: timestamp of probe time
   #  - EASEPROBE_MESSAGE: probe message
   # and offer two formats of string
