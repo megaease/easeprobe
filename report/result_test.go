@@ -225,6 +225,7 @@ func TestResultToShell(t *testing.T) {
 	assert.Equal(t, "dummy", envMap["EASEPROBE_NAME"])
 	assert.Equal(t, r.Status.String(), envMap["EASEPROBE_STATUS"])
 	assert.Equal(t, fmt.Sprintf("%d", r.StartTimestamp), envMap["EASEPROBE_TIMESTAMP"])
+	assert.Equal(t, FormatTime(r.StartTime), envMap["EASEPROBE_TIME"])
 	assert.Equal(t, fmt.Sprintf("%d", r.RoundTripTime.Round(time.Millisecond)), envMap["EASEPROBE_RTT"])
 	assert.Equal(t, r.Message, envMap["EASEPROBE_MESSAGE"])
 

@@ -18,6 +18,7 @@ if [[ ${EASEPROBE_TYPE} == "Status" ]]; then
     echo "Name: ${EASEPROBE_NAME}"
     echo "Status: ${EASEPROBE_STATUS}"
     echo "RTT: ${EASEPROBE_RTT}"
+    echo "TIME: ${EASEPROBE_TIME}"
     echo "TIMESTAMP: ${EASEPROBE_TIMESTAMP}"
     echo "Message: - ${EASEPROBE_MESSAGE}"
     echo "----------------------------------------------------"

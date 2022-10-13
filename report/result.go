@@ -290,6 +290,7 @@ func ToShell(r probe.Result) string {
 	env["EASEPROBE_ENDPOINT"] = r.Endpoint
 	env["EASEPROBE_STATUS"] = r.Status.String()
 	env["EASEPROBE_TIMESTAMP"] = fmt.Sprintf("%d", r.StartTimestamp)
+	env["EASEPROBE_TIME"] = FormatTime(r.StartTime)
 	env["EASEPROBE_RTT"] = fmt.Sprintf("%d", r.RoundTripTime.Round(time.Millisecond))
 	env["EASEPROBE_MESSAGE"] = r.Message
 

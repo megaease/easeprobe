@@ -1215,12 +1215,13 @@ notify:
   #  - EASEPROBE_NAME: probe name
   #  - EASEPROBE_STATUS: "up" or "down"
   #  - EASEPROBE_RTT: round trip time in milliseconds
+  #  - EASEPROBE_TIME: time of probe time(formatted by timeformat configured in settings section)
   #  - EASEPROBE_TIMESTAMP: timestamp of probe time
   #  - EASEPROBE_MESSAGE: probe message
   # and offer two formats of string
   #  - EASEPROBE_JSON: the JSON format
   #  - EASEPROBE_CSV: the CSV format
-  # The CVS format would be set for STDIN for the shell command.
+  # The CSV format would be set for STDIN for the shell command.
   # (see the example: resources/scripts/notify/notify.sh)
   shell:
     - name: "shell alert service"
