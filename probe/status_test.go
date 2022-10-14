@@ -106,3 +106,23 @@ func TestStatus(t *testing.T) {
 	err = yaml.Unmarshal([]byte{1, 2}, &s)
 	assert.NotNil(t, err)
 }
+
+func TestStatusTitle(t *testing.T) {
+	s := StatusInit
+	assert.Equal(t, "Initialization", s.Title())
+
+	s = StatusUp
+	assert.Equal(t, "Success", s.Title())
+
+	s = StatusDown
+	assert.Equal(t, "Error", s.Title())
+
+	s = StatusUnknown
+	assert.Equal(t, "Unknown", s.Title())
+
+	s = StatusBad
+	assert.Equal(t, "Bad", s.Title())
+
+	s = -1
+	assert.Equal(t, "Unknown", s.Title())
+}

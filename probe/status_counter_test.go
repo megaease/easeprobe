@@ -52,4 +52,8 @@ func TestNewStatusCounter(t *testing.T) {
 
 	s1 := s.Clone()
 	assert.True(t, reflect.DeepEqual(s, &s1))
+
+	s1.SetMaxLen(2)
+	assert.Equal(t, 2, s1.MaxLen)
+	assert.Equal(t, 2, len(s1.StatusHistory))
 }
