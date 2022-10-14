@@ -43,7 +43,7 @@
 #     # configuration
 #     timeout: 10s # default is 30 seconds
 #     failure: 2 # number of continuously failed probes needed to determine the status down, default: 1
-#     success: 1 # number of continuously successful probes needed to determine the status down , default: 1
+#     success: 1 # number of continuously successful probes needed to determine the status up , default: 1
 
 http: # http probes
   - name: EaseProbe Github
@@ -60,7 +60,7 @@ http: # http probes
 #     proxy: socks5://proxy.server:1080 # Optional. Only support socks5.
 #                                       # Also support the `ALL_PROXY` environment.
 #     failure: 2 # number of continuously failed probes needed to determine the status down, default: 1
-#     success: 1 # number of continuously successful probes needed to determine the status down, default: 1
+#     success: 1 # number of continuously successful probes needed to determine the status up, default: 1
 
 # --------------------- Shell Probe Configuration ---------------------
 #
@@ -391,7 +391,7 @@ notify:
 #     timeout: 30s # the time out for all probes
 #     interval: 1m # probe every minute for all probes
 #     failure: 2 # number of continuously failed probes needed to determine the status down, default: 1
-#     success: 1 # number of continuously successful probes needed to determine the status down, default: 1
+#     success: 1 # number of continuously successful probes needed to determine the status up, default: 1
 
 #   # easeprobe program running log file.
 #   log:
