@@ -22,9 +22,9 @@ import "time"
 // StatusChangeThresholdSettings is the settings for probe threshold
 type StatusChangeThresholdSettings struct {
 	// the failures threshold such as 2, 5
-	Failure int `yaml:"failure,omitempty" json:"failure,omitempty" jsonschema:"description=the failures threshold to change the status such as 3, 5,default=1"`
+	Failure int `yaml:"failure,omitempty" json:"failure,omitempty" jsonschema:"title=Failure Threshold,description=the failures threshold to change the status such as 3,default=1"`
 	// the success threshold such as 2, 5
-	Success int `yaml:"success,omitempty" json:"success,omitempty" jsonschema:"description=the success threshold to change the status such as 3, 5,default=1"`
+	Success int `yaml:"success,omitempty" json:"success,omitempty" jsonschema:"title=Success Threshold,description=the success threshold to change the status such as 2,default=1"`
 }
 
 // ProbeSettings is the global probe setting
