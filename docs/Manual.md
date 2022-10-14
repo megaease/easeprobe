@@ -627,7 +627,8 @@ The following example configurations illustrate the EaseProbe supported features
 
 - `timeout` - the maximum time to wait for the probe to complete. default: `30s`.
 - `interval` - the interval time to run the probe. default: `1m`.
-
+- `failure` - number of continuously failed probes needed to determine the status down, default: 1
+- `success` - number of continuously successful probes needed to determine the status down, default: 1
 
 ## 7.1 HTTP Probe Configuration
 
@@ -1308,6 +1309,9 @@ settings:
   probe:
     timeout: 30s # the time out for all probes
     interval: 1m # probe every minute for all probes
+    failure: 2 # number of continuously failed probes needed to determine the status down, default: 1
+    success: 1 # number of continuously successful probes needed to determine the status down, default: 1
+
 
   # easeprobe program running log file.
   log:

@@ -46,5 +46,67 @@ func TestProbe(t *testing.T) {
 	p.Interval = 20
 	r = p.NormalizeInterval(0)
 	assert.Equal(t, time.Duration(20), r)
+}
 
+func TestStatusChangeThresholdSettings(t *testing.T) {
+	p := ProbeSettings{}
+
+	r := p.NormalizeThreshold(StatusChangeThresholdSettings{})
+	assert.Equal(t, StatusChangeThresholdSettings{
+		Failure: DefaultStatusChangeThresholdSetting,
+		Success: DefaultStatusChangeThresholdSetting,
+	}, r)
+
+	p.Failure = 2
+	p.Success = 3
+
+	r = p.NormalizeThreshold(StatusChangeThresholdSettings{
+		Failure: 1,
+	})
+	assert.Equal(t, StatusChangeThresholdSettings{
+		Failure: 1,
+		Success: 3,
+	}, r)
+
+	r = p.NormalizeThreshold(StatusChangeThresholdSettings{
+		Success: 2,
+	})
+	assert.Equal(t, StatusChangeThresholdSettings{
+		Failure: 2,
+		Success: 2,
+	}, r)
+
+	r = p.NormalizeThreshold(StatusChangeThresholdSettings{
+		Failure: 5,
+		Success: 6,
+	})
+	assert.Equal(t, StatusChangeThresholdSettings{
+		Failure: 5,
+		Success: 6,
+	}, r)
+
+	r = p.NormalizeThreshold(StatusChangeThresholdSettings{
+		Failure: 0,
+	})
+	assert.Equal(t, StatusChangeThresholdSettings{
+		Failure: 2,
+		Success: 3,
+	}, r)
+
+	r = p.NormalizeThreshold(StatusChangeThresholdSettings{
+		Success: -1,
+	})
+	assert.Equal(t, StatusChangeThresholdSettings{
+		Failure: 2,
+		Success: 3,
+	}, r)
+
+	p.Failure = -1
+	r = p.NormalizeThreshold(StatusChangeThresholdSettings{
+		Failure: 0,
+	})
+	assert.Equal(t, StatusChangeThresholdSettings{
+		Failure: 1,
+		Success: 3,
+	}, r)
 }

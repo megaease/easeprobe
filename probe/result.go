@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/megaease/easeprobe/global"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -32,6 +33,7 @@ type Stat struct {
 	Status   map[Status]int64 `json:"status" yaml:"status"`
 	UpTime   time.Duration    `json:"uptime" yaml:"uptime"`
 	DownTime time.Duration    `json:"downtime" yaml:"downtime"`
+	StatusCounter
 }
 
 // Result is the status of health check
@@ -63,11 +65,12 @@ func NewResult() *Result {
 		LatestDownTime:   time.Time{},
 		RecoveryDuration: 0,
 		Stat: Stat{
-			Since:    time.Now().UTC(),
-			Total:    0,
-			Status:   map[Status]int64{},
-			UpTime:   0,
-			DownTime: 0,
+			Since:         time.Now().UTC(),
+			Total:         0,
+			Status:        map[Status]int64{},
+			UpTime:        0,
+			DownTime:      0,
+			StatusCounter: *NewStatusCounter(global.DefaultStatusChangeThresholdSetting),
 		},
 	}
 }
@@ -112,6 +115,7 @@ func (s *Stat) Clone() Stat {
 	}
 	dst.UpTime = s.UpTime
 	dst.DownTime = s.DownTime
+	dst.StatusCounter = s.StatusCounter.Clone()
 	return dst
 }
 

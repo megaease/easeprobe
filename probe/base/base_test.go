@@ -18,6 +18,7 @@
 package base
 
 import (
+	"fmt"
 	"math/rand"
 	"net"
 	"os"
@@ -146,4 +147,65 @@ func TestProxyConnection(t *testing.T) {
 	assert.NotNil(t, conn)
 
 	monkey.UnpatchAll()
+}
+
+func TestStatusThreshold(t *testing.T) {
+	p := newDummyProber("probe")
+	p.StatusChangeThresholdSettings = global.StatusChangeThresholdSettings{
+		Failure: 2,
+		Success: 3,
+	}
+	p.Config(global.ProbeSettings{
+		StatusChangeThresholdSettings: global.StatusChangeThresholdSettings{
+			Failure: 2,
+			Success: 1,
+		},
+	})
+	assert.Equal(t, 3, p.ProbeResult.Stat.MaxLen)
+	assert.Equal(t, 2, p.StatusChangeThresholdSettings.Failure)
+	assert.Equal(t, 3, p.StatusChangeThresholdSettings.Success)
+
+	p.ProbeResult.Status = probe.StatusInit
+
+	cnt := 0
+	p.ProbeFunc = func() (bool, string) {
+		cnt++
+		return true, fmt.Sprintf("success - %d", cnt)
+	}
+
+	n := p.ProbeResult.Stat.MaxLen + 2
+	for i := 1; i <= n; i++ {
+		p.Probe()
+		if i < p.StatusChangeThresholdSettings.Success {
+
+			assert.Equal(t, probe.StatusInit, p.Result().Status)
+		} else {
+			assert.Equal(t, probe.StatusUp, p.Result().Status)
+		}
+		if i < p.ProbeResult.Stat.MaxLen {
+			assert.Equal(t, i, p.ProbeResult.Stat.StatusCount)
+		} else {
+			assert.Equal(t, p.ProbeResult.Stat.MaxLen, p.ProbeResult.Stat.StatusCount)
+		}
+	}
+
+	cnt = 0
+	p.ProbeFunc = func() (bool, string) {
+		cnt++
+		return false, fmt.Sprintf("failure - %d", cnt)
+	}
+
+	for i := 1; i <= n; i++ {
+		p.Probe()
+		if i < p.StatusChangeThresholdSettings.Failure {
+			assert.Equal(t, probe.StatusUp, p.Result().Status)
+		} else {
+			assert.Equal(t, probe.StatusDown, p.Result().Status)
+		}
+		if i < p.ProbeResult.Stat.MaxLen {
+			assert.Equal(t, i, p.ProbeResult.Stat.StatusCount)
+		} else {
+			assert.Equal(t, p.ProbeResult.Stat.MaxLen, p.ProbeResult.Stat.StatusCount)
+		}
+	}
 }

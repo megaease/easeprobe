@@ -64,6 +64,8 @@ const (
 	DefaultTimeOut = time.Second * 30
 	// DefaultChannelName  is the default wide channel name
 	DefaultChannelName = "__EaseProbe_Channel__"
+	// DefaultStatusChangeThresholdSetting is the threshold of status change
+	DefaultStatusChangeThresholdSetting = 1
 )
 
 const (

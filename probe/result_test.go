@@ -47,11 +47,12 @@ func CreateTestResult() *Result {
 		LatestDownTime:   now.Add(-20 * time.Hour),
 		RecoveryDuration: 5 * time.Minute,
 		Stat: Stat{
-			Since:    now,
-			Total:    1000,
-			Status:   m,
-			UpTime:   50 * time.Second,
-			DownTime: 10 * time.Second,
+			Since:         now,
+			Total:         1000,
+			Status:        m,
+			UpTime:        50 * time.Second,
+			DownTime:      10 * time.Second,
+			StatusCounter: *NewStatusCounter(2),
 		},
 	}
 	return r
@@ -180,7 +181,7 @@ func TestDebug(t *testing.T) {
 	up := fmt.Sprintf("%d", StatusUp)
 	down := fmt.Sprintf("%d", StatusDown)
 
-	expected := `{"name":"Test Name","endpoint":"http://example.com","time":"2022-01-01T00:00:00Z","timestamp":1640995200,"rtt":30000000000,"status":"up","prestatus":"down","message":"This is a test message","latestdowntime":"2021-12-31T04:00:00Z","recoverytime":300000000000,"stat":{"since":"2022-01-01T00:00:00Z","total":1001,"status":{"` + up + `":51,"` + down + `":10},"uptime":1850000000000,"downtime":10000000000}}`
+	expected := `{"name":"Test Name","endpoint":"http://example.com","time":"2022-01-01T00:00:00Z","timestamp":1640995200,"rtt":30000000000,"status":"up","prestatus":"down","message":"This is a test message","latestdowntime":"2021-12-31T04:00:00Z","recoverytime":300000000000,"stat":{"since":"2022-01-01T00:00:00Z","total":1001,"status":{"1":51,"2":10},"uptime":1850000000000,"downtime":10000000000,"StatusHistory":[],"MaxLen":1,"CurrentStatus":true,"StatusCount":0}}`
 	if r.DebugJSON() != expected {
 		t.Errorf("%s != %s", r.DebugJSON(), expected)
 	}
@@ -204,7 +205,11 @@ func TestDebug(t *testing.T) {
             "` + down + `": 10
         },
         "uptime": 1850000000000,
-        "downtime": 10000000000
+        "downtime": 10000000000,
+        "StatusHistory": [],
+        "MaxLen": 1,
+        "CurrentStatus": true,
+        "StatusCount": 0
     }
 }`
 

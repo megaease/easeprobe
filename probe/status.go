@@ -36,6 +36,13 @@ const (
 )
 
 var (
+	toTitle = map[Status]string{
+		StatusInit:    "Initialization",
+		StatusUp:      "Success",
+		StatusDown:    "Error",
+		StatusUnknown: "Unknown",
+		StatusBad:     "Bad",
+	}
 	toString = map[Status]string{
 		StatusInit:    "init",
 		StatusUp:      "up",
@@ -54,6 +61,14 @@ var (
 		StatusBad:     "🚫",
 	}
 )
+
+// Title convert the Status to title
+func (s Status) Title() string {
+	if val, ok := toTitle[s]; ok {
+		return val
+	}
+	return "Unknown"
+}
 
 // String convert the Status to string
 func (s Status) String() string {

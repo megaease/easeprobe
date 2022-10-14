@@ -51,8 +51,9 @@ var testResults = []Result{
 				StatusUp:   70,
 				StatusDown: 30,
 			},
-			UpTime:   70 * time.Minute,
-			DownTime: 30 * time.Minute,
+			UpTime:        70 * time.Minute,
+			DownTime:      30 * time.Minute,
+			StatusCounter: *NewStatusCounter(1),
 		},
 	},
 	{
@@ -74,8 +75,9 @@ var testResults = []Result{
 				StatusUp:   270,
 				StatusDown: 30,
 			},
-			UpTime:   270 * time.Minute,
-			DownTime: 30 * time.Minute,
+			UpTime:        270 * time.Minute,
+			DownTime:      30 * time.Minute,
+			StatusCounter: *NewStatusCounter(2),
 		},
 	},
 }
