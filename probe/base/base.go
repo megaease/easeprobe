@@ -20,6 +20,7 @@ package base
 
 import (
 	"fmt"
+	"math"
 	"net"
 	"net/url"
 	"os"
@@ -103,15 +104,26 @@ func (d *DefaultProbe) CheckStatusThreshold() probe.Status {
 		title, c.CurrentStatus, c.StatusCount, s.Failure, s.Success)
 
 	if c.CurrentStatus == true && c.StatusCount >= s.Success {
-		log.Infof("%s - Status is UP! Meet the Success Threshold [%d/%d]", title, c.StatusCount, s.Success)
+		if d.ProbeResult.Status != probe.StatusUp {
+			cnt := math.Max(float64(c.StatusCount), float64(s.Success))
+			log.Infof("%s - Status is UP! Threshold reached for success [%d/%d]", title, int(cnt), s.Success)
+		}
 		return probe.StatusUp
 	}
 	if c.CurrentStatus == false && c.StatusCount >= s.Failure {
-		log.Infof("%s - Status is DOWN! Meet the Failure Threshold [%d/%d]", title, c.StatusCount, s.Failure)
+		if d.ProbeResult.Status != probe.StatusDown {
+			cnt := math.Max(float64(c.StatusCount), float64(s.Failure))
+			log.Infof("%s - Status is DOWN! Threshold reached for failure [%d/%d]", title, int(cnt), s.Failure)
+		}
 		return probe.StatusDown
 	}
-	log.Infof("%s - Keep the Status as %s! Not meet the Threshold - Current[%v], StatusCnt[%d], FailureThread[%d], SuccessThread[%d]",
-		title, d.ProbeResult.PreStatus, c.CurrentStatus, c.StatusCount, s.Failure, s.Success)
+	if c.CurrentStatus == true {
+		log.Infof("%s - Status unchanged [%s]! Threshold is not reached for success [%d/%d].",
+			title, d.ProbeResult.PreStatus, c.StatusCount, s.Success)
+	} else {
+		log.Infof("%s - Status unchanged [%s]! Threshold is not reached for failure [%d/%d].",
+			title, d.ProbeResult.PreStatus, c.StatusCount, s.Failure)
+	}
 	return d.ProbeResult.PreStatus
 }
 
@@ -145,6 +157,10 @@ func (d *DefaultProbe) Config(gConf global.ProbeSettings,
 	}
 
 	log.Infof("Probe %s base options are configured!", d.LogTitle())
+
+	if d.Failure > 1 || d.Success > 1 {
+		log.Infof("Probe %s Status Threshold are configured! failure[%d], success[%d]", d.LogTitle(), d.Failure, d.Success)
+	}
 
 	d.metrics = newMetrics(kind, tag)
 
