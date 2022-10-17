@@ -164,8 +164,11 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 		return err
 	}
 
-	if err := h.Evaluator.Config(); err != nil {
-		return err
+	// if the evaluator is set, config it
+	if h.Evaluator.DocType != eval.Unsupported && len(strings.TrimSpace(h.Evaluator.Expression)) > 0 {
+		if err := h.Evaluator.Config(); err != nil {
+			return err
+		}
 	}
 
 	h.metrics = newMetrics(kind, tag)

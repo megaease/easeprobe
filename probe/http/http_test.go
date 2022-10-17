@@ -18,6 +18,7 @@
 package http
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"fmt"
@@ -25,6 +26,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"os"
 	"reflect"
 	"testing"
 
@@ -33,6 +35,7 @@ import (
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/base"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -68,9 +71,28 @@ func createHTTP() *HTTP {
 		},
 	}
 }
+
+func createSimpleHTTP() *HTTP {
+	return &HTTP{
+		DefaultProbe:    base.DefaultProbe{ProbeName: "dummy http"},
+		URL:             "http://localhost:8888",
+		ContentEncoding: "text/json",
+		Headers:         map[string]string{"header1": "value1", "header2": "value2", "Host": "host.com"},
+		Body:            "{ \"key1\": \"value1\", \"key2\": \"value2\" }",
+	}
+}
+
 func TestHTTPConfig(t *testing.T) {
-	h := createHTTP()
+	h := createSimpleHTTP()
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
 	err := h.Config(global.ProbeSettings{})
+	assert.NoError(t, err)
+	assert.NotContains(t, buf.String(), "Unsupported document type")
+	log.SetOutput(os.Stdout)
+
+	h = createHTTP()
+	err = h.Config(global.ProbeSettings{})
 	assert.Error(t, err)
 
 	//TLS config success
