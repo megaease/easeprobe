@@ -20,6 +20,7 @@ package eval
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/Knetic/govaluate"
@@ -68,6 +69,11 @@ func NewEvaluator(doc string, t DocType, exp string) *Evaluator {
 
 // Config is the function to config the evaluator
 func (e *Evaluator) Config() error {
+	// if Eval is not configured, do nothing
+	if e.DocType == Unsupported && len(strings.TrimSpace( e.Expression))<=0 {
+		return nil
+	}
+
 	e.configExtractor()
 	e.configEvalFunctions()
 	return nil
