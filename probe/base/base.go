@@ -20,6 +20,7 @@ package base
 
 import (
 	"fmt"
+	"math"
 	"net"
 	"net/url"
 	"os"
@@ -44,15 +45,16 @@ type ProbeFuncType func() (bool, string)
 
 // DefaultProbe is the default options for all probe
 type DefaultProbe struct {
-	ProbeKind         string        `yaml:"-" json:"-"`
-	ProbeTag          string        `yaml:"-" json:"-"`
-	ProbeName         string        `yaml:"name" json:"name" jsonschema:"required,title=Probe Name,description=the name of probe must be unique"`
-	ProbeChannels     []string      `yaml:"channels" json:"channels,omitempty" jsonschema:"title=Probe Channels,description=the channels of probe message need to send to"`
-	ProbeTimeout      time.Duration `yaml:"timeout,omitempty" json:"timeout,omitempty" jsonschema:"type=string,format=duration,title=Probe Timeout,description=the timeout of probe"`
-	ProbeTimeInterval time.Duration `yaml:"interval,omitempty" json:"interval,omitempty" jsonschema:"type=string,format=duration,title=Probe Interval,description=the interval of probe"`
-	ProbeFunc         ProbeFuncType `yaml:"-" json:"-"`
-	ProbeResult       *probe.Result `yaml:"-" json:"-"`
-	metrics           *metrics      `yaml:"-" json:"-"`
+	ProbeKind                            string        `yaml:"-" json:"-"`
+	ProbeTag                             string        `yaml:"-" json:"-"`
+	ProbeName                            string        `yaml:"name" json:"name" jsonschema:"required,title=Probe Name,description=the name of probe must be unique"`
+	ProbeChannels                        []string      `yaml:"channels" json:"channels,omitempty" jsonschema:"title=Probe Channels,description=the channels of probe message need to send to"`
+	ProbeTimeout                         time.Duration `yaml:"timeout,omitempty" json:"timeout,omitempty" jsonschema:"type=string,format=duration,title=Probe Timeout,description=the timeout of probe"`
+	ProbeTimeInterval                    time.Duration `yaml:"interval,omitempty" json:"interval,omitempty" jsonschema:"type=string,format=duration,title=Probe Interval,description=the interval of probe"`
+	global.StatusChangeThresholdSettings `yaml:",inline" json:",inline"`
+	ProbeFunc                            ProbeFuncType `yaml:"-" json:"-"`
+	ProbeResult                          *probe.Result `yaml:"-" json:"-"`
+	metrics                              *metrics      `yaml:"-" json:"-"`
 }
 
 // Kind return the probe kind
@@ -85,6 +87,46 @@ func (d *DefaultProbe) Result() *probe.Result {
 	return d.ProbeResult
 }
 
+// LogTitle return the log title
+func (d *DefaultProbe) LogTitle() string {
+	if len(d.ProbeTag) > 0 {
+		return fmt.Sprintf("[%s / %s / %s]", d.ProbeKind, d.ProbeTag, d.ProbeName)
+	}
+	return fmt.Sprintf("[%s / %s]", d.ProbeKind, d.ProbeName)
+}
+
+// CheckStatusThreshold check the status threshold
+func (d *DefaultProbe) CheckStatusThreshold() probe.Status {
+	s := d.StatusChangeThresholdSettings
+	c := d.ProbeResult.Stat.StatusCounter
+	title := d.LogTitle()
+	log.Debugf(" %s - Status Threshold Checking - Current[%v], StatusCnt[%d], FailureThread[%d], SuccessThread[%d]",
+		title, c.CurrentStatus, c.StatusCount, s.Failure, s.Success)
+
+	if c.CurrentStatus == true && c.StatusCount >= s.Success {
+		if d.ProbeResult.Status != probe.StatusUp {
+			cnt := math.Max(float64(c.StatusCount), float64(s.Success))
+			log.Infof("%s - Status is UP! Threshold reached for success [%d/%d]", title, int(cnt), s.Success)
+		}
+		return probe.StatusUp
+	}
+	if c.CurrentStatus == false && c.StatusCount >= s.Failure {
+		if d.ProbeResult.Status != probe.StatusDown {
+			cnt := math.Max(float64(c.StatusCount), float64(s.Failure))
+			log.Infof("%s - Status is DOWN! Threshold reached for failure [%d/%d]", title, int(cnt), s.Failure)
+		}
+		return probe.StatusDown
+	}
+	if c.CurrentStatus == true {
+		log.Infof("%s - Status unchanged [%s]! Threshold is not reached for success [%d/%d].",
+			title, d.ProbeResult.PreStatus, c.StatusCount, s.Success)
+	} else {
+		log.Infof("%s - Status unchanged [%s]! Threshold is not reached for failure [%d/%d].",
+			title, d.ProbeResult.PreStatus, c.StatusCount, s.Failure)
+	}
+	return d.ProbeResult.PreStatus
+}
+
 // Config default config
 func (d *DefaultProbe) Config(gConf global.ProbeSettings,
 	kind, tag, name, endpoint string, fn ProbeFuncType) error {
@@ -96,19 +138,28 @@ func (d *DefaultProbe) Config(gConf global.ProbeSettings,
 
 	d.ProbeTimeout = gConf.NormalizeTimeOut(d.ProbeTimeout)
 	d.ProbeTimeInterval = gConf.NormalizeInterval(d.ProbeTimeInterval)
+	d.StatusChangeThresholdSettings = gConf.NormalizeThreshold(d.StatusChangeThresholdSettings)
 
 	d.ProbeResult = probe.NewResultWithName(name)
 	d.ProbeResult.Name = name
 	d.ProbeResult.Endpoint = endpoint
 
+	// Set the new length of the status counter
+	maxLen := d.StatusChangeThresholdSettings.Failure
+	if d.StatusChangeThresholdSettings.Success > maxLen {
+		maxLen = d.StatusChangeThresholdSettings.Success
+	}
+	d.ProbeResult.Stat.StatusCounter.SetMaxLen(maxLen)
+
+	// if there no channels, use the default channel
 	if len(d.ProbeChannels) == 0 {
 		d.ProbeChannels = append(d.ProbeChannels, global.DefaultChannelName)
 	}
 
-	if len(d.ProbeTag) > 0 {
-		log.Infof("Probe [%s / %s] - [%s] base options are configured!", d.ProbeKind, d.ProbeTag, d.ProbeName)
-	} else {
-		log.Infof("Probe [%s] - [%s] base options are configured!", d.ProbeKind, d.ProbeName)
+	log.Infof("Probe %s base options are configured!", d.LogTitle())
+
+	if d.Failure > 1 || d.Success > 1 {
+		log.Infof("Probe %s Status Threshold are configured! failure[%d], success[%d]", d.LogTitle(), d.Failure, d.Success)
 	}
 
 	d.metrics = newMetrics(kind, tag)
@@ -130,20 +181,18 @@ func (d *DefaultProbe) Probe() probe.Result {
 
 	d.ProbeResult.RoundTripTime = time.Since(now)
 
-	status := probe.StatusUp
-	title := "Success"
-	if stat != true {
-		status = probe.StatusDown
-		title = "Error"
-	}
+	// check the status threshold
+	d.ProbeResult.Stat.StatusCounter.AppendStatus(stat, msg)
+	status := d.CheckStatusThreshold()
+	title := status.Title()
 
 	if len(d.ProbeTag) > 0 {
 		d.ProbeResult.Message = fmt.Sprintf("%s (%s/%s): %s", title, d.ProbeKind, d.ProbeTag, msg)
-		log.Debugf("[%s / %s / %s] - %s", d.ProbeKind, d.ProbeTag, d.ProbeName, msg)
 	} else {
 		d.ProbeResult.Message = fmt.Sprintf("%s (%s): %s", title, d.ProbeKind, msg)
-		log.Debugf("[%s / %s] - %s", d.ProbeKind, d.ProbeName, msg)
 	}
+
+	log.Debugf("%s - %s", d.LogTitle(), msg)
 
 	d.ProbeResult.PreStatus = d.ProbeResult.Status
 	d.ProbeResult.Status = status
