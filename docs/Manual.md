@@ -396,13 +396,13 @@ notify:
 
 ## 3.1 SLA Report Notification
 
-EaseProbe would send the daily, weekly, or monthly SLA report.
+EaseProbe supports minutely, hourly, daily, weekly, or monthly SLA reports.
 
 ```YAML
 settings:
 # SLA Report schedule
 sla:
-    #  daily, weekly (Sunday), monthly (Last Day), none
+    #  minutely, hourly, daily, weekly (Sunday), monthly (Last Day), none
     schedule: "weekly"
     # UTC time, the format is 'hour:min:sec'
     time: "23:59"
@@ -1285,14 +1285,10 @@ settings:
 
   # SLA Report schedule
   sla:
-    #  daily, weekly (Sunday), monthly (Last Day), none
+    #  minutely, hourly, daily, weekly (Sunday), monthly (Last Day), none
     schedule : "daily"
-    # UTC time, the format is 'hour:min:sec'
+    # UTC time, the format is 'hour:min:sec'. Ignored on hourly and minutely schedules
     time: "23:59"
-    # debug mode
-    # - true: send the SLA report every minute
-    # - false: send the SLA report in schedule
-    debug: false
     # SLA data persistence file path.
     # The default location is `$CWD/data/data.yaml`
     data: /path/to/data/file.yaml
