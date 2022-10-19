@@ -88,6 +88,7 @@ func testScheduleYaml(t *testing.T, name string, sch Schedule, good bool) {
 	}
 }
 func TestScheduleYaml(t *testing.T) {
+	testScheduleYaml(t, "minutely", Minutely, true)
 	testScheduleYaml(t, "hourly", Hourly, true)
 	testScheduleYaml(t, "daily", Daily, true)
 	testScheduleYaml(t, "weekly", Weekly, true)
@@ -546,7 +547,6 @@ settings:
   sla:
     schedule: "weekly"
     time: "23:59"
-    debug: true
     backups: 20
     channels:
       - general
@@ -573,7 +573,6 @@ func checkSettings(t *testing.T, s Settings) {
 	assert.Equal(t, s.HTTPServer.AccessLog.SelfRotate, true)
 	assert.Equal(t, s.SLAReport.Schedule, Weekly)
 	assert.Equal(t, s.SLAReport.Time, "23:59")
-	assert.Equal(t, s.SLAReport.Debug, true)
 	assert.Equal(t, s.SLAReport.Backups, 20)
 	assert.Equal(t, s.SLAReport.Channels, []string{"general"})
 	assert.Equal(t, s.Notify.Dry, true)
