@@ -198,6 +198,18 @@
           "title": "Probe Timeout",
           "description": "the timeout of probe",
           "default": "30s"
+        },
+        "failure": {
+          "type": "integer",
+          "title": "Failure Threshold",
+          "description": "the failures threshold to change the status such as 3",
+          "default": 1
+        },
+        "success": {
+          "type": "integer",
+          "title": "Success Threshold",
+          "description": "the success threshold to change the status such as 2",
+          "default": 1
         }
       },
       "additionalProperties": false,
@@ -1314,6 +1326,18 @@
           "title": "Probe Interval",
           "description": "the interval of probe"
         },
+        "failure": {
+          "type": "integer",
+          "title": "Failure Threshold",
+          "description": "the failures threshold to change the status such as 3",
+          "default": 1
+        },
+        "success": {
+          "type": "integer",
+          "title": "Success Threshold",
+          "description": "the success threshold to change the status such as 2",
+          "default": 1
+        },
         "host": {
           "type": "string",
           "format": "hostname",
@@ -1441,6 +1465,18 @@
           "type": "string",
           "title": "Probe Interval",
           "description": "the interval of probe"
+        },
+        "failure": {
+          "type": "integer",
+          "title": "Failure Threshold",
+          "description": "the failures threshold to change the status such as 3",
+          "default": 1
+        },
+        "success": {
+          "type": "integer",
+          "title": "Success Threshold",
+          "description": "the success threshold to change the status such as 2",
+          "default": 1
         },
         "key": {
           "type": "string",
@@ -1575,6 +1611,18 @@
           "type": "string",
           "title": "Probe Interval",
           "description": "the interval of probe"
+        },
+        "failure": {
+          "type": "integer",
+          "title": "Failure Threshold",
+          "description": "the failures threshold to change the status such as 3",
+          "default": 1
+        },
+        "success": {
+          "type": "integer",
+          "title": "Success Threshold",
+          "description": "the success threshold to change the status such as 2",
+          "default": 1
         },
         "url": {
           "type": "string",
@@ -1717,6 +1765,18 @@
           "title": "Probe Interval",
           "description": "the interval of probe"
         },
+        "failure": {
+          "type": "integer",
+          "title": "Failure Threshold",
+          "description": "the failures threshold to change the status such as 3",
+          "default": 1
+        },
+        "success": {
+          "type": "integer",
+          "title": "Success Threshold",
+          "description": "the success threshold to change the status such as 2",
+          "default": 1
+        },
         "cmd": {
           "type": "string",
           "title": "Command Line",
@@ -1848,6 +1908,18 @@
           "title": "Probe Interval",
           "description": "the interval of probe"
         },
+        "failure": {
+          "type": "integer",
+          "title": "Failure Threshold",
+          "description": "the failures threshold to change the status such as 3",
+          "default": 1
+        },
+        "success": {
+          "type": "integer",
+          "title": "Success Threshold",
+          "description": "the success threshold to change the status such as 2",
+          "default": 1
+        },
         "key": {
           "type": "string",
           "title": "Private Key",
@@ -1948,6 +2020,18 @@
           "title": "Probe Interval",
           "description": "the interval of probe"
         },
+        "failure": {
+          "type": "integer",
+          "title": "Failure Threshold",
+          "description": "the failures threshold to change the status such as 3",
+          "default": 1
+        },
+        "success": {
+          "type": "integer",
+          "title": "Success Threshold",
+          "description": "the success threshold to change the status such as 2",
+          "default": 1
+        },
         "host": {
           "type": "string",
           "format": "hostname",
@@ -1992,6 +2076,18 @@
           "type": "string",
           "title": "Probe Interval",
           "description": "the interval of probe"
+        },
+        "failure": {
+          "type": "integer",
+          "title": "Failure Threshold",
+          "description": "the failures threshold to change the status such as 3",
+          "default": 1
+        },
+        "success": {
+          "type": "integer",
+          "title": "Success Threshold",
+          "description": "the success threshold to change the status such as 2",
+          "default": 1
         },
         "host": {
           "type": "string",
