@@ -60,6 +60,7 @@ type Schedule int
 // Schedule enum
 const (
 	None Schedule = iota
+	Minutely
 	Hourly
 	Daily
 	Weekly
@@ -67,11 +68,12 @@ const (
 )
 
 var scheduleToString = map[Schedule]string{
-	Hourly:  "hourly",
-	Daily:   "daily",
-	Weekly:  "weekly",
-	Monthly: "monthly",
-	None:    "none",
+	Minutely: "minutely",
+	Hourly:   "hourly",
+	Daily:    "daily",
+	Weekly:   "weekly",
+	Monthly:  "monthly",
+	None:     "none",
 }
 
 var stringToSchedule = global.ReverseMap(scheduleToString)
@@ -101,9 +103,9 @@ type Probe struct {
 
 // SLAReport is the settings for SLA report
 type SLAReport struct {
-	Schedule Schedule `yaml:"schedule" json:"schedule" jsonschema:"type=string,enum=none,enum=hourly,enum=daily,enum=weekly,enum=monthly,title=Schedule,description=the schedule of SLA report"`
+	Schedule Schedule `yaml:"schedule" json:"schedule" jsonschema:"type=string,enum=none,enum=minutely,enum=hourly,enum=daily,enum=weekly,enum=monthly,title=Schedule,description=the schedule of SLA report"`
 	Time     string   `yaml:"time" json:"time,omitempty" jsonschema:"format=time,title=Time,description=the time of SLA report need to send out,example=23:59:59+08:00"`
-	Debug    bool     `yaml:"debug" json:"debug,omitempty" jsonschema:"title=Debug,description=if true the SLA report will be printed to stdout,default=false"`
+	//Debug    bool     `yaml:"debug" json:"debug,omitempty" jsonschema:"title=Debug,description=if true the SLA report will be printed to stdout,default=false"`
 	DataFile string   `yaml:"data" json:"data,omitempty" jsonschema:"title=Data File,description=the data file of SLA report, absolute path"`
 	Backups  int      `yaml:"backups" json:"backups,omitempty" jsonschema:"title=Backups,description=the number of backups of SLA report,default=5"`
 	Channels []string `yaml:"channels" json:"channels,omitempty" jsonschema:"title=Channels,description=the channels of SLA report"`
@@ -274,7 +276,7 @@ func New(conf *string) (*Conf, error) {
 			SLAReport: SLAReport{
 				Schedule: Daily,
 				Time:     "00:00",
-				Debug:    false,
+				//Debug:    false,
 				DataFile: global.DefaultDataFile,
 				Backups:  global.DefaultMaxBackups,
 				Channels: []string{global.DefaultChannelName},

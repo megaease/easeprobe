@@ -54,7 +54,7 @@ func saveData(doneSave chan bool, saveChannel chan probe.Result) {
 			probe.SetResultData(res.Name, &res)
 		case <-doneSave:
 			save()
-			log.Info("Received the exit signal, Saving data process is exiting...")
+			log.Info("Received the exit signal. Saving data, process is exiting...")
 			return
 		case <-interval.C:
 			log.Debugf("SaveData - %s Interval is up, Saving data to file...", c.Settings.Probe.Interval)
@@ -71,7 +71,7 @@ func scheduleSLA(probers []probe.Prober) {
 
 	notifies := channel.GetNotifiers(conf.Get().Settings.SLAReport.Channels)
 	if len(notifies) == 0 {
-		log.Warnf("No notify found for SLA report...")
+		log.Warnf("No notify settings found for SLA report...")
 		return
 	}
 
@@ -90,31 +90,30 @@ func scheduleSLA(probers []probe.Prober) {
 			}
 		}
 		_, t := cron.NextRun()
-		log.Infof("Next Time to send the SLA Report - %s", t.Format(conf.Get().Settings.TimeFormat))
+		log.Infof("Next SLA report will be sent at %s", t.Format(conf.Get().Settings.TimeFormat))
 	}
 
-	if conf.Get().Settings.SLAReport.Debug {
+	time := conf.Get().Settings.SLAReport.Time
+	switch conf.Get().Settings.SLAReport.Schedule {
+	case conf.Minutely:
 		cron.Every(1).Minute().Do(SLAFn)
-		log.Infoln("Preparing to send the  SLA report in every minute...")
-	} else {
-		time := conf.Get().Settings.SLAReport.Time
-		switch conf.Get().Settings.SLAReport.Schedule {
-		case conf.Daily:
-			cron.Every(1).Day().At(time).Do(SLAFn)
-			log.Infof("Preparing to send the daily SLA report at %s UTC time...", time)
-		case conf.Weekly:
-			cron.Every(1).Day().Sunday().At(time).Do(SLAFn)
-			log.Infof("Preparing to send the weekly SLA report on Sunday at %s UTC time...", time)
-		case conf.Monthly:
-			cron.Every(1).MonthLastDay().At(time).Do(SLAFn)
-			log.Infof("Preparing to send the monthly SLA report in last day at %s UTC time...", time)
-		default:
-			cron.Every(1).Day().At("00:00").Do(SLAFn)
-			log.Warnf("Bad Scheduling! Preparing to send the daily SLA report at 00:00 UTC time...")
-		}
+		log.Infoln("Scheduling every minute SLA reports...")
+	case conf.Hourly:
+		cron.Every(1).Hour().Do(SLAFn)
+		log.Infof("Scheduling hourly SLA reports...")
+	case conf.Daily:
+		cron.Every(1).Day().At(time).Do(SLAFn)
+		log.Infof("Scheduling daily SLA reports at %s UTC time...", time)
+	case conf.Weekly:
+		cron.Every(1).Day().Sunday().At(time).Do(SLAFn)
+		log.Infof("Scheduling weekly SLA reports on Sunday at %s UTC time...", time)
+	case conf.Monthly:
+		cron.Every(1).MonthLastDay().At(time).Do(SLAFn)
+		log.Infof("Scheduling monthly SLA reports for last day of the month at %s UTC time...", time)
+	default:
+		cron.Every(1).Day().At("00:00").Do(SLAFn)
+		log.Warnf("Bad Scheduling! Setting daily SLA reports to be sent at 00:00 UTC...")
 	}
 
 	cron.StartAsync()
-	_, t := cron.NextRun()
-	log.Infof("Next Time to send the SLA Report - %s", t.Format(conf.Get().Settings.TimeFormat))
 }

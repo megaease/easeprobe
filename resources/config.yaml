@@ -369,10 +369,6 @@ notify:
 #     schedule : "daily"
 #     # UTC time, the format is 'hour:min:sec'
 #     time: "23:59"
-#     # debug mode
-#     # - true: send the SLA report every minute
-#     # - false: send the SLA report in schedule
-#     debug: false
 #     # SLA data persistence file path.
 #     # The default location is `$CWD/data/data.yaml`
 #     data: /path/to/data/file.yaml
