@@ -221,6 +221,7 @@
           "type": "string",
           "enum": [
             "none",
+            "minutely",
             "hourly",
             "daily",
             "weekly",
@@ -236,12 +237,6 @@
           "examples": [
             "23:59:59+08:00"
           ]
-        },
-        "debug": {
-          "type": "boolean",
-          "title": "Debug",
-          "description": "if true the SLA report will be printed to stdout",
-          "default": false
         },
         "data": {
           "type": "string",
