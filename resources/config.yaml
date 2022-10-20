@@ -369,7 +369,7 @@ notify:
 #     schedule : "daily"
 #     # the time to send the SLA report. Ignored on hourly and minutely schedules
       # - the format is 'hour:min:sec'
-#     # - the timezone can be configured by `settings.timezone`
+#     # - the timezone can be configured by `settings.timezone`, default is UTC
 #     time: "23:59"
 #     # SLA data persistence file path.
 #     # The default location is `$CWD/data/data.yaml`
