@@ -23,6 +23,7 @@ import (
 	"github.com/go-co-op/gocron"
 	"github.com/megaease/easeprobe/channel"
 	"github.com/megaease/easeprobe/conf"
+	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
 	log "github.com/sirupsen/logrus"
 )
@@ -65,7 +66,7 @@ func saveData(doneSave chan bool, saveChannel chan probe.Result) {
 }
 
 func scheduleSLA(probers []probe.Prober) {
-	cron := gocron.NewScheduler(time.UTC)
+	cron := gocron.NewScheduler(global.GetEaseProbe().TimeLoc)
 
 	dryNotify := conf.Get().Settings.Notify.Dry
 
@@ -96,10 +97,10 @@ func scheduleSLA(probers []probe.Prober) {
 	time := conf.Get().Settings.SLAReport.Time
 	switch conf.Get().Settings.SLAReport.Schedule {
 	case conf.Minutely:
-		cron.Every(1).Minute().Do(SLAFn)
+		cron.Cron("* * * * *").Do(SLAFn)
 		log.Infoln("Scheduling every minute SLA reports...")
 	case conf.Hourly:
-		cron.Every(1).Hour().Do(SLAFn)
+		cron.Cron("0 * * * *").Do(SLAFn)
 		log.Infof("Scheduling hourly SLA reports...")
 	case conf.Daily:
 		cron.Every(1).Day().At(time).Do(SLAFn)
@@ -116,4 +117,7 @@ func scheduleSLA(probers []probe.Prober) {
 	}
 
 	cron.StartAsync()
+
+	_, t := cron.NextRun()
+	log.Infof("The SLA report will be schedule at %s", t.Format(conf.Get().Settings.TimeFormat))
 }
