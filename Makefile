@@ -9,7 +9,10 @@ MKFILE_DIR := $(dir $(MKFILE_PATH))
 RELEASE_DIR := ${MKFILE_DIR}/build/bin
 
 # Version
-RELEASE?=v0.1.0
+RELEASE_VER := $(shell git describe --tag --abbrev=0)
+
+# Go MOD
+GO_MOD := $(shell go list -m)
 
 # Git Related
 GIT_REPO_INFO=$(shell cd ${MKFILE_DIR} && git config --get remote.origin.url)
@@ -27,7 +30,7 @@ all: ${TARGET}
 ${TARGET}: ${SOURCE}
 	mkdir -p ${RELEASE_DIR}
 	go mod tidy
-	CGO_ENABLED=0 go build -a -ldflags '-s -w -extldflags "-static"' -o ${TARGET} github.com/megaease/easeprobe/cmd/easeprobe
+	CGO_ENABLED=0 go build -a -ldflags "-s -w -extldflags -static -X ${GO_MOD}/global.Ver=${RELEASE_VER}" -o ${TARGET} ${GO_MOD}/cmd/easeprobe
 
 build: all
 
