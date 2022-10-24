@@ -277,7 +277,6 @@ func SLASlackSection(r *probe.Result) string {
 func SLASlack(probers []probe.Prober) string {
 	summary := SLASummary(probers)
 	json := `{
-		"channel": "Report",
 		"text": "Overall SLA Report - ` + summary + ` ",
 		"blocks": [
 		{

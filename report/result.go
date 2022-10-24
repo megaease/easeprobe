@@ -162,7 +162,6 @@ func ToSlack(r probe.Result) string {
 
 	json := `
 	{
-		"channel": "Alert",
 		"text": "%s",
 		"blocks": [
 			{

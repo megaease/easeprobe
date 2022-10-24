@@ -37,16 +37,19 @@ const (
 	Org = "MegaEase"
 	// DefaultProg is the program name
 	DefaultProg = "EaseProbe"
-	// Ver is the program version
-	Ver = "v1.7.0"
+	// DefaultIconURL is the default icon which used in Slack or Discord
+	DefaultIconURL = "https://megaease.com/favicon.png"
+)
 
+var (
+	// Ver is the program version
+	// It will be set by the build script
+	// go build -ldflags "-X github.com/megaease/easegress/pkg/global.Ver=1.0.0"
+	Ver = "v1.7.0"
 	//OrgProg combine organization and program
 	OrgProg = Org + " " + DefaultProg
 	//OrgProgVer combine organization and program and version
 	OrgProgVer = Org + " " + DefaultProg + "/" + Ver
-
-	// DefaultIconURL is the default icon which used in Slack or Discord
-	DefaultIconURL = "https://megaease.com/favicon.png"
 )
 
 const (
