@@ -19,7 +19,7 @@ require (
 	github.com/prometheus/client_golang v1.13.0
 	github.com/segmentio/kafka-go v0.4.35
 	github.com/sirupsen/logrus v1.9.0
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	github.com/uptrace/bun/driver/pgdriver v1.1.8
 	go.mongodb.org/mongo-driver v1.10.3
 	golang.org/x/crypto v0.0.0-20220826181053-bd7e27e6170d
