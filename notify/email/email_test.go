@@ -18,11 +18,7 @@
 package email
 
 import (
-	"crypto/tls"
 	"errors"
-	"io"
-	"net"
-	"net/smtp"
 	"reflect"
 	"testing"
 
@@ -30,6 +26,7 @@ import (
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/report"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/gomail.v2"
 )
 
 type MyWriteCloser struct{}
@@ -56,88 +53,35 @@ func TestEmail(t *testing.T) {
 	err = conf.SendMail("title", "message")
 	assert.Error(t, err, "missing port")
 
-	monkey.Patch(tls.Dial, func(_, _ string, _ *tls.Config) (*tls.Conn, error) {
-		return &tls.Conn{}, nil
-	})
-	monkey.Patch(smtp.NewClient, func(_ net.Conn, _ string) (*smtp.Client, error) {
-		return &smtp.Client{}, nil
-	})
-	var client *smtp.Client
-	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Close", func(_ *smtp.Client) error {
-		return nil
-	})
-	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Extension", func(_ *smtp.Client, _ string) (bool, string) {
-		return true, ""
-	})
-	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Auth", func(_ *smtp.Client, _ smtp.Auth) error {
-		return nil
-	})
-	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Mail", func(_ *smtp.Client, _ string) error {
-		return nil
-	})
-	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Rcpt", func(_ *smtp.Client, _ string) error {
-		return nil
-	})
-	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Data", func(_ *smtp.Client) (io.WriteCloser, error) {
-		return &MyWriteCloser{}, nil
-	})
-	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Quit", func(_ *smtp.Client) error {
-		return nil
+	conf.Server = "smtp.example.com:xx"
+	err = conf.SendMail("title", "message")
+	assert.Error(t, err, "invalid syntax")
+
+	monkey.Patch(gomail.NewDialer, func(_ string, _ int, _, _ string) *gomail.Dialer {
+		return &gomail.Dialer{}
 	})
 
+	var d *gomail.Dialer
+	monkey.PatchInstanceMethod(reflect.TypeOf(d), "DialAndSend", func(_ *gomail.Dialer, _ ...*gomail.Message) error {
+		return errors.New("send error")
+	})
 	conf.Server = "smtp.example.com:25"
+	err = conf.SendMail("title", "message")
+	assert.Error(t, err, "send error")
+
+	conf.To = "test@emai.com;user@email.com"
+	err = conf.SendMail("title", "message")
+	assert.Error(t, err, "send error")
+
+	monkey.PatchInstanceMethod(reflect.TypeOf(d), "DialAndSend", func(_ *gomail.Dialer, _ ...*gomail.Message) error {
+		return nil
+	})
 	err = conf.SendMail("title", "message")
 	assert.NoError(t, err)
 
-	var w *MyWriteCloser
-	monkey.PatchInstanceMethod(reflect.TypeOf(w), "Close", func(_ *MyWriteCloser) error {
-		return errors.New("close error")
-	})
-	err = conf.SendMail("title", "message")
-	assertError(t, err, "close error")
-
-	monkey.PatchInstanceMethod(reflect.TypeOf(w), "Write", func(_ *MyWriteCloser, data []byte) (int, error) {
-		return 0, errors.New("write error")
-	})
-	err = conf.SendMail("title", "message")
-	assertError(t, err, "write error")
-
-	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Data", func(_ *smtp.Client) (io.WriteCloser, error) {
-		return nil, errors.New("data error")
-	})
-	err = conf.SendMail("title", "message")
-	assertError(t, err, "data error")
-
-	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Rcpt", func(_ *smtp.Client, _ string) error {
-		return errors.New("rcpt error")
-	})
 	conf.To = "test@emai.com;user@email.com"
 	err = conf.SendMail("title", "message")
-	assertError(t, err, "rcpt error")
-
-	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Mail", func(_ *smtp.Client, _ string) error {
-		return errors.New("mail error")
-	})
-	err = conf.SendMail("title", "message")
-	assertError(t, err, "mail error")
-
-	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Auth", func(_ *smtp.Client, _ smtp.Auth) error {
-		return errors.New("auth error")
-	})
-	err = conf.SendMail("title", "message")
-	assertError(t, err, "auth error")
-
-	monkey.Patch(smtp.NewClient, func(_ net.Conn, _ string) (*smtp.Client, error) {
-		return nil, errors.New("new client error")
-	})
-	err = conf.SendMail("title", "message")
-	assertError(t, err, "new client error")
-
-	monkey.Patch(tls.Dial, func(_, _ string, _ *tls.Config) (*tls.Conn, error) {
-		return nil, errors.New("dial error")
-	})
-	err = conf.SendMail("title", "message")
-	assertError(t, err, "dial error")
+	assert.NoError(t, err)
 
 	monkey.UnpatchAll()
 }
