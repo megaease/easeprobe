@@ -26,6 +26,7 @@ require (
 	golang.org/x/exp v0.0.0-20220328175248-053ad81199eb
 	golang.org/x/net v0.0.0-20220811182439-13a9a731de15
 	golang.org/x/sys v0.0.0-20220825204002-c680a09ffe64
+	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473
 	gopkg.in/yaml.v3 v3.0.1
@@ -43,6 +44,7 @@ require (
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
+	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 )
 
 require (

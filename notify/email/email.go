@@ -19,16 +19,15 @@
 package email
 
 import (
-	"crypto/tls"
-	"fmt"
 	"net"
-	"net/smtp"
+	"strconv"
 	"strings"
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify/base"
 	"github.com/megaease/easeprobe/report"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/gomail.v2"
 )
 
 // NotifyConfig is the email notification configuration
@@ -54,7 +53,12 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 // SendMail sends the email
 func (c *NotifyConfig) SendMail(subject string, message string) error {
 
-	host, _, err := net.SplitHostPort(c.Server)
+	host, p, err := net.SplitHostPort(c.Server)
+	if err != nil {
+		return err
+	}
+
+	port, err := strconv.Atoi(p)
 	if err != nil {
 		return err
 	}
@@ -64,72 +68,20 @@ func (c *NotifyConfig) SendMail(subject string, message string) error {
 		email = c.From
 	}
 
-	header := make(map[string]string)
-	header["From"] = email
-	header["To"] = c.To
-	header["Subject"] = subject
-	header["Content-Type"] = "text/html; charset=UTF-8"
-
-	body := ""
-	for k, v := range header {
-		body += fmt.Sprintf("%s: %s\r\n", k, v)
-	}
-	body += "\r\n" + message
-
-	auth := smtp.PlainAuth("", c.User, c.Pass, host)
-
-	conn, err := tls.Dial("tcp", c.Server, nil)
-	if err != nil {
-		return err
-	}
-
-	client, err := smtp.NewClient(conn, host)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
-
-	// Auth
-	if auth != nil {
-		if ok, _ := client.Extension("AUTH"); ok {
-			if err = client.Auth(auth); err != nil {
-				log.Errorln(err)
-				return err
-			}
-		}
-	}
-
-	// To && From
-	if err = client.Mail(c.User); err != nil {
-		return err
-	}
-
-	// support "," and ";"
 	split := func(r rune) bool {
 		return r == ';' || r == ','
 	}
-	for _, addr := range strings.FieldsFunc(c.To, split) {
 
-		if err = client.Rcpt(addr); err != nil {
-			return err
-		}
-	}
+	recipients := strings.FieldsFunc(c.To, split)
 
-	// Data
-	w, err := client.Data()
-	if err != nil {
-		return err
-	}
+	m := gomail.NewMessage()
+	m.SetHeader("From", email)
+	m.SetHeader("To", recipients...)
+	m.SetHeader("Subject", subject)
+	m.SetBody("text/html; charset=UTF-8", message)
 
-	_, err = w.Write([]byte(body))
-	if err != nil {
-		return err
-	}
+	d := gomail.NewDialer(host, port, c.User, c.Pass)
+	err = d.DialAndSend(m)
 
-	err = w.Close()
-	if err != nil {
-		return err
-	}
-
-	return client.Quit()
+	return err
 }
