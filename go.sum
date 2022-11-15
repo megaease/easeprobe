@@ -234,8 +234,8 @@ github.com/mattn/go-isatty v0.0.14 h1:yVuAays6BHfxijgZPzw+3Zlu5yQgKGP2/hcQbHb7S9
 github.com/mattn/go-isatty v0.0.14/go.mod h1:7GGIvUiUoEMVVmxf/4nioHXj79iQHKdU27kJ6hsGG94=
 github.com/matttproud/golang_protobuf_extensions v1.0.1 h1:4hp9jkHxhMHkqkrB3Ix0jegS5sx/RkqARlsWZ6pIwiU=
 github.com/matttproud/golang_protobuf_extensions v1.0.1/go.mod h1:D8He9yQNgCq6Z5Ld7szi9bcBfOoFv/3dc6xSMkL2PC0=
-github.com/mikefarah/yq/v4 v4.29.2 h1:JDnmZCBZpinREyX6nOxrXziK5g7/4rJ/QRezucWyrHs=
-github.com/mikefarah/yq/v4 v4.29.2/go.mod h1:5W3SgDwOG0zBPSjGf7ecreDiFlH16fd7Qj43F2UFCvU=
+github.com/mikefarah/yq/v4 v4.30.3 h1:3Dv3wt64mDUQzJ1KH5nXigiLX4j1tzzkmiqAarEgOxg=
+github.com/mikefarah/yq/v4 v4.30.3/go.mod h1:KBm6Ec5wLC5kiKJaDZfN4a7KWrJrf4rFPUZAmgleIAg=
 github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
 github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
 github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
