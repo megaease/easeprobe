@@ -34,7 +34,7 @@ import (
 // refer to https://github.com/golang/go/issues/51442
 // using the workaround to remove the directory by a retry loop
 func removeDir(dir string) {
-	for i := 0; i < 100; i++ {
+	for {
 		if err := os.RemoveAll(dir); err == nil {
 			return
 		}

@@ -35,10 +35,11 @@ require (
 require (
 	github.com/a8m/envsubst v1.3.0 // indirect
 	github.com/alecthomas/participle/v2 v2.0.0-beta.5 // indirect
+	github.com/dimchansky/utfbom v1.1.1 // indirect
 	github.com/elliotchance/orderedmap v1.5.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/goccy/go-json v0.9.11 // indirect
-	github.com/goccy/go-yaml v1.9.5 // indirect
+	github.com/goccy/go-yaml v1.9.6 // indirect
 	github.com/jinzhu/copier v0.3.5 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
@@ -64,7 +65,7 @@ require (
 	github.com/klauspost/compress v1.15.9 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
-	github.com/mikefarah/yq/v4 v4.28.1
+	github.com/mikefarah/yq/v4 v4.30.3
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
 	github.com/pierrec/lz4/v4 v4.1.15 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
