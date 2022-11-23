@@ -95,7 +95,7 @@ func (s *Shell) DoProbe() (bool, string) {
 			message = fmt.Sprintf("Error: %v, ExitCode(null), Output:%s",
 				err, probe.CheckEmpty(string(output)))
 		}
-		log.Errorf(message)
+		log.Errorf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, message)
 		status = false
 	}
 	log.Debugf("[%s / %s] - %s", s.ProbeKind, s.ProbeName, global.CommandLine(s.Command, s.Args))
