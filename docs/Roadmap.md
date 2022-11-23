@@ -6,7 +6,7 @@ EaseProbe plans to align closely with the Cloud Native ecosystem in providing se
   - [Features](#features)
     - [Probe specific](#probe-specific)
     - [Notify specific](#notify-specific)
-  - [Roadmap 2022](#roadmap-2022)
+  - [Roadmap](#roadmap)
     - [General](#general)
     - [Probes](#probes)
     - [Notify](#notify)
@@ -53,21 +53,22 @@ The project principles, of EaseProbe' features are separated into two main categ
 
 ... with new notification backends been added constantly.
 
-## Roadmap 2022
+## Roadmap 
 Some of the features that are planned/considered for 2022 can be broken down into three categories: *General*, *Probe*, *Notify*
 
 ### General
-* [ ] Work on detailed documentation
+* [x] Work on detailed documentation (megaease/easeprobe#210)
 * [x] Improve test coverage (megaease/easeprobe#128 megaease/easeprobe#127 megaease/easeprobe#119 megaease/easeprobe#118 megaease/easeprobe#117)
-* [ ] Improve 3rd party integrations and supports
+* Improve 3rd party integrations and supports
   * [x] megaease/easeprobe#95 Prometheus compatible metrics
 * Support for common daemon features
   * [ ] ability to send daemon to background without stdout logs
   * [x] megaease/easeprobe#129 add syslog support as an alternative destination instead of `easeprobe.log` eg `log: syslog`
-  * [ ] introduce a control socket for running easyprobe instance with disable or enable probes and notify endpoints (maybe something like `/var/run/easeprobe.sock` that speaks HTTP (`dockerd` & `supervisord` does something like that).
+  * [ ] introduce a control socket for running easeprobe instance with disable or enable probes and notify endpoints (maybe something like `/var/run/easeprobe.sock` that speaks HTTP (`dockerd` & `supervisord` does something like that).
   * [x] megaease/easeprobe#75 add `daemon()` & `/var/run/easeprobe.pid` support
   * [x] megaease/easeprobe#75 add SIGHUP, and ensure it closes and re-opens of logfile to allow for `easeprobe.log` rotation
 * [ ] Support for common `timeformat`, use standard timezone and `strftime` conversions, eg `timezone: [UTC|local|Europe/Athens]`, `timeformat: %F %R:%S UTC`
+* [x] Support the timezone configuration (megaease/easeprobe#167)
 * Add opt-out options where appropriate
   * [x] megaease/easeprobe#75 add opt-out option for `log` option
   * [x] megaease/easeprobe#92 Add opt-out option for SLA data persistence `data: false`
@@ -91,7 +92,7 @@ name: MyServer
     http:
       url: https://myserver.com
 ```
-  * add support for custom metrics and expand thresholds accordingly eg: number of process
+* [ ] add support for custom metrics and expand thresholds accordingly eg: number of process
 ```yaml
 host:
   servers:

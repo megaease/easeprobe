@@ -209,3 +209,33 @@ func TestStatusThreshold(t *testing.T) {
 		}
 	}
 }
+
+func TestStatusThreshold2(t *testing.T) {
+	p := newDummyProber("probe")
+	p.Failure = 2
+	p.Success = 1
+	p.Config(global.ProbeSettings{})
+	p.ProbeResult.Status = probe.StatusUp
+
+	p.ProbeFunc = func() (bool, string) {
+		return true, fmt.Sprintf("success")
+	}
+	p.Probe()
+	assert.Equal(t, probe.StatusUp, p.Result().Status)
+
+	p.ProbeFunc = func() (bool, string) {
+		return false, fmt.Sprintf("failure")
+	}
+	p.Probe()
+	assert.Equal(t, probe.StatusUp, p.Result().Status)
+	p.Probe()
+	assert.Equal(t, probe.StatusDown, p.Result().Status)
+	p.Probe()
+	assert.Equal(t, probe.StatusDown, p.Result().Status)
+
+	p.ProbeFunc = func() (bool, string) {
+		return true, fmt.Sprintf("success")
+	}
+	p.Probe()
+	assert.Equal(t, probe.StatusUp, p.Result().Status)
+}

@@ -100,7 +100,7 @@ func (d *DefaultProbe) CheckStatusThreshold() probe.Status {
 	s := d.StatusChangeThresholdSettings
 	c := d.ProbeResult.Stat.StatusCounter
 	title := d.LogTitle()
-	log.Debugf(" %s - Status Threshold Checking - Current[%v], StatusCnt[%d], FailureThread[%d], SuccessThread[%d]",
+	log.Debugf("%s - Status Threshold Checking - Current[%v], StatusCnt[%d], FailureThread[%d], SuccessThread[%d]",
 		title, c.CurrentStatus, c.StatusCount, s.Failure, s.Success)
 
 	if c.CurrentStatus == true && c.StatusCount >= s.Success {
