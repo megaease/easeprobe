@@ -86,5 +86,5 @@ func TestPingWithInvalidHost(t *testing.T) {
 	p.Config(global.ProbeSettings{})
 	s, m = p.DoProbe()
 	assert.False(t, s)
-	assert.Contains(t, m, "lookup unknown: no such host")
+	assert.Contains(t, m, "lookup unknown")
 }
