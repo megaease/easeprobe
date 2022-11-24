@@ -234,13 +234,14 @@ func (h *HTTP) DoProbe() (bool, string) {
 		return false, fmt.Sprintf("HTTP Status Code is %d. It missed in %v", resp.StatusCode, h.SuccessCode)
 	}
 
+	result := true
 	message := fmt.Sprintf("HTTP Status Code is %d", resp.StatusCode)
 
 	log.Debugf("[%s / %s] - %s", h.ProbeKind, h.ProbeName, h.TextChecker.String())
 	if err := h.Check(string(response)); err != nil {
 		log.Errorf("[%s / %s] - %v", h.ProbeKind, h.ProbeName, err)
 		message += fmt.Sprintf(". Error: %v", err)
-		return false, message
+		result = false
 	}
 
 	if h.Evaluator.DocType != eval.Unsupported && h.Evaluator.Extractor != nil &&
@@ -257,12 +258,15 @@ func (h *HTTP) DoProbe() (bool, string) {
 		if !result {
 			log.Errorf("[%s / %s] - expression is evaluated to false!", h.ProbeKind, h.ProbeName)
 			message += fmt.Sprintf(". Expression is evaluated to false!")
+			for k, v := range h.Evaluator.ExtractedValues {
+				message += fmt.Sprintf(" [%s = %v]", k, v)
+			}
 			return false, message
 		}
 		log.Debugf("[%s / %s] - expression is evaluated to true!", h.ProbeKind, h.ProbeName)
 	}
 
-	return true, message
+	return result, message
 }
 
 // ExportMetrics export HTTP metrics
