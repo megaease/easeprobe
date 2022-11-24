@@ -20,6 +20,7 @@ package ping
 import (
 	"fmt"
 	"reflect"
+	"runtime"
 	"testing"
 
 	"bou.ke/monkey"
@@ -50,6 +51,9 @@ func TestPing(t *testing.T) {
 	assert.Equal(t, DefaultPingCount, ping.Count)
 	assert.Equal(t, DefaultLostThreshold, ping.LostThreshold)
 
+	if runtime.GOOS == "windows" {
+		ping.Privileged = true
+	}
 	s, m := ping.DoProbe()
 	assert.True(t, s)
 	assert.Contains(t, m, "Succeeded")
@@ -68,6 +72,9 @@ func TestPingWithInvalidHost(t *testing.T) {
 	monkey.PatchInstanceMethod(reflect.TypeOf(pinger), "Statistics", func(_ *ping.Pinger) *ping.Statistics {
 		return &ping.Statistics{PacketLoss: 51}
 	})
+	if runtime.GOOS == "windows" {
+		p.Privileged = true
+	}
 	s, m := p.DoProbe()
 	assert.False(t, s)
 	assert.Contains(t, m, "Ping Failed")
@@ -83,7 +90,11 @@ func TestPingWithInvalidHost(t *testing.T) {
 		DefaultProbe: base.DefaultProbe{ProbeName: "dummy ping"},
 		Host:         "unknown",
 	}
-	p.Config(global.ProbeSettings{})
+	err := p.Config(global.ProbeSettings{})
+	assert.Error(t, err)
+	if runtime.GOOS == "windows" {
+		p.Privileged = true
+	}
 	s, m = p.DoProbe()
 	assert.False(t, s)
 	assert.Contains(t, m, "lookup unknown")

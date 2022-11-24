@@ -34,6 +34,7 @@ type Ping struct {
 	Host              string  `yaml:"host" json:"host" jsonschema:"required,title=Host,description=The host to ping"`
 	Count             int     `yaml:"count" json:"count" jsonschema:"title=Count,description=The number of ping packets to send,minimum=1,default=3"`
 	LostThreshold     float64 `yaml:"lost" json:"lost" jsonschema:"title=Lost Threshold,description=The threshold of packet loss,minimum=0,maximum=1,default=0"`
+	Privileged	bool	`yaml:"privileged" json:"privileged" jsonschema:"title=Privileged,description=Run ping with privileged modem, default=false"`
 
 	metrics *metrics `yaml:"-" json:"-"`
 }
@@ -50,6 +51,11 @@ func (p *Ping) Config(gConf global.ProbeSettings) error {
 	tag := ""
 	name := p.ProbeName
 	p.DefaultProbe.Config(gConf, kind, tag, name, p.Host, p.DoProbe)
+
+	pinger := ping.New(p.Host)
+	if err := pinger.Resolve(); err != nil {
+		return err
+	}
 
 	if p.Count <= 0 {
 		log.Debugf("[%s / %s] ping count is not set, use default value: %d", p.ProbeKind, p.ProbeName, DefaultPingCount)
@@ -75,6 +81,7 @@ func (p *Ping) DoProbe() (bool, string) {
 	}
 	pinger.Timeout = p.ProbeTimeout
 	pinger.Count = p.Count
+	pinger.SetPrivileged(p.Privileged)
 	err = pinger.Run() // Blocks until finished.
 	if err != nil {
 		return false, err.Error()
