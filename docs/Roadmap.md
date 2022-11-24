@@ -76,7 +76,7 @@ Some of the features that are planned/considered for 2022 can be broken down int
 
 ### Probes
 * [ ] add automatic service discovery which includes probing details
-* [x] add plain old `icmp` ping probe
+* [x] add plain old `icmp` ping probe (megaease/easeprobe#251)
 * [ ] `shell` probe command improvements in handling stdout/stderr
 * [x] megaease/easeprobe#108 add support to define destination notification channels for probe (see https://github.com/megaease/easeprobe/discussions/82)
 * [ ] work on cleaner distinction between `host`, `ssh` and `shell` (certain areas seem overlapping):
