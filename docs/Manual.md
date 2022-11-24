@@ -62,7 +62,7 @@ EaseProbe supports the following probing methods: **HTTP**, **TCP**, **TLS**, **
 Each probe is identified by the method it supports (eg `http`), a unique name (across all probes in the configuration file) and the method specific parameters.
 - **HTTP**. Checking the HTTP status code, Support mTLS, HTTP Basic Auth, and can set the Request Header/Body. ( [HTTP Probe Configuration](#71-http-probe-configuration) )
 - **TCP**. Just simply check whether the TCP connection can be established or not. ( [TCP Probe Configuration](#72-tcp-probe-configuration) )
-- **Ping**. Just simply check whether can be ping or not. ( [Ping Probe Configuration](#73-ping-probe-configuration) )
+- **Ping**. Just simply check whether can be pinged or not. ( [Ping Probe Configuration](#73-ping-probe-configuration) )
 - **Shell**. Run a Shell command and check the result. ( [Shell Command Probe Configuration](#74-shell-command-probe-configuration) )
 - **SSH**. Run a remote command via SSH and check the result. Support the bastion/jump server  ([SSH Command Probe Configuration](#75-ssh-command-probe-configuration))
 - **TLS**. Ping the remote endpoint, can probe for revoked or expired certificates ( [TLS Probe Configuration](#76-tls-probe-configuration) )
