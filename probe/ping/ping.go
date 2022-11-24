@@ -83,9 +83,8 @@ func (p *Ping) DoProbe() (bool, string) {
 	p.ExportMetrics(stats)
 
 	stat := ""
-	stat += fmt.Sprintf("%d packets transmitted, %d packets received, %v%% packet loss\n",
-		stats.PacketsSent, stats.PacketsRecv, stats.PacketLoss)
-	stat += fmt.Sprintf("round-trip min/avg/max/stddev = %v/%v/%v/%v\n",
+	stat += fmt.Sprintf("%d sent, %d received, %v%% loss, RTT min/avg/max/stddev = %v/%v/%v/%v",
+		stats.PacketsSent, stats.PacketsRecv, stats.PacketLoss,
 		stats.MinRtt, stats.AvgRtt, stats.MaxRtt, stats.StdDevRtt)
 
 	log.Debugf("[%s / %s] --- %s ping statistics ---", p.ProbeKind, p.ProbeName, stats.Addr)
@@ -101,7 +100,7 @@ func (p *Ping) DoProbe() (bool, string) {
 		result = false
 		message = "Ping Failed!"
 	}
-	return result, fmt.Sprintf("%s: %d/%d\n%s", message, stats.PacketsRecv, stats.PacketsSent, stat)
+	return result, fmt.Sprintf("%s: %d/%d ( %s )", message, stats.PacketsRecv, stats.PacketsSent, stat)
 }
 
 // ExportMetrics export Ping metrics
