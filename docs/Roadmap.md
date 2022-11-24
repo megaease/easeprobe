@@ -54,7 +54,7 @@ The project principles, of EaseProbe' features are separated into two main categ
 ... with new notification backends been added constantly.
 
 ## Roadmap
-Some of the features that we plan to implement in the future fall under one these categories: *General*, *Probe*, *Notify*
+Some of the features that we plan to implement in the future fall under one of these categories: *General*, *Probe*, *Notify*
 
 ### General
 * [x] Work on detailed documentation (megaease/easeprobe#210)
