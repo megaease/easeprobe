@@ -34,7 +34,7 @@ type Ping struct {
 	Host              string  `yaml:"host" json:"host" jsonschema:"required,title=Host,description=The host to ping"`
 	Count             int     `yaml:"count" json:"count" jsonschema:"title=Count,description=The number of ping packets to send,minimum=1,default=3"`
 	LostThreshold     float64 `yaml:"lost" json:"lost" jsonschema:"title=Lost Threshold,description=The threshold of packet loss,minimum=0,maximum=1,default=0"`
-	Privileged	bool	`yaml:"privileged" json:"privileged" jsonschema:"title=Privileged,description=Run ping with privileged modem, default=false"`
+	Privileged        bool    `yaml:"privileged" json:"privileged" jsonschema:"title=Privileged,description=Run ping with privileged modem, default=false"`
 
 	metrics *metrics `yaml:"-" json:"-"`
 }
