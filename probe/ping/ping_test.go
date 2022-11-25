@@ -77,7 +77,7 @@ func TestPingWithInvalidHost(t *testing.T) {
 	}
 	s, m := p.DoProbe()
 	assert.False(t, s)
-	assert.Contains(t, m, "Ping Failed")
+	assert.Contains(t, m, "Failed")
 
 	monkey.PatchInstanceMethod(reflect.TypeOf(pinger), "Run", func(_ *ping.Pinger) error {
 		return fmt.Errorf("ping error")

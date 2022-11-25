@@ -20,6 +20,7 @@ package ping
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/go-ping/ping"
 	"github.com/megaease/easeprobe/global"
@@ -73,6 +74,14 @@ func (p *Ping) Config(gConf global.ProbeSettings) error {
 	return nil
 }
 
+// using reflect to get the network and protocol (private fields)
+func protocol(p *ping.Pinger) (network string, protocol string) {
+	v := reflect.ValueOf(*p)
+	net := v.FieldByName("network")
+	proto := v.FieldByName("protocol")
+	return net.String(), proto.String()
+}
+
 // DoProbe return the checking result
 func (p *Ping) DoProbe() (bool, string) {
 	pinger, err := ping.NewPinger(p.Host)
@@ -89,8 +98,11 @@ func (p *Ping) DoProbe() (bool, string) {
 	stats := pinger.Statistics() // get send/receive/rtt stats
 	p.ExportMetrics(stats)
 
+	network, protocol := protocol(pinger)
+
 	stat := ""
-	stat += fmt.Sprintf("%d sent, %d received, %v%% loss, RTT min/avg/max/stddev = %v/%v/%v/%v",
+	stat += fmt.Sprintf("%s-%s, %d sent, %d received, %v%% loss, RTT min/avg/max/stddev = %v/%v/%v/%v",
+		network, protocol,
 		stats.PacketsSent, stats.PacketsRecv, stats.PacketLoss,
 		stats.MinRtt, stats.AvgRtt, stats.MaxRtt, stats.StdDevRtt)
 
@@ -101,12 +113,14 @@ func (p *Ping) DoProbe() (bool, string) {
 		p.ProbeKind, p.ProbeName, stats.MinRtt, stats.AvgRtt, stats.MaxRtt, stats.StdDevRtt)
 
 	result := true
-	message := "Ping Succeeded!"
+	message := "Succeeded!"
 	// if half of the packets are lost, return false
 	if stats.PacketLoss > p.LostThreshold*100 {
 		result = false
-		message = "Ping Failed!"
+		message = "Failed!"
 	}
+	message = fmt.Sprintf("Ping %s %s", p.Host, message)
+	log.Infof("[%s / %s] %s (%s-%s)", p.ProbeKind, p.ProbeName, message, network, protocol)
 	return result, fmt.Sprintf("%s: %d/%d ( %s )", message, stats.PacketsRecv, stats.PacketsSent, stat)
 }
 
