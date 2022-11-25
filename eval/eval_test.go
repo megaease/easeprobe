@@ -422,8 +422,8 @@ func TestSpringActuator(t *testing.T) {
 	eval := NewEvaluator(jsonDoc, JSON, "x_str('//status') == 'UP'")
 	assertResult(t, eval, true)
 
-	eval = NewEvaluator(jsonDoc, JSON, "x_str('//components/*/details/error') != ''")
+	exp := "//components/*/details/error"
+	eval = NewEvaluator(jsonDoc, JSON, "x_str('"+exp+"') != ''")
 	assertResult(t, eval, true)
-	assert.Equal(t, errMsg, eval.ExtractedValues["//components/*/details/error"])
-
+	assert.Equal(t, errMsg, eval.ExtractedValues[exp])
 }

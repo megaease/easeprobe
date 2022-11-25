@@ -76,6 +76,7 @@ func (e *Evaluator) Config() error {
 }
 
 func (e *Evaluator) configExtractor() {
+	e.ExtractedValues = make(map[string]interface{})
 	switch e.DocType {
 	case HTML:
 		e.Extractor = NewHTMLExtractor(e.Document)
@@ -93,8 +94,6 @@ func (e *Evaluator) configExtractor() {
 
 func (e *Evaluator) configEvalFunctions() {
 
-	e.ExtractedValues = make(map[string]interface{})
-
 	extract := func(t VarType, query string, failed interface{}) (interface{}, error) {
 		v := Variable{
 			Type:  t,
@@ -103,7 +102,6 @@ func (e *Evaluator) configEvalFunctions() {
 		if err := e.ExtractValue(&v); err != nil {
 			return failed, err
 		}
-		e.ExtractedValues[v.Query] = v.Value
 		return v.Value, nil
 	}
 
@@ -238,5 +236,6 @@ func (e *Evaluator) ExtractValue(v *Variable) error {
 	} else {
 		v.Value = value
 	}
+	e.ExtractedValues[v.Query] = v.Value
 	return nil
 }
