@@ -37,6 +37,7 @@ import (
 	"github.com/megaease/easeprobe/probe/client"
 	"github.com/megaease/easeprobe/probe/host"
 	"github.com/megaease/easeprobe/probe/http"
+	"github.com/megaease/easeprobe/probe/ping"
 	"github.com/megaease/easeprobe/probe/shell"
 	"github.com/megaease/easeprobe/probe/ssh"
 	"github.com/megaease/easeprobe/probe/tcp"
@@ -143,6 +144,7 @@ type Conf struct {
 	SSH      ssh.SSH         `yaml:"ssh" json:"ssh,omitempty" jsonschema:"title=SSH Probe,description=SSH Probe Configuration"`
 	TLS      []tls.TLS       `yaml:"tls" json:"tls,omitempty" jsonschema:"title=TLS Probe,description=TLS Probe Configuration"`
 	Host     host.Host       `yaml:"host" json:"host,omitempty" jsonschema:"title=Host Probe,description=Host Probe Configuration"`
+	Ping     []ping.Ping     `yaml:"ping" json:"ping,omitempty" jsonschema:"title=Ping Probe,description=Ping Probe Configuration"`
 	Notify   notify.Config   `yaml:"notify" json:"notify,omitempty" jsonschema:"title=Notification,description=Notification Configuration"`
 	Settings Settings        `yaml:"settings" json:"settings,omitempty" jsonschema:"title=Global Settings,description=EaseProbe Global configuration"`
 }

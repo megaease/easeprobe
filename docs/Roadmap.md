@@ -53,8 +53,8 @@ The project principles, of EaseProbe' features are separated into two main categ
 
 ... with new notification backends been added constantly.
 
-## Roadmap 
-Some of the features that are planned/considered for 2022 can be broken down into three categories: *General*, *Probe*, *Notify*
+## Roadmap
+Some of the features that we plan to implement in the future fall under one of these categories: *General*, *Probe*, *Notify*
 
 ### General
 * [x] Work on detailed documentation (megaease/easeprobe#210)
@@ -76,7 +76,7 @@ Some of the features that are planned/considered for 2022 can be broken down int
 
 ### Probes
 * [ ] add automatic service discovery which includes probing details
-* [ ] add plain old `icmp` ping probe
+* [x] add plain old `icmp` ping probe (megaease/easeprobe#251)
 * [ ] `shell` probe command improvements in handling stdout/stderr
 * [x] megaease/easeprobe#108 add support to define destination notification channels for probe (see https://github.com/megaease/easeprobe/discussions/82)
 * [ ] work on cleaner distinction between `host`, `ssh` and `shell` (certain areas seem overlapping):

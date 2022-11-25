@@ -40,13 +40,14 @@ EaseProbe is a simple, standalone, and lightweight tool that can do health/statu
     - [7.1.2 Complete HTTP Configuration](#712-complete-http-configuration)
     - [7.1.3 Expression Evaluation](#713-expression-evaluation)
   - [7.2 TCP Probe Configuration](#72-tcp-probe-configuration)
-  - [7.3 Shell Command Probe Configuration](#73-shell-command-probe-configuration)
-  - [7.4 SSH Command Probe Configuration](#74-ssh-command-probe-configuration)
-  - [7.5 TLS Probe Configuration](#75-tls-probe-configuration)
-  - [7.6 Host Resource Usage Probe Configuration](#76-host-resource-usage-probe-configuration)
-  - [7.7 Native Client Probe Configuration](#77-native-client-probe-configuration)
-  - [7.8 Notification Configuration](#78-notification-configuration)
-  - [7.9 Global Setting Configuration](#79-global-setting-configuration)
+  - [7.3 Ping Probe Configuration](#73-ping-probe-configuration)
+  - [7.4 Shell Command Probe Configuration](#74-shell-command-probe-configuration)
+  - [7.5 SSH Command Probe Configuration](#75-ssh-command-probe-configuration)
+  - [7.6 TLS Probe Configuration](#76-tls-probe-configuration)
+  - [7.7 Host Resource Usage Probe Configuration](#77-host-resource-usage-probe-configuration)
+  - [7.8 Native Client Probe Configuration](#78-native-client-probe-configuration)
+  - [7.9 Notification Configuration](#79-notification-configuration)
+  - [7.10 Global Setting Configuration](#710-global-setting-configuration)
 - [8. Tools](#8-tools)
   - [8.1 EaseProbe JSON Schema](#81-easeprobe-json-schema)
 
@@ -61,11 +62,12 @@ EaseProbe supports the following probing methods: **HTTP**, **TCP**, **TLS**, **
 Each probe is identified by the method it supports (eg `http`), a unique name (across all probes in the configuration file) and the method specific parameters.
 - **HTTP**. Checking the HTTP status code, Support mTLS, HTTP Basic Auth, and can set the Request Header/Body. ( [HTTP Probe Configuration](#71-http-probe-configuration) )
 - **TCP**. Just simply check whether the TCP connection can be established or not. ( [TCP Probe Configuration](#72-tcp-probe-configuration) )
-- **Shell**. Run a Shell command and check the result. ( [Shell Command Probe Configuration](#73-shell-command-probe-configuration) )
-- **SSH**. Run a remote command via SSH and check the result. Support the bastion/jump server  ([SSH Command Probe Configuration](#74-ssh-command-probe-configuration))
-- **TLS**. Ping the remote endpoint, can probe for revoked or expired certificates ( [TLS Probe Configuration](#75-tls-probe-configuration) )
-- **Host**. Run an SSH command on a remote host and check the CPU, Memory, and Disk usage. ( [Host Load Probe](#76-host-resource-usage-probe-configuration) )
-- **Client**. Currently, support the following native client. Support the mTLS. ( refer to: [Native Client Probe Configuration](#77-native-client-probe-configuration) )
+- **Ping**. Just simply check whether can be pinged or not. ( [Ping Probe Configuration](#73-ping-probe-configuration) )
+- **Shell**. Run a Shell command and check the result. ( [Shell Command Probe Configuration](#74-shell-command-probe-configuration) )
+- **SSH**. Run a remote command via SSH and check the result. Support the bastion/jump server  ([SSH Command Probe Configuration](#75-ssh-command-probe-configuration))
+- **TLS**. Ping the remote endpoint, can probe for revoked or expired certificates ( [TLS Probe Configuration](#76-tls-probe-configuration) )
+- **Host**. Run an SSH command on a remote host and check the CPU, Memory, and Disk usage. ( [Host Load Probe](#77-host-resource-usage-probe-configuration) )
+- **Client**. Currently, support the following native client. Support the mTLS. ( refer to: [Native Client Probe Configuration](#78-native-client-probe-configuration) )
   - **MySQL**. Connect to the MySQL server and run the `SHOW STATUS` SQL.
   - **Redis**. Connect to the Redis server and run the `PING` command.
   - **Memcache**. Connect to a Memcache server and run the `version` command or check based on key/value checks.
@@ -126,7 +128,7 @@ And please be aware that the following configuration:
           interval: 10s # retry interval, default is 5s
     ```
 
-For a complete list of examples using all the notifications please check the [Notification Configuration](#78-notification-configuration) section.
+For a complete list of examples using all the notifications please check the [Notification Configuration](#79-notification-configuration) section.
 
 ## 2.1 Slack
 This notification method utilizes the Slack webhooks to deliver status updates as messages.
@@ -428,7 +430,7 @@ You can use the following URL query options for both HTML and JSON:
   - `gte`: filter the probers with SLA greater than or equal to the given percentage (ex. `?gte=50` filter only hosts with SLA percentage `>= 50%`)
   - `lte`:filter the probers with SLA less than or equal to the given percentage (ex. `?lte=90` filter only hosts with SLA percentage `<= 90%` )
 
-  Refer to the [Global Setting Configuration](#79-global-setting-configuration) to see how to configure the access log.
+  Refer to the [Global Setting Configuration](#710-global-setting-configuration) to see how to configure the access log.
 
 
 ## 3.3 SLA Data Persistence
@@ -447,7 +449,7 @@ sla:
     data: /path/to/data/file.yaml
 ```
 
-For more information, please check the [Global Setting Configuration](#79-global-setting-configuration)
+For more information, please check the [Global Setting Configuration](#710-global-setting-configuration)
 
 
 # 4. Channel
@@ -578,6 +580,18 @@ And for the different Probers, the following metrics are available:
   - `transfer_duration`: HTTP transfer duration in milliseconds
   - `total_duration`: HTTP total duration in milliseconds
 
+- Ping Probe
+  - `sent`: Number of sent packets
+  - `recv`: Number of received packets
+  - `loss`: Packet loss percentage
+  - `min_rtt`: Minimum round-trip time in milliseconds
+  - `max_rtt`: Maximum round-trip time in milliseconds
+  - `avg_rtt`: Average round-trip time in milliseconds
+  - `stddev_rtt`: Standard deviation of round-trip time in milliseconds
+  - `privileged`: Whether to use ICMP (`true`) or UDP (`false`) based ping probes, default `false`. 
+  
+Please note that `privileged: true` requires administrative privileges such as `root` (for more details see https://github.com/go-ping/ping#supported-operating-systems)
+
 - TLS Probe
   - `earliest_cert_expiry`: last TLS chain expiry in timestamp seconds
   - `last_chain_expiry_timestamp_seconds`: earliest TLS cert expiry in Unix time
@@ -596,7 +610,7 @@ The following snapshot is the Grafana panel for host CPU metrics
 
 ![](./grafana.demo.png)
 
-Refer to the [Global Setting Configuration](#79-global-setting-configuration) for further details on how to configure the HTTP server.
+Refer to the [Global Setting Configuration](#710-global-setting-configuration) for further details on how to configure the HTTP server.
 
 
 # 7. Configuration
@@ -877,7 +891,20 @@ tcp:
     host: kafka.server:9093
 ```
 
-## 7.3 Shell Command Probe Configuration
+## 7.3 Ping Probe Configuration
+
+```YAML
+ping:
+  - name: Localhost
+    host: 127.0.0.1
+    count: 5 # number of packets to send, default: 3
+    lost: 0.2 # 20% lost percentage threshold, mark it down if the loss is greater than this, default: 0
+    privileged: true # if true, the ping will be executed with icmp, otherwise use udp, default: false (Note: On Windows platform, this must be set to True)
+    timeout: 10s # default is 30 seconds
+    interval: 2m # default is 60 seconds
+```
+
+## 7.4 Shell Command Probe Configuration
 
 The shell command probe is used to execute a shell command and check the output.
 
@@ -923,7 +950,7 @@ shell:
 >
 > The Regular Expression supported refer to https://github.com/google/re2/wiki/Syntax
 
-## 7.4 SSH Command Probe Configuration
+## 7.5 SSH Command Probe Configuration
 
 SSH probe is similar to Shell probe.
 - Support Password and Private key authentication.
@@ -983,7 +1010,7 @@ ssh:
 >
 > The Regular Expression supported refer to https://github.com/google/re2/wiki/Syntax
 
-## 7.5 TLS Probe Configuration
+## 7.6 TLS Probe Configuration
 
 TLS ping to remote endpoint, can probe for revoked or expired certificates
 
@@ -1008,7 +1035,7 @@ tls:
     #   -----BEGIN CERTIFICATE-----
 ```
 
-## 7.6 Host Resource Usage Probe Configuration
+## 7.7 Host Resource Usage Probe Configuration
 
 The host resource usage probe allows for collecting information and alerting when certain resource utilization thresholds are exceeded.
 
@@ -1045,7 +1072,7 @@ host:
       key: /Users/user/.ssh/id_rsa
 ```
 
-## 7.7 Native Client Probe Configuration
+## 7.8 Native Client Probe Configuration
 
 Native Client probe uses the native GO SDK to communicate with the remote endpoints. Additionally to simple connectivity checks, you can also define key and data validity checks for EaseProbe, it will query for the given keys and verify the data stored on each service.
 
@@ -1135,7 +1162,7 @@ client:
 ```
 
 
-## 7.8 Notification Configuration
+## 7.9 Notification Configuration
 
 ```YAML
 # Notification Configuration
@@ -1252,7 +1279,7 @@ notify:
 >     ```
 
 
-## 7.9 Global Setting Configuration
+## 7.10 Global Setting Configuration
 
 ```YAML
 # Global settings for all probes and notifiers.
