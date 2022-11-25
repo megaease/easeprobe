@@ -260,6 +260,7 @@ func (h *HTTP) DoProbe() (bool, string) {
 			message += fmt.Sprintf(". Expression is evaluated to false!")
 			for k, v := range h.Evaluator.ExtractedValues {
 				message += fmt.Sprintf(" [%s = %v]", k, v)
+				log.Debugf("[%s / %s] - Expression Value: [%s] = [%v]", h.ProbeKind, h.ProbeName, k, v)
 			}
 			return false, message
 		}
