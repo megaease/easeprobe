@@ -68,6 +68,14 @@
           "title": "Host Probe",
           "description": "Host Probe Configuration"
         },
+        "ping": {
+          "items": {
+            "$ref": "#/$defs/probe_ping_Ping"
+          },
+          "type": "array",
+          "title": "Ping Probe",
+          "description": "Ping Probe Configuration"
+        },
         "notify": {
           "$ref": "#/$defs/notify_Config",
           "title": "Notification",
@@ -1733,6 +1741,78 @@
       "required": [
         "name",
         "url"
+      ]
+    },
+    "probe_ping_Ping": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Probe Name",
+          "description": "the name of probe must be unique"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Probe Channels",
+          "description": "the channels of probe message need to send to"
+        },
+        "timeout": {
+          "type": "string",
+          "title": "Probe Timeout",
+          "description": "the timeout of probe"
+        },
+        "interval": {
+          "type": "string",
+          "title": "Probe Interval",
+          "description": "the interval of probe"
+        },
+        "failure": {
+          "type": "integer",
+          "title": "Failure Threshold",
+          "description": "the failures threshold to change the status such as 3",
+          "default": 1
+        },
+        "success": {
+          "type": "integer",
+          "title": "Success Threshold",
+          "description": "the success threshold to change the status such as 2",
+          "default": 1
+        },
+        "host": {
+          "type": "string",
+          "title": "Host",
+          "description": "The host to ping"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "title": "Count",
+          "description": "The number of ping packets to send",
+          "default": 3
+        },
+        "lost": {
+          "type": "number",
+          "maximum": 1,
+          "title": "Lost Threshold",
+          "description": "The threshold of packet loss",
+          "default": 0
+        },
+        "privileged": {
+          "type": "boolean",
+          "title": "Privileged",
+          "description": "Run ping with privileged modem"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "host",
+        "count",
+        "lost",
+        "privileged"
       ]
     },
     "probe_shell_Shell": {
