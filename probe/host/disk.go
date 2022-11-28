@@ -51,7 +51,7 @@ func (d *Disks) Config(s *Server) error {
 	d.Mount = append(d.Mount, s.Disks...)
 	if s.Threshold.Disk == 0 {
 		s.Threshold.Disk = DefaultDiskThreshold
-		log.Debugf("[%s / %s] Disk threshold is not set, use default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Disk)
+		log.Debugf("[%s / %s] Disk threshold is not set, using default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Disk)
 	}
 	d.SetThreshold(&s.Threshold)
 	return nil
@@ -101,7 +101,7 @@ func (d *Disks) CheckThreshold() (bool, string) {
 		}
 	}
 	if len(lowDisks) > 0 {
-		return false, fmt.Sprintf("Disk Space Low! - [%s]", strings.Join(lowDisks, ", "))
+		return false, fmt.Sprintf("Disk Space threshold alert! - [%s]", strings.Join(lowDisks, ", "))
 	}
 	return true, ""
 }

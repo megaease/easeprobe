@@ -54,7 +54,7 @@ func (c *CPU) OutputLines() int {
 func (c *CPU) Config(s *Server) error {
 	if s.Threshold.CPU == 0 {
 		s.Threshold.CPU = DefaultCPUThreshold
-		log.Debugf("[%s / %s] CPU threshold is not set, use default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.CPU)
+		log.Debugf("[%s / %s] CPU threshold is not set, using default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.CPU)
 	}
 	c.SetThreshold(&s.Threshold)
 	return nil
@@ -93,7 +93,7 @@ func (c *CPU) UsageInfo() string {
 // CheckThreshold check the cpu usage
 func (c *CPU) CheckThreshold() (bool, string) {
 	if c.Threshold > 0 && c.Threshold <= (100-c.Idle)/100 {
-		return false, "CPU Busy!"
+		return false, "CPU threshold alert!"
 	}
 	return true, ""
 }

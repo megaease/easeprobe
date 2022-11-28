@@ -79,7 +79,7 @@ func (m *Mem) UsageInfo() string {
 // CheckThreshold check the cpu usage
 func (m *Mem) CheckThreshold() (bool, string) {
 	if m.Threshold > 0 && m.Threshold <= m.Usage/100 {
-		return false, "Memory Shortage!"
+		return false, "Memory threshold alert!"
 	}
 	return true, ""
 }

@@ -51,7 +51,7 @@ func (l *Load) Config(s *Server) error {
 		s.Threshold.Load["m1"] = DefaultLoadThreshold
 		s.Threshold.Load["m5"] = DefaultLoadThreshold
 		s.Threshold.Load["m15"] = DefaultLoadThreshold
-		log.Debugf("[%s / %s] All of load average threshold is not set, use default value: %.2f", s.ProbeKind, s.ProbeName, DefaultLoadThreshold)
+		log.Debugf("[%s / %s] All of load average threshold is not set, using default value: %.2f", s.ProbeKind, s.ProbeName, DefaultLoadThreshold)
 		l.SetThreshold(&s.Threshold)
 		return nil
 	}
@@ -61,15 +61,15 @@ func (l *Load) Config(s *Server) error {
 	}
 	if _, ok := s.Threshold.Load["m1"]; !ok {
 		s.Threshold.Load["m1"] = DefaultLoadThreshold
-		log.Debugf("[%s / %s] Load average threshold for m1 is not set, use default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Load["m1"])
+		log.Debugf("[%s / %s] Load average threshold for m1 is not set, using default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Load["m1"])
 	}
 	if _, ok := s.Threshold.Load["m5"]; !ok {
 		s.Threshold.Load["m5"] = DefaultLoadThreshold
-		log.Debugf("[%s / %s] Load average threshold for m5 is not set, use default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Load["m5"])
+		log.Debugf("[%s / %s] Load average threshold for m5 is not set, using default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Load["m5"])
 	}
 	if _, ok := s.Threshold.Load["m15"]; !ok {
 		s.Threshold.Load["m15"] = DefaultLoadThreshold
-		log.Debugf("[%s / %s] Load average threshold for m15 is not set, use default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Load["m15"])
+		log.Debugf("[%s / %s] Load average threshold for m15 is not set, using default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Load["m15"])
 	}
 	l.SetThreshold(&s.Threshold)
 	return nil
@@ -110,7 +110,7 @@ func (l *Load) CheckThreshold() (bool, string) {
 	for k, v := range l.Metrics {
 		// normalize the load average to 1 cpu core
 		if v/float64(l.Core) > l.Threshold[k] {
-			return false, fmt.Sprintf("Load Average %s High! - %.2f", k, v)
+			return false, fmt.Sprintf("Load Average threshold %s alert! - %.2f", k, v)
 		}
 	}
 	return true, ""
