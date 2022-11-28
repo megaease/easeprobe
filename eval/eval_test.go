@@ -381,3 +381,49 @@ func TestSetDocument(t *testing.T) {
 	eval.Expression = "x_float('//cpu') < 0.4"
 	assertResult(t, eval, true)
 }
+
+func TestSpringActuator(t *testing.T) {
+	errMsg := "com.sun.mail.util.MailConnectException: Couldn't connect to host, port: smtp.example.com, 465; timeout 10"
+	jsonDoc := `{
+		"status":"DOWN",
+		"components":{
+		  "diskSpace":{
+			"status":"UP",
+			"details":{
+			  "total":41954803712,
+			  "free":8418234368,
+			  "threshold":10485760,
+			  "exists":true
+			}
+		  },
+		  "hystrix":{
+			"status":"UP"
+		  },
+		  "livenessState":{
+			"status":"UP"
+		  },
+		  "mail":{
+			"status":"DOWN",
+			"details":{
+			  "location":"smtp.example.com:465",
+			  "error": "` + errMsg + `"
+			}
+		  },
+		  "ping":{
+			"status":"UP"
+		  }
+		},
+		"groups":[
+		  "liveness",
+		  "readiness"
+		]
+	  }`
+
+	eval := NewEvaluator(jsonDoc, JSON, "x_str('//status') == 'UP'")
+	assertResult(t, eval, true)
+
+	exp := "//components/*/details/error"
+	eval = NewEvaluator(jsonDoc, JSON, "x_str('"+exp+"') != ''")
+	assertResult(t, eval, true)
+	assert.Equal(t, errMsg, eval.ExtractedValues[exp])
+}

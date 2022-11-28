@@ -52,6 +52,8 @@ type Evaluator struct {
 	Document   string                                  `yaml:"-" json:"-"`
 	Extractor  Extractor                               `yaml:"-" json:"-"`
 	EvalFuncs  map[string]govaluate.ExpressionFunction `yaml:"-" json:"-"`
+
+	ExtractedValues map[string]interface{} `yaml:"-" json:"-"`
 }
 
 // NewEvaluator is the function to create a evaluator
@@ -74,6 +76,7 @@ func (e *Evaluator) Config() error {
 }
 
 func (e *Evaluator) configExtractor() {
+	e.ExtractedValues = make(map[string]interface{})
 	switch e.DocType {
 	case HTML:
 		e.Extractor = NewHTMLExtractor(e.Document)
@@ -233,5 +236,6 @@ func (e *Evaluator) ExtractValue(v *Variable) error {
 	} else {
 		v.Value = value
 	}
+	e.ExtractedValues[v.Query] = v.Value
 	return nil
 }
