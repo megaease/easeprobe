@@ -70,7 +70,7 @@ func (p *Ping) Config(gConf global.ProbeSettings) error {
 
 	p.metrics = newMetrics(kind, tag)
 
-	log.Debugf("[%s / %s] configuration: %+v", p.ProbeKind, p.ProbeName, p)
+	log.Debugf("[%s / %s] configuration: %+v", p.ProbeKind, p.ProbeName, *p)
 	return nil
 }
 

@@ -78,7 +78,7 @@ func (t *TLS) Config(gConf global.ProbeSettings) error {
 
 	t.metrics = newMetrics(kind, tag)
 
-	log.Debugf("[%s / %s] configuration: %+v", t.ProbeKind, t.ProbeName, t)
+	log.Debugf("[%s / %s] configuration: %+v", t.ProbeKind, t.ProbeName, *t)
 	return nil
 }
 

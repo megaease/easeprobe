@@ -588,8 +588,8 @@ And for the different Probers, the following metrics are available:
   - `max_rtt`: Maximum round-trip time in milliseconds
   - `avg_rtt`: Average round-trip time in milliseconds
   - `stddev_rtt`: Standard deviation of round-trip time in milliseconds
-  - `privileged`: Whether to use ICMP (`true`) or UDP (`false`) based ping probes, default `false`. 
-  
+  - `privileged`: Whether to use ICMP (`true`) or UDP (`false`) based ping probes, default `false`.
+
 Please note that `privileged: true` requires administrative privileges such as `root` (for more details see https://github.com/go-ping/ping#supported-operating-systems)
 
 - TLS Probe
