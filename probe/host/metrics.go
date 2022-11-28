@@ -25,6 +25,7 @@ import (
 
 // metrics is the metrics for host probe
 type metrics struct {
+	Basic  *prometheus.GaugeVec
 	CPU    *prometheus.GaugeVec
 	Memory *prometheus.GaugeVec
 	Disk   *prometheus.GaugeVec
@@ -35,6 +36,8 @@ type metrics struct {
 func newMetrics(subsystem, name string) *metrics {
 	namespace := global.GetEaseProbe().Name
 	return &metrics{
+		Basic: metric.NewGauge(namespace, subsystem, name, "basic",
+			"Basic Host Information", []string{"host", "state"}),
 		CPU: metric.NewGauge(namespace, subsystem, name, "cpu",
 			"CPU Usage", []string{"host", "state"}),
 		Memory: metric.NewGauge(namespace, subsystem, name, "memory",

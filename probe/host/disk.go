@@ -1,0 +1,119 @@
+package host
+
+import (
+	"fmt"
+	"strings"
+
+	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
+)
+
+// Disks is the disk usage
+type Disks struct {
+	Mount     []string
+	Usage     []ResourceUsage
+	Threshold float64
+}
+
+// Command returns the command to get the cpu usage
+func (d *Disks) Command() string {
+	return `df -h ` + strings.Join(d.Mount, " ") + ` 2>/dev/null | awk '(NR>1){printf "%d %d %s %s\n", $3,$2,$5,$6}'`
+}
+
+// OutputLines returns the lines of command output
+func (d *Disks) OutputLines() int {
+	return len(d.Mount)
+}
+
+// Config returns the config of the cpu
+func (d *Disks) Config(s *Server) error {
+	if len(s.Disks) == 0 {
+		s.Disks = []string{"/"}
+	}
+	d.Mount = []string{}
+	d.Mount = append(d.Mount, s.Disks...)
+	if s.Threshold.Disk == 0 {
+		s.Threshold.Disk = DefaultDiskThreshold
+		log.Debugf("[%s / %s] Disk threshold is not set, use default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Disk)
+	}
+	d.SetThreshold(&s.Threshold)
+	return nil
+}
+
+// SetThreshold set the threshold of the disk
+func (d *Disks) SetThreshold(t *Threshold) {
+	d.Threshold = t.Disk
+}
+
+// Parse a string to a CPU struct
+func (d *Disks) Parse(s []string) error {
+	if len(s) != d.OutputLines() {
+		return fmt.Errorf("invalid disk output")
+	}
+	for i := 0; i < len(s); i++ {
+		disk := strings.Split(s[i], " ")
+		if len(disk) < 4 {
+			return fmt.Errorf("invalid disk output")
+		}
+		d.Usage = append(d.Usage, ResourceUsage{
+			Used:  int(strInt(disk[0])),
+			Total: int(strInt(disk[1])),
+			Usage: strFloat(disk[2][:len(disk[2])-1]),
+			Tag:   disk[3],
+		},
+		)
+	}
+	return nil
+}
+
+// UsageInfo returns the usage info of the disks
+func (d *Disks) UsageInfo() string {
+	diskUsage := []string{}
+	for _, disk := range d.Usage {
+		diskUsage = append(diskUsage, fmt.Sprintf("`%s` %.2f%%", disk.Tag, disk.Usage))
+	}
+	return "Disk: " + strings.Join(diskUsage, ", ")
+}
+
+// CheckThreshold check the cpu usage
+func (d *Disks) CheckThreshold() (bool, string) {
+	lowDisks := []string{}
+	for _, disk := range d.Usage {
+		if d.Threshold > 0 && d.Threshold <= disk.Usage/100 {
+			lowDisks = append(lowDisks, disk.Tag)
+		}
+	}
+	if len(lowDisks) > 0 {
+		return false, fmt.Sprintf("Disk Space Low! - [%s]", strings.Join(lowDisks, ", "))
+	}
+	return true, ""
+}
+
+// ExportMetrics export the cpu metrics
+func (d *Disks) ExportMetrics(name string, g *prometheus.GaugeVec) {
+	for _, disk := range d.Usage {
+		g.With(prometheus.Labels{
+			"host":  name,
+			"disk":  disk.Tag,
+			"state": "used",
+		}).Set(float64(disk.Used))
+
+		g.With(prometheus.Labels{
+			"host":  name,
+			"disk":  disk.Tag,
+			"state": "available",
+		}).Set(float64(disk.Total - disk.Used))
+
+		g.With(prometheus.Labels{
+			"host":  name,
+			"disk":  disk.Tag,
+			"state": "total",
+		}).Set(float64(disk.Total))
+
+		g.With(prometheus.Labels{
+			"host":  name,
+			"disk":  disk.Tag,
+			"state": "usage",
+		}).Set(disk.Usage)
+	}
+}

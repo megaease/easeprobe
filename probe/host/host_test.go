@@ -38,6 +38,7 @@ func newHost(t *testing.T) *Host {
 					DefaultProbe: base.DefaultProbe{ProbeName: "dummy host"},
 					Endpoint:     ssh.Endpoint{Host: "server:22"},
 				},
+				Disks: []string{"/", "/data"},
 			},
 		},
 	}
@@ -45,24 +46,24 @@ func newHost(t *testing.T) *Host {
 
 var hostInfo = `t01
 Ubuntu
-4407 15718 28.04
 4
   71.6 us,  1.7 sy,  0.2 ni, 26.8 id,  0.3 wa,  0.4 hi,  0.5 si,  0.6 st
-0.00 0.03 0.10
+4407 15718 28.04
 58 97 60% /
 20 80 20% /data
+4
+0.00 0.03 0.10
 `
 
 func TestHostInfo(t *testing.T) {
 	host := newHost(t)
+	host.Servers[0].Config(global.ProbeSettings{})
 	info, err := host.Servers[0].ParseHostInfo(hostInfo)
 	assert.Nil(t, err)
 	assert.Equal(t, "t01", info.HostName)
 	assert.Equal(t, "Ubuntu", info.OS)
-	assert.Equal(t, 4407, info.Memory.Used)
-	assert.Equal(t, 15718, info.Memory.Total)
-	assert.Equal(t, "28.04", fmt.Sprintf("%.2f", info.Memory.Usage))
 	assert.Equal(t, int64(4), info.Core)
+	assert.Equal(t, "28.04", fmt.Sprintf("%.2f", info.Memory.Usage))
 	assert.Equal(t, "71.60", fmt.Sprintf("%.2f", info.CPU.User))
 	assert.Equal(t, "1.70", fmt.Sprintf("%.2f", info.CPU.Sys))
 	assert.Equal(t, "0.20", fmt.Sprintf("%.2f", info.CPU.Nice))
@@ -71,17 +72,19 @@ func TestHostInfo(t *testing.T) {
 	assert.Equal(t, "0.40", fmt.Sprintf("%.2f", info.CPU.Hard))
 	assert.Equal(t, "0.50", fmt.Sprintf("%.2f", info.CPU.Soft))
 	assert.Equal(t, "0.60", fmt.Sprintf("%.2f", info.CPU.Steal))
-	assert.Equal(t, "0.00", fmt.Sprintf("%.2f", info.Load["m1"]))
-	assert.Equal(t, "0.03", fmt.Sprintf("%.2f", info.Load["m5"]))
-	assert.Equal(t, "0.10", fmt.Sprintf("%.2f", info.Load["m15"]))
-	assert.Equal(t, 58, info.Disks[0].Used)
-	assert.Equal(t, 97, info.Disks[0].Total)
-	assert.Equal(t, "60.00", fmt.Sprintf("%.2f", info.Disks[0].Usage))
-	assert.Equal(t, "/", info.Disks[0].Tag)
-	assert.Equal(t, 20, info.Disks[1].Used)
-	assert.Equal(t, 80, info.Disks[1].Total)
-	assert.Equal(t, "20.00", fmt.Sprintf("%.2f", info.Disks[1].Usage))
-	assert.Equal(t, "/data", info.Disks[1].Tag)
+	assert.Equal(t, "0.00", fmt.Sprintf("%.2f", info.Load.Metrics["m1"]))
+	assert.Equal(t, "0.03", fmt.Sprintf("%.2f", info.Load.Metrics["m5"]))
+	assert.Equal(t, "0.10", fmt.Sprintf("%.2f", info.Load.Metrics["m15"]))
+	assert.Equal(t, 4407, info.Memory.Used)
+	assert.Equal(t, 15718, info.Memory.Total)
+	assert.Equal(t, 58, info.Disks.Usage[0].Used)
+	assert.Equal(t, 97, info.Disks.Usage[0].Total)
+	assert.Equal(t, "60.00", fmt.Sprintf("%.2f", info.Disks.Usage[0].Usage))
+	assert.Equal(t, "/", info.Disks.Usage[0].Tag)
+	assert.Equal(t, 20, info.Disks.Usage[1].Used)
+	assert.Equal(t, 80, info.Disks.Usage[1].Total)
+	assert.Equal(t, "20.00", fmt.Sprintf("%.2f", info.Disks.Usage[1].Usage))
+	assert.Equal(t, "/data", info.Disks.Usage[1].Tag)
 }
 
 func TestHost(t *testing.T) {
@@ -100,33 +103,47 @@ func TestHost(t *testing.T) {
 	})
 
 	server := &host.Servers[0]
+	server.Config(global.ProbeSettings{})
 	status, message := server.DoProbe()
 	assert.True(t, status)
 	assert.Contains(t, message, "Fine")
 
 	server.Threshold.CPU = 0.5
+	server.Config(global.ProbeSettings{})
 	status, message = server.DoProbe()
 	assert.False(t, status)
 	assert.Contains(t, message, "CPU Busy!")
 
 	server.Threshold.Mem = 0.2
+	server.Config(global.ProbeSettings{})
 	status, message = server.DoProbe()
 	assert.False(t, status)
 	assert.Contains(t, message, "Memory Shortage!")
 
 	server.Threshold.Disk = 0.2
+	server.Config(global.ProbeSettings{})
 	status, message = server.DoProbe()
 	assert.False(t, status)
 	assert.Contains(t, message, "Disk Space Low!")
 
+	// default disk test
+	server.Disks = []string{}
+	server.Config(global.ProbeSettings{})
+	assert.Equal(t, 1, len(server.Disks))
+	assert.Equal(t, "/", server.Disks[0])
+	assert.Equal(t, 1, len(server.info.Disks.Mount))
+	assert.Equal(t, "/", server.info.Disks.Mount[0])
+
 	// invalid disk format
 	localHostInfo = `t01
 	Ubuntu
-	4407 15718 28.04
 	4
 	  71.6 us,  1.7 sy,  0.2 ni, 26.8 id,  0.3 wa,  0.4 hi,  0.5 si,  0.6 st
+	4407 15718 28.04
 	0.00 0.03 0.10
-	58`
+	58
+	4
+	0.00 0.03 0.10`
 	status, message = server.DoProbe()
 	assert.False(t, status)
 	assert.Contains(t, message, "invalid disk output")
@@ -134,13 +151,13 @@ func TestHost(t *testing.T) {
 	// invalid load average format
 	localHostInfo = `t01
 	Ubuntu
-	4407 15718 28.04
 	4
 	  71.6 us,  1.7 sy,  0.2 ni, 26.8 id,  0.3 wa,  0.4 hi,  0.5 si,  0.6 st
-	0.00 0.03
+	4407 15718 28.04
 	58 97 60% /
 	20 80 20% /data
-	`
+	4
+	0.00 0.03`
 	status, message = server.DoProbe()
 	assert.False(t, status)
 	assert.Contains(t, message, "invalid load average output")
@@ -148,11 +165,13 @@ func TestHost(t *testing.T) {
 	// invalid memory format
 	localHostInfo = `t01
 	Ubuntu
-	4407 15718
 	4
 	71.6 us,  1.7 sy,  0.2 ni, 26.8 id,  0.3 wa,  0.4 hi,  0.5 si,  0.6 st
+	4407 15718
 	0.00 0.03 0.10
-	58 97 60%`
+	58 97 60%
+	4
+	0.00 0.03 0.10`
 	status, message = server.DoProbe()
 	assert.False(t, status)
 	assert.Contains(t, message, "invalid memory output")
@@ -160,11 +179,13 @@ func TestHost(t *testing.T) {
 	// invalid cpu format
 	localHostInfo = `t01
 	Ubuntu
-	4407 15718 28.04
 	4
 	71.6 us,  1.7 sy,  0.2 ni, 26.8 id
+	4407 15718 28.04
 	0.00 0.03 0.10
-	58 97 60%`
+	58 97 60%
+	4
+	0.00 0.03 0.10`
 	status, message = server.DoProbe()
 	assert.False(t, status)
 	assert.Contains(t, message, "invalid cpu output")
@@ -230,16 +251,41 @@ func TestLoad(t *testing.T) {
 
 	localHostInfo = `t01
 	Ubuntu
-	4407 15718 28.04
 	4
 	71.6 us,  1.7 sy,  0.2 ni, 26.8 id,  0.3 wa,  0.4 hi,  0.5 si,  0.6 st
-	0.4 0.03 0.10
+	4407 15718 28.04
 	58 97 60% /
-	20 80 20% /data`
+	20 80 20% /data
+	4
+	0.4 0.03 0.10`
 
 	status, message = server.DoProbe()
 	assert.False(t, status)
 	assert.Contains(t, message, "Load Average m1 High!")
 
 	monkey.UnpatchAll()
+}
+
+func TestBadParse(t *testing.T) {
+	info := Info{}
+	err := info.Basic.Parse([]string{})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid basic output")
+
+	err = info.CPU.Parse([]string{})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid cpu output")
+
+	err = info.Memory.Parse([]string{})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid memory output")
+
+	info.Disks.Mount = []string{"/", "/data"}
+	err = info.Disks.Parse([]string{"58 97 60% /"})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid disk output")
+
+	err = info.Load.Parse([]string{"0.4 0.03 0.10"})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid load average output")
 }
