@@ -1044,7 +1044,7 @@ The resources currently monitored include CPU, memory and disk utilization. The 
 > **Note**:
 > - The host running EaseProbe needs the following commands to be installed on the remote system that will be monitored: `top`, `df`, `free`, `awk`, `grep`, `tr`, `cat` and `hostname` (check the [source code](./probe/host/host.go) for more details on this works and/or modify its behavior).
 > - The disk usage check is limited to the root filesystem only with the following command `df -h /`.
-> - The actual load would be dived by cpu core number, the threshold won't consider the cpu core number.
+> - The actual load would be divided by cpu core number, the threshold won't consider the cpu core number (requires proc filesystem support).
 
 ```yaml
 host:
