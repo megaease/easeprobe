@@ -48,6 +48,7 @@ Ubuntu
 4407 15718 28.04
 4
   71.6 us,  1.7 sy,  0.2 ni, 26.8 id,  0.3 wa,  0.4 hi,  0.5 si,  0.6 st
+0.00 0.03 0.10
 58 97 60% /
 20 80 20% /data
 `
@@ -70,6 +71,9 @@ func TestHostInfo(t *testing.T) {
 	assert.Equal(t, "0.40", fmt.Sprintf("%.2f", info.CPU.Hard))
 	assert.Equal(t, "0.50", fmt.Sprintf("%.2f", info.CPU.Soft))
 	assert.Equal(t, "0.60", fmt.Sprintf("%.2f", info.CPU.Steal))
+	assert.Equal(t, "0.00", fmt.Sprintf("%.2f", info.Load["m1"]))
+	assert.Equal(t, "0.03", fmt.Sprintf("%.2f", info.Load["m5"]))
+	assert.Equal(t, "0.10", fmt.Sprintf("%.2f", info.Load["m15"]))
 	assert.Equal(t, 58, info.Disks[0].Used)
 	assert.Equal(t, 97, info.Disks[0].Total)
 	assert.Equal(t, "60.00", fmt.Sprintf("%.2f", info.Disks[0].Usage))
@@ -89,9 +93,10 @@ func TestHost(t *testing.T) {
 		assert.Equal(t, "server", server.ProbeTag)
 	}
 
+	localHostInfo := hostInfo
 	var s *ssh.Server
 	monkey.PatchInstanceMethod(reflect.TypeOf(s), "RunSSHCmd", func(_ *ssh.Server) (string, error) {
-		return hostInfo, nil
+		return localHostInfo, nil
 	})
 
 	server := &host.Servers[0]
@@ -115,33 +120,50 @@ func TestHost(t *testing.T) {
 	assert.Contains(t, message, "Disk Space Low!")
 
 	// invalid disk format
-	hostInfo = `t01
+	localHostInfo = `t01
 	Ubuntu
 	4407 15718 28.04
 	4
 	  71.6 us,  1.7 sy,  0.2 ni, 26.8 id,  0.3 wa,  0.4 hi,  0.5 si,  0.6 st
+	0.00 0.03 0.10
 	58`
 	status, message = server.DoProbe()
 	assert.False(t, status)
 	assert.Contains(t, message, "invalid disk output")
 
+	// invalid load average format
+	localHostInfo = `t01
+	Ubuntu
+	4407 15718 28.04
+	4
+	  71.6 us,  1.7 sy,  0.2 ni, 26.8 id,  0.3 wa,  0.4 hi,  0.5 si,  0.6 st
+	0.00 0.03
+	58 97 60% /
+	20 80 20% /data
+	`
+	status, message = server.DoProbe()
+	assert.False(t, status)
+	assert.Contains(t, message, "invalid load average output")
+
 	// invalid memory format
-	hostInfo = `t01
+	localHostInfo = `t01
 	Ubuntu
 	4407 15718
 	4
 	71.6 us,  1.7 sy,  0.2 ni, 26.8 id,  0.3 wa,  0.4 hi,  0.5 si,  0.6 st
+	0.00 0.03 0.10
 	58 97 60%`
 	status, message = server.DoProbe()
 	assert.False(t, status)
 	assert.Contains(t, message, "invalid memory output")
 
 	// invalid cpu format
-	hostInfo = `t01
+	localHostInfo = `t01
 	Ubuntu
 	4407 15718 28.04
 	4
 	71.6 us,  1.7 sy,  0.2 ni, 26.8 id
+	0.00 0.03 0.10
 	58 97 60%`
 	status, message = server.DoProbe()
 	assert.False(t, status)
@@ -163,4 +185,61 @@ func TestHost(t *testing.T) {
 	assert.False(t, status)
 	assert.Contains(t, message, "ssh error")
 
+	monkey.UnpatchAll()
+}
+
+func TestLoad(t *testing.T) {
+	host := newHost(t)
+	server := &host.Servers[0]
+	server.Config(global.ProbeSettings{})
+	assert.Equal(t, DefaultLoadThreshold, server.Threshold.Load["m1"])
+	assert.Equal(t, DefaultLoadThreshold, server.Threshold.Load["m5"])
+	assert.Equal(t, DefaultLoadThreshold, server.Threshold.Load["m15"])
+
+	host = newHost(t)
+	server = &host.Servers[0]
+	server.Threshold.Load = map[string]float64{
+		"xxx": 0.1,
+	}
+	server.Config(global.ProbeSettings{})
+	assert.Equal(t, DefaultLoadThreshold, server.Threshold.Load["m1"])
+	assert.Equal(t, DefaultLoadThreshold, server.Threshold.Load["m5"])
+	assert.Equal(t, DefaultLoadThreshold, server.Threshold.Load["m15"])
+
+	host = newHost(t)
+	server = &host.Servers[0]
+	server.Threshold.Load = map[string]float64{
+		"M1":  0.1,
+		"m5":  0.2,
+		"M15": 0.3,
+	}
+	server.Config(global.ProbeSettings{})
+	assert.Equal(t, 0.1, server.Threshold.Load["m1"])
+	assert.Equal(t, 0.2, server.Threshold.Load["m5"])
+	assert.Equal(t, 0.3, server.Threshold.Load["m15"])
+
+	localHostInfo := hostInfo
+	var s *ssh.Server
+	monkey.PatchInstanceMethod(reflect.TypeOf(s), "RunSSHCmd", func(_ *ssh.Server) (string, error) {
+		return localHostInfo, nil
+	})
+
+	status, message := server.DoProbe()
+	assert.True(t, status)
+	assert.Contains(t, message, "Fine")
+
+	localHostInfo = `t01
+	Ubuntu
+	4407 15718 28.04
+	4
+	71.6 us,  1.7 sy,  0.2 ni, 26.8 id,  0.3 wa,  0.4 hi,  0.5 si,  0.6 st
+	0.4 0.03 0.10
+	58 97 60% /
+	20 80 20% /data`
+
+	status, message = server.DoProbe()
+	assert.False(t, status)
+	assert.Contains(t, message, "Load Average m1 High!")
+
+	monkey.UnpatchAll()
 }

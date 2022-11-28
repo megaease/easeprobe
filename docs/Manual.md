@@ -1042,8 +1042,9 @@ The host resource usage probe allows for collecting information and alerting whe
 The resources currently monitored include CPU, memory and disk utilization. The probe status is considered as `down` when any value exceeds its defined threshold.
 
 > **Note**:
-> - The host running EaseProbe needs the following commands to be installed on the remote system that will be monitored: `top`, `df`, `free`, `awk`, `grep`, `tr`, and `hostname` (check the [source code](./probe/host/host.go) for more details on this works and/or modify its behavior).
+> - The host running EaseProbe needs the following commands to be installed on the remote system that will be monitored: `top`, `df`, `free`, `awk`, `grep`, `tr`, `cat` and `hostname` (check the [source code](./probe/host/host.go) for more details on this works and/or modify its behavior).
 > - The disk usage check is limited to the root filesystem only with the following command `df -h /`.
+> - The actual load would be dived by cpu core number, the threshold won't consider the cpu core number.
 
 ```yaml
 host:
@@ -1064,9 +1065,13 @@ host:
         cpu: 0.80  # cpu usage  80%
         mem: 0.70  # memory usage 70%
         disk: 0.90  # disk usage 90%
+        load: # load average - Note: the actual load would be dived by cpu core number, the threshold won't consider the cpu core number.
+          m1: 0.5  # 1 minute load average 0.5 (default: 0.8)
+          m5: 0.9  # 5 minute load average 0.9 (default: 0.8)
+          m15: 0.9 # 15 minute load average 0.9 (default: 0.8)
 
     # Using the default threshold
-    # cpu 80%, mem 80% and disk 95%
+    # cpu 80%, mem 80%, disk 95% and 0.8 load average
     - name : My VPS
       host: user@example.com:22
       key: /Users/user/.ssh/id_rsa

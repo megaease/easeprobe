@@ -35,17 +35,24 @@ const (
 	DefaultCPUThreshold  = 0.8
 	DefaultMemThreshold  = 0.8
 	DefaultDiskThreshold = 0.95
+	DefaultLoadThreshold = 0.8
 )
 
 // Threshold is the threshold of a probe
 type Threshold struct {
-	CPU  float64 `yaml:"cpu,omitempty" json:"cpu,omitempty" jsonschema:"title=CPU threshold,description=CPU threshold (default: 0.8)"`
-	Mem  float64 `yaml:"mem,omitempty" json:"mem,omitempty" jsonschema:"title=Memory threshold,description=Memory threshold (default: 0.8)"`
-	Disk float64 `yaml:"disk,omitempty" json:"disk,omitempty" jsonschema:"title=Disk threshold,description=Disk threshold (default: 0.95)"`
+	CPU  float64            `yaml:"cpu,omitempty" json:"cpu,omitempty" jsonschema:"title=CPU threshold,description=CPU threshold (default: 0.8)"`
+	Mem  float64            `yaml:"mem,omitempty" json:"mem,omitempty" jsonschema:"title=Memory threshold,description=Memory threshold (default: 0.8)"`
+	Disk float64            `yaml:"disk,omitempty" json:"disk,omitempty" jsonschema:"title=Disk threshold,description=Disk threshold (default: 0.95)"`
+	Load map[string]float64 `yaml:"load,omitempty" json:"load,omitempty" jsonschema:"title=Load average threshold,description=Load Average M1/M5/M15 threshold (default: 0.8)"`
 }
 
 func (t *Threshold) String() string {
-	return fmt.Sprintf("CPU: %.2f, Mem: %.2f, Disk: %.2f", t.CPU, t.Mem, t.Disk)
+	load := []string{}
+	for _, v := range t.Load {
+		load = append(load, fmt.Sprintf("%.2f", v))
+	}
+
+	return fmt.Sprintf("CPU: %.2f, Mem: %.2f, Disk: %.2f, Load: %s", t.CPU, t.Mem, t.Disk, strings.Join(load, "/"))
 }
 
 // Server is the server of a host probe
@@ -79,14 +86,16 @@ func (s *Server) Config(gConf global.ProbeSettings) error {
 	// 4. retrieve the cpu core:		`grep -c ^processor /proc/cpuinfo;`
 	// 5. retrieve the cpu usage:	`top -b -n 1 | grep Cpu | awk -F ":" '{print $2}'`
 	//    output example: 1.6 us,  0.0 sy,  0.0 ni, 98.4 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
-	// 6. retrieve the disk usage	`df -h / 2>/dev/null | awk '(NR>1){printf "%d %d %s %s\n", $3,$2,$5,$6}'`
+	// 6. retrieve the load average:	`cat /proc/loadavg | awk '{print $1,$2,$3}'`
+	// 7. retrieve the disk usage	`df -h / 2>/dev/null | awk '(NR>1){printf "%d %d %s %s\n", $3,$2,$5,$6}'`
 	//    output: used(GB) total(GB) usage(%) disk, example: 40 970 5% /
 
 	s.Command = `hostname;
 	awk -F= '/^NAME/{print $2}' /etc/os-release | tr -d '\"';
 	free -m | awk 'NR==2{printf "%s %s %.2f\n", $3,$2,$3*100/$2 }';
 	grep -c ^processor /proc/cpuinfo;
-	top -b -n 1 | grep Cpu | awk -F ":" '{print $2}';` + "\n"
+	top -b -n 1 | grep Cpu | awk -F ":" '{print $2}';
+	cat /proc/loadavg | awk '{print $1,$2,$3}';` + "\n"
 
 	if len(s.Disks) == 0 {
 		s.Disks = []string{"/"}
@@ -96,18 +105,46 @@ func (s *Server) Config(gConf global.ProbeSettings) error {
 
 	if s.Threshold.CPU == 0 {
 		s.Threshold.CPU = DefaultCPUThreshold
+		log.Debugf("[%s / %s] CPU threshold is not set, use default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.CPU)
 	}
 	if s.Threshold.Mem == 0 {
 		s.Threshold.Mem = DefaultMemThreshold
+		log.Debugf("[%s / %s] Memory threshold is not set, use default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Mem)
 	}
 	if s.Threshold.Disk == 0 {
 		s.Threshold.Disk = DefaultDiskThreshold
+		log.Debugf("[%s / %s] Disk threshold is not set, use default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Disk)
+	}
+	if s.Threshold.Load == nil {
+		s.Threshold.Load = make(map[string]float64)
+		s.Threshold.Load["m1"] = DefaultLoadThreshold
+		s.Threshold.Load["m5"] = DefaultLoadThreshold
+		s.Threshold.Load["m15"] = DefaultLoadThreshold
+		log.Debugf("[%s / %s] All of load average threshold is not set, use default value: %.2f", s.ProbeKind, s.ProbeName, DefaultLoadThreshold)
+	} else {
+		for k, v := range s.Threshold.Load {
+			s.Threshold.Load[strings.ToLower(k)] = v
+		}
+		if _, ok := s.Threshold.Load["m1"]; !ok {
+			s.Threshold.Load["m1"] = DefaultLoadThreshold
+			log.Debugf("[%s / %s] Load average threshold for m1 is not set, use default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Load["m1"])
+		}
+		if _, ok := s.Threshold.Load["m5"]; !ok {
+			s.Threshold.Load["m5"] = DefaultLoadThreshold
+			log.Debugf("[%s / %s] Load average threshold for m5 is not set, use default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Load["m5"])
+		}
+		if _, ok := s.Threshold.Load["m15"]; !ok {
+			s.Threshold.Load["m15"] = DefaultLoadThreshold
+			log.Debugf("[%s / %s] Load average threshold for m15 is not set, use default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Load["m15"])
+		}
 	}
 
 	s.metrics = newMetrics(kind, tag)
 
 	endpoint := s.Threshold.String()
-	return s.Configure(gConf, kind, tag, name, endpoint, &BastionMap, s.DoProbe)
+	err := s.Configure(gConf, kind, tag, name, endpoint, &BastionMap, s.DoProbe)
+	log.Debugf("[%s / %s] configuration: %+v", s.ProbeKind, s.ProbeName, *s)
+	return err
 }
 
 // DoProbe return the checking result
@@ -133,28 +170,43 @@ func (s *Server) DoProbe() (bool, string) {
 	return s.CheckThreshold(info)
 }
 
-// CheckThreshold check the threshold
-func (s *Server) CheckThreshold(info Info) (bool, string) {
-	status := true
-	message := ""
+// Usage return all of the resources usage
+func (s *Server) Usage(info Info) string {
 	usage := fmt.Sprintf(" ( CPU: %.2f%% - ", (100 - info.CPU.Idle))
 	usage += fmt.Sprintf("Memory: %.2f%% - ", info.Memory.Usage)
 	diskUsage := []string{}
 	for _, disk := range info.Disks {
 		diskUsage = append(diskUsage, fmt.Sprintf("`%s` %.2f%%", disk.Tag, disk.Usage))
 	}
-	usage += "Disk: " + strings.Join(diskUsage, ", ") + " )"
+	usage += "Disk: " + strings.Join(diskUsage, ", ")
+	loadAvg := []string{}
+	for _, load := range info.Load {
+		loadAvg = append(loadAvg, fmt.Sprintf("%.2f", load))
+	}
+	usage += " - "
+	usage += "Load: " + strings.Join(loadAvg, "/") + " )"
+	return usage
+}
+
+func addMessage(msg string, message string) string {
+	if msg == "" {
+		return message
+	}
+	return msg + " | " + message
+}
+
+// CheckThreshold check the threshold
+func (s *Server) CheckThreshold(info Info) (bool, string) {
+	status := true
+	message := ""
 
 	if s.Threshold.CPU > 0 && s.Threshold.CPU <= (100-info.CPU.Idle)/100 {
 		status = false
-		message += "CPU Busy!"
+		message = addMessage(message, "CPU Busy!")
 	}
 	if s.Threshold.Mem > 0 && s.Threshold.Mem <= info.Memory.Usage/100 {
 		status = false
-		if message != "" {
-			message += " | "
-		}
-		message += "Memory Shortage!"
+		message = addMessage(message, "Memory Shortage!")
 	}
 	lowDisks := []string{}
 	for _, disk := range info.Disks {
@@ -164,17 +216,22 @@ func (s *Server) CheckThreshold(info Info) (bool, string) {
 	}
 	if len(lowDisks) > 0 {
 		status = false
-		if message != "" {
-			message += " | "
+		message = addMessage(message, fmt.Sprintf("Disk Space Low! - [%s]", strings.Join(lowDisks, ", ")))
+	}
+
+	for k, v := range info.Load {
+		// normalize the load average to 1 cpu core
+		if v/float64(info.Core) > s.Threshold.Load[k] {
+			status = false
+			message = addMessage(message, fmt.Sprintf("Load Average %s High! - %.2f", k, v))
 		}
-		message += fmt.Sprintf("Disk Space Low! - [%s]", strings.Join(lowDisks, ", "))
 	}
 
 	if message == "" {
 		message = "Fine!"
 	}
 
-	return status, message + usage
+	return status, message + s.Usage(info)
 }
 
 // Usage is the resource usage for memory and disk
@@ -221,26 +278,47 @@ func first(str string) string {
 
 // Info is the host probe information
 type Info struct {
-	HostName string  `yaml:"hostname"`
-	OS       string  `yaml:"os"`
-	Core     int64   `yaml:"core"`
-	CPU      CPU     `yaml:"cpu"`
-	Memory   Usage   `yaml:"memory"`
-	Disks    []Usage `yaml:"disks"`
+	HostName string             `yaml:"hostname"`
+	OS       string             `yaml:"os"`
+	Core     int64              `yaml:"core"`
+	CPU      CPU                `yaml:"cpu"`
+	Memory   Usage              `yaml:"memory"`
+	Load     map[string]float64 `yaml:"load"`
+	Disks    []Usage            `yaml:"disks"`
 }
+
+type lineCnt int
+
+const (
+	hostName lineCnt = iota
+	osName
+	memUsage
+	cpuCore
+	cpuUsage
+	loadAvg
+	diskUsage
+)
 
 // ParseHostInfo parse the host info
 func (s *Server) ParseHostInfo(str string) (Info, error) {
-	info := Info{}
+	info := Info{
+		HostName: "",
+		OS:       "",
+		Core:     0,
+		CPU:      CPU{},
+		Memory:   Usage{},
+		Load:     map[string]float64{},
+		Disks:    []Usage{},
+	}
 	line := strings.Split(str, "\n")
-	if len(line) < 5 {
+	if len(line) < int(diskUsage) {
 		return info, fmt.Errorf("invalid output")
 	}
 
-	info.HostName = line[0]
-	info.OS = line[1]
+	info.HostName = line[hostName]
+	info.OS = line[osName]
 
-	mem := strings.Split(line[2], " ")
+	mem := strings.Split(line[memUsage], " ")
 	if len(mem) < 3 {
 		return info, fmt.Errorf("invalid memory output")
 	}
@@ -248,12 +326,20 @@ func (s *Server) ParseHostInfo(str string) (Info, error) {
 	info.Memory.Total = int(strInt(mem[1]))
 	info.Memory.Usage = strFloat(mem[2])
 
-	info.Core = strInt(line[3])
-	if err := info.CPU.Parse(line[4]); err != nil {
+	info.Core = strInt(line[cpuCore])
+	if err := info.CPU.Parse(line[cpuUsage]); err != nil {
 		return info, err
 	}
 
-	for i := 5; i < len(line); i++ {
+	load := strings.Split(line[loadAvg], " ")
+	if len(load) < 3 {
+		return info, fmt.Errorf("invalid load average output")
+	}
+	info.Load["m1"] = strFloat(load[0])
+	info.Load["m5"] = strFloat(load[1])
+	info.Load["m15"] = strFloat(load[2])
+
+	for i := int(diskUsage); i < len(line); i++ {
 		if strings.TrimSpace(line[i]) == "" {
 			break
 		}
@@ -273,12 +359,12 @@ func (s *Server) ParseHostInfo(str string) (Info, error) {
 }
 
 func strFloat(str string) float64 {
-	n, _ := strconv.ParseFloat(str, 32)
+	n, _ := strconv.ParseFloat(strings.TrimSpace(str), 32)
 	return n
 }
 
 func strInt(str string) int64 {
-	n, _ := strconv.ParseInt(str, 10, 32)
+	n, _ := strconv.ParseInt(strings.TrimSpace(str), 10, 32)
 	return n
 }
 
@@ -287,6 +373,7 @@ func (s *Server) ExportMetrics(info *Info) {
 	s.ExportCPUMetrics(info)
 	s.ExportMemoryMetrics(info)
 	s.ExportDiskMetrics(info)
+	s.ExportLoadMetrics(info)
 }
 
 // ExportCPUMetrics export the cpu metrics
@@ -388,4 +475,22 @@ func (s *Server) ExportDiskMetrics(info *Info) {
 			"state": "usage",
 		}).Set(disk.Usage)
 	}
+}
+
+// ExportLoadMetrics export the load metrics
+func (s *Server) ExportLoadMetrics(info *Info) {
+	s.metrics.Load.With(prometheus.Labels{
+		"host":  s.Name(),
+		"state": "m1",
+	}).Set(info.Load["m1"])
+
+	s.metrics.Load.With(prometheus.Labels{
+		"host":  s.Name(),
+		"state": "m5",
+	}).Set(info.Load["m5"])
+
+	s.metrics.Load.With(prometheus.Labels{
+		"host":  s.Name(),
+		"state": "m15",
+	}).Set(info.Load["m15"])
 }

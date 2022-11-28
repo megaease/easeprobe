@@ -28,6 +28,7 @@ type metrics struct {
 	CPU    *prometheus.GaugeVec
 	Memory *prometheus.GaugeVec
 	Disk   *prometheus.GaugeVec
+	Load   *prometheus.GaugeVec
 }
 
 // newMetrics create the host metrics
@@ -40,5 +41,7 @@ func newMetrics(subsystem, name string) *metrics {
 			"Memory Usage", []string{"host", "state"}),
 		Disk: metric.NewGauge(namespace, subsystem, name, "disk",
 			"Disk Usage", []string{"host", "disk", "state"}),
+		Load: metric.NewGauge(namespace, subsystem, name, "load",
+			"Load Average", []string{"host", "state"}),
 	}
 }

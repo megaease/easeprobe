@@ -180,9 +180,13 @@ http: # http probes
 #         cpu: 0.80  # cpu usage  80%
 #         mem: 0.70  # memory usage 70%
 #         disk: 0.90  # disk usage 90%
+#         load: # load average - Note: the actual load would be dived by cpu core number, the threshold won't consider the cpu core number.
+#           m1: 0.5  # 1 minute load average 0.5 (default: 0.8)
+#           m5: 0.9  # 5 minute load average 0.9 (default: 0.8)
+#           m15: 0.9 # 15 minute load average 0.9 (default: 0.8)
 
 #     # Using the default threshold
-#     # cpu 80%, mem 80% and disk 95%
+#     # cpu 80%, mem 80%, disk 95% and 0.8 load average
 #     - name : My VPS
 #       host: user@example.com:22
 #       key: /Users/user/.ssh/id_rsa
