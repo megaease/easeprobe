@@ -112,19 +112,19 @@ func TestHost(t *testing.T) {
 	server.Config(global.ProbeSettings{})
 	status, message = server.DoProbe()
 	assert.False(t, status)
-	assert.Contains(t, message, "CPU Busy!")
+	assert.Contains(t, message, "CPU threshold alert!")
 
 	server.Threshold.Mem = 0.2
 	server.Config(global.ProbeSettings{})
 	status, message = server.DoProbe()
 	assert.False(t, status)
-	assert.Contains(t, message, "Memory Shortage!")
+	assert.Contains(t, message, "Memory threshold alert!")
 
 	server.Threshold.Disk = 0.2
 	server.Config(global.ProbeSettings{})
 	status, message = server.DoProbe()
 	assert.False(t, status)
-	assert.Contains(t, message, "Disk Space Low!")
+	assert.Contains(t, message, "Disk Space threshold alert!")
 
 	// default disk test
 	server.Disks = []string{}
@@ -261,7 +261,7 @@ func TestLoad(t *testing.T) {
 
 	status, message = server.DoProbe()
 	assert.False(t, status)
-	assert.Contains(t, message, "Load Average m1 High!")
+	assert.Contains(t, message, "Load Average threshold m1 alert!")
 
 	monkey.UnpatchAll()
 }
