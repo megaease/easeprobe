@@ -20,6 +20,7 @@ package host
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/megaease/easeprobe/global"
@@ -27,31 +28,6 @@ import (
 	"github.com/megaease/easeprobe/probe/ssh"
 	log "github.com/sirupsen/logrus"
 )
-
-// Default threshold
-const (
-	DefaultCPUThreshold  = 0.8
-	DefaultMemThreshold  = 0.8
-	DefaultDiskThreshold = 0.95
-	DefaultLoadThreshold = 0.8
-)
-
-// Threshold is the threshold of a probe
-type Threshold struct {
-	CPU  float64            `yaml:"cpu,omitempty" json:"cpu,omitempty" jsonschema:"title=CPU threshold,description=CPU threshold (default: 0.8)"`
-	Mem  float64            `yaml:"mem,omitempty" json:"mem,omitempty" jsonschema:"title=Memory threshold,description=Memory threshold (default: 0.8)"`
-	Disk float64            `yaml:"disk,omitempty" json:"disk,omitempty" jsonschema:"title=Disk threshold,description=Disk threshold (default: 0.95)"`
-	Load map[string]float64 `yaml:"load,omitempty" json:"load,omitempty" jsonschema:"title=Load average threshold,description=Load Average M1/M5/M15 threshold (default: 0.8)"`
-}
-
-func (t *Threshold) String() string {
-	load := []string{}
-	for _, v := range t.Load {
-		load = append(load, fmt.Sprintf("%.2f", v))
-	}
-
-	return fmt.Sprintf("CPU: %.2f, Mem: %.2f, Disk: %.2f, Load: %s", t.CPU, t.Mem, t.Disk, strings.Join(load, "/"))
-}
 
 // Server is the server of a host probe
 type Server struct {
@@ -83,15 +59,30 @@ type Info struct {
 	Load   Load  `yaml:"load"`
 }
 
+// IMetrics  put all of the Info member into IMetrics slices
+func (info *Info) IMetrics() []IMetrics {
+	m := []IMetrics{}
+
+	modelType := reflect.TypeOf((*IMetrics)(nil)).Elem()
+
+	t := reflect.TypeOf(*info)
+	for i := 0; i < t.NumField(); i++ {
+		value := reflect.ValueOf(info).Elem().Field(i)
+		if value.Addr().Type().Implements(modelType) {
+			m = append(m, value.Addr().Interface().(IMetrics))
+		}
+	}
+
+	return m
+}
+
 // Config is the host probe configuration
 func (s *Server) Config(gConf global.ProbeSettings) error {
 	kind := "host"
 	tag := "server"
 	name := s.ProbeName
 
-	s.hostMetrics = []IMetrics{
-		&s.info.Basic, &s.info.CPU, &s.info.Memory, &s.info.Disks, &s.info.Load,
-	}
+	s.hostMetrics = s.info.IMetrics()
 
 	// Combine the commands and Config the metrics
 	s.outputLines = 0
