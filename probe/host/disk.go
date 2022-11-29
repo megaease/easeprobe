@@ -58,6 +58,7 @@ func (d *Disks) Config(s *Server) {
 	}
 	d.Mount = []string{}
 	d.Mount = append(d.Mount, s.Disks...)
+	d.Usage = make([]ResourceUsage, len(d.Mount))
 	if s.Threshold.Disk == 0 {
 		s.Threshold.Disk = DefaultDiskThreshold
 		log.Debugf("[%s / %s] Disk threshold is not set, using default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Disk)
@@ -76,18 +77,18 @@ func (d *Disks) Parse(s []string) error {
 	if len(s) != d.OutputLines() {
 		return fmt.Errorf("invalid disk output")
 	}
+
 	for i := 0; i < len(s); i++ {
 		disk := strings.Split(s[i], " ")
 		if len(disk) < 4 {
 			return fmt.Errorf("invalid disk output")
 		}
-		d.Usage = append(d.Usage, ResourceUsage{
+		d.Usage[i] = ResourceUsage{
 			Used:  int(strInt(disk[0])),
 			Total: int(strInt(disk[1])),
 			Usage: strFloat(disk[2][:len(disk[2])-1]),
 			Tag:   disk[3],
-		},
-		)
+		}
 	}
 	return nil
 }
