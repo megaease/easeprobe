@@ -45,7 +45,7 @@ func (m *Mem) OutputLines() int {
 func (m *Mem) Config(s *Server) error {
 	if s.Threshold.Mem == 0 {
 		s.Threshold.Mem = DefaultMemThreshold
-		log.Debugf("[%s / %s] Memory threshold is not set, use default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Mem)
+		log.Debugf("[%s / %s] Memory threshold is not set, using default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Mem)
 	}
 	m.SetThreshold(&s.Threshold)
 	return nil
