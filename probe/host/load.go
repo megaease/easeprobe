@@ -21,18 +21,22 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/metric"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 )
 
 // Load is the load average of the host
 type Load struct {
-	Core      int64              `json:"core"`
-	Metrics   map[string]float64 `json:"metrics"`
+	Core    int64              `json:"core"`
+	Metrics map[string]float64 `json:"metrics"`
+
 	Threshold map[string]float64
+	metrics   *prometheus.GaugeVec
 }
 
-// Command returns the command to get the cpu usage
+// Command returns the command to get the load average
 func (l *Load) Command() string {
 	return `grep -c ^processor /proc/cpuinfo;` + "\n" +
 		`cat /proc/loadavg | awk '{print $1,$2,$3}';`
@@ -43,9 +47,10 @@ func (l *Load) OutputLines() int {
 	return 2
 }
 
-// Config returns the config of the cpu
+// Config returns the config of the load average
 func (l *Load) Config(s *Server) error {
 	l.Metrics = make(map[string]float64)
+	l.CreateMetrics(s.ProbeKind, s.ProbeTag)
 	if s.Threshold.Load == nil {
 		s.Threshold.Load = make(map[string]float64)
 		s.Threshold.Load["m1"] = DefaultLoadThreshold
@@ -75,7 +80,7 @@ func (l *Load) Config(s *Server) error {
 	return nil
 }
 
-// SetThreshold  set the threshold of the load
+// SetThreshold  set the threshold of the load average
 func (l *Load) SetThreshold(t *Threshold) {
 	l.Threshold = t.Load
 }
@@ -96,7 +101,7 @@ func (l *Load) Parse(s []string) error {
 	return nil
 }
 
-// UsageInfo returns the usage info of the load
+// UsageInfo returns the usage info of the load average
 func (l *Load) UsageInfo() string {
 	loadAvg := []string{}
 	for _, load := range l.Metrics {
@@ -105,7 +110,7 @@ func (l *Load) UsageInfo() string {
 	return "Load: " + strings.Join(loadAvg, "/")
 }
 
-// CheckThreshold check the cpu usage
+// CheckThreshold check the load average threshold
 func (l *Load) CheckThreshold() (bool, string) {
 	for k, v := range l.Metrics {
 		// normalize the load average to 1 cpu core
@@ -116,19 +121,26 @@ func (l *Load) CheckThreshold() (bool, string) {
 	return true, ""
 }
 
-// ExportMetrics export the cpu metrics
-func (l *Load) ExportMetrics(name string, g *prometheus.GaugeVec) {
-	g.With(prometheus.Labels{
+// CreateMetrics create the load average metrics
+func (l *Load) CreateMetrics(subsystem, name string) {
+	namespace := global.GetEaseProbe().Name
+	l.metrics = metric.NewGauge(namespace, subsystem, name, "load",
+		"Load Average", []string{"host", "state"})
+}
+
+// ExportMetrics export the load average metrics
+func (l *Load) ExportMetrics(name string) {
+	l.metrics.With(prometheus.Labels{
 		"host":  name,
 		"state": "m1",
 	}).Set(l.Metrics["m1"])
 
-	g.With(prometheus.Labels{
+	l.metrics.With(prometheus.Labels{
 		"host":  name,
 		"state": "m5",
 	}).Set(l.Metrics["m5"])
 
-	g.With(prometheus.Labels{
+	l.metrics.With(prometheus.Labels{
 		"host":  name,
 		"state": "m15",
 	}).Set(l.Metrics["m15"])

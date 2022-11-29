@@ -21,15 +21,19 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/metric"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 )
 
 // Disks is the disk usage
 type Disks struct {
-	Mount     []string
-	Usage     []ResourceUsage
+	Mount []string
+	Usage []ResourceUsage
+
 	Threshold float64
+	metrics   *prometheus.GaugeVec
 }
 
 // Command returns the command to get the cpu usage
@@ -54,6 +58,7 @@ func (d *Disks) Config(s *Server) error {
 		log.Debugf("[%s / %s] Disk threshold is not set, using default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Disk)
 	}
 	d.SetThreshold(&s.Threshold)
+	d.CreateMetrics(s.ProbeKind, s.ProbeTag)
 	return nil
 }
 
@@ -106,28 +111,35 @@ func (d *Disks) CheckThreshold() (bool, string) {
 	return true, ""
 }
 
-// ExportMetrics export the cpu metrics
-func (d *Disks) ExportMetrics(name string, g *prometheus.GaugeVec) {
+// CreateMetrics create the disk metrics
+func (d *Disks) CreateMetrics(subsystem, name string) {
+	namespace := global.GetEaseProbe().Name
+	d.metrics = metric.NewGauge(namespace, subsystem, name, "disk",
+		"Disk Usage", []string{"host", "disk", "state"})
+}
+
+// ExportMetrics export the disk metrics
+func (d *Disks) ExportMetrics(name string) {
 	for _, disk := range d.Usage {
-		g.With(prometheus.Labels{
+		d.metrics.With(prometheus.Labels{
 			"host":  name,
 			"disk":  disk.Tag,
 			"state": "used",
 		}).Set(float64(disk.Used))
 
-		g.With(prometheus.Labels{
+		d.metrics.With(prometheus.Labels{
 			"host":  name,
 			"disk":  disk.Tag,
 			"state": "available",
 		}).Set(float64(disk.Total - disk.Used))
 
-		g.With(prometheus.Labels{
+		d.metrics.With(prometheus.Labels{
 			"host":  name,
 			"disk":  disk.Tag,
 			"state": "total",
 		}).Set(float64(disk.Total))
 
-		g.With(prometheus.Labels{
+		d.metrics.With(prometheus.Labels{
 			"host":  name,
 			"disk":  disk.Tag,
 			"state": "usage",

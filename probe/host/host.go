@@ -20,7 +20,6 @@ package host
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 
 	"github.com/megaease/easeprobe/global"
@@ -38,7 +37,6 @@ type Server struct {
 	outputLines int        `yaml:"-" json:"-"`
 	hostMetrics []IMetrics `yaml:"-" json:"-"`
 	info        Info       `yaml:"-" json:"-"`
-	metrics     *metrics   `yaml:"-" json:"-"`
 }
 
 // Host is the host probe configuration
@@ -50,37 +48,15 @@ type Host struct {
 // BastionMap is a map of bastion
 var BastionMap ssh.BastionMapType
 
-// Info is the host probe information
-type Info struct {
-	Basic  `yaml:",inline"`
-	CPU    CPU   `yaml:"cpu"`
-	Memory Mem   `yaml:"memory"`
-	Disks  Disks `yaml:"disks"`
-	Load   Load  `yaml:"load"`
-}
-
-// IMetrics  put all of the Info member into IMetrics slices
-func (info *Info) IMetrics() []IMetrics {
-	m := []IMetrics{}
-
-	modelType := reflect.TypeOf((*IMetrics)(nil)).Elem()
-
-	t := reflect.TypeOf(*info)
-	for i := 0; i < t.NumField(); i++ {
-		value := reflect.ValueOf(info).Elem().Field(i)
-		if value.Addr().Type().Implements(modelType) {
-			m = append(m, value.Addr().Interface().(IMetrics))
-		}
-	}
-
-	return m
-}
-
 // Config is the host probe configuration
 func (s *Server) Config(gConf global.ProbeSettings) error {
 	kind := "host"
 	tag := "server"
 	name := s.ProbeName
+
+	s.ProbeKind = kind
+	s.ProbeTag = tag
+	s.ProbeName = name
 
 	s.hostMetrics = s.info.IMetrics()
 
@@ -93,8 +69,6 @@ func (s *Server) Config(gConf global.ProbeSettings) error {
 		s.outputLines += m.OutputLines()
 	}
 	log.Debugf("[%s / %s]\n%s", s.ProbeKind, s.ProbeName, s.Command)
-
-	s.metrics = newMetrics(kind, tag)
 
 	endpoint := s.Threshold.String()
 	err := s.Configure(gConf, kind, tag, name, endpoint, &BastionMap, s.DoProbe)
@@ -121,7 +95,7 @@ func (s *Server) DoProbe() (bool, string) {
 		return false, fmt.Sprintf("Prase the output failed: %v", err)
 	}
 	log.Debugf("[%s / %s] - %+v", s.ProbeKind, s.ProbeName, info)
-	s.ExportMetrics(&info)
+	s.ExportMetrics()
 	return s.CheckThreshold(info)
 }
 
@@ -182,10 +156,8 @@ func (s *Server) ParseHostInfo(str string) (Info, error) {
 }
 
 // ExportMetrics export the metrics
-func (s *Server) ExportMetrics(info *Info) {
-	info.Basic.ExportMetrics(s.Name(), s.metrics.Basic)
-	info.CPU.ExportMetrics(s.Name(), s.metrics.CPU)
-	info.Memory.ExportMetrics(s.Name(), s.metrics.Memory)
-	info.Load.ExportMetrics(s.Name(), s.metrics.Load)
-	info.Disks.ExportMetrics(s.Name(), s.metrics.Disk)
+func (s *Server) ExportMetrics() {
+	for _, m := range s.hostMetrics {
+		m.ExportMetrics(s.Name())
+	}
 }

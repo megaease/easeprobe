@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/metric"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 )
@@ -38,6 +40,7 @@ type CPU struct {
 	Steal float64 `yaml:"steal"`
 
 	Threshold float64 `yaml:"threshold"`
+	metrics   *prometheus.GaugeVec
 }
 
 // Command returns the command to get the cpu usage
@@ -57,6 +60,7 @@ func (c *CPU) Config(s *Server) error {
 		log.Debugf("[%s / %s] CPU threshold is not set, using default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.CPU)
 	}
 	c.SetThreshold(&s.Threshold)
+	c.CreateMetrics(s.ProbeKind, s.ProbeTag)
 	return nil
 }
 
@@ -98,50 +102,57 @@ func (c *CPU) CheckThreshold() (bool, string) {
 	return true, ""
 }
 
+// CreateMetrics create the cpu metrics
+func (c *CPU) CreateMetrics(subsystem, name string) {
+	namespace := global.GetEaseProbe().Name
+	c.metrics = metric.NewGauge(namespace, subsystem, name, "cpu",
+		"CPU Usage", []string{"host", "state"})
+}
+
 // ExportMetrics export the cpu metrics
-func (c *CPU) ExportMetrics(name string, g *prometheus.GaugeVec) {
+func (c *CPU) ExportMetrics(name string) {
 	// CPU metrics
-	g.With(prometheus.Labels{
+	c.metrics.With(prometheus.Labels{
 		"host":  name,
 		"state": "usage",
 	}).Set(100 - c.Idle)
 
-	g.With(prometheus.Labels{
+	c.metrics.With(prometheus.Labels{
 		"host":  name,
 		"state": "idle",
 	}).Set(c.Idle)
 
-	g.With(prometheus.Labels{
+	c.metrics.With(prometheus.Labels{
 		"host":  name,
 		"state": "user",
 	}).Set(c.User)
 
-	g.With(prometheus.Labels{
+	c.metrics.With(prometheus.Labels{
 		"host":  name,
 		"state": "sys",
 	}).Set(c.Sys)
 
-	g.With(prometheus.Labels{
+	c.metrics.With(prometheus.Labels{
 		"host":  name,
 		"state": "nice",
 	}).Set(c.Nice)
 
-	g.With(prometheus.Labels{
+	c.metrics.With(prometheus.Labels{
 		"host":  name,
 		"state": "wait",
 	}).Set(c.Wait)
 
-	g.With(prometheus.Labels{
+	c.metrics.With(prometheus.Labels{
 		"host":  name,
 		"state": "hard",
 	}).Set(c.Hard)
 
-	g.With(prometheus.Labels{
+	c.metrics.With(prometheus.Labels{
 		"host":  name,
 		"state": "soft",
 	}).Set(c.Soft)
 
-	g.With(prometheus.Labels{
+	c.metrics.With(prometheus.Labels{
 		"host":  name,
 		"state": "steal",
 	}).Set(c.Steal)

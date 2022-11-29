@@ -20,6 +20,8 @@ package host
 import (
 	"fmt"
 
+	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/metric"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -28,6 +30,8 @@ type Basic struct {
 	HostName string `yaml:"hostname"`
 	OS       string `yaml:"os"`
 	Core     int64  `yaml:"core"`
+
+	metrics *prometheus.GaugeVec `yaml:"-"`
 }
 
 // Command returns the command to get the cpu usage
@@ -45,6 +49,7 @@ func (b *Basic) OutputLines() int {
 // Config returns the config of the basic info
 func (b *Basic) Config(s *Server) error {
 	b.SetThreshold(&s.Threshold)
+	b.CreateMetrics(s.ProbeKind, s.ProbeTag)
 	return nil
 }
 
@@ -73,9 +78,16 @@ func (b *Basic) CheckThreshold() (bool, string) {
 	return true, ""
 }
 
+// CreateMetrics create the cpu metrics
+func (b *Basic) CreateMetrics(subsystem, name string) {
+	namespace := global.GetEaseProbe().Name
+	b.metrics = metric.NewGauge(namespace, subsystem, name, "basic",
+		"Basic Host Information", []string{"host", "state"})
+}
+
 // ExportMetrics export the cpu metrics
-func (b *Basic) ExportMetrics(name string, g *prometheus.GaugeVec) {
-	g.With(prometheus.Labels{
+func (b *Basic) ExportMetrics(name string) {
+	b.metrics.With(prometheus.Labels{
 		"host":  name,
 		"state": "cpu_core",
 	}).Set(float64(b.Core))

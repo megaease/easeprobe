@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/metric"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 )
@@ -28,10 +30,12 @@ import (
 // Mem is the resource usage for memory and disk
 type Mem struct {
 	ResourceUsage `yaml:",inline"`
-	Threshold     float64 `yaml:"threshold"`
+
+	Threshold float64 `yaml:"threshold"`
+	metrics   *prometheus.GaugeVec
 }
 
-// Command returns the command to get the cpu usage
+// Command returns the command to get the memory usage
 func (m *Mem) Command() string {
 	return `free -m | awk 'NR==2{printf "%s %s %.2f\n", $3,$2,$3*100/$2 }'`
 }
@@ -41,13 +45,14 @@ func (m *Mem) OutputLines() int {
 	return 1
 }
 
-// Config returns the config of the cpu
+// Config returns the config of the memory
 func (m *Mem) Config(s *Server) error {
 	if s.Threshold.Mem == 0 {
 		s.Threshold.Mem = DefaultMemThreshold
 		log.Debugf("[%s / %s] Memory threshold is not set, using default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Mem)
 	}
 	m.SetThreshold(&s.Threshold)
+	m.CreateMetrics(s.ProbeKind, s.ProbeTag)
 	return nil
 }
 
@@ -56,7 +61,7 @@ func (m *Mem) SetThreshold(t *Threshold) {
 	m.Threshold = t.Mem
 }
 
-// Parse a string to a CPU struct
+// Parse a string to a Memory struct
 func (m *Mem) Parse(s []string) error {
 	if len(s) < m.OutputLines() {
 		return fmt.Errorf("invalid memory output")
@@ -76,7 +81,7 @@ func (m *Mem) UsageInfo() string {
 	return fmt.Sprintf("Memory: %.2f%%", m.Usage)
 }
 
-// CheckThreshold check the cpu usage
+// CheckThreshold check the memory usage
 func (m *Mem) CheckThreshold() (bool, string) {
 	if m.Threshold > 0 && m.Threshold <= m.Usage/100 {
 		return false, "Memory threshold alert!"
@@ -84,24 +89,31 @@ func (m *Mem) CheckThreshold() (bool, string) {
 	return true, ""
 }
 
-// ExportMetrics export the cpu metrics
-func (m *Mem) ExportMetrics(name string, g *prometheus.GaugeVec) {
-	g.With(prometheus.Labels{
+// CreateMetrics create the memory metrics
+func (m *Mem) CreateMetrics(subsystem, name string) {
+	namespace := global.GetEaseProbe().Name
+	m.metrics = metric.NewGauge(namespace, subsystem, name, "memory",
+		"Memory Usage", []string{"host", "state"})
+}
+
+// ExportMetrics export the memory metrics
+func (m *Mem) ExportMetrics(name string) {
+	m.metrics.With(prometheus.Labels{
 		"host":  name,
 		"state": "used",
 	}).Set(float64(m.Used))
 
-	g.With(prometheus.Labels{
+	m.metrics.With(prometheus.Labels{
 		"host":  name,
 		"state": "available",
 	}).Set(float64(m.Total - m.Used))
 
-	g.With(prometheus.Labels{
+	m.metrics.With(prometheus.Labels{
 		"host":  name,
 		"state": "total",
 	}).Set(float64(m.Total))
 
-	g.With(prometheus.Labels{
+	m.metrics.With(prometheus.Labels{
 		"host":  name,
 		"state": "usage",
 	}).Set(m.Usage)

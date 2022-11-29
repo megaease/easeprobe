@@ -20,20 +20,19 @@ package host
 import (
 	"strconv"
 	"strings"
-
-	"github.com/prometheus/client_golang/prometheus"
 )
 
 // IMetrics is the interface of metrics
 type IMetrics interface {
-	Command() string                                   // Command returns the command to get the metrics
-	OutputLines() int                                  // OutputLines returns the lines of command output
-	Config(s *Server) error                            // Config returns the config of the metrics
-	SetThreshold(t *Threshold)                         // SetThreshold sets the threshold of the metrics
-	Parse(s []string) error                            // Parse a string to a metrics struct
-	UsageInfo() string                                 // UsageInfo returns the usage info of the metrics
-	CheckThreshold() (bool, string)                    // CheckThreshold check the metrics usage
-	ExportMetrics(name string, g *prometheus.GaugeVec) // ExportMetrics export the metrics
+	Command() string                // Command returns the command to get the metrics
+	OutputLines() int               // OutputLines returns the lines of command output
+	Config(s *Server) error         // Config returns the config of the metrics
+	SetThreshold(t *Threshold)      // SetThreshold sets the threshold of the metrics
+	Parse(s []string) error         // Parse a string to a metrics struct
+	UsageInfo() string              // UsageInfo returns the usage info of the metrics
+	CheckThreshold() (bool, string) // CheckThreshold check the metrics usage
+	CreateMetrics(kind, tag string) // CreateMetrics creates the metrics
+	ExportMetrics(name string)      // ExportMetrics export the metrics
 }
 
 // ResourceUsage is the resource usage for cpu and memory
