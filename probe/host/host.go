@@ -58,6 +58,7 @@ func (s *Server) Config(gConf global.ProbeSettings) error {
 	s.ProbeTag = tag
 	s.ProbeName = name
 
+	// put all of the metrics into the IMetrics slice
 	s.hostMetrics = s.info.IMetrics()
 
 	// Combine the commands and Config the metrics
@@ -67,6 +68,7 @@ func (s *Server) Config(gConf global.ProbeSettings) error {
 		m.Config(s)
 		s.Command += m.Command() + "\n"
 		s.outputLines += m.OutputLines()
+		log.Debugf("[%s / %s] - metric [%s] configured!", s.ProbeKind, s.ProbeName, m.Name())
 	}
 	log.Debugf("[%s / %s]\n%s", s.ProbeKind, s.ProbeName, s.Command)
 

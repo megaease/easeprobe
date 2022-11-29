@@ -34,6 +34,11 @@ type Basic struct {
 	metrics *prometheus.GaugeVec `yaml:"-"`
 }
 
+// Name returns the name of the metric
+func (b *Basic) Name() string {
+	return "basic"
+}
+
 // Command returns the command to get the cpu usage
 func (b *Basic) Command() string {
 	return `hostname;` + "\n" +
@@ -47,10 +52,9 @@ func (b *Basic) OutputLines() int {
 }
 
 // Config returns the config of the basic info
-func (b *Basic) Config(s *Server) error {
+func (b *Basic) Config(s *Server) {
 	b.SetThreshold(&s.Threshold)
 	b.CreateMetrics(s.ProbeKind, s.ProbeTag)
-	return nil
 }
 
 // SetThreshold set the basic threshold

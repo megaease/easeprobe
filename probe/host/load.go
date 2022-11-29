@@ -36,6 +36,11 @@ type Load struct {
 	metrics   *prometheus.GaugeVec
 }
 
+// Name returns the name of the metrics
+func (l *Load) Name() string {
+	return "load"
+}
+
 // Command returns the command to get the load average
 func (l *Load) Command() string {
 	return `grep -c ^processor /proc/cpuinfo;` + "\n" +
@@ -48,36 +53,34 @@ func (l *Load) OutputLines() int {
 }
 
 // Config returns the config of the load average
-func (l *Load) Config(s *Server) error {
+func (l *Load) Config(s *Server) {
 	l.Metrics = make(map[string]float64)
-	l.CreateMetrics(s.ProbeKind, s.ProbeTag)
 	if s.Threshold.Load == nil {
 		s.Threshold.Load = make(map[string]float64)
 		s.Threshold.Load["m1"] = DefaultLoadThreshold
 		s.Threshold.Load["m5"] = DefaultLoadThreshold
 		s.Threshold.Load["m15"] = DefaultLoadThreshold
 		log.Debugf("[%s / %s] All of load average threshold is not set, using default value: %.2f", s.ProbeKind, s.ProbeName, DefaultLoadThreshold)
-		l.SetThreshold(&s.Threshold)
-		return nil
-	}
+	} else {
 
-	for k, v := range s.Threshold.Load {
-		s.Threshold.Load[strings.ToLower(k)] = v
-	}
-	if _, ok := s.Threshold.Load["m1"]; !ok {
-		s.Threshold.Load["m1"] = DefaultLoadThreshold
-		log.Debugf("[%s / %s] Load average threshold for m1 is not set, using default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Load["m1"])
-	}
-	if _, ok := s.Threshold.Load["m5"]; !ok {
-		s.Threshold.Load["m5"] = DefaultLoadThreshold
-		log.Debugf("[%s / %s] Load average threshold for m5 is not set, using default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Load["m5"])
-	}
-	if _, ok := s.Threshold.Load["m15"]; !ok {
-		s.Threshold.Load["m15"] = DefaultLoadThreshold
-		log.Debugf("[%s / %s] Load average threshold for m15 is not set, using default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Load["m15"])
+		for k, v := range s.Threshold.Load {
+			s.Threshold.Load[strings.ToLower(k)] = v
+		}
+		if _, ok := s.Threshold.Load["m1"]; !ok {
+			s.Threshold.Load["m1"] = DefaultLoadThreshold
+			log.Debugf("[%s / %s] Load average threshold for m1 is not set, using default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Load["m1"])
+		}
+		if _, ok := s.Threshold.Load["m5"]; !ok {
+			s.Threshold.Load["m5"] = DefaultLoadThreshold
+			log.Debugf("[%s / %s] Load average threshold for m5 is not set, using default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Load["m5"])
+		}
+		if _, ok := s.Threshold.Load["m15"]; !ok {
+			s.Threshold.Load["m15"] = DefaultLoadThreshold
+			log.Debugf("[%s / %s] Load average threshold for m15 is not set, using default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Load["m15"])
+		}
 	}
 	l.SetThreshold(&s.Threshold)
-	return nil
+	l.CreateMetrics(s.ProbeKind, s.ProbeTag)
 }
 
 // SetThreshold  set the threshold of the load average

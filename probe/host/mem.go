@@ -35,6 +35,11 @@ type Mem struct {
 	metrics   *prometheus.GaugeVec
 }
 
+// Name returns the name of the metric
+func (m *Mem) Name() string {
+	return "mem"
+}
+
 // Command returns the command to get the memory usage
 func (m *Mem) Command() string {
 	return `free -m | awk 'NR==2{printf "%s %s %.2f\n", $3,$2,$3*100/$2 }'`
@@ -46,14 +51,13 @@ func (m *Mem) OutputLines() int {
 }
 
 // Config returns the config of the memory
-func (m *Mem) Config(s *Server) error {
+func (m *Mem) Config(s *Server) {
 	if s.Threshold.Mem == 0 {
 		s.Threshold.Mem = DefaultMemThreshold
 		log.Debugf("[%s / %s] Memory threshold is not set, using default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.Mem)
 	}
 	m.SetThreshold(&s.Threshold)
 	m.CreateMetrics(s.ProbeKind, s.ProbeTag)
-	return nil
 }
 
 // SetThreshold set the threshold of the memory

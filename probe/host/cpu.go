@@ -43,6 +43,11 @@ type CPU struct {
 	metrics   *prometheus.GaugeVec
 }
 
+// Name returns the name of the metric
+func (c *CPU) Name() string {
+	return "cpu"
+}
+
 // Command returns the command to get the cpu usage
 func (c *CPU) Command() string {
 	return `top -b -n 1 | grep Cpu | awk -F ":" '{print $2}'`
@@ -54,14 +59,13 @@ func (c *CPU) OutputLines() int {
 }
 
 // Config returns the config of the cpu
-func (c *CPU) Config(s *Server) error {
+func (c *CPU) Config(s *Server) {
 	if s.Threshold.CPU == 0 {
 		s.Threshold.CPU = DefaultCPUThreshold
 		log.Debugf("[%s / %s] CPU threshold is not set, using default value: %.2f", s.ProbeKind, s.ProbeName, s.Threshold.CPU)
 	}
 	c.SetThreshold(&s.Threshold)
 	c.CreateMetrics(s.ProbeKind, s.ProbeTag)
-	return nil
 }
 
 // SetThreshold set the cpu threshold

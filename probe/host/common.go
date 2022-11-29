@@ -24,9 +24,10 @@ import (
 
 // IMetrics is the interface of metrics
 type IMetrics interface {
+	Name() string                   // Name is the name of the metrics
 	Command() string                // Command returns the command to get the metrics
 	OutputLines() int               // OutputLines returns the lines of command output
-	Config(s *Server) error         // Config returns the config of the metrics
+	Config(s *Server)               // Config returns the config of the metrics
 	SetThreshold(t *Threshold)      // SetThreshold sets the threshold of the metrics
 	Parse(s []string) error         // Parse a string to a metrics struct
 	UsageInfo() string              // UsageInfo returns the usage info of the metrics

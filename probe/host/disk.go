@@ -36,6 +36,11 @@ type Disks struct {
 	metrics   *prometheus.GaugeVec
 }
 
+// Name returns the name of the metric
+func (d *Disks) Name() string {
+	return "disk"
+}
+
 // Command returns the command to get the cpu usage
 func (d *Disks) Command() string {
 	return `df -h ` + strings.Join(d.Mount, " ") + ` 2>/dev/null | awk '(NR>1){printf "%d %d %s %s\n", $3,$2,$5,$6}'`
@@ -47,7 +52,7 @@ func (d *Disks) OutputLines() int {
 }
 
 // Config returns the config of the cpu
-func (d *Disks) Config(s *Server) error {
+func (d *Disks) Config(s *Server) {
 	if len(s.Disks) == 0 {
 		s.Disks = []string{"/"}
 	}
@@ -59,7 +64,6 @@ func (d *Disks) Config(s *Server) error {
 	}
 	d.SetThreshold(&s.Threshold)
 	d.CreateMetrics(s.ProbeKind, s.ProbeTag)
-	return nil
 }
 
 // SetThreshold set the threshold of the disk
