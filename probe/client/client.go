@@ -54,7 +54,7 @@ func (c *Client) Config(gConf global.ProbeSettings) error {
 	if err := c.configClientDriver(); err != nil {
 		return err
 	}
-	log.Debugf("[%s] configuration: %+v, %+v", c.ProbeKind, c, c.Result())
+	log.Debugf("[%s / %s / %s ] configuration: %+v", c.ProbeKind, c.ProbeTag, c.ProbeName, *c)
 	return nil
 }
 

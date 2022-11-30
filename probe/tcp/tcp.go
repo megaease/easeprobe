@@ -41,7 +41,7 @@ func (t *TCP) Config(gConf global.ProbeSettings) error {
 	name := t.ProbeName
 	t.DefaultProbe.Config(gConf, kind, tag, name, t.Host, t.DoProbe)
 
-	log.Debugf("[%s / %s] configuration: %+v", t.ProbeKind, t.ProbeName, t)
+	log.Debugf("[%s / %s] configuration: %+v", t.ProbeKind, t.ProbeName, *t)
 	return nil
 }
 

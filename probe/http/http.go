@@ -173,7 +173,7 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 
 	h.metrics = newMetrics(kind, tag)
 
-	log.Debugf("[%s / %s] configuration: %+v", h.ProbeKind, h.ProbeName, h)
+	log.Debugf("[%s / %s] configuration: %+v", h.ProbeKind, h.ProbeName, *h)
 	return nil
 }
 

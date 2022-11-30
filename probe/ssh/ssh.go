@@ -122,7 +122,7 @@ func (s *Server) Configure(gConf global.ProbeSettings,
 		return err
 	}
 
-	log.Debugf("[%s / %s] configuration: %+v", s.ProbeKind, s.ProbeName, s)
+	log.Debugf("[%s / %s] configuration: %+v", s.ProbeKind, s.ProbeName, *s)
 	return nil
 }
 
