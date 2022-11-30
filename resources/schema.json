@@ -1585,6 +1585,16 @@
           "type": "number",
           "title": "Disk threshold",
           "description": "Disk threshold (default: 0.95)"
+        },
+        "load": {
+          "patternProperties": {
+            ".*": {
+              "type": "number"
+            }
+          },
+          "type": "object",
+          "title": "Load average threshold",
+          "description": "Load Average M1/M5/M15 threshold (default: 0.8)"
         }
       },
       "additionalProperties": false,
