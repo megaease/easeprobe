@@ -22,7 +22,7 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/testify v1.8.1
 	github.com/uptrace/bun/driver/pgdriver v1.1.9
-	go.mongodb.org/mongo-driver v1.11.0
+	go.mongodb.org/mongo-driver v1.11.1
 	golang.org/x/crypto v0.4.0
 	golang.org/x/exp v0.0.0-20220328175248-053ad81199eb
 	golang.org/x/net v0.4.0
