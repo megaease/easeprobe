@@ -11,7 +11,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.151
 	github.com/bradfitz/gomemcache v0.0.0-20220106215444-fb4bf637b56d
 	github.com/go-chi/chi v4.1.2+incompatible
-	github.com/go-chi/chi/v5 v5.0.7
+	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-co-op/gocron v1.18.0
 	github.com/go-ping/ping v1.1.0
 	github.com/go-redis/redis/v8 v8.11.5
