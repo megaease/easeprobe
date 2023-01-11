@@ -65,9 +65,15 @@ func NewResult() *Result {
 		LatestDownTime:   time.Time{},
 		RecoveryDuration: 0,
 		Stat: Stat{
-			Since:         time.Now().UTC(),
-			Total:         0,
-			Status:        map[Status]int64{},
+			Since: time.Now().UTC(),
+			Total: 0,
+			Status: map[Status]int64{
+				StatusInit:    0,
+				StatusUp:      0,
+				StatusDown:    0,
+				StatusBad:     0,
+				StatusUnknown: 0,
+			},
 			UpTime:        0,
 			DownTime:      0,
 			StatusCounter: *NewStatusCounter(global.DefaultStatusChangeThresholdSetting),
