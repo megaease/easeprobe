@@ -37,9 +37,9 @@ func newMetrics(subsystem, name string) *metrics {
 	namespace := global.GetEaseProbe().Name
 	return &metrics{
 		TotalCnt: metric.NewGauge(namespace, subsystem, name, "total",
-			"Total Probed Count", []string{"name", "status"}),
+			"Total Probed Counts", []string{"name", "status"}),
 		TotalTime: metric.NewGauge(namespace, subsystem, name, "total_time",
-			"Total Probed Time (Seconds)", []string{"name", "status"}),
+			"Total Time(Seconds) of Status", []string{"name", "status"}),
 		Duration: metric.NewGauge(namespace, subsystem, name, "duration",
 			"Probe Duration", []string{"name", "status"}),
 		Status: metric.NewGauge(namespace, subsystem, name, "status",
