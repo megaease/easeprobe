@@ -197,11 +197,11 @@ func (d *DefaultProbe) Probe() probe.Result {
 	d.ProbeResult.PreStatus = d.ProbeResult.Status
 	d.ProbeResult.Status = status
 
-	d.ExportMetrics()
-
 	d.DownTimeCalculation(status)
 
 	d.ProbeResult.DoStat(d.Interval())
+
+	d.ExportMetrics()
 
 	result := d.ProbeResult.Clone()
 	return result
@@ -209,10 +209,26 @@ func (d *DefaultProbe) Probe() probe.Result {
 
 // ExportMetrics export the metrics
 func (d *DefaultProbe) ExportMetrics() {
-	d.metrics.Total.With(prometheus.Labels{
+	cnt := int64(0)
+	time := time.Duration(0)
+
+	if d.ProbeResult.Status == probe.StatusUp {
+		cnt = d.ProbeResult.Stat.Status[probe.StatusUp]
+		time = d.ProbeResult.Stat.UpTime
+	} else {
+		cnt = d.ProbeResult.Stat.Status[probe.StatusDown]
+		time = d.ProbeResult.Stat.DownTime
+	}
+
+	d.metrics.TotalCnt.With(prometheus.Labels{
 		"name":   d.ProbeName,
 		"status": d.ProbeResult.Status.String(),
-	}).Inc()
+	}).Set(float64(cnt))
+
+	d.metrics.TotalTime.With(prometheus.Labels{
+		"name":   d.ProbeName,
+		"status": d.ProbeResult.Status.String(),
+	}).Set(float64(time.Seconds()))
 
 	d.metrics.Duration.With(prometheus.Labels{
 		"name":   d.ProbeName,

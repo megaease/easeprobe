@@ -25,18 +25,21 @@ import (
 
 // metrics is the probe metrics
 type metrics struct {
-	Total    *prometheus.CounterVec
-	Duration *prometheus.GaugeVec
-	Status   *prometheus.GaugeVec
-	SLA      *prometheus.GaugeVec
+	TotalCnt  *prometheus.GaugeVec
+	TotalTime *prometheus.GaugeVec
+	Duration  *prometheus.GaugeVec
+	Status    *prometheus.GaugeVec
+	SLA       *prometheus.GaugeVec
 }
 
 // newMetrics create the metrics
 func newMetrics(subsystem, name string) *metrics {
 	namespace := global.GetEaseProbe().Name
 	return &metrics{
-		Total: metric.NewCounter(namespace, subsystem, name, "total",
-			"Total Probe Number", []string{"name", "status"}),
+		TotalCnt: metric.NewGauge(namespace, subsystem, name, "total",
+			"Total Probed Counts", []string{"name", "status"}),
+		TotalTime: metric.NewGauge(namespace, subsystem, name, "total_time",
+			"Total Time(Seconds) of Status", []string{"name", "status"}),
 		Duration: metric.NewGauge(namespace, subsystem, name, "duration",
 			"Probe Duration", []string{"name", "status"}),
 		Status: metric.NewGauge(namespace, subsystem, name, "status",
