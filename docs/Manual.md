@@ -562,7 +562,7 @@ EaseProbe supports Prometheus metrics exporter. The Prometheus endpoint is `http
 
 Currently, All of the Probers support the following metrics:
 
-  - `total`: the total probe number of probes
+  - `total`: the total number of probes
   - `total_time`: the total time(seconds) of status up or down
   - `duration`: Probe duration in milliseconds
   - `status`: Probe status
