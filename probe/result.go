@@ -68,8 +68,8 @@ func NewResult() *Result {
 			Since: time.Now().UTC(),
 			Total: 0,
 			Status: map[Status]int64{
-				StatusUp:      0,
-				StatusDown:    0,
+				StatusUp:   0,
+				StatusDown: 0,
 			},
 			UpTime:        0,
 			DownTime:      0,
