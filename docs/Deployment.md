@@ -16,7 +16,14 @@
 
 ## 1. Overview
 
-Deployment of EaseProbe is a simple process. EaseProbe is a Go application and can be deployed on any platform that supports Go. EaseProbe is a single binary and can be deployed as a standalone application or in a Kubernetes pod.
+EaseProbe is a Go application and can be deployed on any platform that supports Go.
+
+This document describes how to deploy EaseProbe on the following ways:
+
+- **Standalone Deployment** - run EaseProbe as a systemd service.
+- **Docker Deployment** - run EaseProbe as a container.
+- **Kubernetes Deployment** -  run EaseProbe as a kubernetes pod.
+
 
 ## 2. Standalone Deployment
 
