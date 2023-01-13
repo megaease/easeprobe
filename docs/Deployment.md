@@ -157,7 +157,7 @@ Note:
 Because EaseProbe needs to persist data,  we have to deploy the EaseProbe as Stateful-Set in Kubernetes, this would lead a bit complex deployment process.
 
 1. Creating the ConfigMap for EaseProbe `config.yaml`
-2. creating a PV/PVC for EaseProbe SLA data persistent.
+2. Creating a PV/PVC for EaseProbe SLA data persistent.
 3. Deploy EaseProbe
 4. Create the EaseProbe Service
 
