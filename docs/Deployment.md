@@ -70,7 +70,7 @@ settings:
 
 ```
 
-There are three parameters need to be noticed:
+There are three parameters need your attention:
 
 - `settings.sla.data`: the data file of EaseProbe
 - `settings.log.file`: the log file of EaseProbe
