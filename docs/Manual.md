@@ -1413,4 +1413,4 @@ In order to use the schema with VSCode for validating your configuration, you ne
 
 EaseProbe can be deployed by Systemd, Docker, & Kubernetes.
 
-YOu can find the the Details in [Deployment Guide](./Deployment.md)
+You can find the details in [Deployment Guide](./Deployment.md)
