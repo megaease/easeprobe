@@ -143,11 +143,12 @@ docker run -d --name easeprobe \
   megaease/easeprobe:latest
 ```
 
-Note:
- - `-p` option is used to expose the HTTP port of EaseProbe.
- - `-v` option is used to mount the configuration file and data file to the container.
-   -  `/opt/config.yaml` is the configuration file default path in the container.
-   -  `/opt/data/` is the data file default directory in the container.
+> Note:
+>
+>  - `-p` option is used to expose the HTTP port of EaseProbe.
+>  - `-v` option is used to mount the configuration file and data file to the container.
+>    -  `/opt/config.yaml` is the configuration file default path in the container.
+>    -  `/opt/data/` is the data file default directory in the container.
 
 
 
@@ -213,7 +214,9 @@ To be simple, we use the NFS as an example
 
 **Step One: Create NFS PV(Persistent Volume)**
 
-> Note: You need to change the `server` and `path` to your NFS server and path.
+> Note:
+>
+> You need to change the `server` and `path` to your NFS server and path.
 
 ```yaml
 apiVersion: v1
