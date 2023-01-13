@@ -16,16 +16,17 @@ EaseProbe is a simple, standalone, and lightweight tool that can do health/statu
 - [1. Introduction](#1-introduction)
   - [1.1 Probe](#11-probe)
   - [1.2 Notification](#12-notification)
-  - [1.3 Report & Metrics](#13-report--metrics)
+  - [1.3 Report \& Metrics](#13-report--metrics)
 - [2. Getting Started](#2-getting-started)
   - [2.1 Build](#21-build)
   - [2.2 Configure](#22-configure)
   - [2.3 Run](#23-run)
-- [3. User Manual](#3-user-manual)
-- [4. Benchmark](#4-benchmark)
-- [5. Contributing](#5-contributing)
-- [6. Community](#6-community)
-- [7. License](#7-license)
+- [3. Deployment](#3-deployment)
+- [4. User Manual](#4-user-manual)
+- [5. Benchmark](#5-benchmark)
+- [6. Contributing](#6-contributing)
+- [7. Community](#7-community)
+- [8. License](#8-license)
 
 
 # 1. Introduction
@@ -144,24 +145,29 @@ $ build/bin/easeprobe -f config.yaml
 * `-f` configuration file or URL or path for multiple files which will be auto merged into one. Can also be achieved by setting the environment variable `PROBE_CONFIG`
 * `-d` dry run. Can also be achieved by setting the environment variable `PROBE_DRY`
 
+# 3. Deployment
 
-# 3. User Manual
+EaseProbe can be deployed by Systemd, Docker, & Kubernetes.
+
+YOu can find the the Details in [Deployment Guide](./Deployment.md)
+
+# 4. User Manual
 
 For detailed instructions and features please refer to the [User Manual](./docs/Manual.md)
 
-# 4. Benchmark
+# 5. Benchmark
 
 We have performed an extensive benchmark on EaseProbe. For the benchmark results please refer to - [Benchmark Report](./docs/Benchmark.md)
 
-# 5. Contributing
+# 6. Contributing
 
 If you're interested in contributing to the project, please spare a moment to read our [CONTRIBUTING Guide](./docs/CONTRIBUTING.md)
 
-# 6. Community
+# 7. Community
 
 - Join Slack [Workspace](https://join.slack.com/t/openmegaease/shared_invite/zt-upo7v306-lYPHvVwKnvwlqR0Zl2vveA) for requirements, issues, and development.
 - [MegaEase on Twitter](https://twitter.com/megaease)
 
-# 7. License
+# 8. License
 
 EaseProbe is under the Apache 2.0 license. See the [LICENSE](./LICENSE) file for details.

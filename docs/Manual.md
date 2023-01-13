@@ -50,6 +50,7 @@ EaseProbe is a simple, standalone, and lightweight tool that can do health/statu
   - [7.10 Global Setting Configuration](#710-global-setting-configuration)
 - [8. Tools](#8-tools)
   - [8.1 EaseProbe JSON Schema](#81-easeprobe-json-schema)
+  - [8.2 EaseProbe Deployment](#82-easeprobe-deployment)
 
 
 
@@ -1407,3 +1408,9 @@ In order to use the schema with VSCode for validating your configuration, you ne
   }
 }
 ```
+
+## 8.2 EaseProbe Deployment
+
+EaseProbe can be deployed by Systemd, Docker, & Kubernetes.
+
+YOu can find the the Details in [Deployment Guide](./Deployment.md)
