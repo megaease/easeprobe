@@ -304,7 +304,7 @@ spec:
 > Note:
 >
 >  - The `configmap-volume-0` is the ConfigMap for `config.yaml`, which is mounted as volume under `/opt/config.yaml` in the container.
->  - The `pvc-volume-easeprobe-pvc` is the PVC for SLA data persistent, which mount to `/opt/data` in the container.
+>  - The `pvc-volume-easeprobe-pvc` is the PVC for SLA data persistent, which is mounted as a volume under `/opt/data` in the container.
 
 ### 4.4 Create the EaseProbe Service
 
