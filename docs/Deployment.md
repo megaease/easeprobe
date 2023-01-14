@@ -86,7 +86,9 @@ There are three parameters need your attention:
 
 ## 2.3 Run EaseProbe
 
-On Linux Platform, you can configure systemd to run EaseProbe as a service. The following is an example of a systemd service file.
+On Linux Platform, you can configure systemd to run EaseProbe as a service.
+
+The following is an example of a systemd service file - `easeprobe.service`
 
 ```ini
 [Unit]
@@ -105,7 +107,7 @@ WantedBy=multi-user.target
 ```
 Run the following command to install the service file.
 
-```bash
+```
 sudo cp ./easeprobe.service /etc/systemd/system/easeprobe.service
 sudo systemctl daemon-reload
 sudo systemctl enable easeprobe.service
@@ -114,7 +116,7 @@ sudo systemctl start easeprobe.service
 
 Uninstall the service file.
 
-```bash
+```
 sudo systemctl stop easeprobe.service
 sudo systemctl disable easeprobe.service
 sudo rm /etc/systemd/system/easeprobe.service
@@ -322,7 +324,7 @@ The service is used to expose the HTTP port of EaseProbe.
 
 > Note:
 >
-> The following service is a ClusterIP service, you can change it to NodePort or LoadBalancer service.
+> The following service is a ClusterIP service, you can change it to NodePort or LoadBalancer service. It uses the port `38181` to map `8181` in the container.
 
 ```yaml
 apiVersion: v1
