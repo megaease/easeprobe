@@ -54,8 +54,8 @@ github.com/antchfx/htmlquery v1.2.5 h1:1lXnx46/1wtv1E/kzmH8vrfMuUKYgkdDBA9pIdMJn
 github.com/antchfx/htmlquery v1.2.5/go.mod h1:2MCVBzYVafPBmKbrmwB9F5xdd+IEgRY61ci2oOsOQVw=
 github.com/antchfx/jsonquery v1.3.2 h1:/BgHv1le9CCkqDe7t1x5BRlCg6DQmXTsztnMQFG5Hoc=
 github.com/antchfx/jsonquery v1.3.2/go.mod h1:VsW9O/sNgHoUVvhoMEjR+opjIOjKOViNFTpAlxcI4Ws=
-github.com/antchfx/xmlquery v1.3.13 h1:wqhTv2BN5MzYg9rnPVtZb3IWP8kW6WV/ebAY0FCTI7Y=
-github.com/antchfx/xmlquery v1.3.13/go.mod h1:3w2RvQvTz+DaT5fSgsELkSJcdNgkmg6vuXDEuhdwsPQ=
+github.com/antchfx/xmlquery v1.3.15 h1:aJConNMi1sMha5G8YJoAIF5P+H+qG1L73bSItWHo8Tw=
+github.com/antchfx/xmlquery v1.3.15/go.mod h1:zMDv5tIGjOxY/JCNNinnle7V/EwthZ5IT8eeCGJKRWA=
 github.com/antchfx/xpath v1.2.1/go.mod h1:i54GszH55fYfBmoZXapTHN8T8tkcHfRgLyVwwqzXNcs=
 github.com/antchfx/xpath v1.2.3 h1:CCZWOzv5bAqjVv0offZ2LVgVYFbeldKQVuLNbViZdes=
 github.com/antchfx/xpath v1.2.3/go.mod h1:i54GszH55fYfBmoZXapTHN8T8tkcHfRgLyVwwqzXNcs=
@@ -512,6 +512,7 @@ golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9sn
 golang.org/x/term v0.0.0-20210927222741-03fcf44c2211/go.mod h1:jbD1KX2456YbFQfuXm/mYQcufACuNUgVhRMnK/tPxf8=
 golang.org/x/term v0.1.0/go.mod h1:jbD1KX2456YbFQfuXm/mYQcufACuNUgVhRMnK/tPxf8=
 golang.org/x/term v0.4.0 h1:O7UWfv5+A2qiuulQk30kVinPoMtoIPeVaKLEgLpVkvg=
+golang.org/x/term v0.4.0/go.mod h1:9P2UbLfCdcvo3p/nzKvsmas4TnlujnuoV9hGgYzW1lQ=
 golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.1-0.20180807135948-17ff2d5776d2/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
