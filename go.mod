@@ -5,7 +5,7 @@ go 1.18
 require (
 	bou.ke/monkey v1.0.2
 	github.com/Knetic/govaluate v3.0.0+incompatible
-	github.com/antchfx/htmlquery v1.2.5
+	github.com/antchfx/htmlquery v1.3.0
 	github.com/antchfx/jsonquery v1.3.2
 	github.com/antchfx/xmlquery v1.3.15
 	github.com/aws/aws-sdk-go v1.44.151
