@@ -1,0 +1,69 @@
+annotations:
+  licenses: Apache-2.0
+
+## EaseProbe configuration
+config:
+  http:
+    - name: EaseProbe Github
+      url: https://github.com/megaease/easeprobe
+  notify:
+    log:
+      - name: log file
+        file: /var/log/easeprobe.log
+  settings:
+    probe:
+      timeout: 30s
+      interval: 1m
+
+image:
+  repository: megaease/easeprobe
+  tag: latest
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+persistence:
+  ## Enable persistence using a `PersistentVolumeClaim`, use emptyDir if false
+  enabled: false
+  ## Name of an existing `PersistentVolumeClaim`
+  ## NOTE: When it's set the rest of persistence parameters are ignored
+  existingClaim: ""
+  ## Volume storage Class
+  storageClassName: ""
+  ## Volume size
+  size: 1Gi
+
+## Refer https://artifacthub.io/packages/helm/prometheus-community/prometheus
+prometheus:
+  enabled: false
+  server:
+    persistentVolume:
+      enabled: false
+  # Scrape EaseProbe metrics
+  extraScrapeConfigs: |
+    - job_name: easeprobe
+      kubernetes_sd_configs:
+      - role: service
+        selectors:
+        - role: "service"
+          field: "metadata.name={{ .Release.Name }}"
+  alertmanager:
+    enabled: false
+  kube-state-metrics:
+    enabled: false
+  prometheus-node-exporter:
+    enabled: false
+  prometheus-pushgateway:
+    enabled: false
+  
+## Refer https://artifacthub.io/packages/helm/grafana/grafana
+grafana:
+  enabled: false
+  datasources:
+    datasources.yaml:
+      datasources:
+      # Add Prometheus datasource
+      - name: Prometheus
+        type: prometheus
+        url: "http://{{ .Release.Name }}-prometheus-server"
+        isDefault: true

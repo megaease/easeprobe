@@ -1,5 +1,6 @@
 .idea/
 .vscode/
 build/*
-*.yaml
+data/*.yaml
 !.github/workflows/*.yaml
+helm/easeprobe/charts/
