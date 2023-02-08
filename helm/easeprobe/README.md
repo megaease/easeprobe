@@ -1,7 +1,7 @@
 # EaseProbe
 EaseProbe is a simple, standalone, and lightweight tool that can do health/status checking, written in Go.
 
-## Install
+## Installation
 
 ### From Source
 - Start Quickly
@@ -30,7 +30,7 @@ EaseProbe is a simple, standalone, and lightweight tool that can do health/statu
 ### From Repo
 - (TBD)
 
-## Uninstall
+## Uninstallation
 ```shell
 helm uninstall [RELEASE_NAME]
 ```
