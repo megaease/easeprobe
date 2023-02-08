@@ -1,0 +1,22 @@
+annotations:
+  licenses: Apache-2.0
+apiVersion: v2
+appVersion: "2.0.0"
+name: easeprobe
+version: "0.0.1"
+description: EaseProbe is a simple, standalone, and lightweight tool that can do health/status checking, written in Go
+home: https://github.com/megaease/easeprobe
+sources:
+  - "https://github.com/megaease/easeprobe"
+maintainers:
+  - name: MegaEase
+    url: https://www.megaease.com
+dependencies:
+  - name: prometheus
+    version: 19.3.3
+    repository: https://prometheus-community.github.io/helm-charts
+    condition: prometheus.enabled
+  - name: grafana
+    version: 6.50.6
+    repository: https://grafana.github.io/helm-charts
+    condition: grafana.enabled
