@@ -61,7 +61,7 @@ func TestPostgreSQL(t *testing.T) {
 	assert.Equal(t, conf.Timeout(), pgd.Config().DialTimeout)
 	assert.Equal(t, conf.Timeout(), pgd.Config().ReadTimeout)
 	assert.Equal(t, conf.Timeout(), pgd.Config().WriteTimeout)
-	assert.Nil(t, pgd.Config().TLSConfig.ClientCAs)
+	assert.Nil(t, pgd.Config().TLSConfig)
 
 	monkey.Patch(sql.OpenDB, func(c driver.Connector) *sql.DB {
 		return &sql.DB{}
@@ -83,6 +83,10 @@ func TestPostgreSQL(t *testing.T) {
 	})
 
 	s, m := pg.Probe()
+	assert.True(t, s)
+	assert.Contains(t, m, "Successfully")
+
+	s, m = pg.ProbeWithDataChecking()
 	assert.True(t, s)
 	assert.Contains(t, m, "Successfully")
 
