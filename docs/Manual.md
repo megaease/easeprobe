@@ -1024,7 +1024,7 @@ tls:
                                       # Also support the `ALL_PROXY` environment.
     insecure_skip_verify: true # don't check cert validity
     expire_skip_verify: true   # don't check cert expire date
-    alert_expire_before: 168h  # alert if cert expire date is before X, the value is a Duration, s
+    alert_expire_before: 168h  # alert if cert expire date is before X, the value is a Duration,
                                # see https://pkg.go.dev/time#ParseDuration. example: 1h, 1m, 1s.
                                # expire_skip_verify must be false to use this feature.
     # root_ca_pem_path: /path/to/root/ca.pem # ignore if root_ca_pem is present
