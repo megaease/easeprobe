@@ -21,6 +21,7 @@ package web
 import (
 	"encoding/json"
 	"fmt"
+	"html"
 	"net"
 	"net/http"
 	"strconv"
@@ -79,15 +80,18 @@ func getNum[T any](str string, _default T, convert func(string) (T, error)) T {
 	}
 	return n
 }
+func getStr(str string) string {
+	return strings.TrimSpace(html.EscapeString(str))
+}
 
 func getFilter(req *http.Request) (*report.SLAFilter, error) {
 	filter := &report.SLAFilter{}
 
-	filter.Name = strings.TrimSpace(req.URL.Query().Get("name"))
-	filter.Kind = strings.TrimSpace(req.URL.Query().Get("kind"))
-	filter.Endpoint = strings.TrimSpace(req.URL.Query().Get("ep"))
+	filter.Name = getStr(req.URL.Query().Get("name"))
+	filter.Kind = getStr(req.URL.Query().Get("kind"))
+	filter.Endpoint = getStr(req.URL.Query().Get("ep"))
 	filter.Status = getStatus(req.URL.Query().Get("status"))
-	filter.Message = strings.TrimSpace(req.URL.Query().Get("msg"))
+	filter.Message = getStr(req.URL.Query().Get("msg"))
 	filter.SLAGreater = getNum(req.URL.Query().Get("gte"), 0, toFloat)
 	filter.SLALess = getNum(req.URL.Query().Get("lte"), 100, toFloat)
 	filter.PageNum = getNum(req.URL.Query().Get("pg"), 1, toInt)
