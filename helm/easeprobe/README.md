@@ -28,7 +28,14 @@ EaseProbe is a simple, standalone, and lightweight tool that can do health/statu
   > Persistence for Prometheus and Grafana is not enabled by default, you must enable it for production environment.
 
 ### From Repo
-- (TBD)
+- Add repository
+  ```shell
+  helm repo add easeprobe https://megaease.github.io/easeprobe
+  ```
+- Install and run
+  ```shell
+  helm install [RELEASE_NAME] megaease/easeprobe
+  ```
 
 ## Uninstallation
 ```shell
@@ -38,7 +45,7 @@ helm uninstall [RELEASE_NAME]
 ## Parameters
 | Name | Description | Value |
 | ---- | ----------- | ----- |
-| `config` | Configuration for EaseProbe, refer [Manual](https://github.com/megaease/easeprobe/blob/main/docs/Manual.md) | `{}`
+| `config` | Configuration for EaseProbe, refer to [Manual](https://github.com/megaease/easeprobe/blob/main/docs/Manual.md) | `{}`
 | `image.repository` | Image repository | `megaease/easeprobe`
 | `image.tag` | Image tag | `latest`
 | `image.pullPolicy` | Image pull policy | `IfNotPresent`
@@ -47,7 +54,7 @@ helm uninstall [RELEASE_NAME]
 | `persistence.existingClaim` | Existing PVC name | `""`
 | `persistence.storageClassName` | Storage class name | `""`
 | `persistence.size` | Volume size for persistence | `1Gi`
-| `prometheus` | Configuration for Prometheus, refer [https://artifacthub.io/packages/helm/prometheus-community/prometheus](https://artifacthub.io/packages/helm/prometheus-community/prometheus) | `{}`
+| `prometheus` | Configuration for Prometheus, refer to [https://artifacthub.io/packages/helm/prometheus-community/prometheus](https://artifacthub.io/packages/helm/prometheus-community/prometheus) | `{}`
 | `prometheus.enabled` | Whether to enable Prometheus | `false`
-| `grafana` | Configuration for Grafana, refer [https://artifacthub.io/packages/helm/grafana/grafana](https://artifacthub.io/packages/helm/grafana/grafana) | `{}`
+| `grafana` | Configuration for Grafana, refer to [https://artifacthub.io/packages/helm/grafana/grafana](https://artifacthub.io/packages/helm/grafana/grafana) | `{}`
 | `grafana.enabled` | Whether to enable Grafana | `false`
