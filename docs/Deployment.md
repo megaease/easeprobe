@@ -12,6 +12,7 @@
     - [4.2 Creating a PV/PVC for EaseProbe SLA data persistent.](#42-creating-a-pvpvc-for-easeprobe-sla-data-persistent)
     - [4.3 Deploy EaseProbe](#43-deploy-easeprobe)
     - [4.4 Create the EaseProbe Service](#44-create-the-easeprobe-service)
+  - [5. Kubernetes Deployment Using Helm](#5-kubernetes-deployment-using-helm)
 
 
 ## 1. Overview
@@ -339,4 +340,23 @@ spec:
     protocol: TCP
     targetPort: 8181
   type: ClusterIP
+```
+
+## 5 Kubernetes Deployment Using Helm
+
+**Add repository**
+```
+helm repo add easeprobe https://megaease.github.io/easeprobe
+```
+
+**Install and run**
+```
+helm install [RELEASE_NAME] megaease/easeprobe
+```
+> **Note**:
+  > Persistence for EaseProbe using Helm is not enabled by default, you must enable it for production environment, refer to [Helm README](../helm/easeprobe/README.md#parameters) for more details.
+
+**Uninstall**
+```
+helm uninstall [RELEASE_NAME]
 ```
