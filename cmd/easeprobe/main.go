@@ -209,7 +209,7 @@ func main() {
 	////////////////////////////////////////////////////////////////////////////
 	//                              Graceful Shutdown                         //
 	////////////////////////////////////////////////////////////////////////////
-	done := make(chan os.Signal)
+	done := make(chan os.Signal, 1)
 	signal.Notify(done, syscall.SIGTERM)
 	select {
 	case <-done:
