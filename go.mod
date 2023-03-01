@@ -23,7 +23,7 @@ require (
 	github.com/stretchr/testify v1.8.1
 	github.com/uptrace/bun/driver/pgdriver v1.1.11
 	go.mongodb.org/mongo-driver v1.11.1
-	golang.org/x/crypto v0.5.0
+	golang.org/x/crypto v0.6.0
 	golang.org/x/exp v0.0.0-20220328175248-053ad81199eb
 	golang.org/x/net v0.7.0
 	golang.org/x/sys v0.5.0
