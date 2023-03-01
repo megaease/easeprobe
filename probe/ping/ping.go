@@ -76,7 +76,7 @@ func (p *Ping) Config(gConf global.ProbeSettings) error {
 
 // using reflect to get the network and protocol (private fields)
 func protocol(p *ping.Pinger) (network string, protocol string) {
-	v := reflect.ValueOf(*p)
+	v := reflect.ValueOf(p).Elem()
 	net := v.FieldByName("network")
 	proto := v.FieldByName("protocol")
 	return net.String(), proto.String()
