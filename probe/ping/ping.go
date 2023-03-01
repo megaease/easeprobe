@@ -22,9 +22,9 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/go-ping/ping"
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe/base"
+	ping "github.com/prometheus-community/pro-bing"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 )
