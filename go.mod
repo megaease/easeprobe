@@ -28,7 +28,7 @@ require (
 	golang.org/x/net v0.7.0
 	golang.org/x/sys v0.5.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
-	gopkg.in/natefinch/lumberjack.v2 v2.0.0
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -51,7 +51,6 @@ require (
 )
 
 require (
-	github.com/BurntSushi/toml v1.1.0 // indirect
 	github.com/antchfx/xpath v1.2.3 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
