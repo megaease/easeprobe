@@ -28,7 +28,7 @@ EaseProbe has the following major modules:
   - [1.5 Shell](#15-shell)
   - [1.6 SSH](#16-ssh)
   - [1.7 TLS](#17-tls)
-  - [1.8 Host Resource Usage](#18-host-resource-usage)
+  - [1.8 Host](#18-host)
   - [1.9 Native Client](#19-native-client)
     - [1.9.1 Redis](#191-redis)
     - [1.9.2 Memcache](#192-memcache)
@@ -552,9 +552,9 @@ tls:
     #   -----BEGIN CERTIFICATE-----
 ```
 
-## 1.8 Host Resource Usage
+## 1.8 Host
 
-The host resource usage probe uses `host` identifier, it allows for collecting information and alerting when certain resource utilization thresholds are exceeded.
+The host probe uses `host` identifier, it allows for collecting information and alerting when certain resource utilization thresholds are exceeded.
 
 The resources currently monitored include CPU, memory and disk utilization. The probe status is considered as `down` when any value exceeds its defined threshold.
 
