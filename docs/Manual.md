@@ -1288,20 +1288,20 @@ The following environment variables can be used to fine-tune the request to the 
 * `HTTP_AUTHORIZATION`
 * `HTTP_TIMEOUT`
 
-Ease Probe supports multiple configuration files, just simply using `-f` indicate the directory of the configuration files.
+EaseProbe supports multiple configuration files, with the use of the command line flag `-f` which indicates the directory of the configuration files.
 
 ```shell
 easeprobe -f /path/to/conf
 ```
 
 
-And the configuration file should be versioned, the version should be aligned with the EaseProbe binary version.
+The configuration file should be versioned, the version should be aligned with the EaseProbe binary version.
 
 ```yaml
 version: v1.5.0
 ```
 
-The full configuration template you can get from [here](../resources/config.yaml)
+You can find the full configuration template [here](../resources/config.yaml)
 
 ## 7.1 Probe Configuration
 
