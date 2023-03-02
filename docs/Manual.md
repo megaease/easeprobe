@@ -4,10 +4,21 @@ EaseProbe is a simple, standalone, and lightweight tool that can do health/statu
 
 ![](./overview.png)
 
+EaseProbe has the following major modules:
+
+- **Probe**: It is used to check the health of the service.
+- **Notification**: It is used to send the Probe notification.
+- **Channel**: It is used to connect the probe and the notification.
+- **Report**: It is used to generate the SLA report for all probe.
+- **Metrics**: It is used to export the metrics data to Prometheus.
+
+
 <h1>Outline</h1>
 
 - [1. Probe](#1-probe)
-  - [1.1 Initial Fire Up](#11-initial-fire-up)
+  - [1.1 Overview](#11-overview)
+    - [1.1.1 General Settings](#111-general-settings)
+    - [1.1.2 Initial Fire Up](#112-initial-fire-up)
   - [1.2 HTTP](#12-http)
     - [1.2.1 Basic Configuration](#121-basic-configuration)
     - [1.2.2 Complete Configuration](#122-complete-configuration)
@@ -22,10 +33,10 @@ EaseProbe is a simple, standalone, and lightweight tool that can do health/statu
     - [1.9.1 Redis](#191-redis)
     - [1.9.2 Memcache](#192-memcache)
     - [1.9.3 MongoDB](#193-mongodb)
-    - [1.9.3 Memcache](#193-memcache)
-    - [1.9.3 Kafka](#193-kafka)
-    - [1.9.3 PostgreSQL](#193-postgresql)
-    - [1.9.3 Zookeeper](#193-zookeeper)
+    - [1.9.4 Memcache](#194-memcache)
+    - [1.9.5 Kafka](#195-kafka)
+    - [1.9.6 PostgreSQL](#196-postgresql)
+    - [1.9.7 Zookeeper](#197-zookeeper)
 - [2. Notification](#2-notification)
   - [2.1 Slack](#21-slack)
   - [2.2 Discord](#22-discord)
@@ -51,6 +62,12 @@ EaseProbe is a simple, standalone, and lightweight tool that can do health/statu
   - [5.1 PID file](#51-pid-file)
   - [5.2 Log file Rotation](#52-log-file-rotation)
 - [6. Prometheus Metrics Exporter](#6-prometheus-metrics-exporter)
+  - [6.1 General Metrics](#61-general-metrics)
+  - [6.2 HTTP Probe](#62-http-probe)
+  - [6.3 Ping Probe](#63-ping-probe)
+  - [6.4 TLS Probe](#64-tls-probe)
+  - [6.5 Shell \& SSH Probe](#65-shell--ssh-probe)
+  - [6.6  Host Probe](#66--host-probe)
 - [7. Configuration](#7-configuration)
   - [7.1 Probe Configuration](#71-probe-configuration)
   - [7.2 Notification Configuration](#72-notification-configuration)
@@ -64,15 +81,22 @@ EaseProbe is a simple, standalone, and lightweight tool that can do health/statu
 
 # 1. Probe
 
-EaseProbe supports the following probing methods: **HTTP**, **TCP**, **TLS**, **Shell Command**, **SSH Command**, **Host Resource Usage**, and **Native Client**.
+EaseProbe supports these probing methods: **HTTP**, **TCP**, **TLS**, **Shell Command**, **SSH Command**, **Host Resource Usage**, and **Native Client**.
 
-Each probe is identified by the method it supports (eg `http`), a unique name (across all probes in the configuration file) and the method specific parameters.
+## 1.1 Overview
 
-And please be ware that the following configuration:
+Each probe is identified by the method it supports (eg `http`), a unique name (across all probes in the configuration file) and the method specific parameters. For example:
 
-The following example configurations illustrate the EaseProbe supported features.
+```yaml
+http:
+  - name: Web Service
+    url: http://example.com:1080
+```
+> **Note**:
+>
+> **Probe name must be unique.** if multiple probes using the same name then this could lead to corruption of the metrics data and/or the behavior of the application in non-deterministic way.
 
-**Note**:
+### 1.1.1 General Settings
 
 All probes support the `timeout`, `interval`, `failure`, and `success` optional configuration parameters. For example:
 
@@ -90,27 +114,22 @@ We can configure the general probe settings for all probes.
 
 The following configuration is effective for all probe, unless the probe has its own configuration.
 
-
 ```yaml
 settings:
   probe:
-    timeout: 30s # the time out for all probes
-    interval: 1m # probe every minute for all probes
+    timeout: 30s # the time out for all probes, default is 30 seconds
+    interval: 1m # probe every minute for all probes, default is 60 seconds
     failure: 2 # number of consecutive failed probes needed to determine the status down, default: 1
     success: 1 # number of consecutive successful probes needed to determine the status up, default: 1
 ```
 
-
-## 1.1 Initial Fire Up
+### 1.1.2 Initial Fire Up
 
 On application startup, the configured probes are scheduled for their initial fire up based on the following criteria:
 
 -  Less than or equal to 60 total probers exist: the delay between initial prober fire-up is `1 second`
 -  More than 60 total probers exist: the startup is scheduled based on the following equation `timeGap = DefaultProbeInterval / numProbes`
 
-> **Note**:
->
-> **If multiple probes using the same name then this could lead to corruption of the metrics data and/or the behavior of the application in non-deterministic way.**
 
 ## 1.2 HTTP
 
@@ -121,6 +140,12 @@ HTTP probe using `http` identifier, it has the following features:
 - Support mTLS and HTTP Basic Auth
 - Can set the customized Request Header/Body.
 - Support the HTTP Proxy
+
+Setting the environment variables `$HTTP_PROXY` & `$HTTPS_PROXY` allows for configuring the proxy settings for all HTTP related probe (or you can set the `proxy` field in the probe configuration for specific probe).
+
+```shell
+export HTTPS_PROXY=socks5://127.0.0.1:1080
+```
 
 ### 1.2.1 Basic Configuration
 
@@ -639,7 +664,7 @@ client:
       "test:product" : '{"name":"EaseProbe"}' # find the product with name "EaseProbe"
 ```
 
-### 1.9.3 Memcache
+### 1.9.4 Memcache
 
 ```YAML
 client:
@@ -652,7 +677,7 @@ client:
       "namespace:key": val # Namespaced keys enclosed in "
 ```
 
-### 1.9.3 Kafka
+### 1.9.5 Kafka
 
 ```YAML
 client:
@@ -665,7 +690,7 @@ client:
     key: /path/to/file.key
 ```
 
-### 1.9.3 PostgreSQL
+### 1.9.6 PostgreSQL
 
 ```YAML
 client:
@@ -686,7 +711,7 @@ client:
     key: /path/to/file.key
 ```
 
-### 1.9.3 Zookeeper
+### 1.9.7 Zookeeper
 
 ```YAML
 client:
@@ -1175,6 +1200,14 @@ EaseProbe accepts the `HUP` signal to rotate the log.
 
 EaseProbe supports Prometheus metrics exporter. The Prometheus endpoint is `http://localhost:8181/metrics` by default.
 
+The following snapshot is the Grafana panel for host CPU metrics
+
+![](./grafana.demo.png)
+
+Refer to the [Global Setting Configuration](#710-global-setting-configuration) for further details on how to configure the HTTP server.
+
+## 6.1 General Metrics
+
 Currently, All of the Probers support the following metrics:
 
   - `total`: the total number of probes
@@ -1183,9 +1216,12 @@ Currently, All of the Probers support the following metrics:
   - `status`: Probe status
   - `SLA`: Probe SLA percentage
 
-And for the different Probers, the following metrics are available:
+And the different Probers have its own metrics.
 
-- HTTP Probe
+## 6.2 HTTP Probe
+
+The HTTP probe supports the following metrics:
+
   - `status_code`: HTTP status code
   - `content_len`: HTTP content length
   - `dns_duration`: DNS duration in milliseconds
@@ -1196,7 +1232,10 @@ And for the different Probers, the following metrics are available:
   - `transfer_duration`: HTTP transfer duration in milliseconds
   - `total_duration`: HTTP total duration in milliseconds
 
-- Ping Probe
+## 6.3 Ping Probe
+
+The Ping probe supports the following metrics:
+
   - `sent`: Number of sent packets
   - `recv`: Number of received packets
   - `loss`: Packet loss percentage
@@ -1208,25 +1247,29 @@ And for the different Probers, the following metrics are available:
 
 Please note that `privileged: true` requires administrative privileges such as `root` (for more details see https://github.com/prometheus-community/pro-bing#supported-operating-systems)
 
-- TLS Probe
+## 6.4 TLS Probe
+
+The TLS probe supports the following metrics:
+
   - `earliest_cert_expiry`: last TLS chain expiry in timestamp seconds
   - `last_chain_expiry_timestamp_seconds`: earliest TLS cert expiry in Unix time
 
-- Shell & SSH Probe
+## 6.5 Shell & SSH Probe
+
+The Shell & SSH probe supports the following metrics:
+
   - `exit_code`: exit code of the command
   - `output_len`: length of the output
 
-- Host Probe
+
+## 6.6  Host Probe
+
+The Host probe supports the following metrics:
+
   - `cpu`: CPU usage in percentage
   - `memory`: memory usage in percentage
   - `disk`: disk usage in percentage
-
-
-The following snapshot is the Grafana panel for host CPU metrics
-
-![](./grafana.demo.png)
-
-Refer to the [Global Setting Configuration](#710-global-setting-configuration) for further details on how to configure the HTTP server.
+  - `load`: load average for `m1`, `m5`, and `m15`
 
 
 # 7. Configuration
