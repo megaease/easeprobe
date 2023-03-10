@@ -13,7 +13,7 @@ the latest versions of the packages. You can then run
 
 To install the easeprobe chart:
 
-    helm install [RELEASE_NAME] megaease/easeprobe
+    helm install [RELEASE_NAME] easeprobe/easeprobe
 
 To uninstall the chart:
 
