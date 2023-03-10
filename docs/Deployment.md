@@ -351,7 +351,7 @@ helm repo add easeprobe https://megaease.github.io/easeprobe
 
 **Install and run**
 ```
-helm install [RELEASE_NAME] megaease/easeprobe
+helm install [RELEASE_NAME] easeprobe/easeprobe
 ```
 > **Note**:
   > Persistence for EaseProbe using Helm is not enabled by default, you must enable it for production environment, refer to [Helm README](../helm/easeprobe/README.md#parameters) for more details.

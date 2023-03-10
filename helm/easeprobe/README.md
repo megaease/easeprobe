@@ -34,7 +34,7 @@ EaseProbe is a simple, standalone, and lightweight tool that can do health/statu
   ```
 - Install and run
   ```shell
-  helm install [RELEASE_NAME] megaease/easeprobe
+  helm install [RELEASE_NAME] easeprobe/easeprobe
   ```
 
 ## Uninstallation
