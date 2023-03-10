@@ -2,8 +2,6 @@ name: Release Helm Charts
 
 on:
   push:
-    tags:
-      - 'v*'
     paths:
       - "helm/**"
 
