@@ -55,7 +55,7 @@ prometheus:
     enabled: false
   prometheus-pushgateway:
     enabled: false
-  
+
 ## Refer https://artifacthub.io/packages/helm/grafana/grafana
 grafana:
   enabled: false
