@@ -9,7 +9,7 @@ MKFILE_DIR := $(dir $(MKFILE_PATH))
 RELEASE_DIR := ${MKFILE_DIR}/build/bin
 
 # Version
-RELEASE_VER := $(shell git describe --tag --abbrev=0)
+RELEASE_VER := $(shell git tag --list --sort=-creatordate  "v*" | head -n 1 )
 
 # Go MOD
 GO_MOD := $(shell go list -m)
