@@ -39,12 +39,12 @@ EaseProbe supports a variety of methods to perform its probes such as:
 
 - **HTTP**. Checking the HTTP status code, Support mTLS, HTTP Basic Auth, setting Request Header/Body, and XPath response evaluation. ( [HTTP Probe Manual](./docs/Manual.md#12-http) )
 - **TCP**. Check whether a TCP connection can be established or not. ( [TCP Probe Manual](./docs/Manual.md#13-tcp) )
-- **Ping**. Ping a host to see it is reachable or not. ( [Ping Probe Manual](./docs/Manual.md#14-ping) )
+- **Ping**. Ping a host to see if it is reachable or not. ( [Ping Probe Manual](./docs/Manual.md#14-ping) )
 - **Shell**. Run a Shell command and check the result. ( [Shell Command Probe Manual](./docs/Manual.md#15-shell) )
 - **SSH**. Run a remote command via SSH and check the result. Support the bastion/jump server ([SSH Command Probe Manual](./docs/Manual.md#16-ssh))
 - **TLS**. Connect to a given port using TLS and (optionally) validate for revoked or expired certificates ( [TLS Probe Manual](./docs/Manual.md#17-tls) )
 - **Host**. Run an SSH command on a remote host and check the CPU, Memory, and Disk usage. ( [Host Load Probe Manual](./docs/Manual.md#18-host) )
-- **Client**. The following native clients are supported. They all support the mTLS and the data checking, please refer to [Native Client Probe Manual](./docs/Manual.md#19-native-client)
+- **Client**. The following native clients are supported. They all support mTLS and data checking. ( [Native Client Probe Manual](./docs/Manual.md#19-native-client) )
   - **MySQL**. Connect to a MySQL server and run the `SHOW STATUS` SQL.
   - **Redis**. Connect to a Redis server and run the `PING` command.
   - **Memcache**. Connect to a Memcache server and run the `version` command or validate a given key/value pair.
@@ -87,7 +87,7 @@ Check the [Notification Manual](./docs/Manual.md#2-notification) to see how to c
 EaseProbe supports the following report and metrics:
 
 - **SLA Report Notify**. EaseProbe would send the daily, weekly, or monthly SLA report using the defined **`notify:`** methods.
-- **SLA Live Report**. The EaseProbe would listen on the `0.0.0.0:8181` port by default. By accessing this service you will be provided with live SLA report either as HTML at `http://localhost:8181/` or as JSON at `http://localhost:8181/api/v1/sla`
+- **SLA Live Report**. The EaseProbe would listen on the `0.0.0.0:8181` port by default. By accessing this service you will be provided with a live SLA report either as HTML at `http://localhost:8181/` or as JSON at `http://localhost:8181/api/v1/sla`
 - **SLA Data Persistence**. The SLA data will be persisted in `$CWD/data/data.yaml` by default. You can configure this path by editing the `settings` section of your configuration file.
 
 For more information, please check the [Global Setting Configuration](./docs/Manual.md#73-global-setting-configuration)
