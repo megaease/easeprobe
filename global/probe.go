@@ -96,7 +96,7 @@ func (n *IntervalStrategy) IntervalStrategy(s string) {
 	if val, ok := toIntervalStrategy[s]; ok {
 		*n = val
 	} else {
-		*n = RegularStrategy
+		*n = UnknownStrategy
 	}
 }
 
