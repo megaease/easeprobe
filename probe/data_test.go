@@ -95,7 +95,7 @@ func newDataFileWithOutMeta(file string) error {
 	if err != nil {
 		return err
 	}
-	if err := ioutil.WriteFile(file, []byte(buf), 0644); err != nil {
+	if err := os.WriteFile(file, []byte(buf), 0644); err != nil {
 		return err
 	}
 	return nil
@@ -152,7 +152,7 @@ func TestNewDataFile(t *testing.T) {
 	removeAll("x/")
 
 	// errors
-	monkey.Patch(ioutil.WriteFile, func(filename string, data []byte, perm os.FileMode) error {
+	monkey.Patch(os.WriteFile, func(filename string, data []byte, perm os.FileMode) error {
 		return fmt.Errorf("error")
 	})
 	file = "data.yaml"

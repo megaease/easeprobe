@@ -587,7 +587,7 @@ func checkSettings(t *testing.T, s Settings) {
 const confYAML = confVer + confHTTP + confSSH + confHost + confClient + confNotify + confSettings
 
 func writeConfig(file, content string) error {
-	return ioutil.WriteFile(file, []byte(content), 0644)
+	return os.WriteFile(file, []byte(content), 0644)
 }
 
 func httpServer() {

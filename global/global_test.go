@@ -27,7 +27,6 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
 	"math/big"
 	"os"
 	"path/filepath"
@@ -167,7 +166,7 @@ func makeCA(path string, subject *pkix.Name) (*x509.Certificate, *rsa.PrivateKey
 		Bytes: caBytes,
 	})
 
-	if err := ioutil.WriteFile(path+"ca.crt", caPEM.Bytes(), 0644); err != nil {
+	if err := os.WriteFile(path+"ca.crt", caPEM.Bytes(), 0644); err != nil {
 		return nil, nil, err
 	}
 
@@ -176,7 +175,7 @@ func makeCA(path string, subject *pkix.Name) (*x509.Certificate, *rsa.PrivateKey
 		Type:  "RSA PRIVATE KEY",
 		Bytes: x509.MarshalPKCS1PrivateKey(caKey),
 	})
-	if err := ioutil.WriteFile(path+"ca.key", caPEM.Bytes(), 0644); err != nil {
+	if err := os.WriteFile(path+"ca.key", caPEM.Bytes(), 0644); err != nil {
 		return nil, nil, err
 	}
 	return caCert, caKey, nil
@@ -209,7 +208,7 @@ func makeCert(path string, caCert *x509.Certificate, caKey *rsa.PrivateKey, subj
 		Type:  "CERTIFICATE",
 		Bytes: certBytes,
 	})
-	if err := ioutil.WriteFile(path+name+".crt", certPEM.Bytes(), 0644); err != nil {
+	if err := os.WriteFile(path+name+".crt", certPEM.Bytes(), 0644); err != nil {
 		return err
 	}
 
@@ -218,7 +217,7 @@ func makeCert(path string, caCert *x509.Certificate, caKey *rsa.PrivateKey, subj
 		Type:  "RSA PRIVATE KEY",
 		Bytes: x509.MarshalPKCS1PrivateKey(certKey),
 	})
-	return ioutil.WriteFile(path+name+".key", certKeyPEM.Bytes(), 0644)
+	return os.WriteFile(path+name+".key", certKeyPEM.Bytes(), 0644)
 }
 
 func TestTLS(t *testing.T) {
