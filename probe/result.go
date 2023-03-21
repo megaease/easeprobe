@@ -34,7 +34,7 @@ type Stat struct {
 	UpTime   time.Duration    `json:"uptime" yaml:"uptime"`
 	DownTime time.Duration    `json:"downtime" yaml:"downtime"`
 	StatusCounter
-	NotificationStrategyData
+	NotificationStrategyData `json:"alert" yaml:"alert"`
 }
 
 // Result is the status of health check
@@ -78,6 +78,7 @@ func NewResult() *Result {
 			NotificationStrategyData: *NewNotificationStrategyData(
 				global.DefaultNotificationStrategy,
 				global.DefaultMaxNotificationTimes,
+				global.DefaultNotificationFactor,
 			),
 		},
 	}

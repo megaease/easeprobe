@@ -118,6 +118,7 @@ func TestNotificationStrategySettings(t *testing.T) {
 	n := p.NormalizeNotificationStrategy(NotificationStrategySettings{})
 	assert.Equal(t, NotificationStrategySettings{
 		Strategy: RegularStrategy,
+		Factor:   DefaultNotificationFactor,
 		MaxTimes: DefaultMaxNotificationTimes,
 	}, n)
 
@@ -126,18 +127,30 @@ func TestNotificationStrategySettings(t *testing.T) {
 	n = p.NormalizeNotificationStrategy(NotificationStrategySettings{Strategy: ExponentialStrategy})
 	assert.Equal(t, NotificationStrategySettings{
 		Strategy: ExponentialStrategy,
+		Factor:   DefaultNotificationFactor,
 		MaxTimes: 10,
 	}, n)
 
+	p.Factor = -1
 	n = p.NormalizeNotificationStrategy(NotificationStrategySettings{MaxTimes: 20})
 	assert.Equal(t, NotificationStrategySettings{
 		Strategy: IncrementStrategy,
+		Factor:   DefaultNotificationFactor,
 		MaxTimes: 20,
 	}, n)
 
-	n = p.NormalizeNotificationStrategy(NotificationStrategySettings{Strategy: RegularStrategy, MaxTimes: 5})
+	p.Factor = 2
+	n = p.NormalizeNotificationStrategy(NotificationStrategySettings{Factor: 3, MaxTimes: 20})
+	assert.Equal(t, NotificationStrategySettings{
+		Strategy: IncrementStrategy,
+		Factor:   3,
+		MaxTimes: 20,
+	}, n)
+
+	n = p.NormalizeNotificationStrategy(NotificationStrategySettings{Strategy: RegularStrategy, Factor: 1, MaxTimes: 5})
 	assert.Equal(t, NotificationStrategySettings{
 		Strategy: RegularStrategy,
+		Factor:   1,
 		MaxTimes: 5,
 	}, n)
 
@@ -182,14 +195,18 @@ func TestNotificationIntervalStrategy(t *testing.T) {
 
 	assert.Equal(t, "regular", RegularStrategy.String())
 	assert.Equal(t, "increment", IncrementStrategy.String())
-	assert.Equal(t, "exponentiation", ExponentialStrategy.String())
+	assert.Equal(t, "exponent", ExponentialStrategy.String())
 
 	var s IntervalStrategy
 	s.IntervalStrategy("regular")
 	assert.Equal(t, RegularStrategy, s)
+	s.IntervalStrategy("Regular")
+	assert.Equal(t, RegularStrategy, s)
+	s.IntervalStrategy("REGULAR")
+	assert.Equal(t, RegularStrategy, s)
 	s.IntervalStrategy("increment")
 	assert.Equal(t, IncrementStrategy, s)
-	s.IntervalStrategy("exponentiation")
+	s.IntervalStrategy("exponent")
 	assert.Equal(t, ExponentialStrategy, s)
 	s.IntervalStrategy("unknown")
 	assert.Equal(t, UnknownStrategy, s)
@@ -198,5 +215,5 @@ func TestNotificationIntervalStrategy(t *testing.T) {
 
 	testNotifyYamlJSON(t, "regular", RegularStrategy, true)
 	testNotifyYamlJSON(t, "increment", IncrementStrategy, true)
-	testNotifyYamlJSON(t, "exponentiation", ExponentialStrategy, true)
+	testNotifyYamlJSON(t, "exponent", ExponentialStrategy, true)
 }

@@ -17,7 +17,10 @@
 
 package global
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 // StatusChangeThresholdSettings is the settings for probe threshold
 type StatusChangeThresholdSettings struct {
@@ -57,6 +60,7 @@ func (p *ProbeSettings) NormalizeThreshold(t StatusChangeThresholdSettings) Stat
 func (p *ProbeSettings) NormalizeNotificationStrategy(t NotificationStrategySettings) NotificationStrategySettings {
 	return NotificationStrategySettings{
 		Strategy: normalize(p.Strategy, t.Strategy, UnknownStrategy, RegularStrategy),
+		Factor:   normalize(p.Factor, t.Factor, 0, DefaultNotificationFactor),
 		MaxTimes: normalize(p.MaxTimes, t.MaxTimes, 0, DefaultMaxNotificationTimes),
 	}
 }
@@ -81,7 +85,7 @@ var (
 		UnknownStrategy:     "unknown",
 		RegularStrategy:     "regular",
 		IncrementStrategy:   "increment",
-		ExponentialStrategy: "exponentiation",
+		ExponentialStrategy: "exponent",
 	}
 	toIntervalStrategy = ReverseMap(toString)
 )
@@ -93,7 +97,7 @@ func (n IntervalStrategy) String() string {
 
 // IntervalStrategy returns the IntervalStrategy value of the string
 func (n *IntervalStrategy) IntervalStrategy(s string) {
-	if val, ok := toIntervalStrategy[s]; ok {
+	if val, ok := toIntervalStrategy[strings.ToLower(s)]; ok {
 		*n = val
 	} else {
 		*n = UnknownStrategy
@@ -122,6 +126,7 @@ func (n IntervalStrategy) MarshalJSON() ([]byte, error) {
 
 // NotificationStrategySettings is the notification strategy settings
 type NotificationStrategySettings struct {
-	Strategy IntervalStrategy `yaml:"strategy" json:"strategy" jsonschema:"title=Interval Strategy,description=the notification interval strategy such as regular,increment,exponentiation,default=Regular"`
+	Strategy IntervalStrategy `yaml:"strategy" json:"strategy" jsonschema:"title=Alert Interval Strategy,description=the notification interval strategy such as regular,increment,exponent,default=regular"`
+	Factor   int              `yaml:"factor" json:"factor" jsonschema:"title=Factor,description=the factor to increase the interval, it must be greater than 0,default=1"`
 	MaxTimes int              `yaml:"max" json:"max" jsonschema:"title=Max Times,description=the max times to send notification,default=1"`
 }

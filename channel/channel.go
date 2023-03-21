@@ -170,7 +170,7 @@ func (c *Channel) WatchEvent(wg *sync.WaitGroup) {
 			if result.Status == probe.StatusDown {
 				if result.Stat.NotificationStrategyData.NeedToSendNotification() == false {
 					log.Debugf("[%s / %s]: %s (%s) - Don't meet the notification condition [max=%d, notified=%d, failed=%d, next=%d], no notification.",
-						kind, c.Name, result.Name, result.Endpoint, nsd.MaxTimes, nsd.NotifyTimes, nsd.FailedTimes, nsd.Next)
+						kind, c.Name, result.Name, result.Endpoint, nsd.MaxTimes, nsd.Notified, nsd.Failed, nsd.Next)
 					continue
 				}
 			}
@@ -180,7 +180,7 @@ func (c *Channel) WatchEvent(wg *sync.WaitGroup) {
 					kind, c.Name, result.Name, result.Endpoint, result.PreStatus, result.Status)
 			} else {
 				log.Debugf("[%s / %s]: %s (%s) - Meet the notification condition [max=%d, notified=%d, failed=%d, next=%d], sending notification...",
-					kind, c.Name, result.Name, result.Endpoint, nsd.MaxTimes, nsd.NotifyTimes, nsd.FailedTimes, nsd.Next)
+					kind, c.Name, result.Name, result.Endpoint, nsd.MaxTimes, nsd.Notified, nsd.Failed, nsd.Next)
 			}
 
 			for _, n := range c.Notifiers {

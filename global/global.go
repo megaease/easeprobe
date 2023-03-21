@@ -73,6 +73,8 @@ const (
 	DefaultNotificationStrategy = RegularStrategy
 	// DefaultMaxNotificationTimes is the default max notification times
 	DefaultMaxNotificationTimes = 1
+	// DefaultNotificationFactor is the default notification factor
+	DefaultNotificationFactor = 1
 )
 
 const (
