@@ -76,7 +76,7 @@ EaseProbe supports notification delivery to the following:
 
 > **Note**:
 >
-> 1) The notification is **Edge-Triggered Mode**, this means that these notifications are triggered when the status changes.
+> 1) The notification is **Edge-Triggered Mode** by default, if you want to config it as **Level-Triggered Mode** with different interval and max notification, please refer to the manual - [Altering Interval](./docs/Manual.md#112-alerting-interval).
 >
 > 2) Windows platforms do not support syslog as notification method.
 

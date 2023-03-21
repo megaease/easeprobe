@@ -218,10 +218,7 @@ func makeCert(path string, caCert *x509.Certificate, caKey *rsa.PrivateKey, subj
 		Type:  "RSA PRIVATE KEY",
 		Bytes: x509.MarshalPKCS1PrivateKey(certKey),
 	})
-	if err := ioutil.WriteFile(path+name+".key", certKeyPEM.Bytes(), 0644); err != nil {
-		return err
-	}
-	return nil
+	return ioutil.WriteFile(path+name+".key", certKeyPEM.Bytes(), 0644)
 }
 
 func TestTLS(t *testing.T) {
