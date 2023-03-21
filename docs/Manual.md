@@ -210,7 +210,7 @@ alter:
   So, the alert would be sent at failure of 1, 4, 10, 19, 31, 46, 64, 85, 109...
 
 
-#### 1.1.2.2 Exponential Strategy
+#### 1.1.2.3 Exponential Strategy
 
 Notifications are sent at exponentially increasing intervals until the maximum number of notifications is reached. With this strategy, the interval is increased exponentially.
 
