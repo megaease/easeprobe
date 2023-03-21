@@ -21,7 +21,7 @@ EaseProbe has the following major modules:
     - [1.1.2 Alerting Interval](#112-alerting-interval)
       - [1.1.2.1 Regular Strategy](#1121-regular-strategy)
       - [1.1.2.2 Incremental Strategy](#1122-incremental-strategy)
-      - [1.1.2.2 Exponential Strategy](#1122-exponential-strategy)
+      - [1.1.2.3 Exponential Strategy](#1123-exponential-strategy)
     - [1.1.3 Initial Fire Up](#113-initial-fire-up)
   - [1.2 HTTP](#12-http)
     - [1.2.1 Basic Configuration](#121-basic-configuration)
