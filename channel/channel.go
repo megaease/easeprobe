@@ -153,8 +153,8 @@ func (c *Channel) WatchEvent(wg *sync.WaitGroup) {
 				continue
 			}
 
-			// if the status has no change for UP, no need notify
-			if result.PreStatus == result.Status && result.Status == probe.StatusUp {
+			// if the status has no change for UP or Init, no need notify
+			if result.PreStatus == result.Status && (result.Status == probe.StatusUp || result.Status == probe.StatusInit) {
 				log.Debugf("[%s / %s]: %s (%s) - Status no change [%s] == [%s], no notification.",
 					kind, c.Name, result.Name, result.Endpoint, result.PreStatus, result.Status)
 				continue
