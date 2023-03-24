@@ -13,7 +13,7 @@ EaseProbe has the following major modules:
 - **Metrics**: It is used to export the metrics data to Prometheus.
 
 
-<h1>Outline</h1>
+<h2>Table of Contents</h2>
 
 - [1. Probe](#1-probe)
   - [1.1 Overview](#11-overview)
