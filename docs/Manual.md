@@ -31,7 +31,7 @@ EaseProbe has the following major modules:
   - [1.8 Host](#18-host)
   - [1.9 Native Client](#19-native-client)
     - [1.9.1 Redis](#191-redis)
-    - [1.9.2 Memcache](#192-memcache)
+    - [1.9.2 MySQL](#192-msyql)
     - [1.9.3 MongoDB](#193-mongodb)
     - [1.9.4 Memcache](#194-memcache)
     - [1.9.5 Kafka](#195-kafka)
@@ -627,7 +627,7 @@ client:
 
 ```
 
-### 1.9.2 Memcache
+### 1.9.2 MySQL
 
 ```YAML
 client:
