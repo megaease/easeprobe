@@ -218,10 +218,18 @@
           "title": "Success Threshold",
           "description": "the success threshold to change the status such as 2",
           "default": 1
+        },
+        "alert": {
+          "$ref": "#/$defs/global_NotificationStrategySettings",
+          "title": "Alert",
+          "description": "the alert settings"
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "alert"
+      ]
     },
     "conf_SLAReport": {
       "properties": {
@@ -402,6 +410,35 @@
         "name",
         "type",
         "query"
+      ]
+    },
+    "global_NotificationStrategySettings": {
+      "properties": {
+        "strategy": {
+          "type": "integer",
+          "title": "Alert Interval Strategy",
+          "description": "the notification interval strategy such as regular",
+          "default": 0
+        },
+        "factor": {
+          "type": "integer",
+          "title": "Factor",
+          "description": "the factor to increase the interval",
+          "default": 1
+        },
+        "max": {
+          "type": "integer",
+          "title": "Max Times",
+          "description": "the max times to send notification",
+          "default": 1
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "strategy",
+        "factor",
+        "max"
       ]
     },
     "global_Retry": {
@@ -1341,6 +1378,11 @@
           "description": "the success threshold to change the status such as 2",
           "default": 1
         },
+        "alert": {
+          "$ref": "#/$defs/global_NotificationStrategySettings",
+          "title": "Probe Alert",
+          "description": "the alert strategy of probe"
+        },
         "host": {
           "type": "string",
           "format": "hostname",
@@ -1418,6 +1460,7 @@
       "type": "object",
       "required": [
         "name",
+        "alert",
         "host",
         "driver"
       ]
@@ -1480,6 +1523,11 @@
           "title": "Success Threshold",
           "description": "the success threshold to change the status such as 2",
           "default": 1
+        },
+        "alert": {
+          "$ref": "#/$defs/global_NotificationStrategySettings",
+          "title": "Probe Alert",
+          "description": "the alert strategy of probe"
         },
         "key": {
           "type": "string",
@@ -1566,6 +1614,7 @@
       "type": "object",
       "required": [
         "name",
+        "alert",
         "host"
       ]
     },
@@ -1636,6 +1685,11 @@
           "title": "Success Threshold",
           "description": "the success threshold to change the status such as 2",
           "default": 1
+        },
+        "alert": {
+          "$ref": "#/$defs/global_NotificationStrategySettings",
+          "title": "Probe Alert",
+          "description": "the alert strategy of probe"
         },
         "url": {
           "type": "string",
@@ -1750,6 +1804,7 @@
       "type": "object",
       "required": [
         "name",
+        "alert",
         "url"
       ]
     },
@@ -1790,6 +1845,11 @@
           "description": "the success threshold to change the status such as 2",
           "default": 1
         },
+        "alert": {
+          "$ref": "#/$defs/global_NotificationStrategySettings",
+          "title": "Probe Alert",
+          "description": "the alert strategy of probe"
+        },
         "host": {
           "type": "string",
           "title": "Host",
@@ -1819,6 +1879,7 @@
       "type": "object",
       "required": [
         "name",
+        "alert",
         "host",
         "count",
         "lost",
@@ -1861,6 +1922,11 @@
           "title": "Success Threshold",
           "description": "the success threshold to change the status such as 2",
           "default": 1
+        },
+        "alert": {
+          "$ref": "#/$defs/global_NotificationStrategySettings",
+          "title": "Probe Alert",
+          "description": "the alert strategy of probe"
         },
         "cmd": {
           "type": "string",
@@ -1908,6 +1974,7 @@
       "type": "object",
       "required": [
         "name",
+        "alert",
         "cmd"
       ]
     },
@@ -2005,6 +2072,11 @@
           "description": "the success threshold to change the status such as 2",
           "default": 1
         },
+        "alert": {
+          "$ref": "#/$defs/global_NotificationStrategySettings",
+          "title": "Probe Alert",
+          "description": "the alert strategy of probe"
+        },
         "key": {
           "type": "string",
           "title": "Private Key",
@@ -2077,6 +2149,7 @@
       "type": "object",
       "required": [
         "name",
+        "alert",
         "host"
       ]
     },
@@ -2117,6 +2190,11 @@
           "description": "the success threshold to change the status such as 2",
           "default": 1
         },
+        "alert": {
+          "$ref": "#/$defs/global_NotificationStrategySettings",
+          "title": "Probe Alert",
+          "description": "the alert strategy of probe"
+        },
         "host": {
           "type": "string",
           "format": "hostname",
@@ -2134,6 +2212,7 @@
       "type": "object",
       "required": [
         "name",
+        "alert",
         "host"
       ]
     },
@@ -2173,6 +2252,11 @@
           "title": "Success Threshold",
           "description": "the success threshold to change the status such as 2",
           "default": 1
+        },
+        "alert": {
+          "$ref": "#/$defs/global_NotificationStrategySettings",
+          "title": "Probe Alert",
+          "description": "the alert strategy of probe"
         },
         "host": {
           "type": "string",
@@ -2216,6 +2300,7 @@
       "type": "object",
       "required": [
         "name",
+        "alert",
         "host"
       ]
     }
