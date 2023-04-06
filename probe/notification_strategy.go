@@ -30,20 +30,20 @@ type NotificationStrategyData struct {
 	Next        int `yaml:"next" json:"next"`
 	// the Step to the next notification round
 	Step int `yaml:"step" json:"step"`
+	// the flag to indicate whether the notification is sent
+	IsSent bool `yaml:"-" json:"-"`
 }
 
 // NewNotificationStrategyData returns a new NotificationStrategy
 func NewNotificationStrategyData(strategy global.IntervalStrategy, maxTimes int) *NotificationStrategyData {
-	return &NotificationStrategyData{
+	n := &NotificationStrategyData{
 		NotificationStrategySettings: global.NotificationStrategySettings{
 			Strategy: strategy,
 			MaxTimes: maxTimes,
 		},
-		NotifyTimes: 0,
-		FailedTimes: 0,
-		Next:        1,
-		Step:        1,
 	}
+	n.Reset()
+	return n
 }
 
 // Clone returns a new NotificationStrategyData
@@ -54,12 +54,8 @@ func (n *NotificationStrategyData) Clone() NotificationStrategyData {
 		FailedTimes:                  n.FailedTimes,
 		Next:                         n.Next,
 		Step:                         n.Step,
+		IsSent:                       n.IsSent,
 	}
-}
-
-// IsExceedMaxTimes returns true if the current times is equal to the max times
-func (n *NotificationStrategyData) IsExceedMaxTimes() bool {
-	return n.NotifyTimes > n.MaxTimes
 }
 
 // Reset resets the current times
@@ -67,7 +63,13 @@ func (n *NotificationStrategyData) Reset() {
 	n.FailedTimes = 0
 	n.NotifyTimes = 0
 	n.Next = 1
-	n.Step = 1
+	n.Step = 0
+	n.IsSent = false
+}
+
+// IsExceedMaxTimes returns true if the current times is equal to the max times
+func (n *NotificationStrategyData) IsExceedMaxTimes() bool {
+	return n.NotifyTimes > n.MaxTimes
 }
 
 // NextNotification returns the next notification times
@@ -77,31 +79,45 @@ func (n *NotificationStrategyData) NextNotification() {
 		// Next time is the same as the probe interval， 1, 2，3，4，5，6，7...
 		n.Step = 1
 	case global.IncrementStrategy:
-		// Next time is increased linearly.  1, 3, 6, 10, 15, 21, 28...
+		// Next time is increased linearly.  1, 2, 4, 7, 11, 16, 22, 29, 37...
 		n.Step++
 	case global.ExponentialStrategy:
 		// Next time is increased exponentially, 1, 2, 4, 8, 16, 32, 64...
 		n.Step = n.FailedTimes
 	default:
-		n.Next = n.FailedTimes + 1
+		n.Step = 1
 	}
 	n.Next = n.FailedTimes + n.Step
 }
 
-// NeedToSendNotification returns true if the notification should be sent
-func (n *NotificationStrategyData) NeedToSendNotification() bool {
+// ProcessStatus processes the probe status
+func (n *NotificationStrategyData) ProcessStatus(status bool) {
+	n.IsSent = false
+	if status == true {
+		n.Reset()
+		return
+	}
 	n.FailedTimes++
 	// not meet the next notification round
 	if n.FailedTimes != n.Next {
-		return false
+		return
 	}
 	// meet the next notification round
 	n.NotifyTimes++
 
 	// check if exceed the max times
 	if n.IsExceedMaxTimes() {
-		return false
+		return
 	}
+
+	// update the next notification round
 	n.NextNotification()
-	return true
+
+	// set the flag to indicate that the notification is sent
+	n.IsSent = true
+}
+
+// NeedToSendNotification returns true if the notification should be sent
+func (n *NotificationStrategyData) NeedToSendNotification() bool {
+	return n.IsSent
 }

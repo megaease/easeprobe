@@ -87,8 +87,10 @@ func NewResult() *Result {
 func NewResultWithName(name string) *Result {
 	r := GetResultData(name)
 	if r != nil {
+		log.Infof("Found result from data file with name: %s", name)
 		return r
 	}
+	log.Infof("Create result with name: %s", name)
 	r = NewResult()
 	r.Name = name
 	SetResultData(name, r)

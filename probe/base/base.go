@@ -146,6 +146,10 @@ func (d *DefaultProbe) Config(gConf global.ProbeSettings,
 	d.ProbeResult.Name = name
 	d.ProbeResult.Endpoint = endpoint
 
+	// update the notification strategy settings
+	d.ProbeResult.Stat.NotificationStrategyData.Strategy = d.NotificationStrategySettings.Strategy
+	d.ProbeResult.Stat.NotificationStrategyData.MaxTimes = d.NotificationStrategySettings.MaxTimes
+
 	// Set the new length of the status counter
 	maxLen := d.StatusChangeThresholdSettings.Failure
 	if d.StatusChangeThresholdSettings.Success > maxLen {
@@ -187,6 +191,9 @@ func (d *DefaultProbe) Probe() probe.Result {
 	d.ProbeResult.Stat.StatusCounter.AppendStatus(stat, msg)
 	status := d.CheckStatusThreshold()
 	title := status.Title()
+
+	// process the notification strategy
+	d.ProbeResult.Stat.NotificationStrategyData.ProcessStatus(status == probe.StatusUp)
 
 	if len(d.ProbeTag) > 0 {
 		d.ProbeResult.Message = fmt.Sprintf("%s (%s/%s): %s", title, d.ProbeKind, d.ProbeTag, msg)

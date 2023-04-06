@@ -35,7 +35,7 @@ func TestNotificationStrategy(t *testing.T) {
 	assert.Contains(t, str, "max: 3")
 	assert.Contains(t, str, "next: 1")
 	assert.Contains(t, str, "failed: 0")
-	assert.Contains(t, str, "step: 1")
+	assert.Contains(t, str, "step: 0")
 
 	err = yaml.Unmarshal(buf, &strategy)
 	assert.Nil(t, err)
@@ -50,6 +50,7 @@ func testNotificationStrategy(t *testing.T, strategy global.IntervalStrategy, pr
 	s := NewNotificationStrategyData(strategy, len(notify))
 	j := 0
 	for i := 1; i <= probeTimes; i++ {
+		s.ProcessStatus(false)
 		send := s.NeedToSendNotification()
 		assert.Equal(t, notify[j] == i, send)
 		if send && j < len(notify)-1 {
@@ -68,11 +69,11 @@ func TestRegularNotificationStrategy(t *testing.T) {
 }
 
 func TestIncrementNotificationStrategy(t *testing.T) {
-	probeTimes := 66
-	notify := []int{1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66}
+	probeTimes := 68
+	notify := []int{1, 2, 4, 7, 11, 16, 22, 29, 37, 46, 56, 67}
 	testNotificationStrategy(t, global.IncrementStrategy, probeTimes, notify)
 
-	notify = []int{1, 3, 6, 10, 15}
+	notify = []int{1, 2, 4, 7, 11}
 	testNotificationStrategy(t, global.IncrementStrategy, probeTimes, notify)
 }
 
@@ -89,6 +90,7 @@ func TestIllegalNotificationStrategy(t *testing.T) {
 	s := NewNotificationStrategyData(global.IntervalStrategy(100), 3)
 	notify := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	for i := 1; i <= 10; i++ {
+		s.ProcessStatus(false)
 		send := s.NeedToSendNotification()
 		if s.IsExceedMaxTimes() {
 			assert.False(t, send)
@@ -100,10 +102,11 @@ func TestIllegalNotificationStrategy(t *testing.T) {
 
 func TestNotificationReset(t *testing.T) {
 	s := NewNotificationStrategyData(global.IncrementStrategy, 3)
-	notify := []int{1, 3, 6}
+	notify := []int{1, 2, 4, 7}
 	test := func() {
 		j := 0
 		for i := 1; i <= 5; i++ {
+			s.ProcessStatus(false)
 			send := s.NeedToSendNotification()
 			assert.Equal(t, notify[j] == i, send)
 			if send && j < len(notify)-1 {
@@ -113,7 +116,7 @@ func TestNotificationReset(t *testing.T) {
 	}
 
 	test()
-	s.Reset()
+	s.ProcessStatus(true)
 	test()
 
 }
