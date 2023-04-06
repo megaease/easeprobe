@@ -407,7 +407,11 @@ notify:
 #     interval: 1m # probe every minute for all probes
 #     failure: 2 # number of consecutive failed probes needed to determine the status down, default: 1
 #     success: 1 # number of consecutive successful probes needed to determine the status up, default: 1
-
+#     alert: # alter interval for all probes
+#       strategy: "regular" # it can be "regular", "increment" or "exponent", default: "regular"
+#       factor: 1 # the factor of the interval, default: 1
+#       max: 5 # the max of the alter, default: 1
+#
 #   # easeprobe program running log file.
 #   log:
 #     file: "/path/to/easeprobe.log" # default: stdout

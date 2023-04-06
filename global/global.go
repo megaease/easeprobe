@@ -69,6 +69,12 @@ const (
 	DefaultChannelName = "__EaseProbe_Channel__"
 	// DefaultStatusChangeThresholdSetting is the threshold of status change
 	DefaultStatusChangeThresholdSetting = 1
+	// DefaultNotificationStrategy is the default notify strategy
+	DefaultNotificationStrategy = RegularStrategy
+	// DefaultMaxNotificationTimes is the default max notification times
+	DefaultMaxNotificationTimes = 1
+	// DefaultNotificationFactor is the default notification factor
+	DefaultNotificationFactor = 1
 )
 
 const (

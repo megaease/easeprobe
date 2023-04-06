@@ -45,6 +45,8 @@ func (d *dummyProber) Config(gConf global.ProbeSettings) error {
 			switch d.ProbeName {
 			case "dummy-X":
 				return true, "OK"
+			case "level-trigger":
+				return false, "ERROR"
 			default:
 				status = !status
 				return status, fmt.Sprintf("%s - %v", d.ProbeName, status)
@@ -195,6 +197,41 @@ func TestManager(t *testing.T) {
 			assert.NotNil(t, res)
 			ch.Send(res)
 		}
+	}
+
+	AllDone()
+}
+
+func TestLevelTrigger(t *testing.T) {
+	name := "test"
+	SetNotify(name, newDummyNotify("email", "level-trigger", []string{"test"}))
+	SetProber(name, newDummyProber("http", "", "level-trigger", []string{"test"}))
+	test := GetChannel(name)
+	assert.NotNil(t, test)
+
+	gProbeConf := global.ProbeSettings{
+		NotificationStrategySettings: global.NotificationStrategySettings{
+			Strategy: global.RegularStrategy,
+			Factor:   1,
+			MaxTimes: 3,
+		},
+	}
+	test.GetProber("level-trigger").Config(gProbeConf)
+
+	gNotifyConf := global.NotifySettings{}
+	test.GetNotify("level-trigger").Config(gNotifyConf)
+
+	ConfigAllChannels()
+	WatchForAllEvents()
+
+	p := test.GetProber("level-trigger")
+
+	for i := 0; i < 5; i++ {
+		res := p.Probe()
+		assert.NotNil(t, res)
+		assert.Equal(t, probe.StatusDown, res.Status)
+		test.Send(res)
+		time.Sleep(100 * time.Millisecond)
 	}
 
 	AllDone()

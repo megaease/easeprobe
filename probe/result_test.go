@@ -181,7 +181,7 @@ func TestDebug(t *testing.T) {
 	up := fmt.Sprintf("%d", StatusUp)
 	down := fmt.Sprintf("%d", StatusDown)
 
-	expected := `{"name":"Test Name","endpoint":"http://example.com","time":"2022-01-01T00:00:00Z","timestamp":1640995200,"rtt":30000000000,"status":"up","prestatus":"down","message":"This is a test message","latestdowntime":"2021-12-31T04:00:00Z","recoverytime":300000000000,"stat":{"since":"2022-01-01T00:00:00Z","total":1001,"status":{"1":51,"2":10},"uptime":1850000000000,"downtime":10000000000,"StatusHistory":[],"MaxLen":1,"CurrentStatus":true,"StatusCount":0}}`
+	expected := `{"name":"Test Name","endpoint":"http://example.com","time":"2022-01-01T00:00:00Z","timestamp":1640995200,"rtt":30000000000,"status":"up","prestatus":"down","message":"This is a test message","latestdowntime":"2021-12-31T04:00:00Z","recoverytime":300000000000,"stat":{"since":"2022-01-01T00:00:00Z","total":1001,"status":{"1":51,"2":10},"uptime":1850000000000,"downtime":10000000000,"StatusHistory":[],"MaxLen":1,"CurrentStatus":true,"StatusCount":0,"alert":{"strategy":"regular","factor":1,"max":1,"notified":0,"failed":0,"next":1,"interval":0}}}`
 	if r.DebugJSON() != expected {
 		t.Errorf("%s != %s", r.DebugJSON(), expected)
 	}
@@ -209,7 +209,16 @@ func TestDebug(t *testing.T) {
         "StatusHistory": [],
         "MaxLen": 1,
         "CurrentStatus": true,
-        "StatusCount": 0
+        "StatusCount": 0,
+        "alert": {
+            "strategy": "regular",
+            "factor": 1,
+            "max": 1,
+            "notified": 0,
+            "failed": 0,
+            "next": 1,
+            "interval": 0
+        }
     }
 }`
 

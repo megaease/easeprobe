@@ -52,6 +52,7 @@ type DefaultProbe struct {
 	ProbeTimeout                         time.Duration `yaml:"timeout,omitempty" json:"timeout,omitempty" jsonschema:"type=string,format=duration,title=Probe Timeout,description=the timeout of probe"`
 	ProbeTimeInterval                    time.Duration `yaml:"interval,omitempty" json:"interval,omitempty" jsonschema:"type=string,format=duration,title=Probe Interval,description=the interval of probe"`
 	global.StatusChangeThresholdSettings `yaml:",inline" json:",inline"`
+	global.NotificationStrategySettings  `yaml:"alert" json:"alert" jsonschema:"title=Probe Alert,description=the alert strategy of probe"`
 	ProbeFunc                            ProbeFuncType `yaml:"-" json:"-"`
 	ProbeResult                          *probe.Result `yaml:"-" json:"-"`
 	metrics                              *metrics      `yaml:"-" json:"-"`
@@ -139,10 +140,16 @@ func (d *DefaultProbe) Config(gConf global.ProbeSettings,
 	d.ProbeTimeout = gConf.NormalizeTimeOut(d.ProbeTimeout)
 	d.ProbeTimeInterval = gConf.NormalizeInterval(d.ProbeTimeInterval)
 	d.StatusChangeThresholdSettings = gConf.NormalizeThreshold(d.StatusChangeThresholdSettings)
+	d.NotificationStrategySettings = gConf.NormalizeNotificationStrategy(d.NotificationStrategySettings)
 
 	d.ProbeResult = probe.NewResultWithName(name)
 	d.ProbeResult.Name = name
 	d.ProbeResult.Endpoint = endpoint
+
+	// update the notification strategy settings
+	d.ProbeResult.Stat.NotificationStrategyData.Strategy = d.NotificationStrategySettings.Strategy
+	d.ProbeResult.Stat.NotificationStrategyData.Factor = d.NotificationStrategySettings.Factor
+	d.ProbeResult.Stat.NotificationStrategyData.MaxTimes = d.NotificationStrategySettings.MaxTimes
 
 	// Set the new length of the status counter
 	maxLen := d.StatusChangeThresholdSettings.Failure
@@ -185,6 +192,9 @@ func (d *DefaultProbe) Probe() probe.Result {
 	d.ProbeResult.Stat.StatusCounter.AppendStatus(stat, msg)
 	status := d.CheckStatusThreshold()
 	title := status.Title()
+
+	// process the notification strategy
+	d.ProbeResult.Stat.NotificationStrategyData.ProcessStatus(status == probe.StatusUp)
 
 	if len(d.ProbeTag) > 0 {
 		d.ProbeResult.Message = fmt.Sprintf("%s (%s/%s): %s", title, d.ProbeKind, d.ProbeTag, msg)

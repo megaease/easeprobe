@@ -122,7 +122,7 @@ func SaveDataToFile(filename string) error {
 	genMetaBuf()
 	buf := append(metaBuf, dataBuf...)
 
-	if err := ioutil.WriteFile(filename, []byte(buf), 0644); err != nil {
+	if err := os.WriteFile(filename, []byte(buf), 0644); err != nil {
 		return err
 	}
 	return nil

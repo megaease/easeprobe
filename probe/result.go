@@ -34,6 +34,7 @@ type Stat struct {
 	UpTime   time.Duration    `json:"uptime" yaml:"uptime"`
 	DownTime time.Duration    `json:"downtime" yaml:"downtime"`
 	StatusCounter
+	NotificationStrategyData `json:"alert" yaml:"alert"`
 }
 
 // Result is the status of health check
@@ -74,6 +75,11 @@ func NewResult() *Result {
 			UpTime:        0,
 			DownTime:      0,
 			StatusCounter: *NewStatusCounter(global.DefaultStatusChangeThresholdSetting),
+			NotificationStrategyData: *NewNotificationStrategyData(
+				global.DefaultNotificationStrategy,
+				global.DefaultMaxNotificationTimes,
+				global.DefaultNotificationFactor,
+			),
 		},
 	}
 }
@@ -82,8 +88,10 @@ func NewResult() *Result {
 func NewResultWithName(name string) *Result {
 	r := GetResultData(name)
 	if r != nil {
+		log.Infof("Found result from data file with name: %s", name)
 		return r
 	}
+	log.Infof("Create result with name: %s", name)
 	r = NewResult()
 	r.Name = name
 	SetResultData(name, r)
@@ -119,6 +127,7 @@ func (s *Stat) Clone() Stat {
 	dst.UpTime = s.UpTime
 	dst.DownTime = s.DownTime
 	dst.StatusCounter = s.StatusCounter.Clone()
+	dst.NotificationStrategyData = s.NotificationStrategyData.Clone()
 	return dst
 }
 

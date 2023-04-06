@@ -146,19 +146,43 @@ func (c *Channel) WatchEvent(wg *sync.WaitGroup) {
 			log.Infof("[%s / %s]: Received the done signal, channel exiting...", kind, c.Name)
 			return
 		case result := <-c.channel:
-			// if the status has no change, no need notify
-			if result.PreStatus == result.Status {
-				log.Debugf("[%s / %s]: %s (%s) - Status no change [%s] == [%s], no notification.",
-					kind, c.Name, result.Name, result.Endpoint, result.PreStatus, result.Status)
-				continue
-			}
+			// if it is the first time, and the status is UP, no need notify
 			if result.PreStatus == probe.StatusInit && result.Status == probe.StatusUp {
 				log.Debugf("[%s / %s]: %s (%s) - Initial Status [%s] == [%s], no notification.",
 					kind, c.Name, result.Name, result.Endpoint, result.PreStatus, result.Status)
 				continue
 			}
-			log.Infof("[%s / %s]: %s (%s) - Status changed [%s] ==> [%s]",
-				kind, c.Name, result.Name, result.Endpoint, result.PreStatus, result.Status)
+
+			// if the status has no change for UP or Init, no need notify
+			if result.PreStatus == result.Status && (result.Status == probe.StatusUp || result.Status == probe.StatusInit) {
+				log.Debugf("[%s / %s]: %s (%s) - Status no change [%s] == [%s], no notification.",
+					kind, c.Name, result.Name, result.Endpoint, result.PreStatus, result.Status)
+				continue
+			}
+
+			nsd := &result.Stat.NotificationStrategyData
+			// if the status changed to UP, reset the notification strategy
+			if result.Status == probe.StatusUp {
+				nsd.Reset()
+			}
+
+			// if the status is DOWN, check the notification strategy
+			if result.Status == probe.StatusDown {
+				if result.Stat.NotificationStrategyData.NeedToSendNotification() == false {
+					log.Debugf("[%s / %s]: %s (%s) - Don't meet the notification condition [max=%d, notified=%d, failed=%d, next=%d], no notification.",
+						kind, c.Name, result.Name, result.Endpoint, nsd.MaxTimes, nsd.Notified, nsd.Failed, nsd.Next)
+					continue
+				}
+			}
+
+			if result.PreStatus != result.Status {
+				log.Infof("[%s / %s]: %s (%s) - Status changed [%s] ==> [%s], sending notification...",
+					kind, c.Name, result.Name, result.Endpoint, result.PreStatus, result.Status)
+			} else {
+				log.Debugf("[%s / %s]: %s (%s) - Meet the notification condition [max=%d, notified=%d, failed=%d, next=%d], sending notification...",
+					kind, c.Name, result.Name, result.Endpoint, nsd.MaxTimes, nsd.Notified, nsd.Failed, nsd.Next)
+			}
+
 			for _, n := range c.Notifiers {
 				if IsDryNotify() == true {
 					n.DryNotify(result)

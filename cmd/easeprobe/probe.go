@@ -33,6 +33,7 @@ func configProbers(probers []probe.Prober) []probe.Prober {
 		Interval:                      conf.Get().Settings.Probe.Interval,
 		Timeout:                       conf.Get().Settings.Probe.Timeout,
 		StatusChangeThresholdSettings: conf.Get().Settings.Probe.StatusChangeThresholdSettings,
+		NotificationStrategySettings:  conf.Get().Settings.Probe.NotificationStrategySettings,
 	}
 	log.Debugf("Global Probe Configuration: %+v", gProbeConf)
 

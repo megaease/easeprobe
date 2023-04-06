@@ -13,12 +13,16 @@ EaseProbe has the following major modules:
 - **Metrics**: It is used to export the metrics data to Prometheus.
 
 
-<h1>Outline</h1>
+<h2>Table of Contents</h2>
 
 - [1. Probe](#1-probe)
   - [1.1 Overview](#11-overview)
     - [1.1.1 General Settings](#111-general-settings)
-    - [1.1.2 Initial Fire Up](#112-initial-fire-up)
+    - [1.1.2 Alerting Interval](#112-alerting-interval)
+      - [1.1.2.1 Regular Strategy](#1121-regular-strategy)
+      - [1.1.2.2 Incremental Strategy](#1122-incremental-strategy)
+      - [1.1.2.3 Exponential Strategy](#1123-exponential-strategy)
+    - [1.1.3 Initial Fire Up](#113-initial-fire-up)
   - [1.2 HTTP](#12-http)
     - [1.2.1 Basic Configuration](#121-basic-configuration)
     - [1.2.2 Complete Configuration](#122-complete-configuration)
@@ -123,7 +127,118 @@ settings:
     success: 1 # number of consecutive successful probes needed to determine the status up, default: 1
 ```
 
-### 1.1.2 Initial Fire Up
+### 1.1.2 Alerting Interval
+
+All of the Probe supports alerting interval configuration.
+
+The alerting interval is the time EaseProbe keep sending service down alerting notification until the probe is back to normal.
+
+The alerting interval is configured by three parameters: `strategy`, `factor` and `max`.
+
+- `strategy` is the alerting strategy, it can be `regular`， `increment` and `exponent`. the default strategy is `regular`.
+- `factor` is the alerting interval factor, it can be any positive integer. the default factor is 1.
+- `max` is the maximum alerting times, it can be any positive integer. the default max is 1.
+
+The following is an example of the alerting interval for HTTP Probe:
+```yaml
+  http:
+    - name: Web Service
+      url: http://example.com:1080
+      alter:
+        strategy: regular
+        factor: 1
+        max: 3
+```
+
+> **Note**:
+>
+> 1. The default strategy is regular and the max time is 1, this would be the same as the old behavior - edge trigger.
+> 2. The altering interval is aligned with the probe interval, it is triggered by the probe failure.
+> 3. The alerting interval configuration can be configured in the global settings `settings.probe`, and the probe's own configuration will override the global settings.
+
+#### 1.1.2.1 Regular Strategy
+
+Notifications are sent at the same frequency as the probe time, continuing until the maximum number of notifications is reached.
+
+The formula is:
+
+`interval = factor`
+
+For example:
+
+```yaml
+alter:
+  strategy: regular
+  factor: 1
+  max: 10
+```
+
+- If the factor = 1, the interval is always 1.<br>
+  So, the alert would be sent at failure of 1, 2，3，4，5，6，7...
+
+
+- If the factor = 2, the interval is always 2.<br>
+  So, the alert would be sent at failure of 1, 3, 5, 7, 9, 11, 13...
+
+- If the factor = 3, the interval is always 3.<br>
+  So, the alert would be sent at failure of 1, 4, 7, 10, 13, 16, 19...
+
+#### 1.1.2.2 Incremental Strategy
+
+Notifications are sent at increasing intervals until the maximum number of notifications is reached. With this strategy, the interval is increased linearly.
+
+The formula is:
+
+`interval = factor * (failure - 1) + 1`
+
+For example:
+
+```yaml
+alter:
+  strategy: increment
+  factor: 1
+  max: 10
+```
+
+- If the factor = 1, the interval is 1, 2, 3, 4, 5, 6, 7, 8, 9, 10.<br>
+  So, the alert would be sent at failure of 1, 2, 4, 7, 11, 16, 22, 29, 37...
+
+- If the factor = 2, the interval is 2, 4, 6, 8, 10, 12, 14, 16, 18, 20.<br>
+  So, the alert would be sent at failure of 1, 3, 7, 13, 21, 31, 43, 57, 73...
+
+- If the factor = 3, the interval is 3, 6, 9, 12, 15, 18, 21, 24, 27, 30.<br>
+  So, the alert would be sent at failure of 1, 4, 10, 19, 31, 46, 64, 85, 109...
+
+
+#### 1.1.2.3 Exponential Strategy
+
+Notifications are sent at exponentially increasing intervals until the maximum number of notifications is reached. With this strategy, the interval is increased exponentially.
+
+The formula is:
+
+`interval =  failure times + factor * ( failure times - 1 )`
+
+For example:
+
+```yaml
+alter:
+  strategy: exponent
+  factor: 1
+  max: 10
+```
+
+- If the factor = 1, the interval is 1, 2, 4, 8, 16, 32, 64, 128...<br>
+  So, the alert would be sent at failure of 1, 2, 4, 8, 16, 32, 64, 128, 256...
+
+- If the factor = 2, the interval is 2, 6, 18, 54, 162, 486, 1458...<br>
+  So, the alert would be sent at failure of 1, 3, 9, 27, 81, 243, 729, 2187...
+
+- If the factor = 3, the interval is 3, 12, 48, 192, 768...<br>
+  So, the alert would be sent at failure of 1, 4, 16, 64, 256, 1024...
+
+
+
+### 1.1.3 Initial Fire Up
 
 On application startup, the configured probes are scheduled for their initial fire up based on the following criteria:
 
@@ -1759,6 +1874,10 @@ settings:
     interval: 1m # probe every minute for all probes
     failure: 2 # number of consecutive failed probes needed to determine the status down, default: 1
     success: 1 # number of consecutive successful probes needed to determine the status up, default: 1
+    alert: # alter interval for all probes
+      strategy: "regular" # it can be "regular", "increment" or "exponent", default: "regular"
+      factor: 1 # the factor of the interval, default: 1
+      max: 5 # the max of the alter, default: 1
 
 
   # easeprobe program running log file.

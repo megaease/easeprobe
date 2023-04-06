@@ -53,7 +53,7 @@ func TestPIDFileNotExist(t *testing.T) {
 
 func TestPIDFileExist(t *testing.T) {
 	path := filepath.Join(global.GetWorkDir(), global.DefaultPIDFile)
-	ioutil.WriteFile(path, []byte("1"), 0644)
+	os.WriteFile(path, []byte("1"), 0644)
 	testPIDFile(path, t)
 }
 
@@ -66,7 +66,7 @@ func TestPIDFileSymLink(t *testing.T) {
 	path := filepath.Join(global.GetWorkDir(), "test")
 	target := "test.txt"
 	os.MkdirAll(path, 0755)
-	ioutil.WriteFile(filepath.Join(path, "test.txt"), []byte("Hello\n"), 0644)
+	os.WriteFile(filepath.Join(path, "test.txt"), []byte("Hello\n"), 0644)
 	symlink := filepath.Join(path, "easeprobe.pid")
 	os.Symlink(target, symlink)
 
