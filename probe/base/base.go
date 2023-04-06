@@ -52,6 +52,7 @@ type DefaultProbe struct {
 	ProbeTimeout                         time.Duration `yaml:"timeout,omitempty" json:"timeout,omitempty" jsonschema:"type=string,format=duration,title=Probe Timeout,description=the timeout of probe"`
 	ProbeTimeInterval                    time.Duration `yaml:"interval,omitempty" json:"interval,omitempty" jsonschema:"type=string,format=duration,title=Probe Interval,description=the interval of probe"`
 	global.StatusChangeThresholdSettings `yaml:",inline" json:",inline"`
+	global.NotificationStrategySettings  `yaml:",inline" json:",inline"`
 	ProbeFunc                            ProbeFuncType `yaml:"-" json:"-"`
 	ProbeResult                          *probe.Result `yaml:"-" json:"-"`
 	metrics                              *metrics      `yaml:"-" json:"-"`
@@ -139,6 +140,7 @@ func (d *DefaultProbe) Config(gConf global.ProbeSettings,
 	d.ProbeTimeout = gConf.NormalizeTimeOut(d.ProbeTimeout)
 	d.ProbeTimeInterval = gConf.NormalizeInterval(d.ProbeTimeInterval)
 	d.StatusChangeThresholdSettings = gConf.NormalizeThreshold(d.StatusChangeThresholdSettings)
+	d.NotificationStrategySettings = gConf.NormalizeNotificationStrategy(d.NotificationStrategySettings)
 
 	d.ProbeResult = probe.NewResultWithName(name)
 	d.ProbeResult.Name = name
