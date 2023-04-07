@@ -35,7 +35,7 @@ EaseProbe has the following major modules:
   - [1.8 Host](#18-host)
   - [1.9 Native Client](#19-native-client)
     - [1.9.1 Redis](#191-redis)
-    - [1.9.2 MySQL](#192-msyql)
+    - [1.9.2 MySQL](#192-mysql)
     - [1.9.3 MongoDB](#193-mongodb)
     - [1.9.4 Memcache](#194-memcache)
     - [1.9.5 Kafka](#195-kafka)
@@ -144,7 +144,7 @@ The following is an example of the alerting interval for HTTP Probe:
   http:
     - name: Web Service
       url: http://example.com:1080
-      alter:
+      alert:
         strategy: regular
         factor: 1
         max: 3
@@ -153,7 +153,7 @@ The following is an example of the alerting interval for HTTP Probe:
 > **Note**:
 >
 > 1. The default strategy is regular and the max time is 1, this would be the same as the old behavior - edge trigger.
-> 2. The altering interval is aligned with the probe interval, it is triggered by the probe failure.
+> 2. The alerting interval is aligned with the probe interval, it is triggered by the probe failure.
 > 3. The alerting interval configuration can be configured in the global settings `settings.probe`, and the probe's own configuration will override the global settings.
 
 #### 1.1.2.1 Regular Strategy
@@ -167,7 +167,7 @@ The formula is:
 For example:
 
 ```yaml
-alter:
+alert:
   strategy: regular
   factor: 1
   max: 10
@@ -194,7 +194,7 @@ The formula is:
 For example:
 
 ```yaml
-alter:
+alert:
   strategy: increment
   factor: 1
   max: 10
@@ -221,7 +221,7 @@ The formula is:
 For example:
 
 ```yaml
-alter:
+alert:
   strategy: exponent
   factor: 1
   max: 10
@@ -1874,10 +1874,10 @@ settings:
     interval: 1m # probe every minute for all probes
     failure: 2 # number of consecutive failed probes needed to determine the status down, default: 1
     success: 1 # number of consecutive successful probes needed to determine the status up, default: 1
-    alert: # alter interval for all probes
+    alert: # alert interval for all probes
       strategy: "regular" # it can be "regular", "increment" or "exponent", default: "regular"
       factor: 1 # the factor of the interval, default: 1
-      max: 5 # the max of the alter, default: 1
+      max: 5 # the max of the alert, default: 1
 
 
   # easeprobe program running log file.
