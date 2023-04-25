@@ -311,3 +311,22 @@ func CommandLine(cmd string, args []string) string {
 	}
 	return result
 }
+
+// EscapeQuote escape the string the single quote, double quote, and backtick
+func EscapeQuote(str string) string {
+	type Escape struct {
+		From string
+		To   string
+	}
+	escape := []Escape{
+		{From: "`", To: ""}, // remove the backtick
+		{From: `\`, To: `\\`},
+		{From: `'`, To: `\'`},
+		{From: `"`, To: `\"`},
+	}
+
+	for _, e := range escape {
+		str = strings.ReplaceAll(str, e.From, e.To)
+	}
+	return str
+}

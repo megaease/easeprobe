@@ -190,16 +190,16 @@ func (r *PostgreSQL) getSQL(str string) (string, string, error) {
 	if len(fields) != 5 {
 		return "", "", fmt.Errorf("Invalid SQL data - [%s]. (syntax: database:table:field:key:value)", str)
 	}
-	db := fields[0]
-	table := fields[1]
-	field := fields[2]
-	key := fields[3]
-	value := fields[4]
+	db := global.EscapeQuote(fields[0])
+	table := global.EscapeQuote(fields[1])
+	field := global.EscapeQuote(fields[2])
+	key := global.EscapeQuote(fields[3])
+	value := global.EscapeQuote(fields[4])
 	//check value is int or not
 	if _, err := strconv.Atoi(value); err != nil {
 		return "", "", fmt.Errorf("Invalid SQL data - [%s], the value must be int", str)
 	}
 
-	sql := fmt.Sprintf("SELECT %s FROM %s WHERE %s = %s", field, table, key, value)
+	sql := fmt.Sprintf(`SELECT "%s" FROM "%s" WHERE "%s" = %s`, field, table, key, value)
 	return db, sql, nil
 }
