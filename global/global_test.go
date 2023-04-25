@@ -438,3 +438,12 @@ func TestCommandLine(t *testing.T) {
 	s = CommandLine("kubectl", []string{"get", "pod", "--all-namespaces", "-o", "json"})
 	assert.Equal(t, "kubectl get pod --all-namespaces -o json", s)
 }
+
+func TestEscape(t *testing.T) {
+	assert.Equal(t, "test", EscapeQuote("test"))
+	assert.Equal(t, "test", EscapeQuote("`test`"))
+	assert.Equal(t, `\'test\'`, EscapeQuote("'test'"))
+	assert.Equal(t, `\"test\"`, EscapeQuote(`"test"`))
+	assert.Equal(t, `\\test\\`, EscapeQuote(`\test\`))
+
+}
