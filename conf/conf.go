@@ -242,11 +242,11 @@ func getYamlFile(path string) ([]byte, error) {
 	return getYamlFileFromFile(path)
 }
 
-// previousYamlFile is the content of the configuration file
-var previousYamlFile []byte
+// previousYAMLFile is the content of the configuration file
+var previousYAMLFile []byte
 
-// IsYamlFileModified checks if the configuration file is modified
-func IsYamlFileModified(path string) bool {
+// IsConfigModified checks if the configuration file is modified
+func IsConfigModified(path string) bool {
 
 	var content []byte
 	var err error
@@ -262,8 +262,8 @@ func IsYamlFileModified(path string) bool {
 	}
 
 	// if it is the fisrt time to read the configuration file, we will not restart the program
-	if previousYamlFile == nil {
-		previousYamlFile = content
+	if previousYAMLFile == nil {
+		previousYAMLFile = content
 		return false
 	}
 
@@ -276,8 +276,8 @@ func IsYamlFileModified(path string) bool {
 	}
 
 	// check if the configuration file is modified
-	modified := !bytes.Equal(content, previousYamlFile)
-	previousYamlFile = content
+	modified := !bytes.Equal(content, previousYAMLFile)
+	previousYAMLFile = content
 	return modified
 }
 

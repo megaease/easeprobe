@@ -242,7 +242,7 @@ func main() {
 
 	// Monitor the configuration file
 	monConf := make(chan bool, 1)
-	go monitorYamlFile(*yamlFile, monConf)
+	go monitorYAMLFile(*yamlFile, monConf)
 
 	// wait for the exit and restart signal
 	select {
@@ -257,9 +257,9 @@ func main() {
 	log.Info("Graceful Exit Successfully!")
 }
 
-func monitorYamlFile(path string, monConf chan bool) {
+func monitorYAMLFile(path string, monConf chan bool) {
 	for {
-		if conf.IsYamlFileModified(path) {
+		if conf.IsConfigModified(path) {
 			log.Infof("The configuration file [%s] has been modified, restarting...", path)
 			monConf <- true
 			break
