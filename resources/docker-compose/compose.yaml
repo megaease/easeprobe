@@ -1,0 +1,42 @@
+services:
+  # Prometheus Service
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/config.yaml'
+    ports:
+      - 9090:9090
+    restart: unless-stopped
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prom_data:/prometheus
+
+  # Grafana Service
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./grafana:/etc/grafana/provisioning/datasources
+
+  # EaseProbe Service
+  easeprobe:
+    image: megaease/easeprobe
+    container_name: easeprobe
+    ports:
+       - 8181:8181
+    restart: unless-stopped
+    volumes:
+       - ./easeprobe/config.yaml:/opt/config.yaml
+       -   easeprobe_data:/opt/data
+
+# Docker Volumes
+volumes:
+  prom_data:
+  easeprobe_data:

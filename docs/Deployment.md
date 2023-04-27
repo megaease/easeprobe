@@ -7,12 +7,13 @@
     - [2.2 Configure EaseProbe](#22-configure-easeprobe)
   - [2.3 Run EaseProbe](#23-run-easeprobe)
   - [3. Docker Deployment](#3-docker-deployment)
-  - [4. Kubernetes Deployment](#4-kubernetes-deployment)
-    - [4.1 Creating the ConfigMap for EaseProbe Configuration file](#41-creating-the-configmap-for-easeprobe-configuration-file)
-    - [4.2 Creating a PV/PVC for EaseProbe SLA data persistent.](#42-creating-a-pvpvc-for-easeprobe-sla-data-persistent)
-    - [4.3 Deploy EaseProbe](#43-deploy-easeprobe)
-    - [4.4 Create the EaseProbe Service](#44-create-the-easeprobe-service)
-  - [5. Kubernetes Deployment Using Helm](#5-kubernetes-deployment-using-helm)
+  - [4. Docker-Compose Deployment](#4-docker-compose-deployment)
+  - [5. Kubernetes Deployment](#5-kubernetes-deployment)
+    - [5.1 Creating the ConfigMap for EaseProbe Configuration file](#51-creating-the-configmap-for-easeprobe-configuration-file)
+    - [5.2 Creating a PV/PVC for EaseProbe SLA data persistent.](#52-creating-a-pvpvc-for-easeprobe-sla-data-persistent)
+    - [5.3 Deploy EaseProbe](#53-deploy-easeprobe)
+    - [5.4 Create the EaseProbe Service](#54-create-the-easeprobe-service)
+  - [6. Kubernetes Deployment Using Helm](#6-kubernetes-deployment-using-helm)
 
 
 ## 1. Overview
@@ -23,7 +24,9 @@ This document describes how to deploy EaseProbe on the following ways:
 
 - **Standalone Deployment** - run EaseProbe as a systemd service.
 - **Docker Deployment** - run EaseProbe as a container.
+- **Docker-Compose Deployment** - run EaseProbe as a docker-compose service which includes a Prometheus and a Grafana.
 - **Kubernetes Deployment** -  run EaseProbe as a kubernetes pod.
+- **Helm Deployment** - run EaseProbe as a kubernetes pod using helm.
 
 
 ## 2. Standalone Deployment
@@ -161,9 +164,30 @@ docker run -d --name easeprobe \
 >    -  `/opt/data/` is the data file default directory in the container.
 
 
+## 4. Docker-Compose Deployment
 
+The docker-compose deployment is a simple way to deploy EaseProbe with Prometheus and Grafana.
 
-## 4. Kubernetes Deployment
+You can visit [Docker-Compose](../resources/docker-compose/) directory to find the docker-compose file and the configuration files.
+
+```bash
+resources/docker-compose
+├── compose.yaml          # <-- the docker-compose file
+├── easeprobe
+│   └── config.yaml       # <-- the EaseProbe configuration file
+├── grafana
+│   └── datasource.yaml   # <-- the Grafana datasource configuration file
+└── prometheus
+    └── prometheus.yaml   # <-- the Prometheus configuration file
+```
+
+To start the EaseProbe, Prometheus and Grafana, run the following command.
+
+```bash
+docker-compose -f compose.yaml up -d
+```
+
+## 5. Kubernetes Deployment
 
 Because EaseProbe needs to persist data,  we have to deploy the EaseProbe as Stateful-Set in Kubernetes, this would lead a bit complex deployment process.
 
@@ -172,7 +196,7 @@ Because EaseProbe needs to persist data,  we have to deploy the EaseProbe as Sta
 3. Deploy EaseProbe
 4. Create the EaseProbe Service
 
-### 4.1 Creating the ConfigMap for EaseProbe Configuration file
+### 5.1 Creating the ConfigMap for EaseProbe Configuration file
 
 The following is an example of a configuration file - `config.yaml`.
 
@@ -218,7 +242,7 @@ data:
         level: "info"
 ```
 
-### 4.2 Creating a PV/PVC for EaseProbe SLA data persistent.
+### 5.2 Creating a PV/PVC for EaseProbe SLA data persistent.
 
 To be simple, we use the NFS as an example
 
@@ -272,7 +296,7 @@ status:
     storage: 10Gi
 ```
 
-### 4.3 Deploy EaseProbe
+### 5.3 Deploy EaseProbe
 
 This is the deployment file for EaseProbe.
 
@@ -319,7 +343,7 @@ spec:
 >  - The `configmap-volume-0` is the ConfigMap for `config.yaml`, which is mounted as volume under `/opt/config.yaml` in the container.
 >  - The `pvc-volume-easeprobe-pvc` is the PVC for SLA data persistent, which is mounted as a volume under `/opt/data` in the container.
 
-### 4.4 Create the EaseProbe Service
+### 5.4 Create the EaseProbe Service
 
 The service is used to expose the HTTP port of EaseProbe.
 
@@ -342,7 +366,7 @@ spec:
   type: ClusterIP
 ```
 
-## 5 Kubernetes Deployment Using Helm
+## 6. Kubernetes Deployment Using Helm
 
 **Add repository**
 ```
