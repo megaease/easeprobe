@@ -40,6 +40,7 @@ import (
 )
 
 var probers *[]probe.Prober
+var webServer net.Listener
 
 func getRefreshInterval(refersh string) time.Duration {
 	interval := conf.Get().Settings.HTTPServer.AutoRefreshTime
@@ -198,6 +199,7 @@ func Server() {
 	}
 	log.Infof("[Web] HTTP server is listening on %s:%s", host, port)
 
+	webServer = server
 	// Start the http server
 	go func() {
 		if err := http.Serve(server, r); err != nil {
@@ -205,4 +207,15 @@ func Server() {
 		}
 	}()
 
+}
+
+// Shutdown the http server
+func Shutdown() {
+	if webServer != nil {
+		if err := webServer.Close(); err != nil {
+			log.Errorf("[Web] Failed to shutdown the http server: %s", err)
+		}
+		log.Info("[Web] HTTP server is shutdown")
+		webServer = nil
+	}
 }

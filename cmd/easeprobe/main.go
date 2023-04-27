@@ -207,13 +207,16 @@ func main() {
 	}()
 
 	////////////////////////////////////////////////////////////////////////////
-	//                              Graceful Shutdown                         //
+	//                         Graceful Shutdown / Re-Run                     //
 	////////////////////////////////////////////////////////////////////////////
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, syscall.SIGTERM)
-	select {
-	case <-done:
-		log.Infof("Received the exit signal, exiting...")
+	restart := make(chan os.Signal, 1)
+	signal.Notify(restart, syscall.SIGUSR1, syscall.SIGUSR2)
+
+	// the graceful shutdown process
+	exit := func() {
+		web.Shutdown()
 		for i := 0; i < len(probers); i++ {
 			if probers[i].Result().Status != probe.StatusBad {
 				doneProbe <- true
@@ -222,7 +225,30 @@ func main() {
 		wg.Wait()
 		channel.AllDone()
 		doneSave <- true
-		doneRotate <- true
+	}
+
+	// the graceful restart process
+	rerun := func() {
+		exit()
+		p, e := os.StartProcess(os.Args[0], os.Args, &os.ProcAttr{
+			Env:   os.Environ(),
+			Files: []*os.File{os.Stdin, os.Stdout, os.Stderr},
+		})
+		if e != nil {
+			log.Errorf("!!! FAILED TO RESTART THE EASEPROBE: %v !!!", e)
+			return
+		}
+		log.Infof("!!! RESTART THE EASEPROBE SUCCESSFULLY - PID=[%d] !!!", p.Pid)
+	}
+
+	// wait for the exit and restart signal
+	select {
+	case <-done:
+		log.Info("!!! RECEIVED THE SIGTERM EXIT SIGNAL, EXITING... !!!")
+		exit()
+	case <-restart:
+		log.Info("!!! RECEIVED THE SIGUSR1/SIGUSR2 RESTART SIGNAL, RESTART... !!!")
+		rerun()
 	}
 
 	log.Info("Graceful Exit Successfully!")

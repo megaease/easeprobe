@@ -19,6 +19,7 @@
 package conf
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	httpClient "net/http"
@@ -28,6 +29,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/megaease/easeprobe/channel"
@@ -197,7 +199,7 @@ func isExternalURL(url string) bool {
 	return true
 }
 
-func getYamlFileFromInternet(url string) ([]byte, error) {
+func getYamlFileFromHTTP(url string) ([]byte, error) {
 	r, err := httpClient.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -236,9 +238,59 @@ func getYamlFileFromFile(path string) ([]byte, error) {
 
 func getYamlFile(path string) ([]byte, error) {
 	if isExternalURL(path) {
-		return getYamlFileFromInternet(path)
+		return getYamlFileFromHTTP(path)
 	}
 	return getYamlFileFromFile(path)
+}
+
+// previousYamlFile is the content of the configuration file
+var previousYamlFile []byte
+
+func isYamlFileModified(path string) bool {
+
+	var content []byte
+	var err error
+	if isExternalURL(path) {
+		content, err = getYamlFileFromHTTP(path)
+	} else {
+		content, err = getYamlFileFromFile(path)
+	}
+
+	if err != nil {
+		log.Warnf("Failed to get the configuration file [%s] from HTTP: %v", path, err)
+		return false
+	}
+
+	// if it is the fisrt time to read the configuration file, we will not restart the program
+	if previousYamlFile == nil {
+		previousYamlFile = content
+		return false
+	}
+
+	//  if the configuration file is invalid, we will not restart the program
+	testConf := Conf{}
+	err = yaml.Unmarshal(content, &testConf)
+	if err != nil {
+		log.Warnf("Invalid configuration file [%s]: %v", path, err)
+		return false
+	}
+
+	// check if the configuration file is modified
+	modified := !bytes.Equal(content, previousYamlFile)
+	previousYamlFile = content
+	return modified
+}
+
+func monitorYamlFile(path string) {
+	for {
+		if isYamlFileModified(path) {
+			log.Infof("The configuration file [%s] has been modified, restarting...", path)
+			syscall.Kill(os.Getpid(), syscall.SIGUSR1)
+		} else {
+			log.Debugf("The configuration file [%s] has not been modified", path)
+		}
+		time.Sleep(5 * time.Second)
+	}
 }
 
 // New read the configuration from yaml
@@ -328,6 +380,9 @@ func New(conf *string) (*Conf, error) {
 			log.Debugf("\n%s", string(s))
 		}
 	}
+
+	// Monitor the configuration file
+	go monitorYamlFile(*conf)
 
 	return &c, err
 }
