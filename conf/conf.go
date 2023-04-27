@@ -29,7 +29,6 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/megaease/easeprobe/channel"
@@ -246,7 +245,8 @@ func getYamlFile(path string) ([]byte, error) {
 // previousYamlFile is the content of the configuration file
 var previousYamlFile []byte
 
-func isYamlFileModified(path string) bool {
+// IsYamlFileModified checks if the configuration file is modified
+func IsYamlFileModified(path string) bool {
 
 	var content []byte
 	var err error
@@ -279,18 +279,6 @@ func isYamlFileModified(path string) bool {
 	modified := !bytes.Equal(content, previousYamlFile)
 	previousYamlFile = content
 	return modified
-}
-
-func monitorYamlFile(path string) {
-	for {
-		if isYamlFileModified(path) {
-			log.Infof("The configuration file [%s] has been modified, restarting...", path)
-			syscall.Kill(os.Getpid(), syscall.SIGUSR1)
-		} else {
-			log.Debugf("The configuration file [%s] has not been modified", path)
-		}
-		time.Sleep(5 * time.Second)
-	}
 }
 
 // New read the configuration from yaml
@@ -380,9 +368,6 @@ func New(conf *string) (*Conf, error) {
 			log.Debugf("\n%s", string(s))
 		}
 	}
-
-	// Monitor the configuration file
-	go monitorYamlFile(*conf)
 
 	return &c, err
 }

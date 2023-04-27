@@ -27,6 +27,7 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/megaease/easeprobe/channel"
 	"github.com/megaease/easeprobe/conf"
@@ -211,8 +212,6 @@ func main() {
 	////////////////////////////////////////////////////////////////////////////
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, syscall.SIGTERM)
-	restart := make(chan os.Signal, 1)
-	signal.Notify(restart, syscall.SIGUSR1, syscall.SIGUSR2)
 
 	// the graceful shutdown process
 	exit := func() {
@@ -228,7 +227,7 @@ func main() {
 	}
 
 	// the graceful restart process
-	rerun := func() {
+	reRun := func() {
 		exit()
 		p, e := os.StartProcess(os.Args[0], os.Args, &os.ProcAttr{
 			Env:   os.Environ(),
@@ -241,15 +240,32 @@ func main() {
 		log.Infof("!!! RESTART THE EASEPROBE SUCCESSFULLY - PID=[%d] !!!", p.Pid)
 	}
 
+	// Monitor the configuration file
+	monConf := make(chan bool, 1)
+	go monitorYamlFile(*yamlFile, monConf)
+
 	// wait for the exit and restart signal
 	select {
 	case <-done:
 		log.Info("!!! RECEIVED THE SIGTERM EXIT SIGNAL, EXITING... !!!")
 		exit()
-	case <-restart:
+	case <-monConf:
 		log.Info("!!! RECEIVED THE SIGUSR1/SIGUSR2 RESTART SIGNAL, RESTART... !!!")
-		rerun()
+		reRun()
 	}
 
 	log.Info("Graceful Exit Successfully!")
+}
+
+func monitorYamlFile(path string, monConf chan bool) {
+	for {
+		if conf.IsYamlFileModified(path) {
+			log.Infof("The configuration file [%s] has been modified, restarting...", path)
+			monConf <- true
+			break
+		} else {
+			log.Debugf("The configuration file [%s] has not been modified", path)
+		}
+		time.Sleep(30 * time.Second)
+	}
 }
