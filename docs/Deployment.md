@@ -184,7 +184,8 @@ resources/docker-compose
 To start the EaseProbe, Prometheus and Grafana, run the following command.
 
 ```bash
-docker-compose -f compose.yaml up -d
+cd resources/docker-compose
+docker-compose up -d
 ```
 
 ## 5. Kubernetes Deployment
