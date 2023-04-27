@@ -245,6 +245,11 @@ func getYamlFile(path string) ([]byte, error) {
 // previousYAMLFile is the content of the configuration file
 var previousYAMLFile []byte
 
+// ResetPreviousYAMLFile resets the previousYAMLFile
+func ResetPreviousYAMLFile() {
+	previousYAMLFile = nil
+}
+
 // IsConfigModified checks if the configuration file is modified
 func IsConfigModified(path string) bool {
 
@@ -257,7 +262,7 @@ func IsConfigModified(path string) bool {
 	}
 
 	if err != nil {
-		log.Warnf("Failed to get the configuration file [%s] from HTTP: %v", path, err)
+		log.Warnf("Failed to get the configuration file [%s]: %v", path, err)
 		return false
 	}
 
