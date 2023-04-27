@@ -1,0 +1,13 @@
+http:
+   - name: Promethus
+     url: http://prometheus:9090
+   - name: Grafana
+     url: http://grafana:3000
+notify:
+  # slack:
+  #   - name: "SLACK_NAME"
+  #     webhook: "https://hooks.slack.com/services/XXXX"
+settings:
+  sla:
+    schedule: daily
+    time: "10:00"

@@ -148,7 +148,7 @@ $ build/bin/easeprobe -f config.yaml
 
 # 3. Deployment
 
-EaseProbe can be deployed by Systemd, Docker, & Kubernetes.
+EaseProbe can be deployed by Systemd, Docker, Docker-Compose, & Kubernetes.
 
 You can find the details in [Deployment Guide](./docs/Deployment.md)
 
