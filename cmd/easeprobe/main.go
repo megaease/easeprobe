@@ -224,6 +224,7 @@ func main() {
 		wg.Wait()
 		channel.AllDone()
 		doneSave <- true
+		doneRotate <- true
 	}
 
 	// the graceful restart process
