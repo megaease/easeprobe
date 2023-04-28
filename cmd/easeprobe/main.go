@@ -250,7 +250,7 @@ func main() {
 		log.Info("!!! RECEIVED THE SIGTERM EXIT SIGNAL, EXITING... !!!")
 		exit()
 	case <-monConf:
-		log.Info("!!! RECEIVED THE SIGUSR1/SIGUSR2 RESTART SIGNAL, RESTART... !!!")
+		log.Info("!!! RECEIVED THE RESTART EVENT, RESTARTING... !!!")
 		reRun()
 	}
 
@@ -266,6 +266,6 @@ func monitorYAMLFile(path string, monConf chan bool) {
 		} else {
 			log.Debugf("The configuration file [%s] has not been modified", path)
 		}
-		time.Sleep(30 * time.Second)
+		time.Sleep(global.DefaultConfigFileCheckInterval)
 	}
 }
