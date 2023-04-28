@@ -263,9 +263,8 @@ func monitorYAMLFile(path string, monConf chan bool) {
 			log.Infof("The configuration file [%s] has been modified, restarting...", path)
 			monConf <- true
 			break
-		} else {
-			log.Debugf("The configuration file [%s] has not been modified", path)
 		}
+		log.Debugf("The configuration file [%s] has not been modified", path)
 		time.Sleep(global.DefaultConfigFileCheckInterval)
 	}
 }
