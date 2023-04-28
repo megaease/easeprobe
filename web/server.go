@@ -19,7 +19,9 @@
 package web
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html"
 	"net"
@@ -40,6 +42,7 @@ import (
 )
 
 var probers *[]probe.Prober
+var webServer *http.Server
 
 func getRefreshInterval(refersh string) time.Duration {
 	interval := conf.Get().Settings.HTTPServer.AutoRefreshTime
@@ -200,9 +203,28 @@ func Server() {
 
 	// Start the http server
 	go func() {
-		if err := http.Serve(server, r); err != nil {
+		webServer = &http.Server{Handler: r}
+		if err := webServer.Serve(server); !errors.Is(err, http.ErrServerClosed) {
 			log.Errorf("[Web] HTTP server error: %s", err)
 		}
+		log.Info("[Web] HTTP server is stopped.")
 	}()
+
+}
+
+// Shutdown the http server
+func Shutdown() {
+	if webServer == nil {
+		log.Debugf("[Web] HTTP server is not running, skip to shutdown")
+		return
+	}
+	shutdownCtx, shutdownRelease := context.WithTimeout(context.Background(), global.DefaultTimeOut)
+	defer shutdownRelease()
+
+	if err := webServer.Shutdown(shutdownCtx); err != nil {
+		log.Errorf("[Web] Failed to shutdown the http server: %s", err)
+	}
+	log.Info("[Web] HTTP server is shutdown")
+	webServer = nil
 
 }

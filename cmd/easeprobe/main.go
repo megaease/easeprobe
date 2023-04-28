@@ -27,6 +27,7 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/megaease/easeprobe/channel"
 	"github.com/megaease/easeprobe/conf"
@@ -207,13 +208,14 @@ func main() {
 	}()
 
 	////////////////////////////////////////////////////////////////////////////
-	//                              Graceful Shutdown                         //
+	//                         Graceful Shutdown / Re-Run                     //
 	////////////////////////////////////////////////////////////////////////////
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, syscall.SIGTERM)
-	select {
-	case <-done:
-		log.Infof("Received the exit signal, exiting...")
+
+	// the graceful shutdown process
+	exit := func() {
+		web.Shutdown()
 		for i := 0; i < len(probers); i++ {
 			if probers[i].Result().Status != probe.StatusBad {
 				doneProbe <- true
@@ -225,5 +227,45 @@ func main() {
 		doneRotate <- true
 	}
 
+	// the graceful restart process
+	reRun := func() {
+		exit()
+		p, e := os.StartProcess(os.Args[0], os.Args, &os.ProcAttr{
+			Env:   os.Environ(),
+			Files: []*os.File{os.Stdin, os.Stdout, os.Stderr},
+		})
+		if e != nil {
+			log.Errorf("!!! FAILED TO RESTART THE EASEPROBE: %v !!!", e)
+			return
+		}
+		log.Infof("!!! RESTART THE EASEPROBE SUCCESSFULLY - PID=[%d] !!!", p.Pid)
+	}
+
+	// Monitor the configuration file
+	monConf := make(chan bool, 1)
+	go monitorYAMLFile(*yamlFile, monConf)
+
+	// wait for the exit and restart signal
+	select {
+	case <-done:
+		log.Info("!!! RECEIVED THE SIGTERM EXIT SIGNAL, EXITING... !!!")
+		exit()
+	case <-monConf:
+		log.Info("!!! RECEIVED THE RESTART EVENT, RESTARTING... !!!")
+		reRun()
+	}
+
 	log.Info("Graceful Exit Successfully!")
+}
+
+func monitorYAMLFile(path string, monConf chan bool) {
+	for {
+		if conf.IsConfigModified(path) {
+			log.Infof("The configuration file [%s] has been modified, restarting...", path)
+			monConf <- true
+			break
+		}
+		log.Debugf("The configuration file [%s] has not been modified", path)
+		time.Sleep(global.DefaultConfigFileCheckInterval)
+	}
 }

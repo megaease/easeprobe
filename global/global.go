@@ -75,6 +75,8 @@ const (
 	DefaultMaxNotificationTimes = 1
 	// DefaultNotificationFactor is the default notification factor
 	DefaultNotificationFactor = 1
+	// DefaultConfigFileCheckInterval is the default config file checking interval
+	DefaultConfigFileCheckInterval = time.Second * 5
 )
 
 const (

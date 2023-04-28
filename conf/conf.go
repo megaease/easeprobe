@@ -19,6 +19,7 @@
 package conf
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	httpClient "net/http"
@@ -197,7 +198,7 @@ func isExternalURL(url string) bool {
 	return true
 }
 
-func getYamlFileFromInternet(url string) ([]byte, error) {
+func getYamlFileFromHTTP(url string) ([]byte, error) {
 	r, err := httpClient.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -236,9 +237,53 @@ func getYamlFileFromFile(path string) ([]byte, error) {
 
 func getYamlFile(path string) ([]byte, error) {
 	if isExternalURL(path) {
-		return getYamlFileFromInternet(path)
+		return getYamlFileFromHTTP(path)
 	}
 	return getYamlFileFromFile(path)
+}
+
+// previousYAMLFile is the content of the configuration file
+var previousYAMLFile []byte
+
+// ResetPreviousYAMLFile resets the previousYAMLFile
+func ResetPreviousYAMLFile() {
+	previousYAMLFile = nil
+}
+
+// IsConfigModified checks if the configuration file is modified
+func IsConfigModified(path string) bool {
+
+	var content []byte
+	var err error
+	if isExternalURL(path) {
+		content, err = getYamlFileFromHTTP(path)
+	} else {
+		content, err = getYamlFileFromFile(path)
+	}
+
+	if err != nil {
+		log.Warnf("Failed to get the configuration file [%s]: %v", path, err)
+		return false
+	}
+
+	// if it is the fisrt time to read the configuration file, we will not restart the program
+	if previousYAMLFile == nil {
+		previousYAMLFile = content
+		return false
+	}
+
+	//  if the configuration file is invalid, we will not restart the program
+	testConf := Conf{}
+	err = yaml.Unmarshal(content, &testConf)
+	if err != nil {
+		log.Warnf("Invalid configuration file [%s]: %v", path, err)
+		return false
+	}
+
+	// check if the configuration file is modified
+	modified := !bytes.Equal(content, previousYAMLFile)
+	previousYAMLFile = content
+	return modified
 }
 
 // New read the configuration from yaml

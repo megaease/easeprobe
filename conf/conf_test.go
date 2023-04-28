@@ -590,11 +590,18 @@ func writeConfig(file, content string) error {
 	return os.WriteFile(file, []byte(content), 0644)
 }
 
-func httpServer() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+func httpServer(port string) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(confYAML))
 	})
-	http.ListenAndServe(":65535", nil)
+	mux.HandleFunc("/modified", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(confYAML + "  \n  \n"))
+	})
+
+	if err := http.ListenAndServe(":"+port, mux); err != nil {
+		panic(err)
+	}
 }
 
 func TestConfig(t *testing.T) {
@@ -646,7 +653,7 @@ func TestConfig(t *testing.T) {
 	notifiers := conf.AllNotifiers()
 	assert.Equal(t, 6, len(notifiers))
 
-	go httpServer()
+	go httpServer("65535")
 	url := "http://localhost:65535"
 	os.Setenv("HTTP_AUTHORIZATION", "Basic dXNlcm5hbWU6cGFzc3dvcmQ=")
 	os.Setenv("HTTP_TIMEOUT", "10")
@@ -654,6 +661,12 @@ func TestConfig(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "EaseProbeBot", httpConf.Settings.Name)
 	assert.Equal(t, "0.1.0", httpConf.Version)
+
+	// test config modification
+	assert.False(t, IsConfigModified(url))
+	assert.False(t, IsConfigModified(url))
+	url += "/modified"
+	assert.True(t, IsConfigModified(url))
 
 	probers = conf.AllProbers()
 	assert.Equal(t, 9, len(probers))
@@ -757,4 +770,26 @@ func TestJSONSchema(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Empty(t, schema)
 	monkey.UnpatchAll()
+}
+
+func TestFileConfigModificaiton(t *testing.T) {
+	file := "./config.yaml"
+	err := writeConfig(file, confYAML)
+	assert.Nil(t, err)
+	ResetPreviousYAMLFile()
+	assert.False(t, IsConfigModified(file))
+	assert.False(t, IsConfigModified(file))
+
+	err = writeConfig(file, confYAML+"  \n\n")
+	assert.Nil(t, err)
+	assert.True(t, IsConfigModified(file))
+	assert.False(t, IsConfigModified(file))
+
+	err = writeConfig(file, confYAML+"\ninvalid")
+	assert.Nil(t, err)
+	assert.False(t, IsConfigModified(file))
+
+	os.RemoveAll(file)
+	assert.False(t, IsConfigModified(file))
+
 }
