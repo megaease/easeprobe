@@ -218,7 +218,7 @@ func Shutdown() {
 		log.Debugf("[Web] HTTP server is not running, skip to shutdown")
 		return
 	}
-	shutdownCtx, shutdownRelease := context.WithTimeout(context.Background(), 10*time.Second)
+	shutdownCtx, shutdownRelease := context.WithTimeout(context.Background(), global.DefaultTimeOut)
 	defer shutdownRelease()
 
 	if err := webServer.Shutdown(shutdownCtx); err != nil {
