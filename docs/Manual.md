@@ -1228,15 +1228,15 @@ For example:
 ```YAML
 http:
    - name: probe A
-     channels : [ Dev_Channel, Manager_Channel ]
+     channels : [ Mgmt_Channel ]
 shell:
    - name: probe B
-     channels: [ Ops_Channel ]
+     channels: [ Dev_Channel, QA_Channel ]
 notify:
    - discord: Discord
-     channels: [ Dev_Channel, Ops_Channel ]
+     channels: [ Mgmt_Channel, Dev_Channel ]
    - email: Gmail
-     channels: [ Mgmt_Channel ]
+     channels: [ QA_Channel ]
 ```
 
 Then, we will have the following diagram
@@ -1245,7 +1245,7 @@ Then, we will have the following diagram
 ┌───────┐          ┌──────────────┐
 │Probe B├─────────►│ Mgmt_Channel ├────┐
 └───────┘          └──────────────┘    │
-                                       │
+  http                                 │
                                        │
                    ┌─────────────┐     │   ┌─────────┐
             ┌─────►│ Dev_Channel ├─────▼───► Discord │
@@ -1253,7 +1253,7 @@ Then, we will have the following diagram
 ┌───────┐   │
 │Probe A├───┤
 └───────┘   │
-            │      ┌────────────┐          ┌─────────┐
+  shell     │      ┌────────────┐          ┌─────────┐
             └─────►│ QA_Channel ├──────────►  Gmail  │
                    └────────────┘          └─────────┘
 ```
