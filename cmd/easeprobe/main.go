@@ -102,7 +102,8 @@ func main() {
 	}
 
 	// Create the pid file if the file name is not empty
-	if len(strings.TrimSpace(c.Settings.PIDFile)) > 0 {
+	c.Settings.PIDFile = strings.TrimSpace(c.Settings.PIDFile)
+	if len(c.Settings.PIDFile) > 0 && c.Settings.PIDFile != "-" {
 		d, err := daemon.NewPIDFile(c.Settings.PIDFile)
 		if err != nil {
 			log.Errorf("Fatal: Cannot create the PID file: %s!", err)
@@ -111,7 +112,11 @@ func main() {
 		log.Infof("Successfully created the PID file: %s", d.PIDFile)
 		defer d.RemovePIDFile()
 	} else {
-		log.Info("Skipping PID file creation (pidfile empty).")
+		if len(c.Settings.PIDFile) == 0 {
+			log.Info("Skipping PID file creation (pid file is empty).")
+		} else {
+			log.Info("Skipping PID file creation (pid file is set to '-').")
+		}
 	}
 
 	c.InitAllLogs()
