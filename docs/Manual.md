@@ -1274,7 +1274,7 @@ pid: /var/run/easeprobe.pid
 - If the file already exists, EaseProbe would overwrite it.
 - If the file cannot be written, EaseProbe would exit with an error.
 
-If you want to disable the PID file, you can configure the pid file to "-".
+If you want to disable the PID file, just simply not configure this.
 
 ```YAML
 settings:
