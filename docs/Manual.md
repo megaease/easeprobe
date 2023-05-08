@@ -1228,34 +1228,34 @@ For example:
 ```YAML
 http:
    - name: probe A
-     channels : [ Dev_Channel, Manager_Channel ]
+     channels : [ Mgmt_Channel ]
 shell:
    - name: probe B
-     channels: [ Ops_Channel ]
+     channels: [ Dev_Channel, QA_Channel ]
 notify:
    - discord: Discord
-     channels: [ Dev_Channel, Ops_Channel ]
+     channels: [ Mgmt_Channel, Dev_Channel ]
    - email: Gmail
-     channels: [ Mgmt_Channel ]
+     channels: [ QA_Channel ]
 ```
 
 Then, we will have the following diagram
 
 ```
-┌───────┐          ┌──────────────┐
-│Probe B├─────────►│ Mgmt_Channel ├────┐
-└───────┘          └──────────────┘    │
-                                       │
-                                       │
-                   ┌─────────────┐     │   ┌─────────┐
-            ┌─────►│ Dev_Channel ├─────▼───► Discord │
-            │      └─────────────┘         └─────────┘
-┌───────┐   │
-│Probe A├───┤
-└───────┘   │
-            │      ┌────────────┐          ┌─────────┐
-            └─────►│ QA_Channel ├──────────►  Gmail  │
-                   └────────────┘          └─────────┘
+┌─────────┐        ┌──────────────┐
+│ Probe A ├───────►│ Mgmt_Channel ├──────────┐
+└─────────┘        └──────────────┘          │
+   http                                      │
+                                             │
+                   ┌──────────────┐     ┌────▼────┐
+              ┌───►│  Dev_Channel ├────►│ Discord │
+              │    └──────────────┘     └─────────┘
+┌─────────┐   │
+│ Probe B ├───┤
+└─────────┘   │
+   shell      │    ┌──────────────┐     ┌─────────┐
+              └───►│  QA_Channel  ├────►│  Gmail  │
+                   └──────────────┘     └─────────┘
 ```
 
 # 5. Administration
@@ -1274,11 +1274,11 @@ pid: /var/run/easeprobe.pid
 - If the file already exists, EaseProbe would overwrite it.
 - If the file cannot be written, EaseProbe would exit with an error.
 
-If you want to disable the PID file, you can configure the pid file to "".
+If you want to disable the PID file, you can set it to "-" or "".
 
 ```YAML
 settings:
-pid: "" # EaseProbe won't create a PID file
+    pid: "" # EaseProbe won't create a PID file
 ```
 
 ## 5.2 Log file Rotation

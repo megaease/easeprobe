@@ -109,7 +109,7 @@ type SLAReport struct {
 	Schedule Schedule `yaml:"schedule" json:"schedule" jsonschema:"type=string,enum=none,enum=minutely,enum=hourly,enum=daily,enum=weekly,enum=monthly,title=Schedule,description=the schedule of SLA report"`
 	Time     string   `yaml:"time" json:"time,omitempty" jsonschema:"format=time,title=Time,description=the time of SLA report need to send out,example=23:59:59+08:00"`
 	//Debug    bool     `yaml:"debug" json:"debug,omitempty" jsonschema:"title=Debug,description=if true the SLA report will be printed to stdout,default=false"`
-	DataFile string   `yaml:"data" json:"data,omitempty" jsonschema:"title=Data File,description=the data file of SLA report, absolute path"`
+	DataFile string   `yaml:"data" json:"data,omitempty" jsonschema:"title=Data File,description=the data file of SLA report, absolute path. ('-' means no SLA persistent data)"`
 	Backups  int      `yaml:"backups" json:"backups,omitempty" jsonschema:"title=Backups,description=the number of backups of SLA report,default=5"`
 	Channels []string `yaml:"channels" json:"channels,omitempty" jsonschema:"title=Channels,description=the channels of SLA report"`
 }
@@ -126,7 +126,7 @@ type HTTPServer struct {
 type Settings struct {
 	Name       string     `yaml:"name" json:"name,omitempty" jsonschema:"title=EaseProbe Name,description=The name of the EaseProbe instance,default=EaseProbe"`
 	IconURL    string     `yaml:"icon" json:"icon,omitempty" jsonschema:"title=Icon URL,description=The URL of the icon of the EaseProbe instance"`
-	PIDFile    string     `yaml:"pid" json:"pid,omitempty" jsonschema:"title=PID File,description=The PID file of the EaseProbe instance ('-' means no PID file)"`
+	PIDFile    string     `yaml:"pid" json:"pid,omitempty" jsonschema:"title=PID File,description=The PID file of the EaseProbe instance ('' or '-' means no PID file)"`
 	Log        Log        `yaml:"log" json:"log,omitempty" jsonschema:"title=EaseProbe Log,description=The log settings of the EaseProbe instance"`
 	TimeFormat string     `yaml:"timeformat" json:"timeformat,omitempty" jsonschema:"title=Time Format,description=The time format of the EaseProbe instance,default=2006-01-02 15:04:05Z07:00"`
 	TimeZone   string     `yaml:"timezone" json:"timezone,omitempty" jsonschema:"title=Time Zone,description=The time zone of the EaseProbe instance,example=Asia/Shanghai,example=Europe/Berlin,default=UTC"`
