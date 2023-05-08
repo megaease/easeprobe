@@ -296,7 +296,7 @@
         "pid": {
           "type": "string",
           "title": "PID File",
-          "description": "The PID file of the EaseProbe instance ('-' means no PID file)"
+          "description": "The PID file of the EaseProbe instance ('' or '-' means no PID file)"
         },
         "log": {
           "$ref": "#/$defs/conf_Log",
