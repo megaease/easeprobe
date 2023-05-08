@@ -105,7 +105,7 @@ You can get started with EaseProbe, by any of the following methods:
 
 ## 2.1 Build
 
-Compiler `Go 1.18+` (Generics Programming Support), checking the [Go Installation](https://go.dev/doc/install) to see how to install Go on your platform.
+Compiler `Go 1.20+` (Generics Programming Support), checking the [Go Installation](https://go.dev/doc/install) to see how to install Go on your platform.
 
 Use `make` to build and produce the `easeprobe` binary file. The executable is produced under the `build/bin` directory.
 
