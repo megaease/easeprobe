@@ -71,7 +71,7 @@ EaseProbe has the following major modules:
   - [6.3 Ping Probe](#63-ping-probe)
   - [6.4 TLS Probe](#64-tls-probe)
   - [6.5 Shell \& SSH Probe](#65-shell--ssh-probe)
-  - [6.6  Host Probe](#66--host-probe)
+  - [6.6 Host Probe](#66-host-probe)
 - [7. Configuration](#7-configuration)
   - [7.1 Probe Configuration](#71-probe-configuration)
   - [7.2 Notification Configuration](#72-notification-configuration)
@@ -494,7 +494,7 @@ Then, the extraction syntax as below:
 ```
 > Notes
 >
-> Checking the unit test case in [`eval`](./eval/) package you can find more examples.
+> Checking the unit test case in [`eval`](../eval/) package you can find more examples.
 
 ## 1.3 TCP
 
@@ -883,7 +883,7 @@ And please be aware that the following configuration:
           interval: 10s # retry interval, default is 5s
     ```
 
-For a complete list of examples using all the notifications please check the [Notification Configuration](#79-notification-configuration) section.
+For a complete list of examples using all the notifications please check the [Notification Configuration](#72-notification-configuration) section.
 
 ## 2.1 Slack
 This notification method utilizes the Slack webhooks to deliver status updates as messages.
@@ -1110,7 +1110,7 @@ notify:
 ```
 
 ## 2.12 Shell
-Run a shell command to notify the result. (see [example](resources/scripts/notify/notify.sh))
+Run a shell command to notify the result. (see [example](../resources/scripts/notify/notify.sh))
 
 The plugin supports the following parameters:
  - `name`: A unique name for this notification endpoint
@@ -1185,7 +1185,7 @@ You can use the following URL query options for both HTML and JSON:
   - `gte`: filter the probers with SLA greater than or equal to the given percentage (ex. `?gte=50` filter only hosts with SLA percentage `>= 50%`)
   - `lte`:filter the probers with SLA less than or equal to the given percentage (ex. `?lte=90` filter only hosts with SLA percentage `<= 90%` )
 
-  Refer to the [Global Setting Configuration](#710-global-setting-configuration) to see how to configure the access log.
+  Refer to the [Global Setting Configuration](#73-global-setting-configuration) to see how to configure the access log.
 
 
 ## 3.3 SLA Data Persistence
@@ -1204,7 +1204,7 @@ sla:
     data: /path/to/data/file.yaml
 ```
 
-For more information, please check the [Global Setting Configuration](#710-global-setting-configuration)
+For more information, please check the [Global Setting Configuration](#73-global-setting-configuration)
 
 
 # 4. Channel
@@ -1319,7 +1319,7 @@ The following snapshot is the Grafana panel for host CPU metrics
 
 ![](./grafana.demo.png)
 
-Refer to the [Global Setting Configuration](#710-global-setting-configuration) for further details on how to configure the HTTP server.
+Refer to the [Global Setting Configuration](#73-global-setting-configuration) for further details on how to configure the HTTP server.
 
 ## 6.1 General Metrics
 
@@ -1377,7 +1377,7 @@ The Shell & SSH probe supports the following metrics:
   - `output_len`: length of the output
 
 
-## 6.6  Host Probe
+## 6.6 Host Probe
 
 The Host probe supports the following metrics:
 
