@@ -23,10 +23,10 @@ require (
 	github.com/stretchr/testify v1.8.2
 	github.com/uptrace/bun/driver/pgdriver v1.1.11
 	go.mongodb.org/mongo-driver v1.11.3
-	golang.org/x/crypto v0.8.0
+	golang.org/x/crypto v0.9.0
 	golang.org/x/exp v0.0.0-20221031165847-c99f073a8326
-	golang.org/x/net v0.9.0
-	golang.org/x/sys v0.7.0
+	golang.org/x/net v0.10.0
+	golang.org/x/sys v0.8.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473
