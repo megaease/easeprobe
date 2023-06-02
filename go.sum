@@ -96,8 +96,8 @@ github.com/mattn/go-isatty v0.0.17 h1:BTarxUcIeDqL27Mc+vyvdWYSL28zpIhv3RoTdsLMPn
 github.com/mattn/go-isatty v0.0.17/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=
 github.com/matttproud/golang_protobuf_extensions v1.0.4 h1:mmDVorXM7PCGKw94cs5zkfA9PSy5pEvNWRP0ET0TIVo=
 github.com/matttproud/golang_protobuf_extensions v1.0.4/go.mod h1:BSXmuO+STAnVfrANrmjBb36TMTDstsz7MSK+HVaYKv4=
-github.com/mikefarah/yq/v4 v4.33.3 h1:cu6JxWAL82bpLCJTLYP3ILZ/3gXF1YfvYBCMRdnY/xA=
-github.com/mikefarah/yq/v4 v4.33.3/go.mod h1:ajAKq75gdANZHzkWu5shY2QZHpg8HOHVSyscC1+OAIs=
+github.com/mikefarah/yq/v4 v4.34.1 h1:7W+SZXvu1yOxpVXS7Hi5a34nU/gdYPjWMNQqoSlfbxo=
+github.com/mikefarah/yq/v4 v4.34.1/go.mod h1:B2JxXiGKqEaU+GTcNwOZ/RQFelq9e6TFIDLRVVFHAu4=
 github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe h1:iruDEfMl2E6fbMZ9s0scYfZQ84/6SPL6zC8ACM2oIL0=
 github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe/go.mod h1:wL8QJuTMNUDYhXwkmfOly8iTdp5TEcJFWZD2D7SIkUc=
 github.com/nxadm/tail v1.4.8 h1:nPr65rt6Y5JFSKQO7qToXr7pePgD6Gwiw05lkbyAQTE=
