@@ -18,7 +18,7 @@ require (
 	github.com/go-zookeeper/zk v1.0.3
 	github.com/prometheus-community/pro-bing v0.1.0
 	github.com/prometheus/client_golang v1.15.1
-	github.com/segmentio/kafka-go v0.4.38
+	github.com/segmentio/kafka-go v0.4.40
 	github.com/sirupsen/logrus v1.9.2
 	github.com/stretchr/testify v1.8.4
 	github.com/uptrace/bun/driver/pgdriver v1.1.11
@@ -81,8 +81,8 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
-	github.com/xdg-go/scram v1.1.1 // indirect
-	github.com/xdg-go/stringprep v1.0.3 // indirect
+	github.com/xdg-go/scram v1.1.2 // indirect
+	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
