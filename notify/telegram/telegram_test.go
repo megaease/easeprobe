@@ -21,10 +21,12 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/global"
@@ -32,12 +34,25 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+func generateRandomString(length int) string {
+	rand.Seed(time.Now().UnixNano())
+
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[rand.Intn(len(charset))]
+	}
+
+	return string(b)
+}
+
 func assertError(t *testing.T, err error, msg string) {
 	assert.Error(t, err)
 	assert.Equal(t, msg, err.Error())
 }
 
-func TestSlack(t *testing.T) {
+func TestTelegram(t *testing.T) {
 	conf := &NotifyConfig{}
 	conf.NotifyName = "dummy"
 	err := conf.Config(global.NotifySettings{})
@@ -85,4 +100,17 @@ func TestSlack(t *testing.T) {
 	assertError(t, err, "new request error")
 
 	monkey.UnpatchAll()
+}
+
+func TestSplitMessage(t *testing.T) {
+	msg := generateRandomString(100)
+	msgs := splitMessage(msg)
+	assert.Equal(t, 1, len(msgs))
+	assert.Equal(t, msg, msgs[0])
+
+	msg = generateRandomString(4097)
+	msgs = splitMessage(msg)
+	assert.Equal(t, 2, len(msgs))
+	assert.Equal(t, msg[:4096], msgs[0])
+	assert.Equal(t, msg[4096:], msgs[1])
 }
