@@ -7,7 +7,7 @@ require (
 	github.com/Knetic/govaluate v3.0.0+incompatible
 	github.com/antchfx/htmlquery v1.3.0
 	github.com/antchfx/jsonquery v1.3.2
-	github.com/antchfx/xmlquery v1.3.15
+	github.com/antchfx/xmlquery v1.3.17
 	github.com/aws/aws-sdk-go v1.44.294
 	github.com/bradfitz/gomemcache v0.0.0-20220106215444-fb4bf637b56d
 	github.com/go-chi/chi v4.1.2+incompatible
@@ -53,7 +53,7 @@ require (
 )
 
 require (
-	github.com/antchfx/xpath v1.2.3 // indirect
+	github.com/antchfx/xpath v1.2.4 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
