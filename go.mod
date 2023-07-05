@@ -16,7 +16,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/go-zookeeper/zk v1.0.3
-	github.com/prometheus-community/pro-bing v0.1.0
+	github.com/prometheus-community/pro-bing v0.2.0
 	github.com/prometheus/client_golang v1.16.0
 	github.com/segmentio/kafka-go v0.4.40
 	github.com/sirupsen/logrus v1.9.2
