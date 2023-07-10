@@ -23,6 +23,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -356,8 +357,15 @@ func SLAStatusText(s probe.Stat, t Format) string {
 	case Log:
 		format = "%s:%d "
 	}
-	for k, v := range s.Status {
-		status += fmt.Sprintf(format, k.String(), v)
+
+	// sort status
+	var statusKeys []int
+	for statusKey, _ := range s.Status {
+		statusKeys = append(statusKeys, int(statusKey))
+	}
+	sort.Ints(statusKeys)
+	for _, k := range statusKeys {
+		status += fmt.Sprintf(format, probe.Status(k).String(), s.Status[probe.Status(k)])
 	}
 	return strings.TrimSpace(status)
 }
