@@ -137,8 +137,12 @@ func (t *TLS) DoProbe() (bool, string) {
 
 	state := tconn.ConnectionState()
 
-	t.metrics.EarliestCertExpiry.With(prometheus.Labels{}).Set(float64(getEarliestCertExpiry(&state).Unix()))
-	t.metrics.LastChainExpiryTimestampSeconds.With(prometheus.Labels{}).Set(float64(getLastChainExpiry(&state).Unix()))
+	t.metrics.EarliestCertExpiry.With(prometheus.Labels{
+		"endpoint": t.ProbeResult.Endpoint,
+	}).Set(float64(getEarliestCertExpiry(&state).Unix()))
+	t.metrics.LastChainExpiryTimestampSeconds.With(prometheus.Labels{
+		"endpoint": t.ProbeResult.Endpoint,
+	}).Set(float64(getLastChainExpiry(&state).Unix()))
 
 	return true, "TLS Endpoint Verified Successfully!"
 }

@@ -279,47 +279,56 @@ func (h *HTTP) ExportMetrics(resp *http.Response) {
 		len = int(resp.ContentLength)
 	}
 	h.metrics.StatusCode.With(prometheus.Labels{
-		"name":   h.ProbeName,
-		"status": fmt.Sprintf("%d", code),
+		"name":     h.ProbeName,
+		"status":   fmt.Sprintf("%d", code),
+		"endpoint": h.ProbeResult.Endpoint,
 	}).Inc()
 
 	h.metrics.ContentLen.With(prometheus.Labels{
-		"name":   h.ProbeName,
-		"status": fmt.Sprintf("%d", code),
+		"name":     h.ProbeName,
+		"status":   fmt.Sprintf("%d", code),
+		"endpoint": h.ProbeResult.Endpoint,
 	}).Set(float64(len))
 
 	h.metrics.DNSDuration.With(prometheus.Labels{
-		"name":   h.ProbeName,
-		"status": fmt.Sprintf("%d", code),
+		"name":     h.ProbeName,
+		"status":   fmt.Sprintf("%d", code),
+		"endpoint": h.ProbeResult.Endpoint,
 	}).Set(toMS(h.traceStats.dnsTook))
 
 	h.metrics.ConnectDuration.With(prometheus.Labels{
-		"name":   h.ProbeName,
-		"status": fmt.Sprintf("%d", code),
+		"name":     h.ProbeName,
+		"status":   fmt.Sprintf("%d", code),
+		"endpoint": h.ProbeResult.Endpoint,
 	}).Set(toMS(h.traceStats.connTook))
 
 	h.metrics.TLSDuration.With(prometheus.Labels{
-		"name":   h.ProbeName,
-		"status": fmt.Sprintf("%d", code),
+		"name":     h.ProbeName,
+		"status":   fmt.Sprintf("%d", code),
+		"endpoint": h.ProbeResult.Endpoint,
 	}).Set(toMS(h.traceStats.tlsTook))
 
 	h.metrics.SendDuration.With(prometheus.Labels{
-		"name":   h.ProbeName,
-		"status": fmt.Sprintf("%d", code),
+		"name":     h.ProbeName,
+		"status":   fmt.Sprintf("%d", code),
+		"endpoint": h.ProbeResult.Endpoint,
 	}).Set(toMS(h.traceStats.sendTook))
 
 	h.metrics.WaitDuration.With(prometheus.Labels{
-		"name":   h.ProbeName,
-		"status": fmt.Sprintf("%d", code),
+		"name":     h.ProbeName,
+		"status":   fmt.Sprintf("%d", code),
+		"endpoint": h.ProbeResult.Endpoint,
 	}).Set(toMS(h.traceStats.waitTook))
 
 	h.metrics.TransferDuration.With(prometheus.Labels{
-		"name":   h.ProbeName,
-		"status": fmt.Sprintf("%d", code),
+		"name":     h.ProbeName,
+		"status":   fmt.Sprintf("%d", code),
+		"endpoint": h.ProbeResult.Endpoint,
 	}).Set(toMS(h.traceStats.transferTook))
 
 	h.metrics.TotalDuration.With(prometheus.Labels{
-		"name":   h.ProbeName,
-		"status": fmt.Sprintf("%d", code),
+		"name":     h.ProbeName,
+		"status":   fmt.Sprintf("%d", code),
+		"endpoint": h.ProbeResult.Endpoint,
 	}).Set(toMS(h.traceStats.totalTook))
 }

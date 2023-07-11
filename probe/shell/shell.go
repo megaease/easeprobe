@@ -116,12 +116,14 @@ func (s *Shell) DoProbe() (bool, string) {
 // ExportMetrics export shell metrics
 func (s *Shell) ExportMetrics() {
 	s.metrics.ExitCode.With(prometheus.Labels{
-		"name": s.ProbeName,
-		"exit": fmt.Sprintf("%d", s.exitCode),
+		"name":     s.ProbeName,
+		"exit":     fmt.Sprintf("%d", s.exitCode),
+		"endpoint": s.ProbeResult.Endpoint,
 	}).Inc()
 
 	s.metrics.OutputLen.With(prometheus.Labels{
-		"name": s.ProbeName,
-		"exit": fmt.Sprintf("%d", s.exitCode),
+		"name":     s.ProbeName,
+		"exit":     fmt.Sprintf("%d", s.exitCode),
+		"endpoint": s.ProbeResult.Endpoint,
 	}).Set(float64(s.outputLen))
 }

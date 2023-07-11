@@ -34,8 +34,8 @@ func newMetrics(subsystem, name string) *metrics {
 	namespace := global.GetEaseProbe().Name
 	return &metrics{
 		ExitCode: metric.NewCounter(namespace, subsystem, name, "exit_code",
-			"Exit Code", []string{"name", "exit"}),
+			"Exit Code", []string{"name", "exit", "endpoint"}),
 		OutputLen: metric.NewGauge(namespace, subsystem, name, "output_len",
-			"Output Length", []string{"name", "exit"}),
+			"Output Length", []string{"name", "exit", "endpoint"}),
 	}
 }
