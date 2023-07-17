@@ -230,19 +230,23 @@ func (d *DefaultProbe) ExportMetrics() {
 		time = d.ProbeResult.Stat.DownTime
 	}
 
+	// Add endpoint label according to ProbeKind(tcp/http/ping/host/...)
 	d.metrics.TotalCnt.With(prometheus.Labels{
-		"name":   d.ProbeName,
-		"status": d.ProbeResult.Status.String(),
+		"name":     d.ProbeName,
+		"status":   d.ProbeResult.Status.String(),
+		"endpoint": d.ProbeResult.Endpoint,
 	}).Set(float64(cnt))
 
 	d.metrics.TotalTime.With(prometheus.Labels{
-		"name":   d.ProbeName,
-		"status": d.ProbeResult.Status.String(),
+		"name":     d.ProbeName,
+		"status":   d.ProbeResult.Status.String(),
+		"endpoint": d.ProbeResult.Endpoint,
 	}).Set(float64(time.Seconds()))
 
 	d.metrics.Duration.With(prometheus.Labels{
-		"name":   d.ProbeName,
-		"status": d.ProbeResult.Status.String(),
+		"name":     d.ProbeName,
+		"status":   d.ProbeResult.Status.String(),
+		"endpoint": d.ProbeResult.Endpoint,
 	}).Set(float64(d.ProbeResult.RoundTripTime.Milliseconds()))
 
 	status := ServiceUp // up
@@ -250,11 +254,13 @@ func (d *DefaultProbe) ExportMetrics() {
 		status = ServiceDown // down
 	}
 	d.metrics.Status.With(prometheus.Labels{
-		"name": d.ProbeName,
+		"name":     d.ProbeName,
+		"endpoint": d.ProbeResult.Endpoint,
 	}).Set(float64(status))
 
 	d.metrics.SLA.With(prometheus.Labels{
-		"name": d.ProbeName,
+		"name":     d.ProbeName,
+		"endpoint": d.ProbeResult.Endpoint,
 	}).Set(float64(d.ProbeResult.SLAPercent()))
 }
 

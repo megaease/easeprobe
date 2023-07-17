@@ -38,18 +38,18 @@ func newMetrics(subsystem, name string) *metrics {
 	namespace := global.GetEaseProbe().Name
 	return &metrics{
 		PacketsSent: metric.NewCounter(namespace, subsystem, name, "sent",
-			"Total Package Sent", []string{"name"}),
+			"Total Package Sent", []string{"name", "endpoint"}),
 		PacketsRecv: metric.NewCounter(namespace, subsystem, name, "recv",
-			"Total Package Received", []string{"name"}),
+			"Total Package Received", []string{"name", "endpoint"}),
 		PacketLoss: metric.NewGauge(namespace, subsystem, name, "loss",
-			"Package Loss Percentage", []string{"name"}),
+			"Package Loss Percentage", []string{"name", "endpoint"}),
 		MinRtt: metric.NewGauge(namespace, subsystem, name, "min_rtt",
-			"Minimum Round Trip Time", []string{"name"}),
+			"Minimum Round Trip Time", []string{"name", "endpoint"}),
 		MaxRtt: metric.NewGauge(namespace, subsystem, name, "max_rtt",
-			"Maximum Round Trip Time", []string{"name"}),
+			"Maximum Round Trip Time", []string{"name", "endpoint"}),
 		AvgRtt: metric.NewGauge(namespace, subsystem, name, "avg_rtt",
-			"Average Round Trip Time", []string{"name"}),
+			"Average Round Trip Time", []string{"name", "endpoint"}),
 		StdDevRtt: metric.NewGauge(namespace, subsystem, name, "stddev_rtt",
-			"Standard Deviation of Round Trip Time", []string{"name"}),
+			"Standard Deviation of Round Trip Time", []string{"name", "endpoint"}),
 	}
 }

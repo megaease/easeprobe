@@ -127,30 +127,37 @@ func (p *Ping) DoProbe() (bool, string) {
 // ExportMetrics export Ping metrics
 func (p *Ping) ExportMetrics(stats *ping.Statistics) {
 	p.metrics.PacketsSent.With(prometheus.Labels{
-		"name": p.ProbeName,
+		"name":     p.ProbeName,
+		"endpoint": p.ProbeResult.Endpoint,
 	}).Add(float64(stats.PacketsSent))
 
 	p.metrics.PacketsRecv.With(prometheus.Labels{
-		"name": p.ProbeName,
+		"name":     p.ProbeName,
+		"endpoint": p.ProbeResult.Endpoint,
 	}).Add(float64(stats.PacketsRecv))
 
 	p.metrics.PacketLoss.With(prometheus.Labels{
-		"name": p.ProbeName,
+		"name":     p.ProbeName,
+		"endpoint": p.ProbeResult.Endpoint,
 	}).Set(stats.PacketLoss)
 
 	p.metrics.MaxRtt.With(prometheus.Labels{
-		"name": p.ProbeName,
+		"name":     p.ProbeName,
+		"endpoint": p.ProbeResult.Endpoint,
 	}).Set(float64(stats.MaxRtt.Milliseconds()))
 
 	p.metrics.MinRtt.With(prometheus.Labels{
-		"name": p.ProbeName,
+		"name":     p.ProbeName,
+		"endpoint": p.ProbeResult.Endpoint,
 	}).Set(float64(stats.MinRtt.Milliseconds()))
 
 	p.metrics.AvgRtt.With(prometheus.Labels{
-		"name": p.ProbeName,
+		"name":     p.ProbeName,
+		"endpoint": p.ProbeResult.Endpoint,
 	}).Set(float64(stats.AvgRtt.Milliseconds()))
 
 	p.metrics.StdDevRtt.With(prometheus.Labels{
-		"name": p.ProbeName,
+		"name":     p.ProbeName,
+		"endpoint": p.ProbeResult.Endpoint,
 	}).Set(float64(stats.StdDevRtt.Milliseconds()))
 }

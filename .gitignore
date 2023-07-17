@@ -4,3 +4,4 @@ build/*
 data/*.yaml
 !.github/workflows/*.yaml
 helm/easeprobe/charts/
+vendor/
