@@ -218,13 +218,13 @@ func TestStatusThreshold2(t *testing.T) {
 	p.ProbeResult.Status = probe.StatusUp
 
 	p.ProbeFunc = func() (bool, string) {
-		return true, fmt.Sprintf("success")
+		return true, "success"
 	}
 	p.Probe()
 	assert.Equal(t, probe.StatusUp, p.Result().Status)
 
 	p.ProbeFunc = func() (bool, string) {
-		return false, fmt.Sprintf("failure")
+		return false, "failure"
 	}
 	p.Probe()
 	assert.Equal(t, probe.StatusUp, p.Result().Status)
@@ -234,7 +234,7 @@ func TestStatusThreshold2(t *testing.T) {
 	assert.Equal(t, probe.StatusDown, p.Result().Status)
 
 	p.ProbeFunc = func() (bool, string) {
-		return true, fmt.Sprintf("success")
+		return true, "success"
 	}
 	p.Probe()
 	assert.Equal(t, probe.StatusUp, p.Result().Status)
