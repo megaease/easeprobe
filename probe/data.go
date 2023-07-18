@@ -20,7 +20,6 @@ package probe
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -142,7 +141,7 @@ func LoadDataFromFile(filename string) error {
 		return err
 	}
 
-	buf, err := ioutil.ReadFile(filename)
+	buf, err := os.ReadFile(filename)
 	if err != nil {
 		return err
 	}

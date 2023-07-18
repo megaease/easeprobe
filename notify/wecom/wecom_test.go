@@ -20,7 +20,6 @@ package wecom
 import (
 	"errors"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"reflect"
 	"strings"
@@ -47,7 +46,7 @@ func TestSlack(t *testing.T) {
 
 	var client http.Client
 	monkey.PatchInstanceMethod(reflect.TypeOf(&client), "Do", func(_ *http.Client, req *http.Request) (*http.Response, error) {
-		r := ioutil.NopCloser(strings.NewReader(`ok`))
+		r := io.NopCloser(strings.NewReader(`ok`))
 		return &http.Response{
 			StatusCode: 200,
 			Body:       r,
@@ -57,7 +56,7 @@ func TestSlack(t *testing.T) {
 	assert.NoError(t, err)
 
 	monkey.PatchInstanceMethod(reflect.TypeOf(&client), "Do", func(_ *http.Client, req *http.Request) (*http.Response, error) {
-		r := ioutil.NopCloser(strings.NewReader(`not found`))
+		r := io.NopCloser(strings.NewReader(`not found`))
 		return &http.Response{
 			StatusCode: 404,
 			Body:       r,
@@ -66,7 +65,7 @@ func TestSlack(t *testing.T) {
 	err = conf.SendWecom("title", "message")
 	assertError(t, err, "Error response from Wecom - code [404] - msg [not found]")
 
-	monkey.Patch(ioutil.ReadAll, func(_ io.Reader) ([]byte, error) {
+	monkey.Patch(io.ReadAll, func(_ io.Reader) ([]byte, error) {
 		return nil, errors.New("read error")
 	})
 	err = conf.SendWecom("title", "message")

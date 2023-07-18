@@ -27,9 +27,9 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"math/big"
 	"net"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -364,7 +364,7 @@ func TestTLSFail(t *testing.T) {
 	err = tlsConf.Config(global.ProbeSettings{})
 	assert.NotNil(t, err)
 
-	monkey.Patch(ioutil.ReadFile, func(filename string) ([]byte, error) {
+	monkey.Patch(os.ReadFile, func(filename string) ([]byte, error) {
 		return []byte("CA file Contents"), nil
 	})
 

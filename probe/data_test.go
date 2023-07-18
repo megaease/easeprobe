@@ -19,7 +19,6 @@ package probe
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -218,7 +217,7 @@ func TestLoadDataFile(t *testing.T) {
 
 	// errors - read error
 	newDataFile(file)
-	monkey.Patch(ioutil.ReadFile, func(filename string) ([]byte, error) {
+	monkey.Patch(os.ReadFile, func(filename string) ([]byte, error) {
 		return nil, fmt.Errorf("error")
 	})
 	err = LoadDataFromFile(file)

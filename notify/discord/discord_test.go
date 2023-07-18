@@ -23,7 +23,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"reflect"
@@ -174,7 +173,7 @@ func TestDiscordNotify(t *testing.T) {
 
 	var client *http.Client
 	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Do", func(_ *http.Client, req *http.Request) (*http.Response, error) {
-		r := ioutil.NopCloser(strings.NewReader(``))
+		r := io.NopCloser(strings.NewReader(``))
 		return &http.Response{
 			StatusCode: 204,
 			Body:       r,
@@ -191,7 +190,7 @@ func TestDiscordNotify(t *testing.T) {
 
 	// error response
 	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Do", func(_ *http.Client, req *http.Request) (*http.Response, error) {
-		r := ioutil.NopCloser(strings.NewReader(`no permission`))
+		r := io.NopCloser(strings.NewReader(`no permission`))
 		return &http.Response{
 			StatusCode: 403,
 			Body:       r,
@@ -202,8 +201,8 @@ func TestDiscordNotify(t *testing.T) {
 	conf.Notify(r)
 	assert.Contains(t, buf.String(), "no permission")
 
-	// ioutil.ReadAll Error
-	monkey.Patch(ioutil.ReadAll, func(r io.Reader) ([]byte, error) {
+	// io.ReadAll Error
+	monkey.Patch(io.ReadAll, func(r io.Reader) ([]byte, error) {
 		return nil, errors.New("read error")
 	})
 	buf.Reset()

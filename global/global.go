@@ -22,7 +22,6 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -200,7 +199,7 @@ func (t *TLS) Config() (*tls.Config, error) {
 		return nil, nil
 	}
 
-	cert, err := ioutil.ReadFile(t.CA)
+	cert, err := os.ReadFile(t.CA)
 	if err != nil {
 		return nil, err
 	}

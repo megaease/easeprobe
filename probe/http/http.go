@@ -22,7 +22,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"net/http/httptrace"
@@ -217,7 +217,7 @@ func (h *HTTP) DoProbe() (bool, string) {
 	}
 	// Read the response body
 	defer resp.Body.Close()
-	response, err := ioutil.ReadAll(resp.Body)
+	response, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Debugf("%s", string(response))
 		return false, fmt.Sprintf("Error: %v", err)

@@ -23,7 +23,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"net"
 	"strings"
 	"time"
@@ -63,7 +63,7 @@ func (t *TLS) Config(gConf global.ProbeSettings) error {
 
 	if len(rootCaPem) == 0 && t.RootCAPemPath != "" {
 		var err error
-		rootCaPem, err = ioutil.ReadFile(t.RootCAPemPath)
+		rootCaPem, err = os.ReadFile(t.RootCAPemPath)
 		if err != nil {
 			return err
 		}

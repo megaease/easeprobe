@@ -23,7 +23,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -172,10 +171,10 @@ func TestHTTPDoProbe(t *testing.T) {
 	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Do", func(_ *http.Client, req *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: 200,
-			Body:       io.NopCloser(ioutil.NopCloser(nil)),
+			Body:       io.NopCloser(io.NopCloser(nil)),
 		}, nil
 	})
-	monkey.Patch(ioutil.ReadAll, func(r io.Reader) ([]byte, error) {
+	monkey.Patch(io.ReadAll, func(r io.Reader) ([]byte, error) {
 		return []byte(`{ "name": "EaseProbe", "status": "good"}`), nil
 	})
 
@@ -195,7 +194,7 @@ func TestHTTPDoProbe(t *testing.T) {
 	assert.Contains(t, m, "Evaluation Error")
 
 	// response does not contain good string
-	monkey.Patch(ioutil.ReadAll, func(r io.Reader) ([]byte, error) {
+	monkey.Patch(io.ReadAll, func(r io.Reader) ([]byte, error) {
 		return []byte("bad"), nil
 	})
 	s, m = h.DoProbe()
@@ -233,7 +232,7 @@ func TestHTTPDoProbe(t *testing.T) {
 		assert.Equal(t, "host.com", req.Host)
 		return &http.Response{
 			StatusCode: 503,
-			Body:       io.NopCloser(ioutil.NopCloser(nil)),
+			Body:       io.NopCloser(io.NopCloser(nil)),
 		}, nil
 	})
 	s, m = h.DoProbe()
@@ -241,7 +240,7 @@ func TestHTTPDoProbe(t *testing.T) {
 	assert.Contains(t, m, "503")
 
 	// io read failure
-	monkey.Patch(ioutil.ReadAll, func(r io.Reader) ([]byte, error) {
+	monkey.Patch(io.ReadAll, func(r io.Reader) ([]byte, error) {
 		return nil, fmt.Errorf("read error")
 	})
 	s, m = h.DoProbe()

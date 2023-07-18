@@ -18,7 +18,7 @@
 package ssh
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 	"time"
 
@@ -70,7 +70,7 @@ func TestSSHConfig(t *testing.T) {
 	assert.Nil(t, config)
 	assert.NotNil(t, err)
 
-	monkey.Patch(ioutil.ReadFile, func(filename string) ([]byte, error) {
+	monkey.Patch(os.ReadFile, func(filename string) ([]byte, error) {
 		return []byte(`
 -----BEGIN OPENSSH PRIVATE KEY-----
 b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAaAAAABNlY2RzYS
@@ -87,7 +87,7 @@ YWwBAg==
 	assert.NotNil(t, config)
 
 	e.Passphrase = "123"
-	monkey.Patch(ioutil.ReadFile, func(filename string) ([]byte, error) {
+	monkey.Patch(os.ReadFile, func(filename string) ([]byte, error) {
 		return []byte(`
 -----BEGIN OPENSSH PRIVATE KEY-----
 b3BlbnNzaC1rZXktdjEAAAAACmFlczI1Ni1jdHIAAAAGYmNyeXB0AAAAGAAAABBdkMia9n
@@ -112,7 +112,7 @@ DX4y9QvXoaUiQ5vB63voiqRTBT4hTYBDVi2G7NEjIczNs9S8JQM5Mg52mZsdH77g6ChUPp
 	assert.Nil(t, err)
 	assert.NotNil(t, config)
 
-	monkey.Patch(ioutil.ReadFile, func(filename string) ([]byte, error) {
+	monkey.Patch(os.ReadFile, func(filename string) ([]byte, error) {
 		return []byte(``), nil
 	})
 	config, err = e.SSHConfig("ssh", "test", 30*time.Second)
