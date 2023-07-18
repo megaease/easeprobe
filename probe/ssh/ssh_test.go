@@ -19,8 +19,8 @@ package ssh
 
 import (
 	"errors"
-	"os"
 	"net"
+	"os"
 	"reflect"
 	"strings"
 	"testing"

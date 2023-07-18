@@ -18,8 +18,8 @@
 package ssh
 
 import (
-	"os"
 	"net"
+	"os"
 
 	"strings"
 	"time"
