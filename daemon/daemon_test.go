@@ -19,7 +19,6 @@ package daemon
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -80,7 +79,7 @@ func TestPIDFileSymLink(t *testing.T) {
 		t.Fatalf("Could not found the pid file, %v", err)
 	}
 
-	buf, err := ioutil.ReadFile(filepath.Join(path, "test.txt"))
+	buf, err := os.ReadFile(filepath.Join(path, "test.txt"))
 	if err != nil {
 		t.Fatalf("Could not read the pid file, %v", err)
 	}

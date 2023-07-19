@@ -20,7 +20,6 @@ package yunpian
 import (
 	"errors"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"reflect"
 	"strings"
@@ -39,7 +38,7 @@ func assertError(t *testing.T, err error, msg string) {
 func testNotify(t *testing.T, provider conf.Provider) {
 	var client *http.Client
 	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Do", func(_ *http.Client, req *http.Request) (*http.Response, error) {
-		r := ioutil.NopCloser(strings.NewReader(`ok`))
+		r := io.NopCloser(strings.NewReader(`ok`))
 		return &http.Response{
 			StatusCode: 200,
 			Body:       r,
@@ -50,7 +49,7 @@ func testNotify(t *testing.T, provider conf.Provider) {
 	assert.NoError(t, err)
 
 	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Do", func(_ *http.Client, req *http.Request) (*http.Response, error) {
-		r := ioutil.NopCloser(strings.NewReader(`Internal Server Error`))
+		r := io.NopCloser(strings.NewReader(`Internal Server Error`))
 		return &http.Response{
 			StatusCode: 500,
 			Body:       r,
@@ -59,7 +58,7 @@ func testNotify(t *testing.T, provider conf.Provider) {
 	err = provider.Notify("title", "text")
 	assertError(t, err, "Error response from SMS [500] - [Internal Server Error]")
 
-	monkey.Patch(ioutil.ReadAll, func(_ io.Reader) ([]byte, error) {
+	monkey.Patch(io.ReadAll, func(_ io.Reader) ([]byte, error) {
 		return nil, errors.New("read error")
 	})
 	err = provider.Notify("title", "text")

@@ -19,8 +19,8 @@ package ssh
 
 import (
 	"errors"
-	"io/ioutil"
 	"net"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -202,7 +202,7 @@ func TestSSH(t *testing.T) {
 		return nil
 	})
 
-	monkey.Patch(ioutil.ReadFile, func(filename string) ([]byte, error) {
+	monkey.Patch(os.ReadFile, func(filename string) ([]byte, error) {
 		return []byte(`
 -----BEGIN OPENSSH PRIVATE KEY-----
 b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAaAAAABNlY2RzYS

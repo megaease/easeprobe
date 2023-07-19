@@ -20,7 +20,6 @@ package telegram
 import (
 	"errors"
 	"io"
-	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"reflect"
@@ -62,7 +61,7 @@ func TestTelegram(t *testing.T) {
 
 	var client http.Client
 	monkey.PatchInstanceMethod(reflect.TypeOf(&client), "Do", func(_ *http.Client, req *http.Request) (*http.Response, error) {
-		r := ioutil.NopCloser(strings.NewReader(`ok`))
+		r := io.NopCloser(strings.NewReader(`ok`))
 		return &http.Response{
 			StatusCode: 200,
 			Body:       r,
@@ -72,7 +71,7 @@ func TestTelegram(t *testing.T) {
 	assert.NoError(t, err)
 
 	monkey.PatchInstanceMethod(reflect.TypeOf(&client), "Do", func(_ *http.Client, req *http.Request) (*http.Response, error) {
-		r := ioutil.NopCloser(strings.NewReader(`not found`))
+		r := io.NopCloser(strings.NewReader(`not found`))
 		return &http.Response{
 			StatusCode: 404,
 			Body:       r,
@@ -81,7 +80,7 @@ func TestTelegram(t *testing.T) {
 	err = conf.SendTelegram("title", "message")
 	assertError(t, err, "Error response from Telegram - code [404] - msg [not found]")
 
-	monkey.Patch(ioutil.ReadAll, func(_ io.Reader) ([]byte, error) {
+	monkey.Patch(io.ReadAll, func(_ io.Reader) ([]byte, error) {
 		return nil, errors.New("read error")
 	})
 	err = conf.SendTelegram("title", "message")

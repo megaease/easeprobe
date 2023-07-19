@@ -20,7 +20,6 @@ package dingtalk
 import (
 	"errors"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"reflect"
 	"strings"
@@ -52,7 +51,7 @@ func TestDingTalk(t *testing.T) {
 
 	var client *http.Client
 	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Do", func(_ *http.Client, req *http.Request) (*http.Response, error) {
-		r := ioutil.NopCloser(strings.NewReader(`{"errmsg": "ok", "errcode": 0}`))
+		r := io.NopCloser(strings.NewReader(`{"errmsg": "ok", "errcode": 0}`))
 		return &http.Response{
 			StatusCode: 200,
 			Body:       r,
@@ -63,7 +62,7 @@ func TestDingTalk(t *testing.T) {
 
 	// bad response
 	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Do", func(_ *http.Client, req *http.Request) (*http.Response, error) {
-		r := ioutil.NopCloser(strings.NewReader(`{"errmsg": "error", "errcode": 1}`))
+		r := io.NopCloser(strings.NewReader(`{"errmsg": "error", "errcode": 1}`))
 		return &http.Response{
 			StatusCode: 200,
 			Body:       r,
@@ -74,7 +73,7 @@ func TestDingTalk(t *testing.T) {
 
 	// bad json
 	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Do", func(_ *http.Client, req *http.Request) (*http.Response, error) {
-		r := ioutil.NopCloser(strings.NewReader(`{"errmsg": "error", "errcode = 1}`))
+		r := io.NopCloser(strings.NewReader(`{"errmsg": "error", "errcode = 1}`))
 		return &http.Response{
 			StatusCode: 200,
 			Body:       r,
@@ -83,8 +82,8 @@ func TestDingTalk(t *testing.T) {
 	err = conf.SendDingtalkNotification("title", "message")
 	assertError(t, err, "Error response from Dingtalk [200]", true)
 
-	// bad ioutil.ReadAll
-	monkey.Patch(ioutil.ReadAll, func(r io.Reader) ([]byte, error) {
+	// bad io.ReadAll
+	monkey.Patch(io.ReadAll, func(r io.Reader) ([]byte, error) {
 		return nil, errors.New("read error")
 	})
 	err = conf.SendDingtalkNotification("title", "message")

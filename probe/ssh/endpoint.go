@@ -18,8 +18,8 @@
 package ssh
 
 import (
-	"io/ioutil"
 	"net"
+	"os"
 
 	"strings"
 	"time"
@@ -74,7 +74,7 @@ func (e *Endpoint) SSHConfig(kind, name string, timeout time.Duration) (*ssh.Cli
 	}
 
 	if len(e.PrivateKey) > 0 {
-		key, err := ioutil.ReadFile(e.PrivateKey)
+		key, err := os.ReadFile(e.PrivateKey)
 		if err != nil {
 			return nil, err
 		}

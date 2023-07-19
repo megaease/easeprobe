@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	httpClient "net/http"
 	"os"
@@ -103,7 +102,7 @@ func TestGetYamlFileFromFile(t *testing.T) {
 		t.Errorf("getYamlFileFromFile(\"/tmp/nonexistent\") = nil, expected error")
 	}
 
-	tmpfile, err := ioutil.TempFile("", "invalid*.yaml")
+	tmpfile, err := os.CreateTemp("", "invalid*.yaml")
 	if err != nil {
 		t.Errorf("TempFile(\"invalid*.yaml\") %v", err)
 	}

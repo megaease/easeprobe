@@ -25,7 +25,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -85,7 +85,7 @@ func (c *NotifyConfig) SendDingtalkNotification(title, msg string) error {
 		defer resp.Body.Close()
 	}
 
-	buf, err := ioutil.ReadAll(resp.Body)
+	buf, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}

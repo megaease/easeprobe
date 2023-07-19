@@ -21,7 +21,7 @@ package conf
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	httpClient "net/http"
 	netUrl "net/url"
 	"os"
@@ -221,7 +221,7 @@ func getYamlFileFromHTTP(url string) ([]byte, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	return ioutil.ReadAll(resp.Body)
+	return io.ReadAll(resp.Body)
 }
 
 func getYamlFileFromFile(path string) ([]byte, error) {
@@ -232,7 +232,7 @@ func getYamlFileFromFile(path string) ([]byte, error) {
 	if f.IsDir() {
 		return mergeYamlFiles(path)
 	}
-	return ioutil.ReadFile(path)
+	return os.ReadFile(path)
 }
 
 func getYamlFile(path string) ([]byte, error) {
