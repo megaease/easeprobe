@@ -19,6 +19,7 @@ package host
 
 import (
 	"fmt"
+	"github.com/megaease/easeprobe/probe/base"
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/metric"
@@ -27,9 +28,10 @@ import (
 
 // Basic is the basic information of the host
 type Basic struct {
-	HostName string `yaml:"hostname"`
-	OS       string `yaml:"os"`
-	Core     int64  `yaml:"core"`
+	base.DefaultProbe `yaml:",inline"`
+	HostName          string `yaml:"hostname"`
+	OS                string `yaml:"os"`
+	Core              int64  `yaml:"core"`
 
 	metrics *prometheus.GaugeVec `yaml:"-"`
 }
@@ -86,7 +88,7 @@ func (b *Basic) CheckThreshold() (bool, string) {
 func (b *Basic) CreateMetrics(subsystem, name string) {
 	namespace := global.GetEaseProbe().Name
 	b.metrics = metric.NewGauge(namespace, subsystem, name, "basic",
-		"Basic Host Information", []string{"host", "state"})
+		"Basic Host Information", []string{"host", "state"}, b.Labels)
 }
 
 // ExportMetrics export the cpu metrics

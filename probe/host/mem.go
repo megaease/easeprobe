@@ -19,6 +19,7 @@ package host
 
 import (
 	"fmt"
+	"github.com/megaease/easeprobe/probe/base"
 	"strings"
 
 	"github.com/megaease/easeprobe/global"
@@ -29,7 +30,8 @@ import (
 
 // Mem is the resource usage for memory and disk
 type Mem struct {
-	ResourceUsage `yaml:",inline"`
+	base.DefaultProbe `yaml:",inline"`
+	ResourceUsage     `yaml:",inline"`
 
 	Threshold float64 `yaml:"threshold"`
 	metrics   *prometheus.GaugeVec
@@ -97,7 +99,7 @@ func (m *Mem) CheckThreshold() (bool, string) {
 func (m *Mem) CreateMetrics(subsystem, name string) {
 	namespace := global.GetEaseProbe().Name
 	m.metrics = metric.NewGauge(namespace, subsystem, name, "memory",
-		"Memory Usage", []string{"host", "state"})
+		"Memory Usage", []string{"host", "state"}, m.Labels)
 }
 
 // ExportMetrics export the memory metrics

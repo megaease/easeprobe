@@ -65,12 +65,12 @@ func TestGetName(t *testing.T) {
 
 func TestNewMetrics(t *testing.T) {
 	NewCounter("namespace", "subsystem", "counter", "metric",
-		"help", []string{"label1", "label2"})
+		"help", []string{"label1", "label2"}, make(map[string]string))
 	assert.NotNil(t, GetName("namespace_subsystem_counter_metric"))
 	assert.NotNil(t, Counter("namespace_subsystem_counter_metric"))
 
 	NewGauge("namespace", "subsystem", "gauge", "metric",
-		"help", []string{"label1", "label2"})
+		"help", []string{"label1", "label2"}, make(map[string]string))
 	assert.NotNil(t, GetName("namespace_subsystem_gauge_metric"))
 	assert.NotNil(t, Gauge("namespace_subsystem_gauge_metric"))
 }
@@ -110,15 +110,15 @@ func TestName(t *testing.T) {
 
 func TestDuplicateName(t *testing.T) {
 	counter1 := NewCounter("namespace", "subsystem", "counter", "metric",
-		"help", []string{})
+		"help", []string{}, make(map[string]string))
 	counter2 := NewCounter("namespace", "subsystem", "counter", "metric",
-		"help", []string{})
+		"help", []string{}, make(map[string]string))
 	assert.Equal(t, counter1, counter2)
 
 	gauge1 := NewGauge("namespace", "subsystem", "gauge", "metric",
-		"help", []string{})
+		"help", []string{}, make(map[string]string))
 	gauge2 := NewGauge("namespace", "subsystem", "gauge", "metric",
-		"help", []string{})
+		"help", []string{}, make(map[string]string))
 	assert.Equal(t, gauge1, gauge2)
 }
 
@@ -126,18 +126,18 @@ func TestInvalidName(t *testing.T) {
 
 	//label errors
 	counter := NewCounter("namespace", "subsystem", "counter", "metric",
-		"help", []string{"label-1", "label:2"})
+		"help", []string{"label-1", "label:2"}, make(map[string]string))
 	assert.Nil(t, counter)
 
 	gauge := NewGauge("namespace", "subsystem", "gauge", "metric",
-		"help", []string{"label-1", "label:2"})
+		"help", []string{"label-1", "label:2"}, make(map[string]string))
 	assert.Nil(t, gauge)
 
 	monkey.Patch(ValidMetricName, func(name string) bool {
 		return false
 	})
 	counter = NewCounter("namespace", "subsystem", "counter", "metric",
-		"help", []string{})
+		"help", []string{}, make(map[string]string))
 	assert.Nil(t, counter)
 
 	monkey.UnpatchAll()

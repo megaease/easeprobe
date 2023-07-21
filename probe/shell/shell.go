@@ -60,7 +60,7 @@ func (s *Shell) Config(gConf global.ProbeSettings) error {
 		return err
 	}
 
-	s.metrics = newMetrics(kind, tag)
+	s.metrics = newMetrics(kind, tag, s.Labels)
 
 	log.Debugf("[%s / %s] configuration: %+v", s.ProbeKind, s.ProbeName, *s)
 	return nil

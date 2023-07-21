@@ -57,7 +57,7 @@ func Gauge(key string) *prometheus.GaugeVec {
 
 // NewCounter create the counter metric
 func NewCounter(namespace, subsystem, name, metric string,
-	help string, labels []string) *prometheus.CounterVec {
+	help string, labels []string, constLabels map[string]string) *prometheus.CounterVec {
 
 	metricName, err := getAndValid(namespace, subsystem, name, metric, labels)
 	if err != nil {
@@ -72,8 +72,9 @@ func NewCounter(namespace, subsystem, name, metric string,
 
 	counterMap[metricName] = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: metricName,
-			Help: help,
+			Name:        metricName,
+			Help:        help,
+			ConstLabels: constLabels,
 		},
 		labels,
 	)
@@ -85,7 +86,7 @@ func NewCounter(namespace, subsystem, name, metric string,
 
 // NewGauge create the gauge metric
 func NewGauge(namespace, subsystem, name, metric string,
-	help string, labels []string) *prometheus.GaugeVec {
+	help string, labels []string, constLabels map[string]string) *prometheus.GaugeVec {
 
 	metricName, err := getAndValid(namespace, subsystem, name, metric, labels)
 	if err != nil {
@@ -99,8 +100,9 @@ func NewGauge(namespace, subsystem, name, metric string,
 
 	gaugeMap[metricName] = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Name: metricName,
-			Help: help,
+			Name:        metricName,
+			Help:        help,
+			ConstLabels: constLabels,
 		},
 		labels,
 	)

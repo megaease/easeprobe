@@ -68,7 +68,7 @@ func (p *Ping) Config(gConf global.ProbeSettings) error {
 		p.LostThreshold = DefaultLostThreshold
 	}
 
-	p.metrics = newMetrics(kind, tag)
+	p.metrics = newMetrics(kind, tag, p.Labels)
 
 	log.Debugf("[%s / %s] configuration: %+v", p.ProbeKind, p.ProbeName, *p)
 	return nil

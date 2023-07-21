@@ -45,12 +45,13 @@ type ProbeFuncType func() (bool, string)
 
 // DefaultProbe is the default options for all probe
 type DefaultProbe struct {
-	ProbeKind                            string        `yaml:"-" json:"-"`
-	ProbeTag                             string        `yaml:"-" json:"-"`
-	ProbeName                            string        `yaml:"name" json:"name" jsonschema:"required,title=Probe Name,description=the name of probe must be unique"`
-	ProbeChannels                        []string      `yaml:"channels" json:"channels,omitempty" jsonschema:"title=Probe Channels,description=the channels of probe message need to send to"`
-	ProbeTimeout                         time.Duration `yaml:"timeout,omitempty" json:"timeout,omitempty" jsonschema:"type=string,format=duration,title=Probe Timeout,description=the timeout of probe"`
-	ProbeTimeInterval                    time.Duration `yaml:"interval,omitempty" json:"interval,omitempty" jsonschema:"type=string,format=duration,title=Probe Interval,description=the interval of probe"`
+	ProbeKind                            string            `yaml:"-" json:"-"`
+	ProbeTag                             string            `yaml:"-" json:"-"`
+	ProbeName                            string            `yaml:"name" json:"name" jsonschema:"required,title=Probe Name,description=the name of probe must be unique"`
+	ProbeChannels                        []string          `yaml:"channels" json:"channels,omitempty" jsonschema:"title=Probe Channels,description=the channels of probe message need to send to"`
+	ProbeTimeout                         time.Duration     `yaml:"timeout,omitempty" json:"timeout,omitempty" jsonschema:"type=string,format=duration,title=Probe Timeout,description=the timeout of probe"`
+	ProbeTimeInterval                    time.Duration     `yaml:"interval,omitempty" json:"interval,omitempty" jsonschema:"type=string,format=duration,title=Probe Interval,description=the interval of probe"`
+	Labels                               map[string]string `yaml:"labels,omitempty" json:"labels,omitempty" jsonschema:"title=Probe Labels,description=the labels of probe"`
 	global.StatusChangeThresholdSettings `yaml:",inline" json:",inline"`
 	global.NotificationStrategySettings  `yaml:"alert" json:"alert" jsonschema:"title=Probe Alert,description=the alert strategy of probe"`
 	ProbeFunc                            ProbeFuncType `yaml:"-" json:"-"`
@@ -169,7 +170,7 @@ func (d *DefaultProbe) Config(gConf global.ProbeSettings,
 		log.Infof("Probe %s Status Threshold are configured! failure[%d], success[%d]", d.LogTitle(), d.Failure, d.Success)
 	}
 
-	d.metrics = newMetrics(kind, tag)
+	d.metrics = newMetrics(kind, tag, d.Labels)
 
 	return nil
 }

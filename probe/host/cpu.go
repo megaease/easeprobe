@@ -19,6 +19,7 @@ package host
 
 import (
 	"fmt"
+	"github.com/megaease/easeprobe/probe/base"
 	"strings"
 
 	"github.com/megaease/easeprobe/global"
@@ -30,14 +31,15 @@ import (
 // CPU is the cpu usage
 // "1.6 us,  1.6 sy,  3.2 ni, 91.9 id,  1.6 wa,  0.0 hi,  0.0 si,  0.0 st"
 type CPU struct {
-	User  float64 `yaml:"user"`
-	Sys   float64 `yaml:"sys"`
-	Nice  float64 `yaml:"nice"`
-	Idle  float64 `yaml:"idle"`
-	Wait  float64 `yaml:"wait"`
-	Hard  float64 `yaml:"hard"`
-	Soft  float64 `yaml:"soft"`
-	Steal float64 `yaml:"steal"`
+	base.DefaultProbe `yaml:",inline"`
+	User              float64 `yaml:"user"`
+	Sys               float64 `yaml:"sys"`
+	Nice              float64 `yaml:"nice"`
+	Idle              float64 `yaml:"idle"`
+	Wait              float64 `yaml:"wait"`
+	Hard              float64 `yaml:"hard"`
+	Soft              float64 `yaml:"soft"`
+	Steal             float64 `yaml:"steal"`
 
 	Threshold float64 `yaml:"threshold"`
 	metrics   *prometheus.GaugeVec
@@ -110,7 +112,7 @@ func (c *CPU) CheckThreshold() (bool, string) {
 func (c *CPU) CreateMetrics(subsystem, name string) {
 	namespace := global.GetEaseProbe().Name
 	c.metrics = metric.NewGauge(namespace, subsystem, name, "cpu",
-		"CPU Usage", []string{"host", "state"})
+		"CPU Usage", []string{"host", "state"}, c.Labels)
 }
 
 // ExportMetrics export the cpu metrics

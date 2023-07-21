@@ -19,6 +19,7 @@ package host
 
 import (
 	"fmt"
+	"github.com/megaease/easeprobe/probe/base"
 	"strings"
 
 	"github.com/megaease/easeprobe/global"
@@ -29,6 +30,7 @@ import (
 
 // Disks is the disk usage
 type Disks struct {
+	base.DefaultProbe
 	Mount []string
 	Usage []ResourceUsage
 
@@ -120,7 +122,7 @@ func (d *Disks) CheckThreshold() (bool, string) {
 func (d *Disks) CreateMetrics(subsystem, name string) {
 	namespace := global.GetEaseProbe().Name
 	d.metrics = metric.NewGauge(namespace, subsystem, name, "disk",
-		"Disk Usage", []string{"host", "disk", "state"})
+		"Disk Usage", []string{"host", "disk", "state"}, d.Labels)
 }
 
 // ExportMetrics export the disk metrics

@@ -19,6 +19,7 @@ package host
 
 import (
 	"fmt"
+	"github.com/megaease/easeprobe/probe/base"
 	"strings"
 
 	"github.com/megaease/easeprobe/global"
@@ -29,8 +30,9 @@ import (
 
 // Load is the load average of the host
 type Load struct {
-	Core    int64              `json:"core"`
-	Metrics map[string]float64 `json:"metrics"`
+	base.DefaultProbe `yaml:",inline"`
+	Core              int64              `json:"core"`
+	Metrics           map[string]float64 `json:"metrics"`
 
 	Threshold map[string]float64
 	metrics   *prometheus.GaugeVec
@@ -128,7 +130,7 @@ func (l *Load) CheckThreshold() (bool, string) {
 func (l *Load) CreateMetrics(subsystem, name string) {
 	namespace := global.GetEaseProbe().Name
 	l.metrics = metric.NewGauge(namespace, subsystem, name, "load",
-		"Load Average", []string{"host", "state"})
+		"Load Average", []string{"host", "state"}, l.Labels)
 }
 
 // ExportMetrics export the load average metrics

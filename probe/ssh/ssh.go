@@ -88,7 +88,7 @@ func (s *Server) Config(gConf global.ProbeSettings) error {
 	name := s.ProbeName
 	endpoint := global.CommandLine(s.Command, s.Args)
 
-	s.metrics = newMetrics(kind, tag)
+	s.metrics = newMetrics(kind, tag, s.Labels)
 
 	return s.Configure(gConf, kind, tag, name, endpoint, &BastionMap, s.DoProbe)
 
