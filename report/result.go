@@ -304,3 +304,19 @@ func ToShell(r probe.Result) string {
 	}
 	return string(buf)
 }
+
+// ToInfoflow convert the object to Infoflow notification
+// https://qy.baidu.com/doc/index.html#/inner_serverapi/robot
+func ToInfoflow(r probe.Result) string {
+	json := `{
+		"type": "MD",
+		"content": "### %s \n %s"
+	}`
+
+	title := fmt.Sprintf("%s %s", r.Title(), r.Status.Emoji())
+	rtt := r.RoundTripTime.Round(time.Millisecond)
+	content := fmt.Sprintf("%s - ⏱ %s\\n%s", r.Endpoint, rtt, JSONEscape(r.Message))
+	req := fmt.Sprintf(json, title, content)
+
+	return req
+}

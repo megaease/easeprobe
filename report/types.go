@@ -41,6 +41,7 @@ const (
 	Lark
 	SMS
 	Shell
+	Infoflow
 )
 
 var fmtToStr = map[Format]string{
@@ -56,6 +57,7 @@ var fmtToStr = map[Format]string{
 	Lark:           "lark",
 	SMS:            "sms",
 	Shell:          "shell",
+	Infoflow:       "Infoflow",
 }
 
 var strToFmt = global.ReverseMap(fmtToStr)
@@ -105,4 +107,6 @@ var FormatFuncs = map[Format]FormatFuncStruct{
 	Lark:           {ToLark, SLALark},
 	SMS:            {ToText, SLASummary},
 	Shell:          {ToShell, SLAShell},
+	// TODO SLAInfoflow
+	Infoflow: {ToInfoflow, nil},
 }

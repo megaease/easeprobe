@@ -24,6 +24,7 @@ import (
 	"github.com/megaease/easeprobe/notify/dingtalk"
 	"github.com/megaease/easeprobe/notify/discord"
 	"github.com/megaease/easeprobe/notify/email"
+	"github.com/megaease/easeprobe/notify/infoflow"
 	"github.com/megaease/easeprobe/notify/lark"
 	"github.com/megaease/easeprobe/notify/log"
 	"github.com/megaease/easeprobe/notify/ringcentral"
@@ -51,6 +52,7 @@ type Config struct {
 	Teams       []teams.NotifyConfig       `yaml:"teams,omitempty" json:"teams,omitempty" jsonschema:"title=Teams Notification,description=Teams Notification Configuration"`
 	Shell       []shell.NotifyConfig       `yaml:"shell,omitempty" json:"shell,omitempty" jsonschema:"title=Shell Notification,description=Shell Notification Configuration"`
 	RingCentral []ringcentral.NotifyConfig `yaml:"ringcentral,omitempty" json:"ringcentral,omitempty" jsonschema:"title=RingCentral Notification,description=RingCentral Notification Configuration"`
+	Infoflow    []infoflow.NotifyConfig    `yaml:"infoflow,omitempty" json:"infoflow,omitempty" jsonschema:"title=Infoflow Notification,description=Infoflow Notification Configuration"`
 }
 
 // Notify is the configuration of the Notify
