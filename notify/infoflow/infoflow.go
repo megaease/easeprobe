@@ -76,9 +76,9 @@ func (c *NotifyConfig) SendInfoflowNotification(msg string) error {
 	if err != nil {
 		return fmt.Errorf("Error response from Infoflow [%d] - [%s]", resp.StatusCode, string(buf))
 	}
-	if statusCode, ok := ret["StatusCode"].(float64); !ok || statusCode != 0 {
-		code, _ := ret["code"].(float64)
-		msg, _ := ret["msg"].(string)
+	if statusCode, ok := ret["errcode"].(float64); !ok || statusCode != 0 {
+		code, _ := ret["errcode"].(float64)
+		msg, _ := ret["errmsg"].(string)
 		return fmt.Errorf("Error response from Infoflow - code [%d] - msg [%v]", int(code), msg)
 	}
 	return nil

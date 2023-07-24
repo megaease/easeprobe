@@ -6,3 +6,4 @@ data/*.yaml
 helm/easeprobe/charts/
 vendor/
 coverage.txt
+easeprobe.pid
