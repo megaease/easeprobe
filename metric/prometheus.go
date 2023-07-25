@@ -33,7 +33,13 @@ type MetricsType interface {
 	*prometheus.CounterVec | *prometheus.GaugeVec | *prometheus.HistogramVec | *prometheus.SummaryVec
 }
 
+type Label struct {
+	Name  string `yaml:"name" json:"name" jsonschema:"required,title=Label Name,description=the name of label must be unique"`
+	Value string `yaml:"value" json:"value" jsonschema:"required,title=Label Value,description=the value of label"`
+}
+
 var (
+	registries   = make([]*prometheus.Registry, 0)
 	counterMap   = make(map[string]*prometheus.CounterVec)
 	gaugeMap     = make(map[string]*prometheus.GaugeVec)
 	histogramMap = make(map[string]*prometheus.HistogramVec)
@@ -57,7 +63,7 @@ func Gauge(key string) *prometheus.GaugeVec {
 
 // NewCounter create the counter metric
 func NewCounter(namespace, subsystem, name, metric string,
-	help string, labels []string, constLabels map[string]string) *prometheus.CounterVec {
+	help string, labels []string, constLabels []Label) *prometheus.CounterVec {
 
 	metricName, err := getAndValid(namespace, subsystem, name, metric, labels)
 	if err != nil {
@@ -72,27 +78,28 @@ func NewCounter(namespace, subsystem, name, metric string,
 
 	counterMap[metricName] = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name:        metricName,
-			Help:        help,
-			ConstLabels: constLabels,
+			Name: metricName,
+			Help: help,
 		},
-		labels,
+		mergeLabels(labels, constLabels),
 	)
-	prometheus.MustRegister(counterMap[metricName])
 
+	// registries[len(registries)-1].MustRegister(m)
+	prometheus.MustRegister(counterMap[metricName])
 	log.Infof("[%s] Counter <%s> is created!", module, metricName)
 	return counterMap[metricName]
 }
 
 // NewGauge create the gauge metric
 func NewGauge(namespace, subsystem, name, metric string,
-	help string, labels []string, constLabels map[string]string) *prometheus.GaugeVec {
+	help string, labels []string, constLabels []Label) *prometheus.GaugeVec {
 
 	metricName, err := getAndValid(namespace, subsystem, name, metric, labels)
 	if err != nil {
 		log.Errorf("[%s] %v", module, err)
 		return nil
 	}
+
 	if m, find := gaugeMap[metricName]; find {
 		log.Debugf("[%s] Gauge <%s> already created!", module, metricName)
 		return m
@@ -100,16 +107,27 @@ func NewGauge(namespace, subsystem, name, metric string,
 
 	gaugeMap[metricName] = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Name:        metricName,
-			Help:        help,
-			ConstLabels: constLabels,
+			Name: metricName,
+			Help: help,
 		},
-		labels,
+		mergeLabels(labels, constLabels),
 	)
+
 	prometheus.MustRegister(gaugeMap[metricName])
 
 	log.Infof("[%s] Gauge <%s> is created!", module, metricName)
 	return gaugeMap[metricName]
+}
+
+func mergeLabels(labels []string, constLabels []Label) []string {
+	l := make([]string, 0, len(labels)+len(constLabels))
+	l = append(l, labels...)
+
+	for _, v := range constLabels {
+		l = append(l, v.Name)
+	}
+
+	return l
 }
 
 func getAndValid(namespace, subsystem, name, metric string, labels []string) (string, error) {
@@ -180,4 +198,11 @@ func RemoveInvalidChars(name string) string {
 		}
 	}
 	return string(result)
+}
+
+func AddConstLabels(labels prometheus.Labels, constLabels []Label) prometheus.Labels {
+	for _, v := range constLabels {
+		labels[v.Name] = v.Value
+	}
+	return labels
 }

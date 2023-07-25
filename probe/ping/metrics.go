@@ -34,7 +34,7 @@ type metrics struct {
 }
 
 // newMetrics create the metrics
-func newMetrics(subsystem, name string, constLabels map[string]string) *metrics {
+func newMetrics(subsystem, name string, constLabels []metric.Label) *metrics {
 	namespace := global.GetEaseProbe().Name
 	return &metrics{
 		PacketsSent: metric.NewCounter(namespace, subsystem, name, "sent",

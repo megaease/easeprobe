@@ -135,18 +135,18 @@ func (l *Load) CreateMetrics(subsystem, name string) {
 
 // ExportMetrics export the load average metrics
 func (l *Load) ExportMetrics(name string) {
-	l.metrics.With(prometheus.Labels{
+	l.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "m1",
-	}).Set(l.Metrics["m1"])
+	}, l.Labels)).Set(l.Metrics["m1"])
 
-	l.metrics.With(prometheus.Labels{
+	l.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "m5",
-	}).Set(l.Metrics["m5"])
+	}, l.Labels)).Set(l.Metrics["m5"])
 
-	l.metrics.With(prometheus.Labels{
+	l.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "m15",
-	}).Set(l.Metrics["m15"])
+	}, l.Labels)).Set(l.Metrics["m15"])
 }

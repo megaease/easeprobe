@@ -104,23 +104,23 @@ func (m *Mem) CreateMetrics(subsystem, name string) {
 
 // ExportMetrics export the memory metrics
 func (m *Mem) ExportMetrics(name string) {
-	m.metrics.With(prometheus.Labels{
+	m.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "used",
-	}).Set(float64(m.Used))
+	}, m.Labels)).Set(float64(m.Used))
 
-	m.metrics.With(prometheus.Labels{
+	m.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "available",
-	}).Set(float64(m.Total - m.Used))
+	}, m.Labels)).Set(float64(m.Total - m.Used))
 
-	m.metrics.With(prometheus.Labels{
+	m.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "total",
-	}).Set(float64(m.Total))
+	}, m.Labels)).Set(float64(m.Total))
 
-	m.metrics.With(prometheus.Labels{
+	m.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "usage",
-	}).Set(m.Usage)
+	}, m.Labels)).Set(m.Usage)
 }

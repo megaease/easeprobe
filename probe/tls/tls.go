@@ -23,6 +23,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"github.com/megaease/easeprobe/metric"
 	"net"
 	"os"
 	"strings"
@@ -137,12 +138,12 @@ func (t *TLS) DoProbe() (bool, string) {
 
 	state := tconn.ConnectionState()
 
-	t.metrics.EarliestCertExpiry.With(prometheus.Labels{
+	t.metrics.EarliestCertExpiry.With(metric.AddConstLabels(prometheus.Labels{
 		"endpoint": t.ProbeResult.Endpoint,
-	}).Set(float64(getEarliestCertExpiry(&state).Unix()))
-	t.metrics.LastChainExpiryTimestampSeconds.With(prometheus.Labels{
+	}, t.Labels)).Set(float64(getEarliestCertExpiry(&state).Unix()))
+	t.metrics.EarliestCertExpiry.With(metric.AddConstLabels(prometheus.Labels{
 		"endpoint": t.ProbeResult.Endpoint,
-	}).Set(float64(getLastChainExpiry(&state).Unix()))
+	}, t.Labels)).Set(float64(getLastChainExpiry(&state).Unix()))
 
 	return true, "TLS Endpoint Verified Successfully!"
 }

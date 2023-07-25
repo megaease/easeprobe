@@ -93,8 +93,8 @@ func (b *Basic) CreateMetrics(subsystem, name string) {
 
 // ExportMetrics export the cpu metrics
 func (b *Basic) ExportMetrics(name string) {
-	b.metrics.With(prometheus.Labels{
+	b.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "cpu_core",
-	}).Set(float64(b.Core))
+	}, b.Labels)).Set(float64(b.Core))
 }

@@ -30,7 +30,7 @@ type metrics struct {
 }
 
 // newMetrics create the shell metrics
-func newMetrics(subsystem, name string, constLabels map[string]string) *metrics {
+func newMetrics(subsystem, name string, constLabels []metric.Label) *metrics {
 	namespace := global.GetEaseProbe().Name
 	return &metrics{
 		ExitCode: metric.NewCounter(namespace, subsystem, name, "exit_code",

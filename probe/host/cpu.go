@@ -118,48 +118,48 @@ func (c *CPU) CreateMetrics(subsystem, name string) {
 // ExportMetrics export the cpu metrics
 func (c *CPU) ExportMetrics(name string) {
 	// CPU metrics
-	c.metrics.With(prometheus.Labels{
+	c.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "usage",
-	}).Set(100 - c.Idle)
+	}, c.Labels)).Set(100 - c.Idle)
 
-	c.metrics.With(prometheus.Labels{
+	c.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "idle",
-	}).Set(c.Idle)
+	}, c.Labels)).Set(c.Idle)
 
-	c.metrics.With(prometheus.Labels{
+	c.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "user",
-	}).Set(c.User)
+	}, c.Labels)).Set(c.User)
 
-	c.metrics.With(prometheus.Labels{
+	c.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "sys",
-	}).Set(c.Sys)
+	}, c.Labels)).Set(c.Sys)
 
-	c.metrics.With(prometheus.Labels{
+	c.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "nice",
-	}).Set(c.Nice)
+	}, c.Labels)).Set(c.Nice)
 
-	c.metrics.With(prometheus.Labels{
+	c.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "wait",
-	}).Set(c.Wait)
+	}, c.Labels)).Set(c.Wait)
 
-	c.metrics.With(prometheus.Labels{
+	c.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "hard",
-	}).Set(c.Hard)
+	}, c.Labels)).Set(c.Hard)
 
-	c.metrics.With(prometheus.Labels{
+	c.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "soft",
-	}).Set(c.Soft)
+	}, c.Labels)).Set(c.Soft)
 
-	c.metrics.With(prometheus.Labels{
+	c.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "steal",
-	}).Set(c.Steal)
+	}, c.Labels)).Set(c.Steal)
 }
