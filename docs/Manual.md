@@ -145,8 +145,10 @@ The following is an example of the alerting interval for HTTP Probe:
     - name: Web Service
       url: http://example.com:1080
       labels:
-        service: web_example
-        env: wg-idc-prod
+        - name: service
+          value: web_example
+        - name: env
+          value: wg-idc-prod
       alert:
         strategy: regular
         factor: 1
@@ -277,8 +279,10 @@ http:
   - name: MegaEase Website (Global)
     url: https://megaease.com
     labels:
-      team: ease
-      owner: megaease
+      - name: team
+        value: ease
+      - name: owner
+        value: megaease
   # Some of the Software support the HTTP Query
   - name: ElasticSearch
     url: http://elasticsearch.server:9200
@@ -519,7 +523,8 @@ tcp:
     proxy: socks5://proxy.server:1080 # Optional. Only support socks5.
                                       # Also support the `ALL_PROXY` environment.
     labels:
-      env: production
+      - name: env
+        value: production
   - name: Kafka
     host: kafka.server:9093
 ```
@@ -540,8 +545,10 @@ ping:
     timeout: 10s # default is 30 seconds
     interval: 2m # default is 60 seconds
     labels:
-      env: development
-      role: primary
+        - name: env
+          value: development
+        - name: role
+          value: primary
 ```
 
 ## 1.5 Shell
