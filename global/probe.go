@@ -126,7 +126,7 @@ func (n IntervalStrategy) MarshalJSON() ([]byte, error) {
 
 // NotificationStrategySettings is the notification strategy settings
 type NotificationStrategySettings struct {
-	Strategy IntervalStrategy `yaml:"strategy" json:"strategy" jsonschema:"title=Alert Interval Strategy,description=the notification interval strategy such as regular,increment,exponent,default=regular"`
+	Strategy IntervalStrategy `yaml:"strategy" json:"strategy" jsonschema:"type=string,enum=regular,enum=increment,enum=exponent,title=Alert Interval Strategy,description=the notification interval strategy such as regular,increment,exponent,default=regular"`
 	Factor   int              `yaml:"factor" json:"factor" jsonschema:"title=Factor,description=the factor to increase the interval, it must be greater than 0,default=1"`
 	MaxTimes int              `yaml:"max" json:"max" jsonschema:"title=Max Times,description=the max times to send notification,default=1"`
 }
