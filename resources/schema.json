@@ -415,10 +415,15 @@
     "global_NotificationStrategySettings": {
       "properties": {
         "strategy": {
-          "type": "integer",
+          "type": "string",
+          "enum": [
+            "regular",
+            "increment",
+            "exponent"
+          ],
           "title": "Alert Interval Strategy",
           "description": "the notification interval strategy such as regular",
-          "default": 0
+          "default": "regular"
         },
         "factor": {
           "type": "integer",
