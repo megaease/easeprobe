@@ -10,8 +10,8 @@ github.com/alecthomas/participle/v2 v2.0.0/go.mod h1:rAKZdJldHu8084ojcWevWAL8KmE
 github.com/alecthomas/repr v0.2.0 h1:HAzS41CIzNW5syS8Mf9UwXhNH1J9aix/BvDRf1Ml2Yk=
 github.com/antchfx/htmlquery v1.3.0 h1:5I5yNFOVI+egyia5F2s/5Do2nFWxJz41Tr3DyfKD25E=
 github.com/antchfx/htmlquery v1.3.0/go.mod h1:zKPDVTMhfOmcwxheXUsx4rKJy8KEY/PU6eXr/2SebQ8=
-github.com/antchfx/jsonquery v1.3.2 h1:/BgHv1le9CCkqDe7t1x5BRlCg6DQmXTsztnMQFG5Hoc=
-github.com/antchfx/jsonquery v1.3.2/go.mod h1:VsW9O/sNgHoUVvhoMEjR+opjIOjKOViNFTpAlxcI4Ws=
+github.com/antchfx/jsonquery v1.3.3 h1:zjZpbnZhYng3uOAbIfdNq81A9mMEeuDJeYIpeKpZ4es=
+github.com/antchfx/jsonquery v1.3.3/go.mod h1:1JG4DqRlRCHgVYDPY1ioYFAGSXGfWHzNgrbiGQHsWck=
 github.com/antchfx/xmlquery v1.3.17 h1:d0qWjPp/D+vtRw7ivCwT5ApH/3CkQU8JOeo3245PpTk=
 github.com/antchfx/xmlquery v1.3.17/go.mod h1:Afkq4JIeXut75taLSuI31ISJ/zeq+3jG7TunF7noreA=
 github.com/antchfx/xpath v1.2.3/go.mod h1:i54GszH55fYfBmoZXapTHN8T8tkcHfRgLyVwwqzXNcs=
