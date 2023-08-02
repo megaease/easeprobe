@@ -6,7 +6,7 @@ require (
 	bou.ke/monkey v1.0.2
 	github.com/Knetic/govaluate v3.0.0+incompatible
 	github.com/antchfx/htmlquery v1.3.0
-	github.com/antchfx/jsonquery v1.3.2
+	github.com/antchfx/jsonquery v1.3.3
 	github.com/antchfx/xmlquery v1.3.17
 	github.com/aws/aws-sdk-go v1.44.314
 	github.com/bradfitz/gomemcache v0.0.0-20220106215444-fb4bf637b56d
