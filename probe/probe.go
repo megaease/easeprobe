@@ -22,10 +22,13 @@ import (
 	"time"
 
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/metric"
 )
 
 // Prober Interface
 type Prober interface {
+	Label() []metric.Label
+	SetLabel([]metric.Label)
 	Kind() string
 	Name() string
 	Channels() []string

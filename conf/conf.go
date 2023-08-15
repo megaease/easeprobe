@@ -436,7 +436,9 @@ func isProbe(t reflect.Type) bool {
 // AllProbers return all probers
 func (conf *Conf) AllProbers() []probe.Prober {
 	log.Debugf("--------- Process the probers settings ---------")
-	return allProbersHelper(*conf)
+	all := allProbersHelper(*conf)
+	MergeConstLabels(all)
+	return all
 }
 
 func allProbersHelper(i interface{}) []probe.Prober {

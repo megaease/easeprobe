@@ -60,6 +60,14 @@ type DefaultProbe struct {
 	metrics                              *metrics      `yaml:"-" json:"-"`
 }
 
+func (d *DefaultProbe) Label() []metric.Label {
+	return d.Labels
+}
+
+func (d *DefaultProbe) SetLabel(allLabels []metric.Label) {
+	d.Labels = allLabels
+}
+
 // Kind return the probe kind
 func (d *DefaultProbe) Kind() string {
 	return d.ProbeKind
