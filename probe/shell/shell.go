@@ -25,6 +25,7 @@ import (
 	"os/exec"
 
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/metric"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/base"
 	"github.com/prometheus/client_golang/prometheus"
@@ -115,15 +116,15 @@ func (s *Shell) DoProbe() (bool, string) {
 
 // ExportMetrics export shell metrics
 func (s *Shell) ExportMetrics() {
-	s.metrics.ExitCode.With(prometheus.Labels{
+	s.metrics.ExitCode.With(metric.AddConstLabels(prometheus.Labels{
 		"name":     s.ProbeName,
 		"exit":     fmt.Sprintf("%d", s.exitCode),
 		"endpoint": s.ProbeResult.Endpoint,
-	}).Inc()
+	}, s.Labels)).Inc()
 
-	s.metrics.OutputLen.With(prometheus.Labels{
+	s.metrics.OutputLen.With(metric.AddConstLabels(prometheus.Labels{
 		"name":     s.ProbeName,
 		"exit":     fmt.Sprintf("%d", s.exitCode),
 		"endpoint": s.ProbeResult.Endpoint,
-	}).Set(float64(s.outputLen))
+	}, s.Labels)).Set(float64(s.outputLen))
 }
