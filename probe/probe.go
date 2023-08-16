@@ -21,8 +21,9 @@ package probe
 import (
 	"time"
 
-	"github.com/megaease/easeprobe/global"
 	"github.com/prometheus/client_golang/prometheus"
+
+	"github.com/megaease/easeprobe/global"
 )
 
 // Prober Interface

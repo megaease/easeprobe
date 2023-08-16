@@ -19,11 +19,12 @@ package host
 
 import (
 	"fmt"
-	"github.com/megaease/easeprobe/probe/base"
+
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/metric"
-	"github.com/prometheus/client_golang/prometheus"
+	"github.com/megaease/easeprobe/probe/base"
 )
 
 // Basic is the basic information of the host

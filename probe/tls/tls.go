@@ -23,17 +23,17 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"github.com/megaease/easeprobe/metric"
 	"net"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/probe/base"
 	"github.com/prometheus/client_golang/prometheus"
-
 	log "github.com/sirupsen/logrus"
+
+	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/metric"
+	"github.com/megaease/easeprobe/probe/base"
 )
 
 // TLS implements a config for TLS

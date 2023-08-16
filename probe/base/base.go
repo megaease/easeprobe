@@ -20,19 +20,19 @@ package base
 
 import (
 	"fmt"
-	"github.com/megaease/easeprobe/metric"
 	"math"
 	"net"
 	"net/url"
 	"os"
 	"time"
 
-	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/probe"
 	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/proxy"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/metric"
+	"github.com/megaease/easeprobe/probe"
 )
 
 // Probe Simple Status

@@ -20,14 +20,15 @@ package ping
 
 import (
 	"fmt"
-	"github.com/megaease/easeprobe/metric"
 	"reflect"
 
-	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/probe/base"
 	ping "github.com/prometheus-community/pro-bing"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/metric"
+	"github.com/megaease/easeprobe/probe/base"
 )
 
 // Ping implements a config for ping

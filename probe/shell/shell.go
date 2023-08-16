@@ -24,12 +24,13 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/metric"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/base"
-	"github.com/prometheus/client_golang/prometheus"
-	log "github.com/sirupsen/logrus"
 )
 
 // Shell implements a config for shell command (os.Exec)

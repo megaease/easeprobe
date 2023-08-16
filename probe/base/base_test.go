@@ -27,10 +27,11 @@ import (
 	"time"
 
 	"bou.ke/monkey"
-	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/probe"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/proxy"
+
+	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/probe"
 )
 
 var (

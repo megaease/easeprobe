@@ -21,16 +21,16 @@ package ssh
 import (
 	"bytes"
 	"fmt"
-	"github.com/megaease/easeprobe/metric"
 	"net"
 
-	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/probe"
-	"github.com/megaease/easeprobe/probe/base"
 	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/metric"
+	"github.com/megaease/easeprobe/probe"
+	"github.com/megaease/easeprobe/probe/base"
 )
 
 // Kind is the type of probe

@@ -19,13 +19,14 @@ package host
 
 import (
 	"fmt"
-	"github.com/megaease/easeprobe/probe/base"
 	"strings"
+
+	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/metric"
-	"github.com/prometheus/client_golang/prometheus"
-	log "github.com/sirupsen/logrus"
+	"github.com/megaease/easeprobe/probe/base"
 )
 
 // Disks is the disk usage

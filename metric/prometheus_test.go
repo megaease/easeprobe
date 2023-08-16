@@ -18,10 +18,10 @@
 package metric
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
 	"testing"
 
 	"bou.ke/monkey"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
 )
 

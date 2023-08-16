@@ -22,7 +22,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/megaease/easeprobe/metric"
 	"io"
 	"net"
 	"net/http"
@@ -31,13 +30,14 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/megaease/easeprobe/eval"
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/metric"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/base"
-	"github.com/prometheus/client_golang/prometheus"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // HTTP implements a config for HTTP.
