@@ -25,10 +25,11 @@ import (
 	"strings"
 	"testing"
 
-	"bou.ke/monkey"
+	"github.com/procodr/monkey"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/report"
-	"github.com/stretchr/testify/assert"
 )
 
 func assertError(t *testing.T, err error, msg string, contain bool) {

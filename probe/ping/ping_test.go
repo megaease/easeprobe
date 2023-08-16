@@ -23,9 +23,10 @@ import (
 	"runtime"
 	"testing"
 
-	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe/base"
+
+	"github.com/procodr/monkey"
 	ping "github.com/prometheus-community/pro-bing"
 	"github.com/stretchr/testify/assert"
 )

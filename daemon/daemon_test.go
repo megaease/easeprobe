@@ -23,10 +23,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"bou.ke/monkey"
-	"github.com/megaease/easeprobe/global"
-
+	"github.com/procodr/monkey"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/megaease/easeprobe/global"
 )
 
 func testPIDFile(pidfile string, t *testing.T) {

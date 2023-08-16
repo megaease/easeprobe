@@ -23,10 +23,11 @@ import (
 	"reflect"
 	"testing"
 
-	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe/base"
 	"github.com/megaease/easeprobe/probe/ssh"
+
+	"github.com/procodr/monkey"
 	"github.com/stretchr/testify/assert"
 )
 

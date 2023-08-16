@@ -20,7 +20,7 @@ package metric
 import (
 	"testing"
 
-	"bou.ke/monkey"
+	"github.com/procodr/monkey"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
 )

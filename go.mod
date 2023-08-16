@@ -3,7 +3,6 @@ module github.com/megaease/easeprobe
 go 1.20
 
 require (
-	bou.ke/monkey v1.0.2
 	github.com/Knetic/govaluate v3.0.0+incompatible
 	github.com/antchfx/htmlquery v1.3.0
 	github.com/antchfx/jsonquery v1.3.3
@@ -16,6 +15,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/go-zookeeper/zk v1.0.3
+	github.com/procodr/monkey v0.0.0-20221102224215-28eb53c3a645
 	github.com/prometheus-community/pro-bing v0.3.0
 	github.com/prometheus/client_golang v1.16.0
 	github.com/segmentio/kafka-go v0.4.42
@@ -34,6 +34,7 @@ require (
 )
 
 require (
+	bou.ke/monkey v1.0.2 // indirect
 	github.com/a8m/envsubst v1.4.2 // indirect
 	github.com/alecthomas/participle/v2 v2.0.0 // indirect
 	github.com/dimchansky/utfbom v1.1.1 // indirect

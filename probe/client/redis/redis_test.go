@@ -24,11 +24,12 @@ import (
 	"reflect"
 	"testing"
 
-	"bou.ke/monkey"
 	"github.com/go-redis/redis/v8"
+	"github.com/procodr/monkey"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe/client/conf"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestRedis(t *testing.T) {

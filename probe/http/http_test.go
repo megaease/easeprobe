@@ -29,11 +29,12 @@ import (
 	"reflect"
 	"testing"
 
-	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/eval"
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/base"
+
+	"github.com/procodr/monkey"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )

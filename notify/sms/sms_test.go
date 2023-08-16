@@ -21,12 +21,13 @@ import (
 	"reflect"
 	"testing"
 
-	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify/sms/conf"
 	"github.com/megaease/easeprobe/notify/sms/nexmo"
 	"github.com/megaease/easeprobe/notify/sms/twilio"
 	"github.com/megaease/easeprobe/notify/sms/yunpian"
+
+	"github.com/procodr/monkey"
 	"github.com/stretchr/testify/assert"
 )
 

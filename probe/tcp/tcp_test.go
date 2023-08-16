@@ -19,12 +19,12 @@ package tcp
 
 import (
 	"fmt"
+	"github.com/procodr/monkey"
 	"net"
 	"reflect"
 	"testing"
 	"time"
 
-	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe/base"
 	"github.com/stretchr/testify/assert"

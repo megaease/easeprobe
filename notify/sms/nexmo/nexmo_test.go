@@ -26,8 +26,8 @@ import (
 
 	"testing"
 
-	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/notify/sms/conf"
+	"github.com/procodr/monkey"
 	"github.com/stretchr/testify/assert"
 )
 

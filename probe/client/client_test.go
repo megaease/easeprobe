@@ -21,7 +21,6 @@ import (
 	"reflect"
 	"testing"
 
-	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe/base"
 	"github.com/megaease/easeprobe/probe/client/conf"
@@ -32,6 +31,8 @@ import (
 	"github.com/megaease/easeprobe/probe/client/postgres"
 	"github.com/megaease/easeprobe/probe/client/redis"
 	"github.com/megaease/easeprobe/probe/client/zookeeper"
+
+	"github.com/procodr/monkey"
 	"github.com/stretchr/testify/assert"
 )
 
