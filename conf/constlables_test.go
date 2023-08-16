@@ -32,6 +32,6 @@ func TestMergeConstLabels(t *testing.T) {
 	assert.Equal(t, "", ps[0].LabelMap()["host"])
 
 	assert.Equal(t, 2, len(ps[1].LabelMap()))
-	assert.Equal(t, "", ps[0].LabelMap()["service"])
-	assert.Equal(t, "host_b", ps[0].LabelMap()["host"])
+	assert.Equal(t, "", ps[1].LabelMap()["service"])
+	assert.Equal(t, "host_b", ps[1].LabelMap()["host"])
 }
