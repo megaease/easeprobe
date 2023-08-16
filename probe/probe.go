@@ -22,12 +22,12 @@ import (
 	"time"
 
 	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/metric"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 // Prober Interface
 type Prober interface {
-	LabelMap() metric.LabelMap
+	LabelMap() prometheus.Labels
 	Kind() string
 	Name() string
 	Channels() []string

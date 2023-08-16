@@ -33,8 +33,6 @@ type MetricsType interface {
 	*prometheus.CounterVec | *prometheus.GaugeVec | *prometheus.HistogramVec | *prometheus.SummaryVec
 }
 
-type LabelMap map[string]string
-
 var (
 	registries   = make([]*prometheus.Registry, 0)
 	counterMap   = make(map[string]*prometheus.CounterVec)
@@ -60,7 +58,7 @@ func Gauge(key string) *prometheus.GaugeVec {
 
 // NewCounter create the counter metric
 func NewCounter(namespace, subsystem, name, metric string,
-	help string, labels []string, constLabels LabelMap) *prometheus.CounterVec {
+	help string, labels []string, constLabels prometheus.Labels) *prometheus.CounterVec {
 
 	metricName, err := getAndValid(namespace, subsystem, name, metric, labels)
 	if err != nil {
@@ -89,7 +87,7 @@ func NewCounter(namespace, subsystem, name, metric string,
 
 // NewGauge create the gauge metric
 func NewGauge(namespace, subsystem, name, metric string,
-	help string, labels []string, constLabels LabelMap) *prometheus.GaugeVec {
+	help string, labels []string, constLabels prometheus.Labels) *prometheus.GaugeVec {
 
 	metricName, err := getAndValid(namespace, subsystem, name, metric, labels)
 	if err != nil {
@@ -116,7 +114,7 @@ func NewGauge(namespace, subsystem, name, metric string,
 	return gaugeMap[metricName]
 }
 
-func mergeLabels(labels []string, constLabels LabelMap) []string {
+func mergeLabels(labels []string, constLabels prometheus.Labels) []string {
 	l := make([]string, 0, len(labels)+len(constLabels))
 	l = append(l, labels...)
 
@@ -197,7 +195,7 @@ func RemoveInvalidChars(name string) string {
 	return string(result)
 }
 
-func AddConstLabels(labels prometheus.Labels, constLabels LabelMap) prometheus.Labels {
+func AddConstLabels(labels prometheus.Labels, constLabels prometheus.Labels) prometheus.Labels {
 	for k, v := range constLabels {
 		labels[k] = v
 	}

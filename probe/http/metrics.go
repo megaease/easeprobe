@@ -37,7 +37,7 @@ type metrics struct {
 }
 
 // newMetrics create the HTTP metrics
-func newMetrics(subsystem, name string, constLabels metric.LabelMap) *metrics {
+func newMetrics(subsystem, name string, constLabels prometheus.Labels) *metrics {
 	namespace := global.GetEaseProbe().Name
 	return &metrics{
 		StatusCode: metric.NewCounter(namespace, subsystem, name, "status_code",

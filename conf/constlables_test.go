@@ -1,11 +1,11 @@
 package conf
 
 import (
-	"github.com/megaease/easeprobe/metric"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/base"
 	"github.com/megaease/easeprobe/probe/http"
 	"github.com/megaease/easeprobe/probe/tcp"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -15,12 +15,12 @@ func TestMergeConstLabels(t *testing.T) {
 	ps := []probe.Prober{
 		&http.HTTP{
 			DefaultProbe: base.DefaultProbe{
-				Labels: metric.LabelMap{"service": "service_a"},
+				Labels: prometheus.Labels{"service": "service_a"},
 			},
 		},
 		&tcp.TCP{
 			DefaultProbe: base.DefaultProbe{
-				Labels: metric.LabelMap{"host": "host_b"},
+				Labels: prometheus.Labels{"host": "host_b"},
 			},
 		},
 	}

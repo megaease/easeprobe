@@ -30,7 +30,7 @@ type metrics struct {
 }
 
 // newMetrics create the shell metrics
-func newMetrics(subsystem, name string, constLabels metric.LabelMap) *metrics {
+func newMetrics(subsystem, name string, constLabels prometheus.Labels) *metrics {
 	namespace := global.GetEaseProbe().Name
 	return &metrics{
 		ExitCode: metric.NewCounter(namespace, subsystem, name, "exit_code",

@@ -33,7 +33,7 @@ type metrics struct {
 }
 
 // newMetrics create the metrics
-func newMetrics(subsystem, name string, constLabels metric.LabelMap) *metrics {
+func newMetrics(subsystem, name string, constLabels prometheus.Labels) *metrics {
 	namespace := global.GetEaseProbe().Name
 	return &metrics{
 		TotalCnt: metric.NewGauge(namespace, subsystem, name, "total",
