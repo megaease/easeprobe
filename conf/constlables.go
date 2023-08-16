@@ -21,12 +21,9 @@ func MergeConstLabels(ps []probe.Prober) {
 }
 func buildConstLabels(p probe.Prober) {
 	ls := p.LabelMap()
-LA:
 	for k, _ := range constLabels {
-		if _, ok := ls[k]; ok {
-			continue LA
+		if _, ok := ls[k]; !ok {
+			ls[k] = ""
 		}
-
-		ls[k] = ""
 	}
 }
