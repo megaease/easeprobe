@@ -18,6 +18,7 @@
 package metric
 
 import (
+	"github.com/prometheus/client_golang/prometheus"
 	"testing"
 
 	"bou.ke/monkey"
@@ -65,12 +66,12 @@ func TestGetName(t *testing.T) {
 
 func TestNewMetrics(t *testing.T) {
 	NewCounter("namespace", "subsystem", "counter", "metric",
-		"help", []string{"label1", "label2"}, make([]Label, 0))
+		"help", []string{"label1", "label2"}, prometheus.Labels{})
 	assert.NotNil(t, GetName("namespace_subsystem_counter_metric"))
 	assert.NotNil(t, Counter("namespace_subsystem_counter_metric"))
 
 	NewGauge("namespace", "subsystem", "gauge", "metric",
-		"help", []string{"label1", "label2"}, make([]Label, 0))
+		"help", []string{"label1", "label2"}, prometheus.Labels{})
 	assert.NotNil(t, GetName("namespace_subsystem_gauge_metric"))
 	assert.NotNil(t, Gauge("namespace_subsystem_gauge_metric"))
 }
@@ -110,15 +111,15 @@ func TestName(t *testing.T) {
 
 func TestDuplicateName(t *testing.T) {
 	counter1 := NewCounter("namespace", "subsystem", "counter", "metric",
-		"help", []string{}, make([]Label, 0))
+		"help", []string{}, prometheus.Labels{})
 	counter2 := NewCounter("namespace", "subsystem", "counter", "metric",
-		"help", []string{}, make([]Label, 0))
+		"help", []string{}, prometheus.Labels{})
 	assert.Equal(t, counter1, counter2)
 
 	gauge1 := NewGauge("namespace", "subsystem", "gauge", "metric",
-		"help", []string{}, make([]Label, 0))
+		"help", []string{}, prometheus.Labels{})
 	gauge2 := NewGauge("namespace", "subsystem", "gauge", "metric",
-		"help", []string{}, make([]Label, 0))
+		"help", []string{}, prometheus.Labels{})
 	assert.Equal(t, gauge1, gauge2)
 }
 
@@ -126,18 +127,18 @@ func TestInvalidName(t *testing.T) {
 
 	//label errors
 	counter := NewCounter("namespace", "subsystem", "counter", "metric",
-		"help", []string{"label-1", "label:2"}, make([]Label, 0))
+		"help", []string{"label-1", "label:2"}, prometheus.Labels{})
 	assert.Nil(t, counter)
 
 	gauge := NewGauge("namespace", "subsystem", "gauge", "metric",
-		"help", []string{"label-1", "label:2"}, make([]Label, 0))
+		"help", []string{"label-1", "label:2"}, prometheus.Labels{})
 	assert.Nil(t, gauge)
 
 	monkey.Patch(ValidMetricName, func(name string) bool {
 		return false
 	})
 	counter = NewCounter("namespace", "subsystem", "counter", "metric",
-		"help", []string{}, make([]Label, 0))
+		"help", []string{}, prometheus.Labels{})
 	assert.Nil(t, counter)
 
 	monkey.UnpatchAll()
