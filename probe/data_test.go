@@ -26,9 +26,11 @@ import (
 	"time"
 
 	"bou.ke/monkey"
-	"github.com/megaease/easeprobe/global"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
+
+	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/probe/base"
 )
 
 var testResults = []Result{
@@ -339,6 +341,7 @@ func TestMetaData(t *testing.T) {
 }
 
 type DummyProbe struct {
+	base.DefaultProbe
 	MyName     string
 	MyResult   *Result
 	MyChannels []string
