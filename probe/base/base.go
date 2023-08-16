@@ -64,6 +64,10 @@ func (d *DefaultProbe) LabelMap() prometheus.Labels {
 	return d.Labels
 }
 
+func (d *DefaultProbe) SetLabelMap(labels prometheus.Labels) {
+	d.Labels = labels
+}
+
 // Kind return the probe kind
 func (d *DefaultProbe) Kind() string {
 	return d.ProbeKind

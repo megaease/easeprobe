@@ -23,6 +23,7 @@ func buildConstLabels(p probe.Prober) {
 	ls := p.LabelMap()
 	if ls == nil {
 		ls = make(map[string]string)
+		p.SetLabelMap(ls)
 	}
 
 	for k, _ := range constLabels {

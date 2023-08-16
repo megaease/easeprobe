@@ -28,6 +28,7 @@ import (
 // Prober Interface
 type Prober interface {
 	LabelMap() prometheus.Labels
+	SetLabelMap(labels prometheus.Labels)
 	Kind() string
 	Name() string
 	Channels() []string
