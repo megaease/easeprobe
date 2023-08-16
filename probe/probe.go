@@ -27,8 +27,7 @@ import (
 
 // Prober Interface
 type Prober interface {
-	Label() []metric.Label
-	SetLabel([]metric.Label)
+	LabelMap() metric.LabelMap
 	Kind() string
 	Name() string
 	Channels() []string

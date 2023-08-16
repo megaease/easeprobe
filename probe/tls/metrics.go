@@ -33,7 +33,7 @@ type metrics struct {
 }
 
 // newMetrics create the HTTP metrics
-func newMetrics(subsystem, name string, constLabels []metric.Label) *metrics {
+func newMetrics(subsystem, name string, constLabels metric.LabelMap) *metrics {
 	namespace := global.GetEaseProbe().Name
 	return &metrics{
 		EarliestCertExpiry: metric.NewGauge(namespace, subsystem, name, "earliest_cert_expiry",

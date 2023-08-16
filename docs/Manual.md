@@ -145,10 +145,8 @@ The following is an example of the alerting interval for HTTP Probe:
     - name: Web Service
       url: http://example.com:1080
       labels:
-        - name: service
-          value: web_example
-        - name: env
-          value: wg-idc-prod
+        service: web_example
+        env:    wg-idc-prod
       alert:
         strategy: regular
         factor: 1
@@ -279,10 +277,8 @@ http:
   - name: MegaEase Website (Global)
     url: https://megaease.com
     labels:
-      - name: team
-        value: ease
-      - name: owner
-        value: megaease
+      team:  ease
+      owner: megaease
   # Some of the Software support the HTTP Query
   - name: ElasticSearch
     url: http://elasticsearch.server:9200
@@ -523,8 +519,7 @@ tcp:
     proxy: socks5://proxy.server:1080 # Optional. Only support socks5.
                                       # Also support the `ALL_PROXY` environment.
     labels:
-      - name: env
-        value: production
+      env: production
   - name: Kafka
     host: kafka.server:9093
 ```
@@ -545,10 +540,8 @@ ping:
     timeout: 10s # default is 30 seconds
     interval: 2m # default is 60 seconds
     labels:
-        - name: env
-          value: development
-        - name: role
-          value: primary
+        env:  development
+        role: primary
 ```
 
 ## 1.5 Shell
@@ -1347,7 +1340,6 @@ Currently, All of the Probers support the following metrics:
   - `duration`: Probe duration in milliseconds
   - `status`: Probe status
   - `SLA`: Probe SLA percentage
-  - `labels`: Constant labels of the metric
 
 And the different Probers have its own metrics.
 

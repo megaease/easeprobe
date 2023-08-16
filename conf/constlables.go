@@ -1,7 +1,6 @@
 package conf
 
 import (
-	"github.com/megaease/easeprobe/metric"
 	"github.com/megaease/easeprobe/probe"
 )
 
@@ -11,8 +10,8 @@ var constLabels = make(map[string]bool)
 // Prometheus requires all metric  of the same name have the same set of labels in a collector
 func MergeConstLabels(ps []probe.Prober) {
 	for _, p := range ps {
-		for _, k := range p.Label() {
-			constLabels[k.Name] = true
+		for k, _ := range p.LabelMap() {
+			constLabels[k] = true
 		}
 	}
 
@@ -21,17 +20,13 @@ func MergeConstLabels(ps []probe.Prober) {
 	}
 }
 func buildConstLabels(p probe.Prober) {
-	ls := p.Label()
+	ls := p.LabelMap()
 LA:
 	for k, _ := range constLabels {
-		for _, l := range ls {
-			if k == l.Name {
-				continue LA
-			}
+		if _, ok := ls[k]; ok {
+			continue LA
 		}
 
-		ls = append(ls, metric.Label{Name: k, Value: ""})
+		ls[k] = ""
 	}
-
-	p.SetLabel(ls)
 }

@@ -15,21 +15,23 @@ func TestMergeConstLabels(t *testing.T) {
 	ps := []probe.Prober{
 		&http.HTTP{
 			DefaultProbe: base.DefaultProbe{
-				Labels: []metric.Label{{"service", "service_a"}},
+				Labels: metric.LabelMap{"service": "service_a"},
 			},
 		},
 		&tcp.TCP{
 			DefaultProbe: base.DefaultProbe{
-				Labels: []metric.Label{{"host", "host_b"}},
+				Labels: metric.LabelMap{"host": "host_b"},
 			},
 		},
 	}
 
 	MergeConstLabels(ps)
 
-	assert.Equal(t, "service_a", ps[0].Label()[0].Value)
-	assert.Equal(t, "host_b", ps[0].Label()[1].Value)
+	assert.Equal(t, 2, len(ps[0].LabelMap()))
+	assert.Equal(t, "service_a", ps[0].LabelMap()["service"])
+	assert.Equal(t, "", ps[0].LabelMap()["host"])
 
-	assert.Equal(t, "host_a", ps[1].Label()[0].Value)
-	assert.Equal(t, "service_b", ps[1].Label()[1].Value)
+	assert.Equal(t, 2, len(ps[1].LabelMap()))
+	assert.Equal(t, "", ps[0].LabelMap()["service"])
+	assert.Equal(t, "host_b", ps[0].LabelMap()["host"])
 }

@@ -33,10 +33,7 @@ type MetricsType interface {
 	*prometheus.CounterVec | *prometheus.GaugeVec | *prometheus.HistogramVec | *prometheus.SummaryVec
 }
 
-type Label struct {
-	Name  string `yaml:"name" json:"name" jsonschema:"required,title=Label Name,description=the name of label must be unique"`
-	Value string `yaml:"value" json:"value" jsonschema:"required,title=Label Value,description=the value of label"`
-}
+type LabelMap map[string]string
 
 var (
 	registries   = make([]*prometheus.Registry, 0)
@@ -63,7 +60,7 @@ func Gauge(key string) *prometheus.GaugeVec {
 
 // NewCounter create the counter metric
 func NewCounter(namespace, subsystem, name, metric string,
-	help string, labels []string, constLabels []Label) *prometheus.CounterVec {
+	help string, labels []string, constLabels LabelMap) *prometheus.CounterVec {
 
 	metricName, err := getAndValid(namespace, subsystem, name, metric, labels)
 	if err != nil {
@@ -92,7 +89,7 @@ func NewCounter(namespace, subsystem, name, metric string,
 
 // NewGauge create the gauge metric
 func NewGauge(namespace, subsystem, name, metric string,
-	help string, labels []string, constLabels []Label) *prometheus.GaugeVec {
+	help string, labels []string, constLabels LabelMap) *prometheus.GaugeVec {
 
 	metricName, err := getAndValid(namespace, subsystem, name, metric, labels)
 	if err != nil {
@@ -119,12 +116,12 @@ func NewGauge(namespace, subsystem, name, metric string,
 	return gaugeMap[metricName]
 }
 
-func mergeLabels(labels []string, constLabels []Label) []string {
+func mergeLabels(labels []string, constLabels LabelMap) []string {
 	l := make([]string, 0, len(labels)+len(constLabels))
 	l = append(l, labels...)
 
-	for _, v := range constLabels {
-		l = append(l, v.Name)
+	for k, _ := range constLabels {
+		l = append(l, k)
 	}
 
 	return l
@@ -200,9 +197,9 @@ func RemoveInvalidChars(name string) string {
 	return string(result)
 }
 
-func AddConstLabels(labels prometheus.Labels, constLabels []Label) prometheus.Labels {
-	for _, v := range constLabels {
-		labels[v.Name] = v.Value
+func AddConstLabels(labels prometheus.Labels, constLabels LabelMap) prometheus.Labels {
+	for k, v := range constLabels {
+		labels[k] = v
 	}
 	return labels
 }
