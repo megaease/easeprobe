@@ -4,11 +4,11 @@ import (
 	"github.com/megaease/easeprobe/probe"
 )
 
-var constLabels = make(map[string]bool)
-
 // MergeConstLabels merge const labels from all probers.
-// Prometheus requires all metric  of the same name have the same set of labels in a collector
+//
+//	Prometheus requires all metric  of the same name have the same set of labels in a collector
 func MergeConstLabels(ps []probe.Prober) {
+	var constLabels = make(map[string]bool)
 	for _, p := range ps {
 		for k, _ := range p.LabelMap() {
 			constLabels[k] = true
@@ -16,10 +16,11 @@ func MergeConstLabels(ps []probe.Prober) {
 	}
 
 	for _, p := range ps {
-		buildConstLabels(p)
+		buildConstLabels(p, constLabels)
 	}
 }
-func buildConstLabels(p probe.Prober) {
+
+func buildConstLabels(p probe.Prober, constLabels map[string]bool) {
 	ls := p.LabelMap()
 	if ls == nil {
 		ls = make(map[string]string)

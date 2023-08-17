@@ -143,3 +143,14 @@ func TestInvalidName(t *testing.T) {
 
 	monkey.UnpatchAll()
 }
+
+func TestDuplicateLabels(t *testing.T) {
+
+	_, err := getAndValid("namespace", "subsystem", "counter", "metric",
+		[]string{"label1", "label2"}, prometheus.Labels{"label3": "value3"})
+	assert.Nil(t, err)
+
+	_, err = getAndValid("namespace", "subsystem", "counter", "metric",
+		[]string{"label1", "label2"}, prometheus.Labels{"label1": "value1"})
+	assert.Error(t, err)
+}

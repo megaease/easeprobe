@@ -60,9 +60,10 @@ func Gauge(key string) *prometheus.GaugeVec {
 func NewCounter(namespace, subsystem, name, metric string,
 	help string, labels []string, constLabels prometheus.Labels) *prometheus.CounterVec {
 
-	metricName, err := getAndValid(namespace, subsystem, name, metric, labels)
+	metricName, err := getAndValid(namespace, subsystem, name, metric, labels, constLabels)
 	if err != nil {
-		log.Errorf("[%s] %v", module, err)
+		log.Errorf("[namespace: %s, subsystem: %s, name: %s, metric: %s] %v",
+			namespace, subsystem, name, metric, err)
 		return nil
 	}
 
@@ -89,7 +90,7 @@ func NewCounter(namespace, subsystem, name, metric string,
 func NewGauge(namespace, subsystem, name, metric string,
 	help string, labels []string, constLabels prometheus.Labels) *prometheus.GaugeVec {
 
-	metricName, err := getAndValid(namespace, subsystem, name, metric, labels)
+	metricName, err := getAndValid(namespace, subsystem, name, metric, labels, constLabels)
 	if err != nil {
 		log.Errorf("[%s] %v", module, err)
 		return nil
@@ -125,7 +126,7 @@ func mergeLabels(labels []string, constLabels prometheus.Labels) []string {
 	return l
 }
 
-func getAndValid(namespace, subsystem, name, metric string, labels []string) (string, error) {
+func getAndValid(namespace, subsystem, name, metric string, labels []string, constLabels prometheus.Labels) (string, error) {
 	metricName := GetName(namespace, subsystem, name, metric)
 	if ValidMetricName(metricName) == false {
 		return "", fmt.Errorf("Invalid metric name: %s", metricName)
@@ -136,6 +137,19 @@ func getAndValid(namespace, subsystem, name, metric string, labels []string) (st
 			return "", fmt.Errorf("Invalid label name: %s", l)
 		}
 	}
+
+	for l, _ := range constLabels {
+		if !ValidLabelName(l) {
+			return "", fmt.Errorf("invalid const label name: %s", l)
+		}
+	}
+
+	for _, l := range labels {
+		if _, ok := constLabels[l]; ok {
+			return "", fmt.Errorf("label '%s' is duplicated", l)
+		}
+	}
+
 	return metricName, nil
 }
 
