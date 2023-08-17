@@ -26,11 +26,11 @@ import (
 	"time"
 
 	"bou.ke/monkey"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
 	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/probe/base"
 )
 
 var testResults = []Result{
@@ -341,12 +341,18 @@ func TestMetaData(t *testing.T) {
 }
 
 type DummyProbe struct {
-	base.DefaultProbe
 	MyName     string
 	MyResult   *Result
 	MyChannels []string
 	MyTimeout  time.Duration
 	MyInterval time.Duration
+}
+
+func (d *DummyProbe) LabelMap() prometheus.Labels {
+	return prometheus.Labels{}
+}
+
+func (d *DummyProbe) SetLabelMap(l prometheus.Labels) {
 }
 
 func (d *DummyProbe) Kind() string {
