@@ -60,10 +60,14 @@ type DefaultProbe struct {
 	metrics                              *metrics      `yaml:"-" json:"-"`
 }
 
+// LabelMap return the const metric labels  for a probe in the configuration.
 func (d *DefaultProbe) LabelMap() prometheus.Labels {
 	return d.Labels
 }
 
+// SetLabelMap set a set of new labels for a probe.
+//
+//	Note: This method takes effect before Probe.Config() only
 func (d *DefaultProbe) SetLabelMap(labels prometheus.Labels) {
 	d.Labels = labels
 }
