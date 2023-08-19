@@ -22,12 +22,11 @@ import (
 )
 
 // MergeConstLabels merge const labels from all probers.
-//
-//	Prometheus requires all metric  of the same name have the same set of labels in a collector
+// Prometheus requires all metric  of the same name have the same set of labels in a collector
 func MergeConstLabels(ps []probe.Prober) {
 	var constLabels = make(map[string]bool)
 	for _, p := range ps {
-		for k, _ := range p.LabelMap() {
+		for k := range p.LabelMap() {
 			constLabels[k] = true
 		}
 	}
@@ -44,7 +43,7 @@ func buildConstLabels(p probe.Prober, constLabels map[string]bool) {
 		p.SetLabelMap(ls)
 	}
 
-	for k, _ := range constLabels {
+	for k := range constLabels {
 		if _, ok := ls[k]; !ok {
 			ls[k] = ""
 		}

@@ -80,7 +80,6 @@ func NewCounter(namespace, subsystem, name, metric string,
 		mergeLabels(labels, constLabels),
 	)
 
-	// registries[len(registries)-1].MustRegister(m)
 	prometheus.MustRegister(counterMap[metricName])
 	log.Infof("[%s] Counter <%s> is created!", module, metricName)
 	return counterMap[metricName]
@@ -129,16 +128,16 @@ func mergeLabels(labels []string, constLabels prometheus.Labels) []string {
 func getAndValid(namespace, subsystem, name, metric string, labels []string, constLabels prometheus.Labels) (string, error) {
 	metricName := GetName(namespace, subsystem, name, metric)
 	if ValidMetricName(metricName) == false {
-		return "", fmt.Errorf("Invalid metric name: %s", metricName)
+		return "", fmt.Errorf("invalid metric name: %s", metricName)
 	}
 
 	for _, l := range labels {
 		if ValidLabelName(l) == false {
-			return "", fmt.Errorf("Invalid label name: %s", l)
+			return "", fmt.Errorf("invalid label name: %s", l)
 		}
 	}
 
-	for l, _ := range constLabels {
+	for l := range constLabels {
 		if !ValidLabelName(l) {
 			return "", fmt.Errorf("invalid const label name: %s", l)
 		}
