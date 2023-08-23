@@ -33,18 +33,18 @@ type metrics struct {
 }
 
 // newMetrics create the metrics
-func newMetrics(subsystem, name string) *metrics {
+func newMetrics(subsystem, name string, constLabels prometheus.Labels) *metrics {
 	namespace := global.GetEaseProbe().Name
 	return &metrics{
 		TotalCnt: metric.NewGauge(namespace, subsystem, name, "total",
-			"Total Probed Counts", []string{"name", "status", "endpoint"}),
+			"Total Probed Counts", []string{"name", "status", "endpoint"}, constLabels),
 		TotalTime: metric.NewGauge(namespace, subsystem, name, "total_time",
-			"Total Time(Seconds) of Status", []string{"name", "status", "endpoint"}),
+			"Total Time(Seconds) of Status", []string{"name", "status", "endpoint"}, constLabels),
 		Duration: metric.NewGauge(namespace, subsystem, name, "duration",
-			"Probe Duration", []string{"name", "status", "endpoint"}),
+			"Probe Duration", []string{"name", "status", "endpoint"}, constLabels),
 		Status: metric.NewGauge(namespace, subsystem, name, "status",
-			"Probe Status", []string{"name", "endpoint"}),
+			"Probe Status", []string{"name", "endpoint"}, constLabels),
 		SLA: metric.NewGauge(namespace, subsystem, name, "sla",
-			"Probe SLA", []string{"name", "endpoint"}),
+			"Probe SLA", []string{"name", "endpoint"}, constLabels),
 	}
 }

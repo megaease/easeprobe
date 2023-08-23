@@ -23,13 +23,14 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/probe"
-	"github.com/megaease/easeprobe/probe/base"
 	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/metric"
+	"github.com/megaease/easeprobe/probe"
+	"github.com/megaease/easeprobe/probe/base"
 )
 
 // Kind is the type of probe
@@ -88,7 +89,7 @@ func (s *Server) Config(gConf global.ProbeSettings) error {
 	name := s.ProbeName
 	endpoint := global.CommandLine(s.Command, s.Args)
 
-	s.metrics = newMetrics(kind, tag)
+	s.metrics = newMetrics(kind, tag, s.Labels)
 
 	return s.Configure(gConf, kind, tag, name, endpoint, &BastionMap, s.DoProbe)
 
@@ -267,15 +268,15 @@ func (s *Server) RunSSHCmd() (string, error) {
 
 // ExportMetrics export shell metrics
 func (s *Server) ExportMetrics() {
-	s.metrics.ExitCode.With(prometheus.Labels{
+	s.metrics.ExitCode.With(metric.AddConstLabels(prometheus.Labels{
 		"name":     s.ProbeName,
 		"exit":     fmt.Sprintf("%d", s.exitCode),
 		"endpoint": s.ProbeResult.Endpoint,
-	}).Inc()
+	}, s.Labels)).Inc()
 
-	s.metrics.OutputLen.With(prometheus.Labels{
+	s.metrics.OutputLen.With(metric.AddConstLabels(prometheus.Labels{
 		"name":     s.ProbeName,
 		"exit":     fmt.Sprintf("%d", s.exitCode),
 		"endpoint": s.ProbeResult.Endpoint,
-	}).Set(float64(s.outputLen))
+	}, s.Labels)).Set(float64(s.outputLen))
 }

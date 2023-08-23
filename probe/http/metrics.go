@@ -37,26 +37,26 @@ type metrics struct {
 }
 
 // newMetrics create the HTTP metrics
-func newMetrics(subsystem, name string) *metrics {
+func newMetrics(subsystem, name string, constLabels prometheus.Labels) *metrics {
 	namespace := global.GetEaseProbe().Name
 	return &metrics{
 		StatusCode: metric.NewCounter(namespace, subsystem, name, "status_code",
-			"HTTP Status Code", []string{"name", "status", "endpoint"}),
+			"HTTP Status Code", []string{"name", "status", "endpoint"}, constLabels),
 		ContentLen: metric.NewGauge(namespace, subsystem, name, "content_len",
-			"HTTP Content Length", []string{"name", "status", "endpoint"}),
+			"HTTP Content Length", []string{"name", "status", "endpoint"}, constLabels),
 		DNSDuration: metric.NewGauge(namespace, subsystem, name, "dns_duration",
-			"DNS Duration", []string{"name", "status", "endpoint"}),
+			"DNS Duration", []string{"name", "status", "endpoint"}, constLabels),
 		ConnectDuration: metric.NewGauge(namespace, subsystem, name, "connect_duration",
-			"TCP Connection Duration", []string{"name", "status", "endpoint"}),
+			"TCP Connection Duration", []string{"name", "status", "endpoint"}, constLabels),
 		TLSDuration: metric.NewGauge(namespace, subsystem, name, "tls_duration",
-			"TLS Duration", []string{"name", "status", "endpoint"}),
+			"TLS Duration", []string{"name", "status", "endpoint"}, constLabels),
 		SendDuration: metric.NewGauge(namespace, subsystem, name, "send_duration",
-			"Send Duration", []string{"name", "status", "endpoint"}),
+			"Send Duration", []string{"name", "status", "endpoint"}, constLabels),
 		WaitDuration: metric.NewGauge(namespace, subsystem, name, "wait_duration",
-			"Wait Duration", []string{"name", "status", "endpoint"}),
+			"Wait Duration", []string{"name", "status", "endpoint"}, constLabels),
 		TransferDuration: metric.NewGauge(namespace, subsystem, name, "transfer_duration",
-			"Transfer Duration", []string{"name", "status", "endpoint"}),
+			"Transfer Duration", []string{"name", "status", "endpoint"}, constLabels),
 		TotalDuration: metric.NewGauge(namespace, subsystem, name, "total_duration",
-			"Total Duration", []string{"name", "status", "endpoint"}),
+			"Total Duration", []string{"name", "status", "endpoint"}, constLabels),
 	}
 }

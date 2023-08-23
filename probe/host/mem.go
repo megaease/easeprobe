@@ -21,15 +21,18 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/metric"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/metric"
+	"github.com/megaease/easeprobe/probe/base"
 )
 
 // Mem is the resource usage for memory and disk
 type Mem struct {
-	ResourceUsage `yaml:",inline"`
+	base.DefaultProbe `yaml:",inline"`
+	ResourceUsage     `yaml:",inline"`
 
 	Threshold float64 `yaml:"threshold"`
 	metrics   *prometheus.GaugeVec
@@ -97,28 +100,28 @@ func (m *Mem) CheckThreshold() (bool, string) {
 func (m *Mem) CreateMetrics(subsystem, name string) {
 	namespace := global.GetEaseProbe().Name
 	m.metrics = metric.NewGauge(namespace, subsystem, name, "memory",
-		"Memory Usage", []string{"host", "state"})
+		"Memory Usage", []string{"host", "state"}, m.Labels)
 }
 
 // ExportMetrics export the memory metrics
 func (m *Mem) ExportMetrics(name string) {
-	m.metrics.With(prometheus.Labels{
+	m.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "used",
-	}).Set(float64(m.Used))
+	}, m.Labels)).Set(float64(m.Used))
 
-	m.metrics.With(prometheus.Labels{
+	m.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "available",
-	}).Set(float64(m.Total - m.Used))
+	}, m.Labels)).Set(float64(m.Total - m.Used))
 
-	m.metrics.With(prometheus.Labels{
+	m.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "total",
-	}).Set(float64(m.Total))
+	}, m.Labels)).Set(float64(m.Total))
 
-	m.metrics.With(prometheus.Labels{
+	m.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "usage",
-	}).Set(m.Usage)
+	}, m.Labels)).Set(m.Usage)
 }

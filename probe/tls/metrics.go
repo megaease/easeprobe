@@ -33,13 +33,13 @@ type metrics struct {
 }
 
 // newMetrics create the HTTP metrics
-func newMetrics(subsystem, name string) *metrics {
+func newMetrics(subsystem, name string, constLabels prometheus.Labels) *metrics {
 	namespace := global.GetEaseProbe().Name
 	return &metrics{
 		EarliestCertExpiry: metric.NewGauge(namespace, subsystem, name, "earliest_cert_expiry",
-			"last TLS chain expiry in timestamp seconds", []string{"endpoint"}),
+			"last TLS chain expiry in timestamp seconds", []string{"endpoint"}, constLabels),
 		LastChainExpiryTimestampSeconds: metric.NewGauge(namespace, subsystem, name, "last_chain_expiry_timestamp_seconds",
-			"earliest TLS cert expiry in unix time", []string{"endpoint"}),
+			"earliest TLS cert expiry in unix time", []string{"endpoint"}, constLabels),
 	}
 }
 

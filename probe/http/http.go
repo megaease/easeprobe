@@ -30,13 +30,14 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/megaease/easeprobe/eval"
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/metric"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/base"
-	"github.com/prometheus/client_golang/prometheus"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // HTTP implements a config for HTTP.
@@ -171,7 +172,7 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 		}
 	}
 
-	h.metrics = newMetrics(kind, tag)
+	h.metrics = newMetrics(kind, tag, h.Labels)
 
 	log.Debugf("[%s / %s] configuration: %+v", h.ProbeKind, h.ProbeName, *h)
 	return nil
@@ -209,6 +210,7 @@ func (h *HTTP) DoProbe() (bool, string) {
 
 	resp, err := h.client.Do(req)
 	h.traceStats.Done()
+	prometheus.NewRegistry()
 
 	h.ExportMetrics(resp)
 	if err != nil {
@@ -278,57 +280,57 @@ func (h *HTTP) ExportMetrics(resp *http.Response) {
 		code = resp.StatusCode
 		len = int(resp.ContentLength)
 	}
-	h.metrics.StatusCode.With(prometheus.Labels{
+	h.metrics.StatusCode.With(metric.AddConstLabels(prometheus.Labels{
 		"name":     h.ProbeName,
 		"status":   fmt.Sprintf("%d", code),
 		"endpoint": h.ProbeResult.Endpoint,
-	}).Inc()
+	}, h.Labels)).Inc()
 
-	h.metrics.ContentLen.With(prometheus.Labels{
+	h.metrics.ContentLen.With(metric.AddConstLabels(prometheus.Labels{
 		"name":     h.ProbeName,
 		"status":   fmt.Sprintf("%d", code),
 		"endpoint": h.ProbeResult.Endpoint,
-	}).Set(float64(len))
+	}, h.Labels)).Set(float64(len))
 
-	h.metrics.DNSDuration.With(prometheus.Labels{
+	h.metrics.DNSDuration.With(metric.AddConstLabels(prometheus.Labels{
 		"name":     h.ProbeName,
 		"status":   fmt.Sprintf("%d", code),
 		"endpoint": h.ProbeResult.Endpoint,
-	}).Set(toMS(h.traceStats.dnsTook))
+	}, h.Labels)).Set(toMS(h.traceStats.dnsTook))
 
-	h.metrics.ConnectDuration.With(prometheus.Labels{
+	h.metrics.ConnectDuration.With(metric.AddConstLabels(prometheus.Labels{
 		"name":     h.ProbeName,
 		"status":   fmt.Sprintf("%d", code),
 		"endpoint": h.ProbeResult.Endpoint,
-	}).Set(toMS(h.traceStats.connTook))
+	}, h.Labels)).Set(toMS(h.traceStats.connTook))
 
-	h.metrics.TLSDuration.With(prometheus.Labels{
+	h.metrics.TLSDuration.With(metric.AddConstLabels(prometheus.Labels{
 		"name":     h.ProbeName,
 		"status":   fmt.Sprintf("%d", code),
 		"endpoint": h.ProbeResult.Endpoint,
-	}).Set(toMS(h.traceStats.tlsTook))
+	}, h.Labels)).Set(toMS(h.traceStats.tlsTook))
 
-	h.metrics.SendDuration.With(prometheus.Labels{
+	h.metrics.SendDuration.With(metric.AddConstLabels(prometheus.Labels{
 		"name":     h.ProbeName,
 		"status":   fmt.Sprintf("%d", code),
 		"endpoint": h.ProbeResult.Endpoint,
-	}).Set(toMS(h.traceStats.sendTook))
+	}, h.Labels)).Set(toMS(h.traceStats.sendTook))
 
-	h.metrics.WaitDuration.With(prometheus.Labels{
+	h.metrics.WaitDuration.With(metric.AddConstLabels(prometheus.Labels{
 		"name":     h.ProbeName,
 		"status":   fmt.Sprintf("%d", code),
 		"endpoint": h.ProbeResult.Endpoint,
-	}).Set(toMS(h.traceStats.waitTook))
+	}, h.Labels)).Set(toMS(h.traceStats.waitTook))
 
-	h.metrics.TransferDuration.With(prometheus.Labels{
+	h.metrics.TransferDuration.With(metric.AddConstLabels(prometheus.Labels{
 		"name":     h.ProbeName,
 		"status":   fmt.Sprintf("%d", code),
 		"endpoint": h.ProbeResult.Endpoint,
-	}).Set(toMS(h.traceStats.transferTook))
+	}, h.Labels)).Set(toMS(h.traceStats.transferTook))
 
-	h.metrics.TotalDuration.With(prometheus.Labels{
+	h.metrics.TotalDuration.With(metric.AddConstLabels(prometheus.Labels{
 		"name":     h.ProbeName,
 		"status":   fmt.Sprintf("%d", code),
 		"endpoint": h.ProbeResult.Endpoint,
-	}).Set(toMS(h.traceStats.totalTook))
+	}, h.Labels)).Set(toMS(h.traceStats.totalTook))
 }

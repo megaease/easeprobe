@@ -21,14 +21,17 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/metric"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/metric"
+	"github.com/megaease/easeprobe/probe/base"
 )
 
 // Disks is the disk usage
 type Disks struct {
+	base.DefaultProbe
 	Mount []string
 	Usage []ResourceUsage
 
@@ -120,34 +123,34 @@ func (d *Disks) CheckThreshold() (bool, string) {
 func (d *Disks) CreateMetrics(subsystem, name string) {
 	namespace := global.GetEaseProbe().Name
 	d.metrics = metric.NewGauge(namespace, subsystem, name, "disk",
-		"Disk Usage", []string{"host", "disk", "state"})
+		"Disk Usage", []string{"host", "disk", "state"}, d.Labels)
 }
 
 // ExportMetrics export the disk metrics
 func (d *Disks) ExportMetrics(name string) {
 	for _, disk := range d.Usage {
-		d.metrics.With(prometheus.Labels{
+		d.metrics.With(metric.AddConstLabels(prometheus.Labels{
 			"host":  name,
 			"disk":  disk.Tag,
 			"state": "used",
-		}).Set(float64(disk.Used))
+		}, d.Labels)).Set(float64(disk.Used))
 
-		d.metrics.With(prometheus.Labels{
+		d.metrics.With(metric.AddConstLabels(prometheus.Labels{
 			"host":  name,
 			"disk":  disk.Tag,
 			"state": "available",
-		}).Set(float64(disk.Total - disk.Used))
+		}, d.Labels)).Set(float64(disk.Total - disk.Used))
 
-		d.metrics.With(prometheus.Labels{
+		d.metrics.With(metric.AddConstLabels(prometheus.Labels{
 			"host":  name,
 			"disk":  disk.Tag,
 			"state": "total",
-		}).Set(float64(disk.Total))
+		}, d.Labels)).Set(float64(disk.Total))
 
-		d.metrics.With(prometheus.Labels{
+		d.metrics.With(metric.AddConstLabels(prometheus.Labels{
 			"host":  name,
 			"disk":  disk.Tag,
 			"state": "usage",
-		}).Set(disk.Usage)
+		}, d.Labels)).Set(disk.Usage)
 	}
 }

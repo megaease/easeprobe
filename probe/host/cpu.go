@@ -21,23 +21,26 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/metric"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/metric"
+	"github.com/megaease/easeprobe/probe/base"
 )
 
 // CPU is the cpu usage
 // "1.6 us,  1.6 sy,  3.2 ni, 91.9 id,  1.6 wa,  0.0 hi,  0.0 si,  0.0 st"
 type CPU struct {
-	User  float64 `yaml:"user"`
-	Sys   float64 `yaml:"sys"`
-	Nice  float64 `yaml:"nice"`
-	Idle  float64 `yaml:"idle"`
-	Wait  float64 `yaml:"wait"`
-	Hard  float64 `yaml:"hard"`
-	Soft  float64 `yaml:"soft"`
-	Steal float64 `yaml:"steal"`
+	base.DefaultProbe `yaml:",inline"`
+	User              float64 `yaml:"user"`
+	Sys               float64 `yaml:"sys"`
+	Nice              float64 `yaml:"nice"`
+	Idle              float64 `yaml:"idle"`
+	Wait              float64 `yaml:"wait"`
+	Hard              float64 `yaml:"hard"`
+	Soft              float64 `yaml:"soft"`
+	Steal             float64 `yaml:"steal"`
 
 	Threshold float64 `yaml:"threshold"`
 	metrics   *prometheus.GaugeVec
@@ -110,54 +113,54 @@ func (c *CPU) CheckThreshold() (bool, string) {
 func (c *CPU) CreateMetrics(subsystem, name string) {
 	namespace := global.GetEaseProbe().Name
 	c.metrics = metric.NewGauge(namespace, subsystem, name, "cpu",
-		"CPU Usage", []string{"host", "state"})
+		"CPU Usage", []string{"host", "state"}, c.Labels)
 }
 
 // ExportMetrics export the cpu metrics
 func (c *CPU) ExportMetrics(name string) {
 	// CPU metrics
-	c.metrics.With(prometheus.Labels{
+	c.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "usage",
-	}).Set(100 - c.Idle)
+	}, c.Labels)).Set(100 - c.Idle)
 
-	c.metrics.With(prometheus.Labels{
+	c.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "idle",
-	}).Set(c.Idle)
+	}, c.Labels)).Set(c.Idle)
 
-	c.metrics.With(prometheus.Labels{
+	c.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "user",
-	}).Set(c.User)
+	}, c.Labels)).Set(c.User)
 
-	c.metrics.With(prometheus.Labels{
+	c.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "sys",
-	}).Set(c.Sys)
+	}, c.Labels)).Set(c.Sys)
 
-	c.metrics.With(prometheus.Labels{
+	c.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "nice",
-	}).Set(c.Nice)
+	}, c.Labels)).Set(c.Nice)
 
-	c.metrics.With(prometheus.Labels{
+	c.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "wait",
-	}).Set(c.Wait)
+	}, c.Labels)).Set(c.Wait)
 
-	c.metrics.With(prometheus.Labels{
+	c.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "hard",
-	}).Set(c.Hard)
+	}, c.Labels)).Set(c.Hard)
 
-	c.metrics.With(prometheus.Labels{
+	c.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "soft",
-	}).Set(c.Soft)
+	}, c.Labels)).Set(c.Soft)
 
-	c.metrics.With(prometheus.Labels{
+	c.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "steal",
-	}).Set(c.Steal)
+	}, c.Labels)).Set(c.Steal)
 }

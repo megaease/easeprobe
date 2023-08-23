@@ -21,16 +21,19 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/metric"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/metric"
+	"github.com/megaease/easeprobe/probe/base"
 )
 
 // Load is the load average of the host
 type Load struct {
-	Core    int64              `json:"core"`
-	Metrics map[string]float64 `json:"metrics"`
+	base.DefaultProbe `yaml:",inline"`
+	Core              int64              `json:"core"`
+	Metrics           map[string]float64 `json:"metrics"`
 
 	Threshold map[string]float64
 	metrics   *prometheus.GaugeVec
@@ -128,23 +131,23 @@ func (l *Load) CheckThreshold() (bool, string) {
 func (l *Load) CreateMetrics(subsystem, name string) {
 	namespace := global.GetEaseProbe().Name
 	l.metrics = metric.NewGauge(namespace, subsystem, name, "load",
-		"Load Average", []string{"host", "state"})
+		"Load Average", []string{"host", "state"}, l.Labels)
 }
 
 // ExportMetrics export the load average metrics
 func (l *Load) ExportMetrics(name string) {
-	l.metrics.With(prometheus.Labels{
+	l.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "m1",
-	}).Set(l.Metrics["m1"])
+	}, l.Labels)).Set(l.Metrics["m1"])
 
-	l.metrics.With(prometheus.Labels{
+	l.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "m5",
-	}).Set(l.Metrics["m5"])
+	}, l.Labels)).Set(l.Metrics["m5"])
 
-	l.metrics.With(prometheus.Labels{
+	l.metrics.With(metric.AddConstLabels(prometheus.Labels{
 		"host":  name,
 		"state": "m15",
-	}).Set(l.Metrics["m15"])
+	}, l.Labels)).Set(l.Metrics["m15"])
 }

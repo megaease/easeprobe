@@ -30,12 +30,12 @@ type metrics struct {
 }
 
 // newMetrics create the shell metrics
-func newMetrics(subsystem, name string) *metrics {
+func newMetrics(subsystem, name string, constLabels prometheus.Labels) *metrics {
 	namespace := global.GetEaseProbe().Name
 	return &metrics{
 		ExitCode: metric.NewCounter(namespace, subsystem, name, "exit_code",
-			"Exit Code", []string{"name", "exit", "endpoint"}),
+			"Exit Code", []string{"name", "exit", "endpoint"}, constLabels),
 		OutputLen: metric.NewGauge(namespace, subsystem, name, "output_len",
-			"Output Length", []string{"name", "exit", "endpoint"}),
+			"Output Length", []string{"name", "exit", "endpoint"}, constLabels),
 	}
 }

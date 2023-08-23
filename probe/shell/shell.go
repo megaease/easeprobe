@@ -24,11 +24,13 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/probe"
-	"github.com/megaease/easeprobe/probe/base"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/metric"
+	"github.com/megaease/easeprobe/probe"
+	"github.com/megaease/easeprobe/probe/base"
 )
 
 // Shell implements a config for shell command (os.Exec)
@@ -60,7 +62,7 @@ func (s *Shell) Config(gConf global.ProbeSettings) error {
 		return err
 	}
 
-	s.metrics = newMetrics(kind, tag)
+	s.metrics = newMetrics(kind, tag, s.Labels)
 
 	log.Debugf("[%s / %s] configuration: %+v", s.ProbeKind, s.ProbeName, *s)
 	return nil
@@ -115,15 +117,15 @@ func (s *Shell) DoProbe() (bool, string) {
 
 // ExportMetrics export shell metrics
 func (s *Shell) ExportMetrics() {
-	s.metrics.ExitCode.With(prometheus.Labels{
+	s.metrics.ExitCode.With(metric.AddConstLabels(prometheus.Labels{
 		"name":     s.ProbeName,
 		"exit":     fmt.Sprintf("%d", s.exitCode),
 		"endpoint": s.ProbeResult.Endpoint,
-	}).Inc()
+	}, s.Labels)).Inc()
 
-	s.metrics.OutputLen.With(prometheus.Labels{
+	s.metrics.OutputLen.With(metric.AddConstLabels(prometheus.Labels{
 		"name":     s.ProbeName,
 		"exit":     fmt.Sprintf("%d", s.exitCode),
 		"endpoint": s.ProbeResult.Endpoint,
-	}).Set(float64(s.outputLen))
+	}, s.Labels)).Set(float64(s.outputLen))
 }

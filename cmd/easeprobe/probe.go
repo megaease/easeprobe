@@ -21,14 +21,17 @@ import (
 	"sync"
 	"time"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/megaease/easeprobe/channel"
 	"github.com/megaease/easeprobe/conf"
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/probe"
-	log "github.com/sirupsen/logrus"
 )
 
 func configProbers(probers []probe.Prober) []probe.Prober {
+	conf.MergeConstLabels(probers)
+
 	gProbeConf := global.ProbeSettings{
 		Interval:                      conf.Get().Settings.Probe.Interval,
 		Timeout:                       conf.Get().Settings.Probe.Timeout,

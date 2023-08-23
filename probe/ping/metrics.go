@@ -34,22 +34,22 @@ type metrics struct {
 }
 
 // newMetrics create the metrics
-func newMetrics(subsystem, name string) *metrics {
+func newMetrics(subsystem, name string, constLabels prometheus.Labels) *metrics {
 	namespace := global.GetEaseProbe().Name
 	return &metrics{
 		PacketsSent: metric.NewCounter(namespace, subsystem, name, "sent",
-			"Total Package Sent", []string{"name", "endpoint"}),
+			"Total Package Sent", []string{"name", "endpoint"}, constLabels),
 		PacketsRecv: metric.NewCounter(namespace, subsystem, name, "recv",
-			"Total Package Received", []string{"name", "endpoint"}),
+			"Total Package Received", []string{"name", "endpoint"}, constLabels),
 		PacketLoss: metric.NewGauge(namespace, subsystem, name, "loss",
-			"Package Loss Percentage", []string{"name", "endpoint"}),
+			"Package Loss Percentage", []string{"name", "endpoint"}, constLabels),
 		MinRtt: metric.NewGauge(namespace, subsystem, name, "min_rtt",
-			"Minimum Round Trip Time", []string{"name", "endpoint"}),
+			"Minimum Round Trip Time", []string{"name", "endpoint"}, constLabels),
 		MaxRtt: metric.NewGauge(namespace, subsystem, name, "max_rtt",
-			"Maximum Round Trip Time", []string{"name", "endpoint"}),
+			"Maximum Round Trip Time", []string{"name", "endpoint"}, constLabels),
 		AvgRtt: metric.NewGauge(namespace, subsystem, name, "avg_rtt",
-			"Average Round Trip Time", []string{"name", "endpoint"}),
+			"Average Round Trip Time", []string{"name", "endpoint"}, constLabels),
 		StdDevRtt: metric.NewGauge(namespace, subsystem, name, "stddev_rtt",
-			"Standard Deviation of Round Trip Time", []string{"name", "endpoint"}),
+			"Standard Deviation of Round Trip Time", []string{"name", "endpoint"}, constLabels),
 	}
 }

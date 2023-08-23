@@ -28,11 +28,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/megaease/easeprobe/global"
-	"github.com/megaease/easeprobe/probe/base"
 	"github.com/prometheus/client_golang/prometheus"
-
 	log "github.com/sirupsen/logrus"
+
+	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/metric"
+	"github.com/megaease/easeprobe/probe/base"
 )
 
 // TLS implements a config for TLS
@@ -76,7 +77,7 @@ func (t *TLS) Config(gConf global.ProbeSettings) error {
 		}
 	}
 
-	t.metrics = newMetrics(kind, tag)
+	t.metrics = newMetrics(kind, tag, t.Labels)
 
 	log.Debugf("[%s / %s] configuration: %+v", t.ProbeKind, t.ProbeName, *t)
 	return nil
@@ -137,12 +138,12 @@ func (t *TLS) DoProbe() (bool, string) {
 
 	state := tconn.ConnectionState()
 
-	t.metrics.EarliestCertExpiry.With(prometheus.Labels{
+	t.metrics.EarliestCertExpiry.With(metric.AddConstLabels(prometheus.Labels{
 		"endpoint": t.ProbeResult.Endpoint,
-	}).Set(float64(getEarliestCertExpiry(&state).Unix()))
-	t.metrics.LastChainExpiryTimestampSeconds.With(prometheus.Labels{
+	}, t.Labels)).Set(float64(getEarliestCertExpiry(&state).Unix()))
+	t.metrics.EarliestCertExpiry.With(metric.AddConstLabels(prometheus.Labels{
 		"endpoint": t.ProbeResult.Endpoint,
-	}).Set(float64(getLastChainExpiry(&state).Unix()))
+	}, t.Labels)).Set(float64(getLastChainExpiry(&state).Unix()))
 
 	return true, "TLS Endpoint Verified Successfully!"
 }
