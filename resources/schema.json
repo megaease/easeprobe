@@ -11,6 +11,14 @@
       },
       "type": "object"
     },
+    "Labels": {
+      "patternProperties": {
+        ".*": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "conf_Conf": {
       "properties": {
         "version": {
@@ -1371,6 +1379,11 @@
           "title": "Probe Interval",
           "description": "the interval of probe"
         },
+        "labels": {
+          "$ref": "#/$defs/Labels",
+          "title": "Probe LabelMap",
+          "description": "the labels of probe"
+        },
         "failure": {
           "type": "integer",
           "title": "Failure Threshold",
@@ -1516,6 +1529,11 @@
           "type": "string",
           "title": "Probe Interval",
           "description": "the interval of probe"
+        },
+        "labels": {
+          "$ref": "#/$defs/Labels",
+          "title": "Probe LabelMap",
+          "description": "the labels of probe"
         },
         "failure": {
           "type": "integer",
@@ -1679,6 +1697,11 @@
           "title": "Probe Interval",
           "description": "the interval of probe"
         },
+        "labels": {
+          "$ref": "#/$defs/Labels",
+          "title": "Probe LabelMap",
+          "description": "the labels of probe"
+        },
         "failure": {
           "type": "integer",
           "title": "Failure Threshold",
@@ -1838,6 +1861,11 @@
           "title": "Probe Interval",
           "description": "the interval of probe"
         },
+        "labels": {
+          "$ref": "#/$defs/Labels",
+          "title": "Probe LabelMap",
+          "description": "the labels of probe"
+        },
         "failure": {
           "type": "integer",
           "title": "Failure Threshold",
@@ -1915,6 +1943,11 @@
           "type": "string",
           "title": "Probe Interval",
           "description": "the interval of probe"
+        },
+        "labels": {
+          "$ref": "#/$defs/Labels",
+          "title": "Probe LabelMap",
+          "description": "the labels of probe"
         },
         "failure": {
           "type": "integer",
@@ -2065,6 +2098,11 @@
           "title": "Probe Interval",
           "description": "the interval of probe"
         },
+        "labels": {
+          "$ref": "#/$defs/Labels",
+          "title": "Probe LabelMap",
+          "description": "the labels of probe"
+        },
         "failure": {
           "type": "integer",
           "title": "Failure Threshold",
@@ -2183,6 +2221,11 @@
           "title": "Probe Interval",
           "description": "the interval of probe"
         },
+        "labels": {
+          "$ref": "#/$defs/Labels",
+          "title": "Probe LabelMap",
+          "description": "the labels of probe"
+        },
         "failure": {
           "type": "integer",
           "title": "Failure Threshold",
@@ -2245,6 +2288,11 @@
           "type": "string",
           "title": "Probe Interval",
           "description": "the interval of probe"
+        },
+        "labels": {
+          "$ref": "#/$defs/Labels",
+          "title": "Probe LabelMap",
+          "description": "the labels of probe"
         },
         "failure": {
           "type": "integer",
