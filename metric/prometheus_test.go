@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/procodr/monkey"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
 )
 
