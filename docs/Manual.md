@@ -41,6 +41,7 @@ EaseProbe has the following major modules:
     - [1.9.5 Kafka](#195-kafka)
     - [1.9.6 PostgreSQL](#196-postgresql)
     - [1.9.7 Zookeeper](#197-zookeeper)
+  - [1.10 WebSocket](#110-websocket)
 - [2. Notification](#2-notification)
   - [2.1 Slack](#21-slack)
   - [2.2 Discord](#22-discord)
@@ -850,6 +851,16 @@ client:
     ca: /path/to/file.ca
     cert: /path/to/file.crt
     key: /path/to/file.key
+```
+## 1.10 WebSocket
+
+The websocket probe uses `websocket` identifier, it pings a websocket server with Ping/Pong message type of the WebSocket Protocol.
+
+```yaml
+websocket:
+    name: asr-server
+    url: wss://example.com/asr/
+    timeout: 5s
 ```
 
 

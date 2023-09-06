@@ -43,6 +43,7 @@ import (
 	"github.com/megaease/easeprobe/probe/ssh"
 	"github.com/megaease/easeprobe/probe/tcp"
 	"github.com/megaease/easeprobe/probe/tls"
+	"github.com/megaease/easeprobe/probe/websocket"
 
 	"github.com/invopop/jsonschema"
 	log "github.com/sirupsen/logrus"
@@ -138,17 +139,18 @@ type Settings struct {
 
 // Conf is Probe configuration
 type Conf struct {
-	Version  string          `yaml:"version" json:"version,omitempty" jsonschema:"title=Version,description=Version of the EaseProbe configuration"`
-	HTTP     []http.HTTP     `yaml:"http" json:"http,omitempty" jsonschema:"title=HTTP Probe,description=HTTP Probe Configuration"`
-	TCP      []tcp.TCP       `yaml:"tcp" json:"tcp,omitempty" jsonschema:"title=TCP Probe,description=TCP Probe Configuration"`
-	Shell    []shell.Shell   `yaml:"shell" json:"shell,omitempty" jsonschema:"title=Shell Probe,description=Shell Probe Configuration"`
-	Client   []client.Client `yaml:"client" json:"client,omitempty" jsonschema:"title=Native Client Probe,description=Native Client Probe Configuration"`
-	SSH      ssh.SSH         `yaml:"ssh" json:"ssh,omitempty" jsonschema:"title=SSH Probe,description=SSH Probe Configuration"`
-	TLS      []tls.TLS       `yaml:"tls" json:"tls,omitempty" jsonschema:"title=TLS Probe,description=TLS Probe Configuration"`
-	Host     host.Host       `yaml:"host" json:"host,omitempty" jsonschema:"title=Host Probe,description=Host Probe Configuration"`
-	Ping     []ping.Ping     `yaml:"ping" json:"ping,omitempty" jsonschema:"title=Ping Probe,description=Ping Probe Configuration"`
-	Notify   notify.Config   `yaml:"notify" json:"notify,omitempty" jsonschema:"title=Notification,description=Notification Configuration"`
-	Settings Settings        `yaml:"settings" json:"settings,omitempty" jsonschema:"title=Global Settings,description=EaseProbe Global configuration"`
+	Version   string                `yaml:"version" json:"version,omitempty" jsonschema:"title=Version,description=Version of the EaseProbe configuration"`
+	HTTP      []http.HTTP           `yaml:"http" json:"http,omitempty" jsonschema:"title=HTTP Probe,description=HTTP Probe Configuration"`
+	TCP       []tcp.TCP             `yaml:"tcp" json:"tcp,omitempty" jsonschema:"title=TCP Probe,description=TCP Probe Configuration"`
+	Shell     []shell.Shell         `yaml:"shell" json:"shell,omitempty" jsonschema:"title=Shell Probe,description=Shell Probe Configuration"`
+	Client    []client.Client       `yaml:"client" json:"client,omitempty" jsonschema:"title=Native Client Probe,description=Native Client Probe Configuration"`
+	SSH       ssh.SSH               `yaml:"ssh" json:"ssh,omitempty" jsonschema:"title=SSH Probe,description=SSH Probe Configuration"`
+	TLS       []tls.TLS             `yaml:"tls" json:"tls,omitempty" jsonschema:"title=TLS Probe,description=TLS Probe Configuration"`
+	Host      host.Host             `yaml:"host" json:"host,omitempty" jsonschema:"title=Host Probe,description=Host Probe Configuration"`
+	Ping      []ping.Ping           `yaml:"ping" json:"ping,omitempty" jsonschema:"title=Ping Probe,description=Ping Probe Configuration"`
+	WebSocket []websocket.WebSocket `yaml:"websocket" json:"websocket,omitempty" jsonschema:"title=WebSocket Probe,description=WebSocket Probe Configuration"`
+	Notify    notify.Config         `yaml:"notify" json:"notify,omitempty" jsonschema:"title=Notification,description=Notification Configuration"`
+	Settings  Settings              `yaml:"settings" json:"settings,omitempty" jsonschema:"title=Global Settings,description=EaseProbe Global configuration"`
 }
 
 // JSONSchema return the json schema of the configuration
