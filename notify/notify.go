@@ -34,7 +34,6 @@ import (
 	"github.com/megaease/easeprobe/notify/telegram"
 	"github.com/megaease/easeprobe/notify/wecom"
 	"github.com/megaease/easeprobe/probe"
-	"github.com/megaease/easeprobe/probe/websocket"
 )
 
 // Config is the notify configuration
@@ -51,7 +50,6 @@ type Config struct {
 	Sms         []sms.NotifyConfig         `yaml:"sms,omitempty" json:"sms,omitempty" jsonschema:"title=SMS Notification,description=SMS Notification Configuration"`
 	Teams       []teams.NotifyConfig       `yaml:"teams,omitempty" json:"teams,omitempty" jsonschema:"title=Teams Notification,description=Teams Notification Configuration"`
 	Shell       []shell.NotifyConfig       `yaml:"shell,omitempty" json:"shell,omitempty" jsonschema:"title=Shell Notification,description=Shell Notification Configuration"`
-	WebSocket   []websocket.WebSocket      `yaml:"webSocket,omitempty" json:"webSocket,omitempty" jsonschema:"title=WebSocket Notification,description=WebSocket Notification Configuration"`
 	RingCentral []ringcentral.NotifyConfig `yaml:"ringcentral,omitempty" json:"ringcentral,omitempty" jsonschema:"title=RingCentral Notification,description=RingCentral Notification Configuration"`
 }
 

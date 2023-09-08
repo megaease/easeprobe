@@ -73,14 +73,13 @@ func (h *WebSocket) DoProbe() (bool, string) {
 	}
 
 	begin := time.Now()
-	remaining := new(time.Duration)
-	*remaining = h.ProbeTimeout
+	remaining := h.ProbeTimeout
 
 	var dial = websocket.DefaultDialer
 	dial.TLSClientConfig = &tls.Config{
 		InsecureSkipVerify: true,
 	}
-	dial.HandshakeTimeout = *remaining
+	dial.HandshakeTimeout = remaining
 	if h.proxy != nil {
 		dial.Proxy = func(request *http.Request) (*url.URL, error) {
 			return h.proxy, nil
@@ -114,15 +113,16 @@ func (h *WebSocket) DoProbe() (bool, string) {
 		}
 	}()
 
-	*remaining = h.ProbeTimeout - time.Now().Sub(begin)
-	err = ws.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(*remaining))
+	remaining = h.ProbeTimeout - time.Now().Sub(begin)
+	err = ws.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(remaining))
 	if err != nil {
 		ws.Close()
 		wg.Wait()
 		return false, err.Error()
 	}
 
-	t := time.NewTimer(*remaining)
+	remaining = h.ProbeTimeout - time.Now().Sub(begin)
+	t := time.NewTimer(remaining)
 	defer t.Stop()
 
 	select {
@@ -131,10 +131,10 @@ func (h *WebSocket) DoProbe() (bool, string) {
 		wg.Wait()
 		return false, "ping timeout"
 	case <-pingPongChan:
-		*remaining = h.ProbeTimeout - time.Now().Sub(begin)
+		remaining = h.ProbeTimeout - time.Now().Sub(begin)
 		closeCode := bytes.NewBufferString(fmt.Sprintf("%d", websocket.CloseNormalClosure))
 		// try to do a graceful close, but do not care the result
-		err := ws.WriteControl(websocket.CloseMessage, closeCode.Bytes(), time.Now().Add(*remaining))
+		err := ws.WriteControl(websocket.CloseMessage, closeCode.Bytes(), time.Now().Add(remaining))
 		if err != nil {
 			log.Error(err)
 		}
