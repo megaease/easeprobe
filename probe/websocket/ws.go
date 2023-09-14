@@ -18,12 +18,10 @@
 package websocket
 
 import (
-	"bytes"
 	"crypto/tls"
 	"fmt"
 	"net/http"
 	"net/url"
-	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -33,6 +31,7 @@ import (
 	"github.com/megaease/easeprobe/probe/base"
 )
 
+// WebSocket implements a Config for a websocket prober.
 type WebSocket struct {
 	base.DefaultProbe `yaml:",inline"`
 	URL               string            `yaml:"url" json:"url" jsonschema:"format=uri,title=WebSocket URL,description=WebSocket URL to probe"`
@@ -42,6 +41,7 @@ type WebSocket struct {
 	proxy *url.URL
 }
 
+// Config Websocket config Object
 func (h *WebSocket) Config(gConf global.ProbeSettings) error {
 	kind := "websocket"
 	tag := ""
@@ -66,6 +66,8 @@ func (h *WebSocket) Config(gConf global.ProbeSettings) error {
 
 	return nil
 }
+
+// DoProbe return the checking result
 func (h *WebSocket) DoProbe() (bool, string) {
 	wsHeader := make(http.Header)
 	for k, v := range h.Headers {
@@ -99,12 +101,9 @@ func (h *WebSocket) DoProbe() (bool, string) {
 		return nil
 	})
 
-	// doing nothing else but trigger the read message loop to receive the
+	// doing nothing but trigger the read message loop to receive the
 	// Pong and Close messages from the server. exit after ws.Close()
-	wg := sync.WaitGroup{}
-	wg.Add(1)
 	go func() {
-		defer wg.Done()
 		for {
 			_, _, err := ws.ReadMessage()
 			if err != nil {
@@ -113,34 +112,28 @@ func (h *WebSocket) DoProbe() (bool, string) {
 		}
 	}()
 
-	remaining = h.ProbeTimeout - time.Now().Sub(begin)
+	remaining = h.ProbeTimeout - time.Since(begin)
 	err = ws.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(remaining))
 	if err != nil {
-		ws.Close()
-		wg.Wait()
 		return false, err.Error()
 	}
 
-	remaining = h.ProbeTimeout - time.Now().Sub(begin)
+	remaining = h.ProbeTimeout - time.Since(begin)
 	t := time.NewTimer(remaining)
 	defer t.Stop()
 
 	select {
 	case <-t.C:
-		ws.Close()
-		wg.Wait()
 		return false, "ping timeout"
 	case <-pingPongChan:
-		remaining = h.ProbeTimeout - time.Now().Sub(begin)
-		closeCode := bytes.NewBufferString(fmt.Sprintf("%d", websocket.CloseNormalClosure))
+		remaining = h.ProbeTimeout - time.Since(begin)
+		closeCode := websocket.FormatCloseMessage(websocket.CloseNormalClosure, "")
 		// try to do a graceful close, but do not care the result
-		err := ws.WriteControl(websocket.CloseMessage, closeCode.Bytes(), time.Now().Add(remaining))
+		err := ws.WriteControl(websocket.CloseMessage, closeCode, time.Now().Add(remaining))
 		if err != nil {
 			log.Error(err)
 		}
 
-		ws.Close()
-		wg.Wait()
 		return true, ""
 	}
 }

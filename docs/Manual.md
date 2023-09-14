@@ -858,9 +858,22 @@ The websocket probe uses `websocket` identifier, it pings a websocket server wit
 
 ```yaml
 websocket:
-    name: asr-server
+  - name: asr-server
     url: wss://example.com/asr/
+  - name: tts-server
+    url: wss://example.com/tts/
     timeout: 5s
+    interval: 30s
+    headers:
+      Authorization: Bearer 2322f5d2-52d7-11ee-be56-0242ac120002
+    proxy: http://192.168.18.7
+    labels:
+      service: tts
+      idc: idc-a
+
+
+
+
 ```
 
 
