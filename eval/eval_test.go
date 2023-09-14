@@ -307,7 +307,7 @@ func TestFailure(t *testing.T) {
 
 	result, err = eval.Evaluate()
 	assert.NotNil(t, err)
-	assert.Contains(t, err.Error(), "Unsupported")
+	assert.Contains(t, err.Error(), "unsupported")
 	assert.False(t, result)
 
 	monkey.Patch(govaluate.NewEvaluableExpressionWithFunctions, func(expression string, functions map[string]govaluate.ExpressionFunction) (*govaluate.EvaluableExpression, error) {
