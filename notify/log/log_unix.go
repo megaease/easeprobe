@@ -65,7 +65,7 @@ func (c *NotifyConfig) IsSyslog() bool {
 // HasNetwork returns true if the log has network configuration
 func (c *NotifyConfig) HasNetwork() bool {
 	// if is not syslog, then return false
-	if c.IsSyslog() == false {
+	if !c.IsSyslog() {
 		return false
 	}
 	// if is syslog, but not configured network, then return false
@@ -88,7 +88,7 @@ func (c *NotifyConfig) ConfigLog() error {
 	hasNetwork := c.HasNetwork()
 
 	// syslog && network configuration error
-	if isSyslog == true && hasNetwork == true { // remote syslog
+	if isSyslog && hasNetwork { // remote syslog
 		c.NotifyKind = syslogIdentifier
 		c.Type = SysLog
 		if err := c.checkNetworkProtocol(); err != nil {
@@ -101,7 +101,7 @@ func (c *NotifyConfig) ConfigLog() error {
 		}
 		c.logger.SetOutput(writer)
 		log.Infof("[%s / %s] - remote syslog (%s:%s) configured", c.Kind(), c.Name(), c.Network, c.Host)
-	} else if isSyslog == true { // only for local syslog
+	} else if isSyslog { // only for local syslog
 		c.NotifyKind = syslogIdentifier
 		c.Type = SysLog
 		writer, err := syslog.New(syslog.LOG_NOTICE, global.GetEaseProbe().Name)

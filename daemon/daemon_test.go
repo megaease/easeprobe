@@ -100,12 +100,12 @@ func TestPIDFileFailed(t *testing.T) {
 	assert.NotNil(t, err)
 
 	file = "./"
-	conf, err = NewPIDFile(file)
+	NewPIDFile(file)
 	assert.FileExists(t, global.DefaultPIDFile)
 	os.RemoveAll(global.DefaultPIDFile)
 
 	file = "dir/easedprobe.pid"
-	conf, err = NewPIDFile(file)
+	conf, _ = NewPIDFile(file)
 	assert.FileExists(t, file)
 	conf.RemovePIDFile()
 	os.RemoveAll("dir")

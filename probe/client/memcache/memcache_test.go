@@ -108,7 +108,7 @@ func TestMemcache(t *testing.T) {
 
 	m.Data = map[string]string{}
 	m.ProbeTimeout = time.Second
-	s, msg = m.Probe()
+	s, _ = m.Probe()
 	assert.False(t, s)
 
 	monkey.PatchInstanceMethod(reflect.TypeOf(mc), "Ping", func(*memcache.Client) error {

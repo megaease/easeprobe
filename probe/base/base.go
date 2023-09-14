@@ -118,21 +118,21 @@ func (d *DefaultProbe) CheckStatusThreshold() probe.Status {
 	log.Debugf("%s - Status Threshold Checking - Current[%v], StatusCnt[%d], FailureThread[%d], SuccessThread[%d]",
 		title, c.CurrentStatus, c.StatusCount, s.Failure, s.Success)
 
-	if c.CurrentStatus == true && c.StatusCount >= s.Success {
+	if c.CurrentStatus && c.StatusCount >= s.Success {
 		if d.ProbeResult.Status != probe.StatusUp {
 			cnt := math.Max(float64(c.StatusCount), float64(s.Success))
 			log.Infof("%s - Status is UP! Threshold reached for success [%d/%d]", title, int(cnt), s.Success)
 		}
 		return probe.StatusUp
 	}
-	if c.CurrentStatus == false && c.StatusCount >= s.Failure {
+	if !c.CurrentStatus && c.StatusCount >= s.Failure {
 		if d.ProbeResult.Status != probe.StatusDown {
 			cnt := math.Max(float64(c.StatusCount), float64(s.Failure))
 			log.Infof("%s - Status is DOWN! Threshold reached for failure [%d/%d]", title, int(cnt), s.Failure)
 		}
 		return probe.StatusDown
 	}
-	if c.CurrentStatus == true {
+	if c.CurrentStatus {
 		log.Infof("%s - Status unchanged [%s]! Threshold is not reached for success [%d/%d].",
 			title, d.ProbeResult.PreStatus, c.StatusCount, s.Success)
 	} else {

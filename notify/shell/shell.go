@@ -71,7 +71,7 @@ func (c *NotifyConfig) RunShell(title, msg string) error {
 		env = append(env, fmt.Sprintf("%s=%s", k, v))
 	}
 	cmd.Stdin = strings.NewReader(envMap["EASEPROBE_CSV"])
-	if c.CleanEnv == false {
+	if !c.CleanEnv {
 		cmd.Env = append(os.Environ(), env...)
 	} else {
 		log.Infof("[%s / %s] clean the environment variables", c.NotifyKind, c.NotifyName)

@@ -109,10 +109,6 @@ func isDataFileExisted(file string) bool {
 	return true
 }
 
-func removeDataFile(file string) {
-	os.Remove(file)
-}
-
 func makeAllDir(file string) {
 	dir, _ := filepath.Split(file)
 	os.MkdirAll(dir, 0755)

@@ -66,7 +66,6 @@ func TestZooKeeper(t *testing.T) {
 		return []byte("test"), &zk.Stat{}, nil
 	})
 	monkey.PatchInstanceMethod(reflect.TypeOf(conn), "Close", func(_ *zk.Conn) {
-		return
 	})
 
 	monkey.Patch(zk.ConnectWithDialer, func(servers []string, sessionTimeout time.Duration, dialer zk.Dialer) (*zk.Conn, <-chan zk.Event, error) {
@@ -178,7 +177,6 @@ func TestData(t *testing.T) {
 	})
 	var conn *zk.Conn
 	monkey.PatchInstanceMethod(reflect.TypeOf(conn), "Close", func(_ *zk.Conn) {
-		return
 	})
 	monkey.PatchInstanceMethod(reflect.TypeOf(conn), "Get", func(_ *zk.Conn, path string) ([]byte, *zk.Stat, error) {
 		return []byte("test"), &zk.Stat{}, nil

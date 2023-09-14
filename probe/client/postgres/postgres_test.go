@@ -96,7 +96,7 @@ func TestPostgreSQL(t *testing.T) {
 		return &tls.Config{}, nil
 	})
 
-	pg, err = New(conf)
+	pg, _ = New(conf)
 	pgd = pgdriver.NewConnector(pg.ClientOptions...)
 	assert.True(t, pgd.Config().TLSConfig.InsecureSkipVerify)
 
@@ -186,7 +186,7 @@ func TestData(t *testing.T) {
 	conf.Data = map[string]string{
 		"database:table:column:key:1": "expected",
 	}
-	pg, err = New(conf)
+	pg, _ = New(conf)
 	s, m := pg.Probe()
 	assert.True(t, s)
 	assert.Contains(t, m, "Successfully")

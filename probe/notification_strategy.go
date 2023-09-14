@@ -123,7 +123,7 @@ func (n *NotificationStrategyData) NextNotification() {
 // ProcessStatus processes the probe status
 func (n *NotificationStrategyData) ProcessStatus(status bool) {
 	n.IsSent = false
-	if status == true {
+	if status {
 		n.Reset()
 		return
 	}

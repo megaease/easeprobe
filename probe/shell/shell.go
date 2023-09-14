@@ -75,7 +75,7 @@ func (s *Shell) DoProbe() (bool, string) {
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, s.Command, s.Args...)
-	if s.CleanEnv == false {
+	if !s.CleanEnv {
 		cmd.Env = append(os.Environ(), s.Env...)
 	} else {
 		log.Infof("[%s / %s] clean the environment variables", s.ProbeKind, s.ProbeName)

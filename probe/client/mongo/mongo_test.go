@@ -78,6 +78,7 @@ func TestMongo(t *testing.T) {
 
 	conf.Password = ""
 	mg, err = New(conf)
+	assert.Nil(t, err)
 	connStr = fmt.Sprintf("mongodb://%s/?connectTimeoutMS=%d",
 		conf.Host, conf.Timeout().Milliseconds())
 	assert.Equal(t, connStr, mg.ConnStr)
@@ -92,6 +93,7 @@ func TestMongo(t *testing.T) {
 	})
 
 	mg, err = New(conf)
+	assert.Nil(t, err)
 	assert.Equal(t, "Mongo", mg.Kind())
 	assert.Equal(t, connStr, mg.ConnStr)
 	assert.NotNil(t, mg.ClientOpt.TLSConfig)
@@ -175,6 +177,7 @@ func TestDta(t *testing.T) {
 		"database:collection": "{\"key\" : \"value\"}",
 	}
 	mg, err = New(conf)
+	assert.Nil(t, err)
 	s, m := mg.Probe()
 	assert.True(t, s)
 	assert.Contains(t, m, "Successfully")

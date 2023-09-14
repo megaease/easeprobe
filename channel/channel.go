@@ -129,7 +129,7 @@ func (c *Channel) WatchEvent(wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	// check if the channel is watching
-	if atomic.CompareAndSwapInt32(&(c.isWatch), 0, 1) == false {
+	if !atomic.CompareAndSwapInt32(&(c.isWatch), 0, 1) {
 		log.Warnf("[%s/ %s]: Channel is already watching!", kind, c.Name)
 		return
 	}
@@ -168,7 +168,7 @@ func (c *Channel) WatchEvent(wg *sync.WaitGroup) {
 
 			// if the status is DOWN, check the notification strategy
 			if result.Status == probe.StatusDown {
-				if result.Stat.NotificationStrategyData.NeedToSendNotification() == false {
+				if !result.Stat.NotificationStrategyData.NeedToSendNotification() {
 					log.Debugf("[%s / %s]: %s (%s) - Don't meet the notification condition [max=%d, notified=%d, failed=%d, next=%d], no notification.",
 						kind, c.Name, result.Name, result.Endpoint, nsd.MaxTimes, nsd.Notified, nsd.Failed, nsd.Next)
 					continue
@@ -184,7 +184,7 @@ func (c *Channel) WatchEvent(wg *sync.WaitGroup) {
 			}
 
 			for _, n := range c.Notifiers {
-				if IsDryNotify() == true {
+				if IsDryNotify() {
 					n.DryNotify(result)
 				} else {
 					go n.Notify(result)

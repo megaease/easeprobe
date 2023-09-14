@@ -121,7 +121,7 @@ func (s *Server) CheckThreshold(info Info) (bool, string) {
 
 	for _, metric := range s.hostMetrics {
 		s, m := metric.CheckThreshold()
-		if s == false {
+		if !s {
 			status = false
 			message = addMessage(message, m)
 		}

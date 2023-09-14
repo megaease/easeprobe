@@ -122,7 +122,7 @@ func (l *Log) Open() {
 		return
 	}
 	// using lumberjack if self rotate
-	if l.SelfRotate == true {
+	if l.SelfRotate {
 		log.Debugf("[Log] Self Rotate log file %s", l.File)
 		l.IsStdout = false
 		l.Writer = &lumberjack.Logger{
@@ -167,7 +167,7 @@ func (l *Log) GetWriter() io.Writer {
 
 // Rotate rotate the log file
 func (l *Log) Rotate() {
-	if l.Writer == nil || l.IsStdout == true {
+	if l.Writer == nil || l.IsStdout {
 		return
 	}
 	if lumberjackLogger, ok := l.Writer.(*lumberjack.Logger); ok {

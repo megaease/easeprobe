@@ -34,11 +34,8 @@ type MetricsType interface {
 }
 
 var (
-	registries   = make([]*prometheus.Registry, 0)
-	counterMap   = make(map[string]*prometheus.CounterVec)
-	gaugeMap     = make(map[string]*prometheus.GaugeVec)
-	histogramMap = make(map[string]*prometheus.HistogramVec)
-	summaryMap   = make(map[string]*prometheus.SummaryVec)
+	counterMap = make(map[string]*prometheus.CounterVec)
+	gaugeMap   = make(map[string]*prometheus.GaugeVec)
 )
 
 var (
@@ -127,12 +124,12 @@ func mergeLabels(labels []string, constLabels prometheus.Labels) []string {
 
 func getAndValid(namespace, subsystem, name, metric string, labels []string, constLabels prometheus.Labels) (string, error) {
 	metricName := GetName(namespace, subsystem, name, metric)
-	if ValidMetricName(metricName) == false {
+	if !ValidMetricName(metricName) {
 		return "", fmt.Errorf("invalid metric name: %s", metricName)
 	}
 
 	for _, l := range labels {
-		if ValidLabelName(l) == false {
+		if !ValidLabelName(l) {
 			return "", fmt.Errorf("invalid label name: %s", l)
 		}
 	}

@@ -175,16 +175,6 @@ func checkHTTPProbe(t *testing.T, probe httpProbe.HTTP) {
 	}
 }
 
-const confTCP = `
-tcp:
-  - name: Example SSH
-    host: example.com:22
-    timeout: 10s
-    interval: 2m
-  - name: Example HTTP
-    host: example.com:80
-`
-
 func checkTCPProbe(t *testing.T, probe tcp.TCP) {
 	switch probe.ProbeName {
 	case "Example SSH":
@@ -197,32 +187,6 @@ func checkTCPProbe(t *testing.T, probe tcp.TCP) {
 		t.Errorf("unexpected probe name %s", probe.ProbeName)
 	}
 }
-
-const confShell = `
-shell:
-  - name: Google Service
-    cmd: "./resources/scripts/probe/proxy.curl.sh"
-    args:
-      - "socks5://127.0.0.1:1085"
-      - "www.google.com"
-    timeout: 20s
-    interval: 1m
-    channels:
-        - "telegram#Dev"
-  - name: Redis (Local)
-    cmd: "redis-cli"
-    args:
-      - "-h"
-      - "127.0.0.1"
-      - "-p"
-      - 6379
-      - "ping"
-    env:
-      - "REDISCLI_AUTH=abc123"
-    contain: "PONG"
-	channels:
-        - "slack"
-`
 
 func checkShellProbe(t *testing.T, probe shell.Shell) {
 	switch probe.ProbeName {

@@ -360,7 +360,7 @@ func SLAStatusText(s probe.Stat, t Format) string {
 
 	// sort status
 	var statusKeys []int
-	for statusKey, _ := range s.Status {
+	for statusKey := range s.Status {
 		statusKeys = append(statusKeys, int(statusKey))
 	}
 	sort.Ints(statusKeys)

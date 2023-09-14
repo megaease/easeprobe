@@ -63,7 +63,7 @@ type PlainFormatter struct {
 
 // Format formats the log entry
 func (f *PlainFormatter) Format(entry *logrus.Entry) ([]byte, error) {
-	timestamp := fmt.Sprintf(entry.Time.Format(f.TimestampFormat))
+	timestamp := entry.Time.Format(f.TimestampFormat)
 	return []byte(fmt.Sprintf("%s %s\n", timestamp, entry.Message)), nil
 }
 

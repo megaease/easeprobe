@@ -37,10 +37,6 @@ func (mwc *MyWriteCloser) Close() error {
 func (mwc *MyWriteCloser) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
-func assertError(t *testing.T, err error, msg string) {
-	assert.Error(t, err)
-	assert.Equal(t, msg, err.Error())
-}
 
 func TestEmail(t *testing.T) {
 	conf := &NotifyConfig{}

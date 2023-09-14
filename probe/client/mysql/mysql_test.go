@@ -59,7 +59,7 @@ func TestMySQL(t *testing.T) {
 	assert.Equal(t, connStr, my.ConnStr)
 
 	conf.Password = ""
-	my, err = New(conf)
+	my, _ = New(conf)
 	connStr = fmt.Sprintf("%s@tcp(%s)/?timeout=%s",
 		conf.Username, conf.Host, conf.Timeout().Round(time.Second))
 	assert.Equal(t, connStr, my.ConnStr)
@@ -95,7 +95,7 @@ func TestMySQL(t *testing.T) {
 		return nil
 	})
 
-	my, err = New(conf)
+	my, _ = New(conf)
 	assert.NotNil(t, my.tls)
 	s, m = my.Probe()
 	assert.True(t, s)
@@ -146,21 +146,24 @@ func TestData(t *testing.T) {
 			"": "",
 		},
 	}
-	my, err := New(conf)
+	var my *MySQL
+	var err error
+
+	_, err = New(conf)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "Empty SQL data")
 
 	conf.Data = map[string]string{
 		"key": "value",
 	}
-	my, err = New(conf)
+	_, err = New(conf)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "Invalid SQL data")
 
 	conf.Data = map[string]string{
 		"database:table:column:key:value": "expected",
 	}
-	my, err = New(conf)
+	_, err = New(conf)
 	assert.NotNil(t, err)
 	assert.Contains(t, err.Error(), "the value must be int")
 
@@ -186,7 +189,7 @@ func TestData(t *testing.T) {
 	conf.Data = map[string]string{
 		"database:table:column:key:1": "expected",
 	}
-	my, err = New(conf)
+	my, _ = New(conf)
 	s, m := my.Probe()
 	assert.True(t, s)
 	assert.Contains(t, m, "Successfully")

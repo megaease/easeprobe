@@ -192,7 +192,7 @@ func EnumUnmarshalJSON[T comparable](b []byte, m map[string]T, v *T, init T, typ
 func (t *TLS) Config() (*tls.Config, error) {
 	if len(t.CA) <= 0 {
 		// the insecure is true but no ca/cert/key, then return a tls config
-		if t.Insecure == true {
+		if t.Insecure {
 			log.Debug("[TLS] Insecure is true but the CA is empty, return a tls config")
 			return &tls.Config{InsecureSkipVerify: true}, nil
 		}

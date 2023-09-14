@@ -174,8 +174,8 @@ func TestSSH(t *testing.T) {
 		return &ssh.Client{Conn: c}, nil
 	})
 	monkey.Patch(ssh.NewClient, func(c ssh.Conn, chans <-chan ssh.NewChannel, reqs <-chan *ssh.Request) *ssh.Client {
-		c, _, _, _ = ssh.NewClientConn(nil, "", nil)
-		return &ssh.Client{Conn: c}
+		conn, _, _, _ := ssh.NewClientConn(nil, "", nil)
+		return &ssh.Client{Conn: conn}
 	})
 	var client *ssh.Client
 	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Dial", func(c *ssh.Client, n, a string) (net.Conn, error) {

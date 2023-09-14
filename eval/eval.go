@@ -199,15 +199,15 @@ func (e *Evaluator) Evaluate() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	switch result.(type) {
+	switch r := result.(type) {
 	case bool:
-		return result.(bool), nil
+		return r, nil
 	case float64:
-		return result.(float64) != 0, nil
+		return r != 0, nil
 	case string:
-		return result.(string) != "", nil
+		return r != "", nil
 	}
-	return false, fmt.Errorf("Unsupported type: %T", result)
+	return false, fmt.Errorf("unsupported type: %T", result)
 }
 
 // Extract is the function to extract the value from the document
