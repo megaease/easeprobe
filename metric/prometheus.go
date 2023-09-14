@@ -118,8 +118,8 @@ func mergeLabels(labels []string, constLabels prometheus.Labels) []string {
 	l := make([]string, 0, len(labels)+len(constLabels))
 	l = append(l, labels...)
 
-	for k, _ := range constLabels {
-		l = append(l, k)
+	for labelName := range constLabels {
+		l = append(l, labelName)
 	}
 
 	return l
@@ -208,6 +208,8 @@ func RemoveInvalidChars(name string) string {
 	return string(result)
 }
 
+// AddConstLabels append user defined labels in the configuration file to the
+// predefined label set.
 func AddConstLabels(labels prometheus.Labels, constLabels prometheus.Labels) prometheus.Labels {
 	for k, v := range constLabels {
 		labels[k] = v
