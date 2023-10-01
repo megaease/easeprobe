@@ -24,7 +24,7 @@ require (
 	github.com/stretchr/testify v1.8.4
 	github.com/uptrace/bun/driver/pgdriver v1.1.14
 	go.mongodb.org/mongo-driver v1.12.1
-	golang.org/x/crypto v0.12.0
+	golang.org/x/crypto v0.13.0
 	golang.org/x/exp v0.0.0-20221031165847-c99f073a8326
 	golang.org/x/net v0.14.0
 	golang.org/x/sys v0.12.0
@@ -86,7 +86,7 @@ require (
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
 	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/text v0.12.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	mellium.im/sasl v0.3.1 // indirect
 )
