@@ -1097,7 +1097,7 @@ Support SMS notification with multiple SMS service providers
 
 - [Twilio](https://www.twilio.com/sms)
 - [Vonage(Nexmo)](https://developer.vonage.com/messaging/sms/overview)
-- [YunPian](https://www.yunpian.com/doc/en/domestic/list.html)
+- [YunPian](https://www.yunpian.com/official/document/sms/en/domestic_list?lang=en)
 
 The plugin supports the following parameters:
  - `name`: A unique name for this notification endpoint
