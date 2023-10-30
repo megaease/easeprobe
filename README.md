@@ -69,7 +69,7 @@ EaseProbe supports notification delivery to the following:
 - **SMS**. SMS notification delivery with support for multiple SMS service providers
   - [Twilio](https://www.twilio.com/sms)
   - [Vonage(Nexmo)](https://developer.vonage.com/messaging/sms/overview)
-  - [YunPian](https://www.yunpian.com/official/document/sms/en/domestic_list)
+  - [YunPian](https://www.yunpian.com/official/document/sms/en/domestic_list?lang=en)
 - **Log**. Write the notification into a log file or Syslog.
 - **Shell**. Run a shell command to deliver the notification (see [example](resources/scripts/notify/notify.sh))
 - **RingCentral**. Using RingCentral Webhook for notification delivery
