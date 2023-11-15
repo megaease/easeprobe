@@ -1192,7 +1192,7 @@ EaseProbe supports minutely, hourly, daily, weekly, or monthly SLA reports.
 ```YAML
 settings:
 # SLA Report schedule
-sla:
+  sla:
     #  minutely, hourly, daily, weekly (Sunday), monthly (Last Day), none
     schedule: "weekly"
     # UTC time, the format is 'hour:min:sec'
@@ -1232,7 +1232,7 @@ When EaseProbe starts, it looks for the location of `data.yaml` and if found, lo
 
 ```YAML
 settings:
-sla:
+  sla:
     # SLA data persistence file path.
     # The default location is `$CWD/data/data.yaml`
     data: /path/to/data/file.yaml
@@ -1302,7 +1302,7 @@ The EaseProbe would create a PID file (default `$CWD/easeprobe.pid`) when it sta
 
 ```YAML
 settings:
-pid: /var/run/easeprobe.pid
+  pid: /var/run/easeprobe.pid
 ```
 
 - If the file already exists, EaseProbe would overwrite it.
@@ -1312,7 +1312,7 @@ If you want to disable the PID file, you can set it to "-" or "".
 
 ```YAML
 settings:
-    pid: "" # EaseProbe won't create a PID file
+  pid: "" # EaseProbe won't create a PID file
 ```
 
 ## 5.2 Log file Rotation
