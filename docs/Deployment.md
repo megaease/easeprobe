@@ -331,13 +331,13 @@ spec:
       volumes:
       - name: configmap-volume-0
         configMap:
-           name: easeprobe-conf
-           items:
-           - key: config.yaml
-             path: config.yaml
+          name: easeprobe-conf
+          items:
+          - key: config.yaml
+            path: config.yaml
       - name: pvc-volume-easeprobe-pvc
         persistentVolumeClaim:
-           claimName: easeprobe-pvc
+          claimName: easeprobe-pvc
 ```
 
 > Note:
