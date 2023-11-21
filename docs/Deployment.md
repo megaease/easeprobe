@@ -309,6 +309,9 @@ metadata:
   namespace: default
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: easeprobe
   template:
     metadata:
       labels:
@@ -319,24 +322,22 @@ spec:
         image: megaease/easeprobe
         ports:
         - containerPort: 8181
-
-      volumeMounts:
-        - mountPath: /opt/config.yaml
-          name: configmap-volume-0
-          subPath: config.yaml
-        - mountPath: /opt/data
-          name: pvc-volume-easeprobe-pvc
-
-     volumes:
-      - configMap:
-        name: configmap-volume-0
-          name: easeprobe
-          items:
-          - key: config.yaml
-            path: config.yaml
+        volumeMounts:
+          - mountPath: /opt/config.yaml
+            name: configmap-volume-0
+            subPath: config.yaml
+          - mountPath: /opt/data
+            name: pvc-volume-easeprobe-pvc
+      volumes:
+      - name: configmap-volume-0
+        configMap:
+           name: easeprobe-conf
+           items:
+           - key: config.yaml
+             path: config.yaml
       - name: pvc-volume-easeprobe-pvc
         persistentVolumeClaim:
-          claimName: easeprobe-pvc
+           claimName: easeprobe-pvc
 ```
 
 > Note:
