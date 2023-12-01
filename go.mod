@@ -19,7 +19,7 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/prometheus-community/pro-bing v0.3.0
 	github.com/prometheus/client_golang v1.17.0
-	github.com/segmentio/kafka-go v0.4.44
+	github.com/segmentio/kafka-go v0.4.46
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.8.4
 	github.com/uptrace/bun/driver/pgdriver v1.1.16
