@@ -22,6 +22,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"time"
 
 	"github.com/megaease/easeprobe/probe/client/conf"
 	"github.com/segmentio/kafka-go"
@@ -85,12 +86,11 @@ func (k *Kafka) Probe() (bool, string) {
 	defer cancel()
 
 	conn, err := dialer.DialContext(ctx, "tcp", k.Host)
-
 	if err != nil {
 		return false, err.Error()
 	}
-
 	defer conn.Close()
+	conn.SetDeadline(time.Now().Add(k.Timeout()))
 
 	partitions, err := conn.ReadPartitions()
 	if err != nil {
