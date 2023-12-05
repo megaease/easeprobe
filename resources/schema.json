@@ -4,18 +4,14 @@
   "$ref": "#/$defs/conf_Conf",
   "$defs": {
     "BastionMapType": {
-      "patternProperties": {
-        ".*": {
-          "$ref": "#/$defs/probe_ssh_Endpoint"
-        }
+      "additionalProperties": {
+        "$ref": "#/$defs/probe_ssh_Endpoint"
       },
       "type": "object"
     },
     "Labels": {
-      "patternProperties": {
-        ".*": {
-          "type": "string"
-        }
+      "additionalProperties": {
+        "type": "string"
       },
       "type": "object"
     },
@@ -1452,10 +1448,8 @@
           ]
         },
         "data": {
-          "patternProperties": {
-            ".*": {
-              "type": "string"
-            }
+          "additionalProperties": {
+            "type": "string"
           },
           "type": "object",
           "title": "Data",
@@ -1634,7 +1628,10 @@
         },
         "disks": {
           "items": {
-            "type": "string"
+            "type": "string",
+            "examples": [
+              "[\"/\""
+            ]
           },
           "type": "array",
           "title": "Disks",
@@ -1667,10 +1664,8 @@
           "description": "Disk threshold (default: 0.95)"
         },
         "load": {
-          "patternProperties": {
-            ".*": {
-              "type": "number"
-            }
+          "additionalProperties": {
+            "type": "number"
           },
           "type": "object",
           "title": "Load average threshold",
@@ -1760,10 +1755,8 @@
           "description": "HTTP method to use for HTTP requests"
         },
         "headers": {
-          "patternProperties": {
-            ".*": {
-              "type": "string"
-            }
+          "additionalProperties": {
+            "type": "string"
           },
           "type": "object",
           "title": "HTTP Headers",
@@ -1906,6 +1899,7 @@
         "lost": {
           "type": "number",
           "maximum": 1,
+          "minimum": 0,
           "title": "Lost Threshold",
           "description": "The threshold of packet loss",
           "default": 0
@@ -2424,10 +2418,8 @@
           "description": "proxy to use for the HTTP request"
         },
         "headers": {
-          "patternProperties": {
-            ".*": {
-              "type": "string"
-            }
+          "additionalProperties": {
+            "type": "string"
           },
           "type": "object",
           "title": "HTTP Headers",
