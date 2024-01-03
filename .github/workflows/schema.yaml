@@ -22,7 +22,7 @@ jobs:
             token: ${{ secrets.MEGAEASE_BOT }}
 
         - name: Setup Go Environment
-          uses: actions/setup-go@v4
+          uses: actions/setup-go@v5
           with:
             go-version: ${{ env.GO_VERSION }}
 
