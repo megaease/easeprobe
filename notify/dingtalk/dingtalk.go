@@ -43,6 +43,18 @@ type NotifyConfig struct {
 	SignSecret         string `yaml:"secret,omitempty" json:"secret,omitempty" jsonschema:"format=string,title=Secret,description=The Dingtalk Robot Secret"`
 }
 
+// DingTalk is the dingtalk notification struct
+type DingTalk struct {
+	MsgType  string   `json:"msgtype"`
+	Markdown Markdown `json:"markdown"`
+}
+
+// Markdown is the markdown struct of dingtalk notification
+type Markdown struct {
+	Title string `json:"title"`
+	Text  string `json:"text"`
+}
+
 // Config configures the dingtalk notification
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 	c.NotifyKind = "dingtalk"
@@ -56,18 +68,21 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 // SendDingtalkNotification will post to an 'Robot Webhook' url in Dingtalk Apps. It accepts
 // some text and the Dingtalk robot will send it in group.
 func (c *NotifyConfig) SendDingtalkNotification(title, msg string) error {
-
 	title = "**" + title + "**"
-	// It will be better to escape the msg.
-	msgContent := fmt.Sprintf(`
-	{
-		"msgtype": "markdown",
-		"markdown": {
-			"title": "%s",
-			"text": "%s"
-		}
+	dingtalk := DingTalk{
+		MsgType: "markdown",
+		Markdown: Markdown{
+			Title: title,
+			Text:  msg,
+		},
 	}
-	`, report.JSONEscape(title), report.JSONEscape(msg))
+	msgContent, err := json.Marshal(dingtalk)
+	if err != nil {
+		log.Errorf("[%s / %s ] - %v, err - %s", c.Kind(), c.Name(), dingtalk, err)
+		return fmt.Errorf("[%s / %s] - Error from json marshal [%s] - [%s]",
+			c.Kind(), c.Name(), dingtalk, err)
+	}
+
 	req, err := http.NewRequest(http.MethodPost, c.addSign(c.WebhookURL, c.SignSecret), bytes.NewBuffer([]byte(msgContent)))
 	if err != nil {
 		return err
