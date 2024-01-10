@@ -2,8 +2,6 @@ module github.com/megaease/easeprobe
 
 go 1.21
 
-toolchain go1.21.6
-
 require (
 	bou.ke/monkey v1.0.2
 	github.com/Knetic/govaluate v3.0.0+incompatible
