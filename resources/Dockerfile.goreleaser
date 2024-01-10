@@ -2,7 +2,7 @@ FROM --platform=$BUILDPLATFORM alpine:latest
 
 WORKDIR /opt/
 
-COPY easeprobe /opt/
+COPY bin/easeprobe /opt/
 COPY resources/scripts/entrypoint.sh /
 RUN apk update && apk add tini tzdata busybox-extras curl redis
 
