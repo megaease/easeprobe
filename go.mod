@@ -1,6 +1,8 @@
 module github.com/megaease/easeprobe
 
-go 1.20
+go 1.21
+
+toolchain go1.21.6
 
 require (
 	bou.ke/monkey v1.0.2
