@@ -384,7 +384,7 @@ func SLALarkSection(r *probe.Result) string {
 	},`
 	return fmt.Sprintf(text, r.Name, r.Endpoint,
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLAPercent(),
-		r.Stat.Total, SLAStatusText(r.Stat, Lark),
+		r.Stat.Total, JSONEscape(SLAStatusText(r.Stat, Lark)),
 		FormatTime(r.StartTime),
 		r.Status.Emoji()+" "+r.Status.String(), JSONEscape(r.Message))
 }
