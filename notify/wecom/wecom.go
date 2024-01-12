@@ -20,6 +20,7 @@ package wecom
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -64,6 +65,10 @@ func (c *NotifyConfig) SendWecomNotification(msg string) error {
 		}
 	}
 	`, report.JSONEscape(msg))
+	if !json.Valid([]byte(msgContent)) {
+		log.Errorf("[%s / %s ] - %v, err: invalid json", c.Kind(), c.Name(), msgContent)
+	}
+
 	req, err := http.NewRequest(http.MethodPost, c.WebhookURL, bytes.NewBuffer([]byte(msgContent)))
 	if err != nil {
 		return err

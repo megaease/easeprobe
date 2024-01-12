@@ -20,6 +20,7 @@ package ringcentral
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -75,6 +76,9 @@ func (c *NotifyConfig) SendRingCentral(title, msg string) error {
 		]
 	 }
 	`, report.JSONEscape(title), report.JSONEscape(msg))
+	if !json.Valid([]byte(msgContent)) {
+		log.Errorf("[%s / %s ] - %v, err: invalid json", c.Kind(), c.Name(), msgContent)
+	}
 
 	req, err := http.NewRequest(http.MethodPost, c.WebhookURL, bytes.NewBuffer([]byte(msgContent)))
 	if err != nil {

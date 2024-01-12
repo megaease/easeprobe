@@ -78,8 +78,5 @@ func (c *NotifyConfig) SendSlackNotification(msg string) error {
 		log.Debugf(msg)
 		return fmt.Errorf("Error response from Slack - code [%d] - msg [%s]", resp.StatusCode, string(buf))
 	}
-	// if buf.String() != "ok" {
-	// 	return errors.New("Non-ok response returned from Slack " + buf.String())
-	// }
 	return nil
 }
