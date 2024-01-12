@@ -20,6 +20,7 @@ package websocket
 import (
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"testing"
 	"time"
@@ -50,6 +51,21 @@ func TestWSPing(t *testing.T) {
 		}
 	}()
 
+	// wait for http server to start
+	conn, err := net.Conn(nil), error(nil)
+	for i := 0; i < 30; i++ {
+		conn, err = net.DialTimeout("tcp", "127.0.0.1:18080", 1*time.Second)
+		if err == nil {
+			conn.Close()
+			break
+		}
+		t.Log("waiting for http server to start...")
+		time.Sleep(1 * time.Second)
+	}
+	if err != nil {
+		t.Fatalf("http server not started: %v", err)
+	}
+
 	testcases := []TestCase{
 		{URL: "ws://127.0.0.1:18080/right", Timeout: 500 * time.Millisecond, Headers: token, Want: false},
 		{URL: "ws://127.0.0.1:18080/right", Timeout: 2000 * time.Millisecond, Headers: token, Want: true},
@@ -66,9 +82,8 @@ func TestWSPing(t *testing.T) {
 			Headers: test.Headers,
 		}
 		ws.Config(global.ProbeSettings{})
-		ok, _ := ws.DoProbe()
-		assert.Equalf(t, test.Want, ok, fmt.Sprintf("case %d", i))
-
+		ok, err := ws.DoProbe()
+		assert.Equalf(t, test.Want, ok, fmt.Sprintf("case %d %s", i, err))
 	}
 }
 
