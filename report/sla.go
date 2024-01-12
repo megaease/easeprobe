@@ -251,7 +251,7 @@ func SLAHTMLFilter(probers []probe.Prober, filter *SLAFilter) string {
 // SLASlackSection return the slack json format string to stat
 func SLASlackSection(r *probe.Result) string {
 
-	json := `
+	jsonMsg := `
 			{
 				"type": "mrkdwn",
 				"text": "*%s* - %s` +
@@ -268,10 +268,14 @@ func SLASlackSection(r *probe.Result) string {
 		message = "`" + message + "`"
 	}
 
-	return fmt.Sprintf(json, r.Name, JSONEscape(r.Endpoint),
+	output := fmt.Sprintf(jsonMsg, r.Name, JSONEscape(r.Endpoint),
 		DurationStr(r.Stat.UpTime), DurationStr(r.Stat.DownTime), r.SLAPercent(),
 		r.Stat.Total, SLAStatusText(r.Stat, MarkdownSocial),
 		t, r.Status.Emoji()+" "+r.Status.String(), message)
+	if !json.Valid([]byte(output)) {
+		log.Errorf("SLASlackSection() for %s: invalid json: %s", r.Name, output)
+	}
+	return output
 }
 
 // SLASlack generate all probes stat message to slack block string
@@ -391,7 +395,7 @@ func SLALarkSection(r *probe.Result) string {
 
 // SLALark return a full stat report
 func SLALark(probers []probe.Prober) string {
-	json := `
+	jsonMsg := `
 	{
 		"msg_type": "interactive",
 		"card": {
@@ -429,7 +433,11 @@ func SLALark(probers []probe.Prober) string {
 	}
 
 	elements := strings.Join(sections, "")
-	s := fmt.Sprintf(json, title, elements)
+	s := fmt.Sprintf(jsonMsg, title, elements)
+	if !json.Valid([]byte(s)) {
+		log.Errorf("SLALark(): invalid json: %s", s)
+	}
+
 	fmt.Printf("SLA: %s\n", s)
 	return s
 }

@@ -159,8 +159,7 @@ func markdown(r probe.Result, f Format) string {
 // ToSlack convert the object to ToSlack notification
 // Go to https://app.slack.com/block-kit-builder to build the notification block
 func ToSlack(r probe.Result) string {
-
-	json := `
+	jsonMsg := `
 	{
 		"text": "%s",
 		"blocks": [
@@ -193,13 +192,17 @@ func ToSlack(r probe.Result) string {
 		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, JSONEscape(r.Message))
 	context := SlackTimeFormation(r.StartTime, " probed at ", global.GetTimeFormat())
 	summary := fmt.Sprintf("%s %s - %s", r.Title(), r.Status.Emoji(), JSONEscape(r.Message))
-	return fmt.Sprintf(json, summary, body, context)
+	output := fmt.Sprintf(jsonMsg, summary, body, context)
+	if !json.Valid([]byte(output)) {
+		log.Errorf("ToSlack() for %s: Invalid JSON: %s", r.Name, output)
+	}
+	return output
 }
 
 // ToLark convert the object to Lark notification
 // Go to https://open.feishu.cn/document/ukTMukTMukTM/ucTM5YjL3ETO24yNxkjN#4996824a to build the notification block
 func ToLark(r probe.Result) string {
-	json := `
+	jsonMsg := `
 	{
 		"msg_type": "interactive",
 		"card": {
@@ -253,7 +256,11 @@ func ToLark(r probe.Result) string {
 	rtt := r.RoundTripTime.Round(time.Millisecond)
 	content := fmt.Sprintf("%s - ⏱ %s\\n%s", r.Endpoint, rtt, JSONEscape(r.Message))
 	footer := global.FooterString() + " probed at " + FormatTime(r.StartTime)
-	return fmt.Sprintf(json, headerColor, title, content, footer)
+	output := fmt.Sprintf(jsonMsg, headerColor, title, content, footer)
+	if !json.Valid([]byte(output)) {
+		log.Errorf("ToLark() for %s: Invalid JSON: %s", r.Name, output)
+	}
+	return output
 }
 
 // ToCSV convert the object to CSV
