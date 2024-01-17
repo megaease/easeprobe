@@ -53,7 +53,7 @@ func assertMerge(t *testing.T, into, from, expected string) {
 
 	err := os.WriteFile(dir+"/config1.yaml", []byte(into), 0755)
 	assert.Nil(t, err)
-	err = os.WriteFile(dir+"/config2.yaml", []byte(from), 0755)
+	err = os.WriteFile(dir+"/config2.yml", []byte(from), 0755)
 	assert.Nil(t, err)
 
 	actual, err := mergeYamlFiles(dir)

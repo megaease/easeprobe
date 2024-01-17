@@ -46,7 +46,7 @@ func configProbers(probers []probe.Prober) []probe.Prober {
 		if err := p.Config(gProbeConf); err != nil {
 			p.Result().Status = probe.StatusBad
 			p.Result().Message = "Bad Configuration: " + err.Error()
-			log.Errorf("Bad Probe Configuration: %v", err)
+			log.Errorf("Bad Probe Configuration for prober %s %s: %v", p.Kind(), p.Name(), err)
 			continue
 		}
 

@@ -33,7 +33,7 @@ func configNotifiers(notifies []notify.Notify) []notify.Notify {
 	validNotifies := []notify.Notify{}
 	for _, n := range notifies {
 		if err := n.Config(gNotifyConf); err != nil {
-			log.Errorf("error: %v", err)
+			log.Errorf("Bad Notify Configuration for notifier %s %s: %v", n.Kind(), n.Name(), err)
 			continue
 		}
 		validNotifies = append(validNotifies, n)

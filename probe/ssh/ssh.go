@@ -74,7 +74,7 @@ func (bm *BastionMapType) ParseAllBastionHost() {
 		err := v.ParseHost()
 		if err != nil {
 			log.Errorf("Bastion Host error: [%s / %s] - %v", k, BastionMap[k].Host, err)
-			delete(BastionMap, k)
+			delete(*bm, k)
 			continue
 		}
 		(*bm)[k] = v
