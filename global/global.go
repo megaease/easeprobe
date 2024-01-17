@@ -43,7 +43,7 @@ const (
 var (
 	// Ver is the program version
 	// It will be set by the build script
-	// go build -ldflags "-X github.com/megaease/easegress/pkg/global.Ver=1.0.0"
+	// go build -ldflags "-X github.com/megaease/easeprobe/global.Ver=1.0.0"
 	Ver = "v1.7.0"
 	//OrgProg combine organization and program
 	OrgProg = Org + " " + DefaultProg

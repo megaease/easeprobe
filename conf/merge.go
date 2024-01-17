@@ -32,6 +32,10 @@ func mergeYamlFiles(path string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	moreFiles, err := filepath.Glob(filepath.Join(path, "*.yml"))
+	if err == nil {
+		files = append(files, moreFiles...)
+	}
 
 	if len(files) <= 0 {
 		return nil, fmt.Errorf("yaml files not found for %v", path)

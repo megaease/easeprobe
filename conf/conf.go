@@ -463,7 +463,6 @@ func allProbersHelper(i interface{}) []probe.Prober {
 		vField := v.Field(i)
 		for j := 0; j < vField.Len(); j++ {
 			if !isProbe(vField.Index(j).Addr().Type()) {
-				//log.Debugf("%s is not a probe type", vField.Index(j).Type())
 				continue
 			}
 
