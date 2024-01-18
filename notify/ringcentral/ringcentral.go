@@ -21,7 +21,6 @@ package ringcentral
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -101,11 +100,10 @@ func (c *NotifyConfig) SendRingCentral(title, msg string) error {
 		return err
 	}
 	if resp.StatusCode != 200 {
-		log.Debugf(msg)
-		return fmt.Errorf("Error response from RingCentral - code [%d] - msg [%s]", resp.StatusCode, string(buf))
+		return fmt.Errorf("Error response from RingCentral with request body <%s> - code [%d] - msg [%s]", msgContent, resp.StatusCode, string(buf))
 	}
 	if string(buf) != "{\"status\":\"OK\"}" {
-		return errors.New("Non-ok response returned from RingCentral " + string(buf))
+		return fmt.Errorf("Non-ok response returned from RingCentral with request body <%s>, %s", msgContent, string(buf))
 	}
 	return nil
 }

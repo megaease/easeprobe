@@ -19,6 +19,7 @@
 package email
 
 import (
+	"fmt"
 	"net"
 	"strconv"
 	"strings"
@@ -82,6 +83,9 @@ func (c *NotifyConfig) SendMail(subject string, message string) error {
 
 	d := gomail.NewDialer(host, port, c.User, c.Pass)
 	err = d.DialAndSend(m)
+	if err != nil {
+		return fmt.Errorf("[%s / %s] - Error response from mail with body <%s>, %v", c.Kind(), c.Name(), message, err)
+	}
 
-	return err
+	return nil
 }

@@ -33,11 +33,12 @@ import (
 )
 
 func assertError(t *testing.T, err error, msg string) {
+	t.Helper()
 	assert.Error(t, err)
 	assert.Equal(t, msg, err.Error())
 }
 
-func TestSlack(t *testing.T) {
+func TestTeams(t *testing.T) {
 	conf := &NotifyConfig{}
 	conf.NotifyName = "dummy"
 	err := conf.Config(global.NotifySettings{})
@@ -64,7 +65,7 @@ func TestSlack(t *testing.T) {
 		}, nil
 	})
 	err = conf.SendTeamsMessage("title", "message")
-	assertError(t, err, "error response from Teams Webhook - code [404] - msg [not found]")
+	assertError(t, err, "error response from Teams Webhook with request body <{\"@type\":\"MessageCard\",\"@context\":\"https://schema.org/extensions\",\"title\":\"title\",\"text\":\"message\"}> - code [404] - msg [not found]")
 
 	monkey.Patch(io.ReadAll, func(_ io.Reader) ([]byte, error) {
 		return nil, errors.New("read error")

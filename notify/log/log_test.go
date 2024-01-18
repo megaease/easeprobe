@@ -29,6 +29,7 @@ import (
 )
 
 func assertError(t *testing.T, err error, msg string, contain bool) {
+	t.Helper()
 	assert.Error(t, err)
 	if contain {
 		assert.Contains(t, err.Error(), msg)

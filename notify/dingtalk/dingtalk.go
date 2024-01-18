@@ -107,8 +107,8 @@ func (c *NotifyConfig) SendDingtalkNotification(title, msg string) error {
 	ret := make(map[string]interface{})
 	err = json.Unmarshal(buf, &ret)
 	if err != nil || ret["errmsg"] != "ok" {
-		return fmt.Errorf("[%s / %s] - Error response from Dingtalk [%d] - [%s]",
-			c.Kind(), c.Name(), resp.StatusCode, string(buf))
+		return fmt.Errorf("[%s / %s] - Error response from Dingtalk with request body <%s> [%d] - [%s]",
+			c.Kind(), c.Name(), msgContent, resp.StatusCode, string(buf))
 	}
 	return nil
 }

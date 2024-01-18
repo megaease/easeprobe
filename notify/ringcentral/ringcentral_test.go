@@ -33,6 +33,7 @@ import (
 )
 
 func assertError(t *testing.T, err error, msg string) {
+	t.Helper()
 	assert.Error(t, err)
 	assert.Equal(t, msg, err.Error())
 }
@@ -64,7 +65,9 @@ func TestRingCentral(t *testing.T) {
 		}, nil
 	})
 	err = conf.SendRingCentral("title", "message")
-	assertError(t, err, "Non-ok response returned from RingCentral {\"status\": \"error\",\"message\": \"Your request was accepted, however a post was not generated\",\"error\": \"Webhook not found!\"}")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "Non-ok response returned from RingCentral")
+	assert.Contains(t, err.Error(), "{\"status\": \"error\",\"message\": \"Your request was accepted, however a post was not generated\",\"error\": \"Webhook not found!\"}")
 
 	monkey.Patch(io.ReadAll, func(_ io.Reader) ([]byte, error) {
 		return nil, errors.New("read error")
