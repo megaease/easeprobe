@@ -65,7 +65,7 @@ func TestSNSConfig(t *testing.T) {
 
 	err = conf.SendSNS("title", "msg")
 	assert.Error(t, err)
-	assert.Equal(t, err.Error(), "publish error")
+	assert.Contains(t, err.Error(), "publish error")
 
 	monkey.UnpatchAll()
 }

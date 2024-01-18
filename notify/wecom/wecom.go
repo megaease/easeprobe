@@ -89,7 +89,7 @@ func (c *NotifyConfig) SendWecomNotification(msg string) error {
 		return err
 	}
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("Error response from Wecom - code [%d] - msg [%s]", resp.StatusCode, string(buf))
+		return fmt.Errorf("Error response from Wecom with request body <%s> - code [%d] - msg [%s]", msgContent, resp.StatusCode, string(buf))
 	}
 	// It will be better to check response body.
 	return nil

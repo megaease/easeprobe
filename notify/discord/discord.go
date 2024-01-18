@@ -348,7 +348,7 @@ func (c *NotifyConfig) SendDiscordNotification(discord Discord, tag string) erro
 		return err
 	}
 	if resp.StatusCode != 204 {
-		return &global.ErrNoRetry{Message: fmt.Sprintf("Error response from Discord [%d] - [%s]", resp.StatusCode, string(buf))}
+		return &global.ErrNoRetry{Message: fmt.Sprintf("Error response from Discord with request body <%s> [%d] - [%s]", json, resp.StatusCode, string(buf))}
 	}
 	return nil
 }

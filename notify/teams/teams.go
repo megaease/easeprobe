@@ -88,7 +88,7 @@ func (c *NotifyConfig) SendTeamsMessage(title, msg string) error {
 		return err
 	}
 	if resp.StatusCode != 200 && string(buf) != "1" {
-		return fmt.Errorf("error response from Teams Webhook - code [%d] - msg [%s]", resp.StatusCode, string(buf))
+		return fmt.Errorf("error response from Teams Webhook with request body <%s> - code [%d] - msg [%s]", json, resp.StatusCode, string(buf))
 	}
 	return nil
 }

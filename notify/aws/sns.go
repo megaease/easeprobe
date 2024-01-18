@@ -19,6 +19,7 @@ package aws
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/sns"
@@ -71,7 +72,7 @@ func (c *NotifyConfig) SendSNSNotification(msg string) error {
 		TopicArn: aws.String(c.TopicARN),
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("[%s / %s] - Error response from AWS SNS with request body <%s>, %v", c.Kind(), c.Name(), msg, err)
 	}
 	log.Debugf("[%s / %s] Message ID = %s", c.Kind(), c.NotifyName, *res.MessageId)
 	return nil

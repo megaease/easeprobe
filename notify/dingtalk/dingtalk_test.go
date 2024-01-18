@@ -32,6 +32,7 @@ import (
 )
 
 func assertError(t *testing.T, err error, msg string, contain bool) {
+	t.Helper()
 	assert.Error(t, err)
 	if contain {
 		assert.Contains(t, err.Error(), msg)
@@ -69,7 +70,8 @@ func TestDingTalk(t *testing.T) {
 		}, nil
 	})
 	err = conf.SendDingtalkNotification("title", "message")
-	assertError(t, err, "Error response from Dingtalk [200]", true)
+	assertError(t, err, "Error response from Dingtalk", true)
+	assertError(t, err, "[200]", true)
 
 	// bad json
 	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Do", func(_ *http.Client, req *http.Request) (*http.Response, error) {
@@ -80,7 +82,8 @@ func TestDingTalk(t *testing.T) {
 		}, nil
 	})
 	err = conf.SendDingtalkNotification("title", "message")
-	assertError(t, err, "Error response from Dingtalk [200]", true)
+	assertError(t, err, "Error response from Dingtalk", true)
+	assertError(t, err, "[200]", true)
 
 	// bad io.ReadAll
 	monkey.Patch(io.ReadAll, func(r io.Reader) ([]byte, error) {

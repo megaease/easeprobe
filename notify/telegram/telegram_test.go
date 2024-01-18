@@ -47,6 +47,7 @@ func generateRandomString(length int) string {
 }
 
 func assertError(t *testing.T, err error, msg string) {
+	t.Helper()
 	assert.Error(t, err)
 	assert.Equal(t, msg, err.Error())
 }
