@@ -270,6 +270,7 @@ func (s *Server) RunSSHCmd() (string, error) {
 	defer cancel()
 	select {
 	case <-ctx.Done():
+		session.Signal(ssh.SIGINT)
 		return fmt.Sprintf("timeout after %s", s.Timeout()), ctx.Err()
 	case err := <-errCh:
 		return stdoutBuf.String(), err
