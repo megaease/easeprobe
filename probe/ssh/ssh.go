@@ -141,10 +141,10 @@ func (s *Server) DoProbe() (bool, string) {
 	message := "SSH Command has been Run Successfully!"
 
 	if err != nil {
-		if _, ok := err.(*ssh.ExitMissingError); ok {
-			s.exitCode = UnknownExitCode // Error: remote server does not send an exit status
-		} else if e, ok := err.(*ssh.ExitError); ok {
+		if e, ok := err.(*ssh.ExitError); ok {
 			s.exitCode = e.ExitStatus()
+		} else {
+			s.exitCode = UnknownExitCode
 		}
 		log.Errorf("[%s / %s] %v", s.ProbeKind, s.ProbeName, err)
 		status = false
@@ -270,7 +270,7 @@ func (s *Server) RunSSHCmd() (string, error) {
 	defer cancel()
 	select {
 	case <-ctx.Done():
-		return "timeout", ctx.Err()
+		return fmt.Sprintf("timeout after %s", s.Timeout()), ctx.Err()
 	case err := <-errCh:
 		return stdoutBuf.String(), err
 	}
