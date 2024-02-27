@@ -261,13 +261,12 @@ func (s *Server) RunSSHCmd() (string, error) {
 	session.Stdout = &stdoutBuf
 	session.Stderr = &stderrBuf
 
-	ctx, cancel := context.WithTimeout(context.Background(), s.Timeout())
-	defer cancel()
-
 	errCh := make(chan error, 1)
 	go func() {
 		errCh <- session.Run(env + global.CommandLine(s.Command, s.Args))
 	}()
+	ctx, cancel := context.WithTimeout(context.Background(), s.Timeout())
+	defer cancel()
 
 	select {
 	case <-ctx.Done():
