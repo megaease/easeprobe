@@ -265,9 +265,9 @@ func (s *Server) RunSSHCmd() (string, error) {
 	go func() {
 		errCh <- session.Run(env + global.CommandLine(s.Command, s.Args))
 	}()
+
 	ctx, cancel := context.WithTimeout(context.Background(), s.Timeout())
 	defer cancel()
-
 	select {
 	case <-ctx.Done():
 		return "timeout", ctx.Err()
