@@ -20,6 +20,7 @@ package ssh
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net"
 
@@ -259,11 +260,21 @@ func (s *Server) RunSSHCmd() (string, error) {
 	var stdoutBuf, stderrBuf bytes.Buffer
 	session.Stdout = &stdoutBuf
 	session.Stderr = &stderrBuf
-	if err := session.Run(env + global.CommandLine(s.Command, s.Args)); err != nil {
-		return stderrBuf.String(), err
-	}
 
-	return stdoutBuf.String(), nil
+	ctx, cancel := context.WithTimeout(context.Background(), s.Timeout())
+	defer cancel()
+
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- session.Run(env + global.CommandLine(s.Command, s.Args))
+	}()
+
+	select {
+	case <-ctx.Done():
+		return "timeout", ctx.Err()
+	case err := <-errCh:
+		return stdoutBuf.String(), err
+	}
 }
 
 // ExportMetrics export shell metrics
