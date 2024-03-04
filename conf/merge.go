@@ -48,7 +48,7 @@ func mergeYamlFiles(path string) ([]byte, error) {
 		EvaluateTogether:            false,
 	}
 	decoder := yqlib.NewYamlDecoder(preference)
-	encoder := yqlib.NewYamlEncoder(2, false, preference)
+	encoder := yqlib.NewYamlEncoder(preference)
 	printer := yqlib.NewPrinter(encoder, yqlib.NewSinglePrinterWriter(bufio.NewWriter(&buf)))
 	// use evaluate merge, reference https://mikefarah.gitbook.io/yq/operators/multiply-merge
 	err = yqlib.NewAllAtOnceEvaluator().EvaluateFiles(". as $item ireduce ({}; . *+ $item )", files, printer, decoder)
