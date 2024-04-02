@@ -10,22 +10,18 @@ on:
       - "go.sum"
       - ".github/workflows/code.yml"
 
-env:
-  GO_VERSION: "1.20.4"
-
 jobs:
-
   lint:
     name: Code Lint
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
       - name: Setup Go Environment
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ env.GO_VERSION }}
+          go-version-file: go.mod
         id: go
-      - name: Checkout Source Code
-        uses: actions/checkout@v4
       # https://github.com/reviewdog/reviewdog/issues/1158
       # Permissions need to match container user
       - name: "Give Permissions"

@@ -4,8 +4,6 @@ on:
   push:
     tags:
       - 'v*'
-env:
-  GO_VERSION: "1.20.4"
 
 jobs:
   goreleaser:
@@ -18,7 +16,7 @@ jobs:
       - name: Setup Go Environment
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ env.GO_VERSION }}
+          go-version-file: go.mod
       - uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
