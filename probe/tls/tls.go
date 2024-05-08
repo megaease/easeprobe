@@ -141,7 +141,7 @@ func (t *TLS) DoProbe() (bool, string) {
 	t.metrics.EarliestCertExpiry.With(metric.AddConstLabels(prometheus.Labels{
 		"endpoint": t.ProbeResult.Endpoint,
 	}, t.Labels)).Set(float64(getEarliestCertExpiry(&state).Unix()))
-	t.metrics.EarliestCertExpiry.With(metric.AddConstLabels(prometheus.Labels{
+	t.metrics.LastChainExpiryTimestampSeconds.With(metric.AddConstLabels(prometheus.Labels{
 		"endpoint": t.ProbeResult.Endpoint,
 	}, t.Labels)).Set(float64(getLastChainExpiry(&state).Unix()))
 
