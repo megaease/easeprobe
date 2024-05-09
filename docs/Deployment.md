@@ -5,7 +5,7 @@
   - [2. Standalone Deployment](#2-standalone-deployment)
     - [2.1 Download EaseProbe](#21-download-easeprobe)
     - [2.2 Configure EaseProbe](#22-configure-easeprobe)
-  - [2.3 Run EaseProbe](#23-run-easeprobe)
+    - [2.3 Run EaseProbe](#23-run-easeprobe)
   - [3. Docker Deployment](#3-docker-deployment)
   - [4. Docker-Compose Deployment](#4-docker-compose-deployment)
   - [5. Kubernetes Deployment](#5-kubernetes-deployment)
@@ -88,7 +88,7 @@ There are three parameters need your attention:
 - `settings.http.log.file`: the HTTP access log file  of EaseProbe
 
 
-## 2.3 Run EaseProbe
+### 2.3 Run EaseProbe
 
 On Linux Platform, you can configure systemd to run EaseProbe as a service.
 
