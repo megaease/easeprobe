@@ -208,7 +208,9 @@ func (d *DefaultProbe) Probe() probe.Result {
 	title := status.Title()
 
 	// process the notification strategy
-	d.ProbeResult.Stat.NotificationStrategyData.ProcessStatus(status == probe.StatusUp)
+	if status != probe.StatusInit {
+		d.ProbeResult.Stat.NotificationStrategyData.ProcessStatus(status == probe.StatusUp)
+	}
 
 	if len(d.ProbeTag) > 0 {
 		d.ProbeResult.Message = fmt.Sprintf("%s (%s/%s): %s", title, d.ProbeKind, d.ProbeTag, msg)
