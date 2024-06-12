@@ -141,12 +141,12 @@ func (p *Ping) ExportMetrics(stats *ping.Statistics) {
 	p.metrics.PacketLoss.With(metric.AddConstLabels(prometheus.Labels{
 		"name":     p.ProbeName,
 		"endpoint": p.ProbeResult.Endpoint,
-	}, p.Labels)).Add(stats.PacketLoss)
+	}, p.Labels)).Set(stats.PacketLoss)
 
-	p.metrics.AvgRtt.With(metric.AddConstLabels(prometheus.Labels{
+	p.metrics.MaxRtt.With(metric.AddConstLabels(prometheus.Labels{
 		"name":     p.ProbeName,
 		"endpoint": p.ProbeResult.Endpoint,
-	}, p.Labels)).Add(float64(stats.MaxRtt.Milliseconds()))
+	}, p.Labels)).Set(float64(stats.MaxRtt.Milliseconds()))
 
 	p.metrics.MinRtt.With(metric.AddConstLabels(prometheus.Labels{
 		"name":     p.ProbeName,
