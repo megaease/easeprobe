@@ -1191,7 +1191,9 @@ settings:
   sla:
     #  minutely, hourly, daily, weekly (Sunday), monthly (Last Day), none
     schedule: "weekly"
-    # UTC time, the format is 'hour:min:sec'
+    # the time to send the SLA report. Ignored on hourly and minutely schedules
+    # - the format is 'hour:min:sec'.
+    # - the timezone can be configured by `settings.timezone`, default is UTC.
     time: "23:59"
 ```
 

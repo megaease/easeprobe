@@ -95,6 +95,7 @@ func scheduleSLA(probers []probe.Prober) {
 	}
 
 	time := conf.Get().Settings.SLAReport.Time
+	tz := global.GetEaseProbe().TimeZone
 	switch conf.Get().Settings.SLAReport.Schedule {
 	case conf.Minutely:
 		cron.Cron("* * * * *").Do(SLAFn)
@@ -104,16 +105,16 @@ func scheduleSLA(probers []probe.Prober) {
 		log.Infof("Scheduling hourly SLA reports...")
 	case conf.Daily:
 		cron.Every(1).Day().At(time).Do(SLAFn)
-		log.Infof("Scheduling daily SLA reports at %s UTC time...", time)
+		log.Infof("Scheduling daily SLA reports at %s %s time...", time, tz)
 	case conf.Weekly:
 		cron.Every(1).Day().Sunday().At(time).Do(SLAFn)
-		log.Infof("Scheduling weekly SLA reports on Sunday at %s UTC time...", time)
+		log.Infof("Scheduling weekly SLA reports on Sunday at %s %s time...", time, tz)
 	case conf.Monthly:
 		cron.Every(1).MonthLastDay().At(time).Do(SLAFn)
-		log.Infof("Scheduling monthly SLA reports for last day of the month at %s UTC time...", time)
+		log.Infof("Scheduling monthly SLA reports for last day of the month at %s %s time...", time, tz)
 	default:
 		cron.Every(1).Day().At("00:00").Do(SLAFn)
-		log.Warnf("Bad Scheduling! Setting daily SLA reports to be sent at 00:00 UTC...")
+		log.Warnf("Bad Scheduling! Setting daily SLA reports to be sent at 00:00 %s...", tz)
 	}
 
 	cron.StartAsync()
