@@ -44,6 +44,7 @@ type Server struct {
 	Command           string   `yaml:"cmd" json:"cmd,omitempty" jsonschema:"title=Shell Command,description=command to run"`
 	Args              []string `yaml:"args,omitempty" json:"args,omitempty" jsonschema:"title=Shell Command Arguments,description=arguments for the command"`
 	Env               []string `yaml:"env,omitempty" json:"env,omitempty" jsonschema:"title=Environment Variables,description=environment variables for the command"`
+	Linger            bool     `yaml:"linger" json:"linger" jsonschema:"format=linger,title=Set SO_LINGER,description=Set SO_LINGER TCP flag, default=true"`
 
 	// Output Text Checker
 	probe.TextChecker `yaml:",inline"`
@@ -215,7 +216,7 @@ func (s *Server) GetSSHClientFromBastion() error {
 		return fmt.Errorf("Server: %s", err)
 	}
 
-	if tcpConn, ok := conn.(*net.TCPConn); ok {
+	if tcpConn, ok := conn.(*net.TCPConn); ok && s.Linger {
 		tcpConn.SetLinger(0)
 	}
 
