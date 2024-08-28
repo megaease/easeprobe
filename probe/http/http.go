@@ -49,6 +49,7 @@ type HTTP struct {
 	Method            string            `yaml:"method,omitempty" json:"method,omitempty" jsonschema:"enum=GET,enum=POST,enum=DELETE,enum=PUT,enum=HEAD,enum=OPTIONS,enum=PATCH,enum=TRACE,enum=CONNECT,title=HTTP Method,description=HTTP method to use for HTTP requests"`
 	Headers           map[string]string `yaml:"headers,omitempty" json:"headers,omitempty" jsonschema:"title=HTTP Headers,description=HTTP headers to use for HTTP requests"`
 	Body              string            `yaml:"body,omitempty" json:"body,omitempty" jsonschema:"title=HTTP Body,description=HTTP body to use for HTTP requests"`
+	NoLinger          bool              `yaml:"nolinger" json:"nolinger" jsonschema:"format=nolinger,title=Disable SO_LINGER,description=Disable SO_LINGER TCP flag, default=false"`
 
 	// Output Text Checker
 	probe.TextChecker `yaml:",inline"`
@@ -118,9 +119,12 @@ func (h *HTTP) Config(gConf global.ProbeSettings) error {
 			tcpConn, ok := conn.(*net.TCPConn)
 			if ok {
 				log.Debugf("[%s / %s] dial %s:%s", h.ProbeKind, h.ProbeName, network, addr)
-				tcpConn.SetLinger(0) // disable the default TCP delayed-close behavior,
-				// which send the RST to the peer when the connection is closed.
-				// this would remove the TIME_wAIT state of the TCP connection.
+				if !h.NoLinger {
+					// disable the default TCP delayed-close behavior,
+					// which send the RST to the peer when the connection is closed.
+					// this would remove the TIME_WAIT state of the TCP connection.
+					tcpConn.SetLinger(0)
+				}
 				return tcpConn, nil
 			}
 			return conn, nil

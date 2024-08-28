@@ -274,13 +274,14 @@ the following example configuration is a basic HTTP probe configuration, which o
 # HTTP Probe Configuration
 
 http:
-  # A Website
+  # A Website without SO_LINGER
   - name: MegaEase Website (Global)
     url: https://megaease.com
+    nolinger: true
     labels:
       team:  ease
       owner: megaease
-  # Some of the Software support the HTTP Query
+  # Some of the Software supports HTTP probing
   - name: ElasticSearch
     url: http://elasticsearch.server:9200
   - name: Eureka
@@ -345,6 +346,7 @@ http:
       expression: "x_time('//feed/updated') > '2022-07-01'" # the expression to evaluate.
     # configuration
     timeout: 10s # default is 30 seconds
+    nolinger: true # Do not set SO_LINGER
 ```
 
 > **Note**:
@@ -517,6 +519,7 @@ tcp:
     host: example.com:22
     timeout: 10s # default is 30 seconds
     interval: 2m # default is 60 seconds
+    nolinger: true # Disable SO_LINGER
     proxy: socks5://proxy.server:1080 # Optional. Only support socks5.
                                       # Also support the `ALL_PROXY` environment.
     labels:
@@ -646,6 +649,7 @@ ssh:
       username: ubuntu
       key: /path/to/private.key
       cmd: "ps -ef | grep kafka"
+      nolinger: true # Disable SO_LINGER
 ```
 > **Note**:
 >
@@ -661,6 +665,7 @@ tls:
     host: expired.badssl.com:443
     proxy: socks5://proxy.server:1080 # Optional. Only support socks5.
                                       # Also support the `ALL_PROXY` environment.
+    nolinger: true             # Disable SO_LINGER
     insecure_skip_verify: true # don't check cert validity
     expire_skip_verify: true   # don't check cert expire date
     alert_expire_before: 168h  # alert if cert expire date is before X, the value is a Duration,

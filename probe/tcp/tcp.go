@@ -32,6 +32,7 @@ type TCP struct {
 	base.DefaultProbe `yaml:",inline"`
 	Host              string `yaml:"host" json:"host" jsonschema:"required,format=hostname,title=Host,description=The host to probe"`
 	Proxy             string `yaml:"proxy" json:"proxy,omitempty" jsonschema:"format=hostname,title=Proxy,description=The proxy to use"`
+	NoLinger          bool   `yaml:"nolinger" json:"nolinger" jsonschema:"format=nolinger,title=Disable SO_LINGER,description=Disable SO_LINGER TCP flag, default=false"`
 }
 
 // Config HTTP Config Object
@@ -56,7 +57,7 @@ func (t *TCP) DoProbe() (bool, string) {
 		status = false
 	} else {
 		message = "TCP Connection Established Successfully!"
-		if tcpCon, ok := conn.(*net.TCPConn); ok {
+		if tcpCon, ok := conn.(*net.TCPConn); ok && !t.NoLinger {
 			tcpCon.SetLinger(0)
 		}
 		defer conn.Close()
