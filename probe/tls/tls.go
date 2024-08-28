@@ -42,7 +42,7 @@ type TLS struct {
 	Host               string `yaml:"host" json:"host" jsonschema:"required,format=hostname,title=Host,description=The host to probe"`
 	Proxy              string `yaml:"proxy" json:"proxy,omitempty" jsonschema:"format=hostname,title=Proxy,description=The proxy to use for the TLS connection"`
 	InsecureSkipVerify bool   `yaml:"insecure_skip_verify" json:"insecure_skip_verify,omitempty" jsonschema:"title=Insecure Skip Verify,description=Whether to skip verifying the certificate chain and host name"`
-	Linger             bool   `yaml:"linger" json:"linger" jsonschema:"format=linger,title=Set SO_LINGER,description=Set SO_LINGER TCP flag, default=true"`
+	NoLinger           bool   `yaml:"nolinger" json:"nolinger" jsonschema:"format=nolinger,title=Disable SO_LINGER,description=Disable SO_LINGER TCP flag, default=false"`
 
 	RootCAPemPath string         `yaml:"root_ca_pem_path" json:"root_ca_pem_path,omitempty" jsonschema:"title=Root CA PEM Path,description=The path to the root CA PEM file"`
 	RootCaPem     string         `yaml:"root_ca_pem" json:"root_ca_pem,omitempty" jsonschema:"title=Root CA PEM,description=The root CA PEM"`
@@ -92,7 +92,7 @@ func (t *TLS) DoProbe() (bool, string) {
 		log.Errorf("[%s / %s] tcp dial error: %v", t.ProbeKind, t.ProbeName, err)
 		return false, fmt.Sprintf("tcp dial error: %v", err)
 	}
-	if tcpConn, ok := conn.(*net.TCPConn); ok && t.Linger {
+	if tcpConn, ok := conn.(*net.TCPConn); ok && !t.NoLinger {
 		tcpConn.SetLinger(0)
 	}
 	defer conn.Close()
