@@ -1,3 +1,5 @@
+version: 2
+
 before:
   hooks:
     # You may remove this if you don't use go modules.
@@ -6,11 +8,9 @@ before:
     - go generate ./...
 
 snapshot:
-  name_template: '{{ .Tag }}'
+  version_template: '{{ .Tag }}'
 checksum:
   name_template: 'checksums.txt'
-changelog:
-  skip: true
 
 builds:
   - id: build
