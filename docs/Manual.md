@@ -340,6 +340,7 @@ http:
     # Response Checking
     contain: "success" # response body must contain this string, if not the probe is considered failed.
     not_contain: "failure" # response body must NOT contain this string, if it does the probe is considered failed.
+    with_output: false # if true, the error message will contain the output, it works for `contain` and `not_contain` field.
     regex: false # if true, the contain and not_contain will be treated as regular expression. default: false
     eval: # eval is a expression evaluation for HTTP response message
       doc: XML # support  XML, JSON, HTML, TEXT.
@@ -579,6 +580,7 @@ shell:
     # check the command output, if does not contain the PONG, mark the status down
     contain : "PONG"
     not_contain: "failure" # response body must NOT contain this string, if it does the probe is considered failed.
+    with_output: false # if true, the error message will contain the output, it works for `contain` and `not_contain` field.
     regex: false # if true, the `contain` and `not_contain` will be treated as regular expression. default: false
 
   # Run Zookeeper command `stat` to check the zookeeper status
@@ -640,6 +642,7 @@ ssh:
       # check the command output, if does not contain the PONG, mark the status down
       contain : "PONG"
       not_contain: "failure" # response body must NOT contain this string, if it does the probe is considered failed.
+      with_output: false # if true, the error message will contain the output, it works for `contain` and `not_contain` field.
       regex: false # if true, the contain and not_contain will be treated as regular expression. default: false
 
     # Check the process status of `Kafka`
@@ -1496,6 +1499,7 @@ http:
     # Response Checking
     contain: "success" # response body must contain this string, if not the probe is considered failed.
     not_contain: "failure" # response body must NOT contain this string, if it does the probe is considered failed.
+    with_output: false # if true, the error message will contain the output, it works for `contain` and `not_contain` field.
     regex: false # if true, the contain and not_contain will be treated as regular expression. default: false
     eval: # eval is a expression evaluation for HTTP response message
       doc: XML # support  XML, JSON, HTML, TEXT.
@@ -1547,6 +1551,7 @@ shell:
     # check the command output, if does not contain the PONG, mark the status down
     contain : "PONG"
     not_contain: "failure" # response body must NOT contain this string, if it does the probe is considered failed.
+    with_output: false # if true, the error message will contain the output, it works for `contain` and `not_contain` field.
     regex: false # if true, the `contain` and `not_contain` will be treated as regular expression. default: false
 
 
@@ -1584,6 +1589,7 @@ ssh:
       # check the command output, if does not contain the PONG, mark the status down
       contain : "PONG"
       not_contain: "failure" # response body must NOT contain this string, if it does the probe is considered failed.
+      with_output: false # if true, the error message will contain the output, it works for `contain` and `not_contain` field.
       regex: false # if true, the contain and not_contain will be treated as regular expression. default: false
 
     # Check the process status of `Kafka`
