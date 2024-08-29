@@ -8,7 +8,7 @@ before:
     - go generate ./...
 
 snapshot:
-  name_template: '{{ .Tag }}'
+  version_template: '{{ .Tag }}'
 checksum:
   name_template: 'checksums.txt'
 
