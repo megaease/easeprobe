@@ -237,6 +237,9 @@ func (h *HTTP) DoProbe() (bool, string) {
 		}
 	}
 	if !valid {
+		if h.WithOutput {
+			return false, fmt.Sprintf("HTTP Status Code is %d. It missed in %v. Response:\n[%s]", resp.StatusCode, h.SuccessCode, string(response))
+		}
 		return false, fmt.Sprintf("HTTP Status Code is %d. It missed in %v", resp.StatusCode, h.SuccessCode)
 	}
 
