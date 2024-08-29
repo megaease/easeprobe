@@ -1621,6 +1621,11 @@
           "title": "regex",
           "description": "use regular expression to check the contain or not contain"
         },
+        "with_output": {
+          "type": "boolean",
+          "title": "with_output",
+          "description": "generate error message with the output"
+        },
         "bastion": {
           "type": "string",
           "title": "Bastion Server",
@@ -1792,6 +1797,11 @@
           "type": "boolean",
           "title": "regex",
           "description": "use regular expression to check the contain or not contain"
+        },
+        "with_output": {
+          "type": "boolean",
+          "title": "with_output",
+          "description": "generate error message with the output"
         },
         "eval": {
           "$ref": "#/$defs/eval_Evaluator",
@@ -2020,6 +2030,11 @@
           "type": "boolean",
           "title": "regex",
           "description": "use regular expression to check the contain or not contain"
+        },
+        "with_output": {
+          "type": "boolean",
+          "title": "with_output",
+          "description": "generate error message with the output"
         }
       },
       "additionalProperties": false,
@@ -2200,6 +2215,11 @@
           "type": "boolean",
           "title": "regex",
           "description": "use regular expression to check the contain or not contain"
+        },
+        "with_output": {
+          "type": "boolean",
+          "title": "with_output",
+          "description": "generate error message with the output"
         },
         "bastion": {
           "type": "string",
