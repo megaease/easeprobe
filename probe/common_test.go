@@ -60,6 +60,14 @@ func TestCheckText(t *testing.T) {
 	tc.NotContain = "bad"
 	err = tc.Check("easeprobe hello world")
 	assert.NotNil(t, err)
+
+	tc = TextChecker{
+		NotContain: "hello",
+		WithOutput: true,
+	}
+	err = tc.Check("easeprobe hello world")
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "easeprobe")
 }
 
 func testRegExpHelper(t *testing.T, regExp string, str string, match bool) {

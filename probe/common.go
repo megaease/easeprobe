@@ -28,6 +28,7 @@ type TextChecker struct {
 	Contain    string `yaml:"contain,omitempty" json:"contain,omitempty" jsonschema:"title=Contain Text,description=the string must be contained"`
 	NotContain string `yaml:"not_contain,omitempty" json:"not_contain,omitempty" jsonschema:"title=Not Contain Text,description=the string must not be contained"`
 	RegExp     bool   `yaml:"regex,omitempty" json:"regex,omitempty" jsonschema:"title=regex,description=use regular expression to check the contain or not contain"`
+	WithOutput bool   `yaml:"with_output,omitempty" json:"with_output,omitempty" jsonschema:"title=with_output,description=generate error message with the output"`
 
 	containReg    *regexp.Regexp `yaml:"-" json:"-"`
 	notContainReg *regexp.Regexp `yaml:"-" json:"-"`
@@ -77,10 +78,16 @@ func (tc *TextChecker) String() string {
 func (tc *TextChecker) CheckText(Output string) error {
 
 	if len(tc.Contain) > 0 && !strings.Contains(Output, tc.Contain) {
+		if tc.WithOutput {
+			return fmt.Errorf("the output does not contain [%s], the output is:\n[%s]", tc.Contain, Output)
+		}
 		return fmt.Errorf("the output does not contain [%s]", tc.Contain)
 	}
 
 	if len(tc.NotContain) > 0 && strings.Contains(Output, tc.NotContain) {
+		if tc.WithOutput {
+			return fmt.Errorf("the output contains [%s], the output is:\n[%s]", tc.NotContain, Output)
+		}
 		return fmt.Errorf("the output contains [%s]", tc.NotContain)
 	}
 	return nil
@@ -92,10 +99,16 @@ func (tc *TextChecker) CheckText(Output string) error {
 func (tc *TextChecker) CheckRegExp(Output string) error {
 
 	if len(tc.Contain) > 0 && tc.containReg != nil && !tc.containReg.MatchString(Output) {
+		if tc.WithOutput {
+			return fmt.Errorf("the output does not match the pattern [%s], the output is:\n[%s]", tc.Contain, Output)
+		}
 		return fmt.Errorf("the output does not match the pattern [%s]", tc.Contain)
 	}
 
 	if len(tc.NotContain) > 0 && tc.notContainReg != nil && tc.notContainReg.MatchString(Output) {
+		if tc.WithOutput {
+			return fmt.Errorf("the output match the pattern [%s], the output is:\n[%s]", tc.NotContain, Output)
+		}
 		return fmt.Errorf("the output match the pattern [%s]", tc.NotContain)
 	}
 	return nil
