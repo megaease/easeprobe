@@ -188,7 +188,7 @@ func ToSlack(r probe.Result) string {
 	}
 	`
 	rtt := r.RoundTripTime.Round(time.Millisecond)
-	body := fmt.Sprintf("*%s*\\n>%s %s - ⏱ %s\n>%s",
+	body := fmt.Sprintf("*%s*\\n>%s %s - ⏱ %s\\n>%s",
 		r.Title(), r.Status.Emoji(), r.Endpoint, rtt, JSONEscape(r.Message))
 	context := SlackTimeFormation(r.StartTime, " probed at ", global.GetTimeFormat())
 	summary := fmt.Sprintf("%s %s - %s", r.Title(), r.Status.Emoji(), JSONEscape(r.Message))
