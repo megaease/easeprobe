@@ -24,8 +24,8 @@ import (
 	"log/syslog"
 	"testing"
 
-	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/monkey"
 	"github.com/stretchr/testify/assert"
 )
 

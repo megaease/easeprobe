@@ -1,11 +1,12 @@
 module github.com/megaease/easeprobe
 
-go 1.21
+go 1.22
+
 toolchain go1.22.5
 
 require (
-	bou.ke/monkey v1.0.2
 	github.com/Knetic/govaluate v3.0.0+incompatible
+	github.com/agiledragon/gomonkey/v2 v2.11.0
 	github.com/antchfx/htmlquery v1.3.2
 	github.com/antchfx/jsonquery v1.3.5
 	github.com/antchfx/xmlquery v1.4.1

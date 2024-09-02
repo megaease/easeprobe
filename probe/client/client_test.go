@@ -21,8 +21,8 @@ import (
 	"reflect"
 	"testing"
 
-	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/monkey"
 	"github.com/megaease/easeprobe/probe/base"
 	"github.com/megaease/easeprobe/probe/client/conf"
 	"github.com/megaease/easeprobe/probe/client/kafka"

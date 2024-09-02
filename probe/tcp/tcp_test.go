@@ -24,8 +24,8 @@ import (
 	"testing"
 	"time"
 
-	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/monkey"
 	"github.com/megaease/easeprobe/probe/base"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/proxy"

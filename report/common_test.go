@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"testing"
 
-	"bou.ke/monkey"
+	"github.com/megaease/easeprobe/monkey"
 	"github.com/stretchr/testify/assert"
 )
 

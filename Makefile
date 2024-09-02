@@ -35,7 +35,7 @@ ${TARGET}: ${SOURCE}
 build: all
 
 test:
-	go test -gcflags=-l -cover -race ${TEST_FLAGS} -v ./...
+	go test -gcflags=all=-l -cover -race ${TEST_FLAGS} -v ./...
 
 docker:
 	sudo DOCKER_BUILDKIT=1 docker build -t megaease/easeprobe -f ${MKFILE_DIR}/resources/Dockerfile ${MKFILE_DIR}
