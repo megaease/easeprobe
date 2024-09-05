@@ -37,8 +37,14 @@ func TestPatch(t *testing.T) {
 	Patch(strings.Clone, func(s string) string { return "replacement" })
 	assert.Equal(t, "replacement", strings.Clone("original"))
 
+	Patch(strings.Clone, func(s string) string { return "replacement2" })
+	assert.Equal(t, "replacement2", strings.Clone("original"))
+
 	Unpatch(strings.Clone)
 	assert.Equal(t, "original", strings.Clone("original"))
+
+	result := Unpatch(strings.Clone)
+	assert.Equal(t, false, result)
 }
 
 func TestPatchInstanceMethod(t *testing.T) {
@@ -47,8 +53,14 @@ func TestPatchInstanceMethod(t *testing.T) {
 	PatchInstanceMethod(reflect.TypeOf(&myStruct{}), "Method", func(*myStruct) string { return "replacement" })
 	assert.Equal(t, "replacement", (&myStruct{}).Method())
 
+	PatchInstanceMethod(reflect.TypeOf(&myStruct{}), "Method", func(*myStruct) string { return "replacement2" })
+	assert.Equal(t, "replacement2", (&myStruct{}).Method())
+
 	UnpatchInstanceMethod(reflect.TypeOf(&myStruct{}), "Method")
 	assert.Equal(t, "original", (&myStruct{}).Method())
+
+	result := UnpatchInstanceMethod(reflect.TypeOf(&myStruct{}), "Method")
+	assert.Equal(t, false, result)
 }
 
 func TestUnpatchAll(t *testing.T) {
