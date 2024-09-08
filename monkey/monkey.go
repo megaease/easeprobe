@@ -22,7 +22,9 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"runtime"
 	"sync"
+	"time"
 
 	"github.com/bytedance/mockey"
 )
@@ -44,6 +46,7 @@ func Patch(target, replacement interface{}) *mockey.Mocker {
 	// Apply the new patch
 	patches := mockey.Mock(target).To(replacement).Build()
 	patchesMap.Store(key, patches)
+	wait()
 	return patches
 }
 
@@ -57,6 +60,7 @@ func Unpatch(target interface{}) bool {
 	}
 	patches.(*mockey.Mocker).UnPatch()
 	patchesMap.Delete(key)
+	wait()
 	return true
 }
 
@@ -87,6 +91,7 @@ func PatchInstanceMethod(target reflect.Type, methodName string, replacement int
 	// Apply the new patch
 	patches := mockey.Mock(methodValue.Interface()).To(replacement).Build()
 	patchesMap.Store(key, patches)
+	wait()
 	return patches
 }
 
@@ -100,6 +105,7 @@ func UnpatchInstanceMethod(target reflect.Type, methodName string) bool {
 	}
 	patches.(*mockey.Mocker).UnPatch()
 	patchesMap.Delete(key)
+	wait()
 	return true
 }
 
@@ -110,4 +116,12 @@ func UnpatchAll() {
 		patchesMap.Delete(key)
 		return true
 	})
+	wait()
+}
+
+// wait ensures that the patches for darwin/arm64 are applied to prevent test failures and runtime errors, such as invalid memory address or nil pointer dereference
+func wait() {
+	if runtime.GOOS == "darwin" {
+		time.Sleep(100 * time.Millisecond)
+	}
 }
