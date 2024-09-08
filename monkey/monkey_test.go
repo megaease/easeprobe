@@ -34,10 +34,10 @@ func (s *myStruct) Method() string {
 func TestPatch(t *testing.T) {
 	assert.Equal(t, "original", strings.Clone("original"))
 
-	Patch(strings.Clone, func(s string) string { return "replacement" })
+	Patch(strings.Clone, func(_ string) string { return "replacement" })
 	assert.Equal(t, "replacement", strings.Clone("original"))
 
-	Patch(strings.Clone, func(s string) string { return "replacement2" })
+	Patch(strings.Clone, func(_ string) string { return "replacement2" })
 	assert.Equal(t, "replacement2", strings.Clone("original"))
 
 	Unpatch(strings.Clone)

@@ -20,12 +20,11 @@ package monkey
 
 import (
 	"fmt"
+	"log"
 	"reflect"
-	"runtime"
 	"sync"
-	"time"
 
-	"github.com/agiledragon/gomonkey/v2"
+	"github.com/bytedance/mockey"
 )
 
 var (
@@ -33,19 +32,18 @@ var (
 )
 
 // Patch replaces a function with another
-func Patch(target, replacement interface{}) *gomonkey.Patches {
+func Patch(target, replacement interface{}) *mockey.Mocker {
 	key := fmt.Sprintf("%v", target)
 
 	// If an existing patch exists, reset and delete it
 	if existingPatches, ok := patchesMap.Load(key); ok {
-		existingPatches.(*gomonkey.Patches).Reset()
+		existingPatches.(*mockey.Mocker).UnPatch()
 		patchesMap.Delete(key)
 	}
 
 	// Apply the new patch
-	patches := gomonkey.ApplyFunc(target, replacement)
+	patches := mockey.Mock(target).To(replacement).Build()
 	patchesMap.Store(key, patches)
-	wait()
 	return patches
 }
 
@@ -57,26 +55,38 @@ func Unpatch(target interface{}) bool {
 	if !ok {
 		return false
 	}
-	patches.(*gomonkey.Patches).Reset()
+	patches.(*mockey.Mocker).UnPatch()
 	patchesMap.Delete(key)
-	wait()
 	return true
 }
 
 // PatchInstanceMethod replaces an instance method methodName for the type target with replacement
-func PatchInstanceMethod(target reflect.Type, methodName string, replacement interface{}) *gomonkey.Patches {
+func PatchInstanceMethod(target reflect.Type, methodName string, replacement interface{}) *mockey.Mocker {
 	key := fmt.Sprintf("%v:%v", target, methodName)
 
 	// If an existing patch exists, reset and delete it
 	if existingPatches, ok := patchesMap.Load(key); ok {
-		existingPatches.(*gomonkey.Patches).Reset()
+		existingPatches.(*mockey.Mocker).UnPatch()
 		patchesMap.Delete(key)
 	}
 
+	// Get the method
+	method, ok := target.MethodByName(methodName)
+	if !ok {
+		log.Fatalf("failed to patch by method %s not found", methodName)
+		return nil
+	}
+
+	// Check if the method is a function
+	methodValue := method.Func
+	if methodValue.Kind() != reflect.Func {
+		log.Fatalf("failed to patch by method %s is not a function", methodName)
+		return nil
+	}
+
 	// Apply the new patch
-	patches := gomonkey.ApplyMethod(target, methodName, replacement)
+	patches := mockey.Mock(methodValue.Interface()).To(replacement).Build()
 	patchesMap.Store(key, patches)
-	wait()
 	return patches
 }
 
@@ -88,28 +98,16 @@ func UnpatchInstanceMethod(target reflect.Type, methodName string) bool {
 	if !ok {
 		return false
 	}
-	patches.(*gomonkey.Patches).Reset()
+	patches.(*mockey.Mocker).UnPatch()
 	patchesMap.Delete(key)
-	wait()
 	return true
 }
 
 // UnpatchAll removes all patches
 func UnpatchAll() {
 	patchesMap.Range(func(key, value interface{}) bool {
-		value.(*gomonkey.Patches).Reset()
+		value.(*mockey.Mocker).UnPatch()
 		patchesMap.Delete(key)
 		return true
 	})
-	wait()
-}
-
-// wait ensures that the patches for darwin/arm64 are applied to prevent test failures and runtime errors, such as invalid memory address or nil pointer dereference
-func wait() {
-	if runtime.GOOS == "darwin" {
-		// use busy wait instead of time.Sleep which will cause SIGBUS error occasionally
-		endTime := time.Now().Add(100 * time.Millisecond)
-		for time.Now().Before(endTime) {
-		}
-	}
 }
