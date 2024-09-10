@@ -135,7 +135,8 @@ func TestNonSelfRotateLog(t *testing.T) {
 }
 
 func TestOpenLogFail(t *testing.T) {
-	file := "/dev"
+	// User a directory to cause failure
+	file := os.TempDir()
 
 	l := NewLog()
 	l.File = file
