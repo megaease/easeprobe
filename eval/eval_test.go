@@ -24,8 +24,8 @@ import (
 	"testing"
 	"time"
 
-	"bou.ke/monkey"
 	"github.com/Knetic/govaluate"
+	"github.com/megaease/easeprobe/monkey"
 	"github.com/stretchr/testify/assert"
 )
 

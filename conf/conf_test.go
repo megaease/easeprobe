@@ -28,8 +28,8 @@ import (
 	"testing"
 	"time"
 
-	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/monkey"
 	"github.com/megaease/easeprobe/notify"
 	"github.com/megaease/easeprobe/notify/discord"
 	"github.com/megaease/easeprobe/notify/email"

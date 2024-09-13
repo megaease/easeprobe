@@ -22,12 +22,11 @@ import (
 	"net"
 	"os"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
-	"bou.ke/monkey"
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/monkey"
 	"github.com/megaease/easeprobe/probe"
 	"github.com/megaease/easeprobe/probe/base"
 	"github.com/stretchr/testify/assert"
@@ -269,14 +268,8 @@ YWwBAg==
 	}
 
 	// SSHConfig failed - no bastion
-	var guard *monkey.PatchGuard
 	var ed *Endpoint
-	guard = monkey.PatchInstanceMethod(reflect.TypeOf(ed), "SSHConfig", func(e *Endpoint, kind, name string, timeout time.Duration) (*ssh.ClientConfig, error) {
-		guard.Unpatch()
-		defer guard.Restore()
-		if strings.Contains(e.Host, "bastion") {
-			return e.SSHConfig(kind, name, timeout)
-		}
+	monkey.PatchInstanceMethod(reflect.TypeOf(ed), "SSHConfig", func(e *Endpoint, kind, name string, timeout time.Duration) (*ssh.ClientConfig, error) {
 		return nil, errors.New("SSHConfig failed")
 	})
 	checkServer(false, "SSHConfig failed")

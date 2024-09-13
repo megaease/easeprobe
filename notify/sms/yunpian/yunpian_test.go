@@ -25,7 +25,7 @@ import (
 	"strings"
 	"testing"
 
-	"bou.ke/monkey"
+	"github.com/megaease/easeprobe/monkey"
 	"github.com/megaease/easeprobe/notify/sms/conf"
 	"github.com/stretchr/testify/assert"
 )

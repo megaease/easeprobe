@@ -24,9 +24,9 @@ import (
 	"reflect"
 	"testing"
 
-	"bou.ke/monkey"
 	"github.com/go-redis/redis/v8"
 	"github.com/megaease/easeprobe/global"
+	"github.com/megaease/easeprobe/monkey"
 	"github.com/megaease/easeprobe/probe/client/conf"
 	"github.com/stretchr/testify/assert"
 )

@@ -21,10 +21,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
 
-	"bou.ke/monkey"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -137,14 +135,11 @@ func TestNonSelfRotateLog(t *testing.T) {
 }
 
 func TestOpenLogFail(t *testing.T) {
-	monkey.Patch(os.OpenFile, func(name string, flag int, perm os.FileMode) (*os.File, error) {
-		return nil, fmt.Errorf("error")
-	})
-
-	file := "failed"
+	// User a directory to cause failure
+	file := os.TempDir()
 
 	l := NewLog()
-	l.File = file + ".log"
+	l.File = file
 	l.SelfRotate = false
 	l.InitLog(nil)
 	assert.Equal(t, true, l.IsStdout)
@@ -157,19 +152,13 @@ func TestOpenLogFail(t *testing.T) {
 	w := l.GetWriter()
 	assert.Equal(t, os.Stdout, w)
 
-	monkey.UnpatchAll()
-
 	// test rotate error - log file
+	file = "failed"
 	l = NewLog()
 	l.File = file + ".log"
 	l.SelfRotate = false
 	l.InitLog(nil)
 	assert.Equal(t, false, l.IsStdout)
-
-	var fp *os.File
-	monkey.PatchInstanceMethod(reflect.TypeOf(fp), "Close", func(_ *os.File) error {
-		return fmt.Errorf("error")
-	})
 
 	l.Rotate()
 	files, _ := filepath.Glob(file + "*")
@@ -185,10 +174,6 @@ func TestOpenLogFail(t *testing.T) {
 	l.InitLog(nil)
 	assert.Equal(t, false, l.IsStdout)
 
-	var lum *lumberjack.Logger
-	monkey.PatchInstanceMethod(reflect.TypeOf(lum), "Rotate", func(_ *lumberjack.Logger) error {
-		return fmt.Errorf("error")
-	})
 	l.Rotate()
 	files, _ = filepath.Glob(file + "*")
 	fmt.Println(files)
@@ -196,5 +181,4 @@ func TestOpenLogFail(t *testing.T) {
 	l.Close()
 	os.Remove(l.File)
 
-	monkey.UnpatchAll()
 }
