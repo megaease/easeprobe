@@ -41,6 +41,6 @@ jobs:
       - name: Go Test
         run: make test TEST_FLAGS="-coverprofile=coverage.txt -covermode=atomic"
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4.5.0
+        uses: codecov/codecov-action@v4.6.0
         with:
           file: ./coverage.txt
