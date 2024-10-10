@@ -569,6 +569,9 @@ shell:
   - name: Redis (Local)
     cmd: "redis-cli"
     args:
+# uncomment for redis <= 5.0.2
+#      - "-a"
+#      - "AuthPassword"
       - "-h"
       - "127.0.0.1"
       - "ping"
@@ -576,6 +579,8 @@ shell:
                     # default: false
     env:
       # set the `REDISCLI_AUTH` environment variable for redis password
+      # NOTE: The `REDISCLI_AUTH` was first introduced in redis v5.0.3 so
+      # older clients may require an alternative way such as `-a AuthPassword`
       - "REDISCLI_AUTH=abc123"
     # check the command output, if does not contain the PONG, mark the status down
     contain : "PONG"
