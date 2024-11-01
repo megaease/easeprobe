@@ -20,7 +20,7 @@ require (
 	github.com/go-zookeeper/zk v1.0.4
 	github.com/gorilla/websocket v1.5.3
 	github.com/prometheus-community/pro-bing v0.4.1
-	github.com/prometheus/client_golang v1.20.4
+	github.com/prometheus/client_golang v1.20.5
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.9.0
