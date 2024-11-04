@@ -6,7 +6,7 @@ toolchain go1.22.5
 
 require (
 	github.com/Knetic/govaluate v3.0.0+incompatible
-	github.com/antchfx/htmlquery v1.3.2
+	github.com/antchfx/htmlquery v1.3.3
 	github.com/antchfx/jsonquery v1.3.6
 	github.com/antchfx/xmlquery v1.4.2
 	github.com/aws/aws-sdk-go v1.55.5
