@@ -12,12 +12,13 @@ github.com/alecthomas/repr v0.4.0 h1:GhI2A8MACjfegCPVq9f1FLvIBS+DrQ2KQBFZP1iFzXc
 github.com/alecthomas/repr v0.4.0/go.mod h1:Fr0507jx4eOXV7AlPV6AVZLYrLIuIeSOWtW57eE/O/4=
 github.com/antchfx/htmlquery v1.3.2 h1:85YdttVkR1rAY+Oiv/nKI4FCimID+NXhDn82kz3mEvs=
 github.com/antchfx/htmlquery v1.3.2/go.mod h1:1mbkcEgEarAokJiWhTfr4hR06w/q2ZZjnYLrDt6CTUk=
-github.com/antchfx/jsonquery v1.3.5 h1:243OSaQh02EfmASa3w3weKC9UaiD8RRzJhgfvq3q408=
-github.com/antchfx/jsonquery v1.3.5/go.mod h1:qH23yX2Jsj1/k378Yu/EOgPCNgJ35P9tiGOeQdt/GWc=
+github.com/antchfx/jsonquery v1.3.6 h1:TaSfeAh7n6T11I74bsZ1FswreIfrbJ0X+OyLflx6mx4=
+github.com/antchfx/jsonquery v1.3.6/go.mod h1:fGzSGJn9Y826Qd3pC8Wx45avuUwpkePsACQJYy+58BU=
 github.com/antchfx/xmlquery v1.4.1 h1:YgpSwbeWvLp557YFTi8E3z6t6/hYjmFEtiEKbDfEbl0=
 github.com/antchfx/xmlquery v1.4.1/go.mod h1:lKezcT8ELGt8kW5L+ckFMTbgdR61/odpPgDv8Gvi1fI=
-github.com/antchfx/xpath v1.3.1 h1:PNbFuUqHwWl0xRjvUPjJ95Agbmdj2uzzIwmQKgu4oCk=
 github.com/antchfx/xpath v1.3.1/go.mod h1:i54GszH55fYfBmoZXapTHN8T8tkcHfRgLyVwwqzXNcs=
+github.com/antchfx/xpath v1.3.2 h1:LNjzlsSjinu3bQpw9hWMY9ocB80oLOWuQqFvO6xt51U=
+github.com/antchfx/xpath v1.3.2/go.mod h1:i54GszH55fYfBmoZXapTHN8T8tkcHfRgLyVwwqzXNcs=
 github.com/aws/aws-sdk-go v1.55.5 h1:KKUZBfBoyqy5d3swXyiC7Q76ic40rYcbqH7qjh59kzU=
 github.com/aws/aws-sdk-go v1.55.5/go.mod h1:eRwEWoyTWFMVYVQzKMNHWP5/RV4xIUGMQfXQHfHkpNU=
 github.com/bahlo/generic-list-go v0.2.0 h1:5sz/EEAK+ls5wF+NeqDpk5+iNdMDXrh3z3nPnH1Wvgk=

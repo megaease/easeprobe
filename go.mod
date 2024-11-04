@@ -7,7 +7,7 @@ toolchain go1.22.5
 require (
 	github.com/Knetic/govaluate v3.0.0+incompatible
 	github.com/antchfx/htmlquery v1.3.2
-	github.com/antchfx/jsonquery v1.3.5
+	github.com/antchfx/jsonquery v1.3.6
 	github.com/antchfx/xmlquery v1.4.1
 	github.com/aws/aws-sdk-go v1.55.5
 	github.com/bradfitz/gomemcache v0.0.0-20220106215444-fb4bf637b56d
@@ -69,7 +69,7 @@ require (
 )
 
 require (
-	github.com/antchfx/xpath v1.3.1 // indirect
+	github.com/antchfx/xpath v1.3.2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
