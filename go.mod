@@ -8,7 +8,7 @@ require (
 	github.com/Knetic/govaluate v3.0.0+incompatible
 	github.com/antchfx/htmlquery v1.3.2
 	github.com/antchfx/jsonquery v1.3.6
-	github.com/antchfx/xmlquery v1.4.1
+	github.com/antchfx/xmlquery v1.4.2
 	github.com/aws/aws-sdk-go v1.55.5
 	github.com/bradfitz/gomemcache v0.0.0-20220106215444-fb4bf637b56d
 	github.com/bytedance/mockey v1.2.13
