@@ -22,7 +22,7 @@ require (
 	github.com/prometheus/client_golang v1.20.5
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/sirupsen/logrus v1.9.3
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/uptrace/bun/driver/pgdriver v1.2.6
 	go.mongodb.org/mongo-driver v1.17.1
 	golang.org/x/crypto v0.29.0
