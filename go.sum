@@ -193,10 +193,10 @@ github.com/stretchr/testify v1.10.0 h1:Xv5erBjTwe/5IxqUQTdXv5kgmIvbHo3QQyRwhJsOf
 github.com/stretchr/testify v1.10.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc h1:9lRDQMhESg+zvGYmW5DyG0UqvY96Bu5QYsTLvCHdrgo=
 github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc/go.mod h1:bciPuU6GHm1iF1pBvUfxfsH0Wmnc2VbpgvbI9ZWuIRs=
-github.com/uptrace/bun v1.2.6 h1:lyGBQAhNiClchb97HA2cBnDeRxwTRLhSIgiFPXVisV8=
-github.com/uptrace/bun v1.2.6/go.mod h1:xMgnVFf+/5xsrFBU34HjDJmzZnXbVuNEt/Ih56I8qBU=
-github.com/uptrace/bun/driver/pgdriver v1.2.6 h1:dD7ckqIhVDayfYTwMKZ0dJM9AZfNJNBu5Cg/8g0EMOk=
-github.com/uptrace/bun/driver/pgdriver v1.2.6/go.mod h1:ChrVrMZlRzPQHTP4QCm/p1FfQqgnYXWlES0GS9qjWEY=
+github.com/uptrace/bun v1.2.7 h1:rFjJDW9RM+P08FJkwO5xB+cnYSaQAqsAu9LIQH1iEQY=
+github.com/uptrace/bun v1.2.7/go.mod h1:tYihS32vC8v3sNzGtakjd2Q5Vye0D9hBR+0MjvmbaQE=
+github.com/uptrace/bun/driver/pgdriver v1.2.7 h1:vJhF+GSQ56xKzfxG9wjxzF09Uzt8fjSRyD0+iJfTUoI=
+github.com/uptrace/bun/driver/pgdriver v1.2.7/go.mod h1:CEdwB+15ol+yc8xjrckftjEdnB5Uy8bkw4jlATdFzJc=
 github.com/vmihailenco/msgpack/v5 v5.4.1 h1:cQriyiUvjTwOHg8QZaPihLWeRAAVoCpE00IUPn0Bjt8=
 github.com/vmihailenco/msgpack/v5 v5.4.1/go.mod h1:GaZTsDaehaPpQVyxrf5mtQlH+pc21PIudVV/E3rRQok=
 github.com/vmihailenco/tagparser/v2 v2.0.0 h1:y09buUbR+b5aycVFQs/g70pqKVZNBmxwAhO7/IwNM9g=
