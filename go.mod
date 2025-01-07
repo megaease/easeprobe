@@ -74,7 +74,7 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/invopop/jsonschema v0.12.0
+	github.com/invopop/jsonschema v0.13.0
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
