@@ -38,11 +38,10 @@ jobs:
         id: go
       - name: Go Get dependencies
         run: go get -v -t -d ./...
+      - name: Allow ping for ubuntu
+        if: runner.os == 'ubuntu-latest'
+        run: sudo sysctl -w net.ipv4.ping_group_range="0   2147483647"
       - name: Go Test
-        if: runner.os != 'Windows'
-        run: sudo make test TEST_FLAGS="-coverprofile=coverage.txt -covermode=atomic"
-      - name: Go Test Windows
-        if: runner.os == 'Windows'
         run: make test TEST_FLAGS="-coverprofile=coverage.txt -covermode=atomic"
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5.1.2
