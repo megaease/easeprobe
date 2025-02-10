@@ -8,7 +8,7 @@ require (
 	github.com/antchfx/htmlquery v1.3.4
 	github.com/antchfx/jsonquery v1.3.6
 	github.com/antchfx/xmlquery v1.4.3
-	github.com/aws/aws-sdk-go v1.55.5
+	github.com/aws/aws-sdk-go v1.55.6
 	github.com/bradfitz/gomemcache v0.0.0-20220106215444-fb4bf637b56d
 	github.com/bytedance/mockey v1.2.14
 	github.com/go-chi/chi v4.1.2+incompatible
