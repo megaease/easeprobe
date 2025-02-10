@@ -18,7 +18,7 @@ require (
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/go-zookeeper/zk v1.0.4
 	github.com/gorilla/websocket v1.5.3
-	github.com/prometheus-community/pro-bing v0.5.0
+	github.com/prometheus-community/pro-bing v0.6.1
 	github.com/prometheus/client_golang v1.20.5
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/sirupsen/logrus v1.9.3
@@ -27,7 +27,7 @@ require (
 	go.mongodb.org/mongo-driver v1.17.1
 	golang.org/x/crypto v0.33.0
 	golang.org/x/exp v0.0.0-20221031165847-c99f073a8326
-	golang.org/x/net v0.33.0
+	golang.org/x/net v0.34.0
 	golang.org/x/sys v0.30.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
