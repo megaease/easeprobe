@@ -53,7 +53,7 @@ func (c *CPU) Name() string {
 
 // Command returns the command to get the cpu usage
 func (c *CPU) Command() string {
-	return `top -b -n 1 | grep Cpu | awk -F ":" '{print $2}'`
+	return `top -b -n 1 | grep [C]pu | awk -F ":" '{print $2}'`
 }
 
 // OutputLines returns the lines of command output
