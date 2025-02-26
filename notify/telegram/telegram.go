@@ -23,6 +23,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/notify/base"
@@ -79,12 +80,18 @@ func (c *NotifyConfig) SendTelegram(title, text string) error {
 	return nil
 }
 
+// escapeMarkdown escapes special characters for Telegram's Markdown
+func escapeMarkdown(text string) string {
+	return strings.ReplaceAll(text, "_", "\\_")
+}
+
 // SendTelegramNotification will send the notification to telegram.
 func (c *NotifyConfig) SendTelegramNotification(text string) error {
+	escapedText := escapeMarkdown(text)
 	api := "https://api.telegram.org/bot" + c.Token +
 		"/sendMessage?&chat_id=" + c.ChatID +
 		"&parse_mode=markdown" +
-		"&text=" + url.QueryEscape(text)
+		"&text=" + url.QueryEscape(escapedText)
 	log.Debugf("[%s] - API %s", c.Kind(), api)
 	req, err := http.NewRequest(http.MethodPost, api, nil)
 	if err != nil {
