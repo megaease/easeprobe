@@ -209,12 +209,14 @@
       "properties": {
         "interval": {
           "type": "string",
+          "format": "duration",
           "title": "Probe Interval",
           "description": "the interval of probe",
           "default": "1m"
         },
         "timeout": {
           "type": "string",
+          "format": "duration",
           "title": "Probe Timeout",
           "description": "the timeout of probe",
           "default": "30s"
@@ -260,6 +262,7 @@
         },
         "time": {
           "type": "string",
+          "format": "time",
           "title": "Time",
           "description": "the time of SLA report need to send out",
           "examples": [
@@ -468,6 +471,7 @@
         },
         "interval": {
           "type": "string",
+          "format": "duration",
           "title": "Retry Interval",
           "description": "the interval between each retry"
         }
@@ -727,6 +731,7 @@
         },
         "secret": {
           "type": "string",
+          "format": "string",
           "title": "Secret",
           "description": "The Dingtalk Robot Secret"
         }
@@ -1255,6 +1260,7 @@
         },
         "webhook": {
           "type": "string",
+          "format": "url",
           "title": "Webhook URL",
           "description": "The Microsoft Teams Robot Webhook URL"
         }
@@ -1347,6 +1353,7 @@
         },
         "webhook": {
           "type": "string",
+          "format": "url",
           "title": "Webhook URL",
           "description": "The Webhook URL of Wecom"
         }
@@ -1375,11 +1382,13 @@
         },
         "timeout": {
           "type": "string",
+          "format": "duration",
           "title": "Probe Timeout",
           "description": "the timeout of probe"
         },
         "interval": {
           "type": "string",
+          "format": "duration",
           "title": "Probe Interval",
           "description": "the interval of probe"
         },
@@ -1524,11 +1533,13 @@
         },
         "timeout": {
           "type": "string",
+          "format": "duration",
           "title": "Probe Timeout",
           "description": "the timeout of probe"
         },
         "interval": {
           "type": "string",
+          "format": "duration",
           "title": "Probe Interval",
           "description": "the interval of probe"
         },
@@ -1703,11 +1714,13 @@
         },
         "timeout": {
           "type": "string",
+          "format": "duration",
           "title": "Probe Timeout",
           "description": "the timeout of probe"
         },
         "interval": {
           "type": "string",
+          "format": "duration",
           "title": "Probe Interval",
           "description": "the interval of probe"
         },
@@ -1741,6 +1754,7 @@
         },
         "proxy": {
           "type": "string",
+          "format": "url",
           "title": "Proxy Server",
           "description": "proxy to use for HTTP requests"
         },
@@ -1876,11 +1890,13 @@
         },
         "timeout": {
           "type": "string",
+          "format": "duration",
           "title": "Probe Timeout",
           "description": "the timeout of probe"
         },
         "interval": {
           "type": "string",
+          "format": "duration",
           "title": "Probe Interval",
           "description": "the interval of probe"
         },
@@ -1960,11 +1976,13 @@
         },
         "timeout": {
           "type": "string",
+          "format": "duration",
           "title": "Probe Timeout",
           "description": "the timeout of probe"
         },
         "interval": {
           "type": "string",
+          "format": "duration",
           "title": "Probe Interval",
           "description": "the interval of probe"
         },
@@ -2119,11 +2137,13 @@
         },
         "timeout": {
           "type": "string",
+          "format": "duration",
           "title": "Probe Timeout",
           "description": "the timeout of probe"
         },
         "interval": {
           "type": "string",
+          "format": "duration",
           "title": "Probe Interval",
           "description": "the interval of probe"
         },
@@ -2253,11 +2273,13 @@
         },
         "timeout": {
           "type": "string",
+          "format": "duration",
           "title": "Probe Timeout",
           "description": "the timeout of probe"
         },
         "interval": {
           "type": "string",
+          "format": "duration",
           "title": "Probe Interval",
           "description": "the interval of probe"
         },
@@ -2327,11 +2349,13 @@
         },
         "timeout": {
           "type": "string",
+          "format": "duration",
           "title": "Probe Timeout",
           "description": "the timeout of probe"
         },
         "interval": {
           "type": "string",
+          "format": "duration",
           "title": "Probe Interval",
           "description": "the interval of probe"
         },
@@ -2426,11 +2450,13 @@
         },
         "timeout": {
           "type": "string",
+          "format": "duration",
           "title": "Probe Timeout",
           "description": "the timeout of probe"
         },
         "interval": {
           "type": "string",
+          "format": "duration",
           "title": "Probe Interval",
           "description": "the interval of probe"
         },
@@ -2464,6 +2490,7 @@
         },
         "proxy": {
           "type": "string",
+          "format": "url",
           "title": "Proxy Server",
           "description": "proxy to use for the HTTP request"
         },
