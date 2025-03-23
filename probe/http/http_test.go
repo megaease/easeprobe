@@ -94,7 +94,7 @@ func TestHTTPConfig(t *testing.T) {
 	err = h.Config(global.ProbeSettings{})
 	assert.Error(t, err)
 
-	//TLS config success
+	// TLS config success
 	var gtls *global.TLS
 	monkey.PatchInstanceMethod(reflect.TypeOf(gtls), "Config", func(_ *global.TLS) (*tls.Config, error) {
 		return &tls.Config{}, nil
@@ -110,6 +110,13 @@ func TestHTTPConfig(t *testing.T) {
 	err = h.Config(global.ProbeSettings{})
 	assert.NoError(t, err)
 	assert.Equal(t, [][]int{{0, 499}}, h.SuccessCode)
+
+	h.LimitRedirects = true
+	h.MaxRedirects = 3
+	err = h.Config(global.ProbeSettings{})
+	assert.NoError(t, err)
+	assert.Equal(t, true, h.LimitRedirects)
+	assert.Equal(t, 3, h.MaxRedirects)
 
 	err = h.Config(global.ProbeSettings{})
 	assert.NoError(t, err)
