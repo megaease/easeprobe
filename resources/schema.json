@@ -1862,6 +1862,16 @@
           "type": "boolean",
           "title": "Insecure",
           "description": "whether to skip the TLS verification"
+        },
+        "limit_redirects": {
+          "type": "boolean",
+          "title": "Limit Redirects",
+          "description": "whether to limit redirects to follow"
+        },
+        "max_redirects": {
+          "type": "integer",
+          "title": "Maximum redirects to follow",
+          "description": "maximum number of redirects to follow"
         }
       },
       "additionalProperties": false,
