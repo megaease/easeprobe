@@ -1792,6 +1792,16 @@
           "title": "HTTP Body",
           "description": "HTTP body to use for HTTP requests"
         },
+        "limit_redirects": {
+          "type": "boolean",
+          "title": "Limit Redirects",
+          "description": "Limit number of redirects to follow"
+        },
+        "max_redirects": {
+          "type": "integer",
+          "title": "Max Redirects",
+          "description": "Max redirects to follow"
+        },
         "nolinger": {
           "type": "boolean",
           "title": "Disable SO_LINGER",
@@ -1862,16 +1872,6 @@
           "type": "boolean",
           "title": "Insecure",
           "description": "whether to skip the TLS verification"
-        },
-        "limit_redirects": {
-          "type": "boolean",
-          "title": "Limit Redirects",
-          "description": "whether to limit redirects to follow"
-        },
-        "max_redirects": {
-          "type": "integer",
-          "title": "Maximum redirects to follow",
-          "description": "maximum number of redirects to follow"
         }
       },
       "additionalProperties": false,
