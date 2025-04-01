@@ -337,6 +337,8 @@ http:
     success_code:
       - [200,206] # the code >=200 and <= 206
       - [300,308] # the code >=300 and <= 308
+    limit_redirects: true # limit the number of redirects to follow. default: false
+    max_redirects: 3 # maximum number of redirects to follow. default: 0
     # Response Checking
     contain: "success" # response body must contain this string, if not the probe is considered failed.
     not_contain: "failure" # response body must NOT contain this string, if it does the probe is considered failed.
