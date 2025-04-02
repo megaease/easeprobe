@@ -1,7 +1,7 @@
 module github.com/megaease/easeprobe
 
 go 1.22
-toolchain go1.23.3
+toolchain go1.24.1
 
 require (
 	github.com/Knetic/govaluate v3.0.0+incompatible
@@ -15,7 +15,7 @@ require (
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/go-co-op/gocron v1.37.0
 	github.com/go-redis/redis/v8 v8.11.5
-	github.com/go-sql-driver/mysql v1.9.0
+	github.com/go-sql-driver/mysql v1.9.1
 	github.com/go-zookeeper/zk v1.0.4
 	github.com/gorilla/websocket v1.5.3
 	github.com/prometheus-community/pro-bing v0.6.1
