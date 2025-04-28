@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2022, MegaEase
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package http is the HTTP notification
 package http
 
 import (
@@ -21,6 +39,7 @@ type NotifyConfig struct {
 	Headers       []Header `yaml:"headers" json:"headers,omitempty" jsonschema:"title=HTTP Headers,description=Custom headers for the HTTP request"`
 }
 
+// Config configures the HTTP notification
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 	c.NotifyKind = "http"
 	c.NotifyFormat = report.Markdown
@@ -30,6 +49,7 @@ func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 	return nil
 }
 
+// SendHTTP sends the HTTP notification
 func (c *NotifyConfig) SendHTTP(title, text string) error {
 	req, err := http.NewRequest(http.MethodPost, c.URL, bytes.NewBuffer([]byte(text)))
 	if err != nil {
