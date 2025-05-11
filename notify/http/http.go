@@ -39,6 +39,12 @@ type NotifyConfig struct {
 	Headers       []Header `yaml:"headers" json:"headers,omitempty" jsonschema:"title=HTTP Headers,description=Custom headers for the HTTP request"`
 }
 
+// Header represents HTTP header for HTTP notification
+type Header struct {
+	Name  string `yaml:"name" json:"name,omitempty" jsonschema:"title=Header Name,description=The name of the header to send"`
+	Value string `yaml:"value" json:"value,omitempty" jsonschema:"title=Header Value,description=The value of the header to send"`
+}
+
 // Config configures the HTTP notification
 func (c *NotifyConfig) Config(gConf global.NotifySettings) error {
 	c.NotifyKind = "http"
