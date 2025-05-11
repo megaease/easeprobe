@@ -1,6 +1,7 @@
 module github.com/megaease/easeprobe
 
-go 1.22
+go 1.23.0
+
 toolchain go1.24.1
 
 require (
@@ -18,7 +19,7 @@ require (
 	github.com/go-sql-driver/mysql v1.9.2
 	github.com/go-zookeeper/zk v1.0.4
 	github.com/gorilla/websocket v1.5.3
-	github.com/prometheus-community/pro-bing v0.6.1
+	github.com/prometheus-community/pro-bing v0.7.0
 	github.com/prometheus/client_golang v1.22.0
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/sirupsen/logrus v1.9.3
@@ -96,7 +97,7 @@ require (
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 // indirect
-	golang.org/x/sync v0.12.0 // indirect
+	golang.org/x/sync v0.13.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	google.golang.org/protobuf v1.36.5 // indirect
 	mellium.im/sasl v0.3.2 // indirect
