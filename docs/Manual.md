@@ -56,6 +56,7 @@ EaseProbe has the following major modules:
   - [2.11 Log](#211-log)
   - [2.12 Shell](#212-shell)
   - [2.13 RingCentral](#213-ringcentral)
+  - [2.14 HTTP](#214-http)
 - [3. Report](#3-report)
   - [3.1 SLA Report Notification](#31-sla-report-notification)
   - [3.2 SLA Live Report](#32-sla-live-report)
@@ -1192,6 +1193,32 @@ notify:
   ringcentral:
     - name: "MegaEase#Alert"
       webhook: "https://hooks.ringcentral.com/webhook/v2/.........."
+```
+
+## 2.14 HTTP
+This notification method sends notifications as HTTP POST requests to a specified endpoint.
+
+The plugin supports the following parameters:
+- `name`: A unique name for this notification endpoint
+- `url`: The HTTP endpoint URL to send notifications to
+- `success_status`: The expected HTTP status code for successful delivery
+- `headers`: Optional headers to include in the request (see example below)
+
+`Note`: The http method is always `POST`, and the body of the request will contain the notification data
+
+Example:
+```YAML
+# Notification Configuration
+notify:
+  http:
+    - name: "Custom HTTP Notify"
+      url: "https://api.example.com/notify"
+      success_status: 201
+      headers:
+        - name: "Content-Type"
+          value: "application/json"
+        - name: "Authorization"
+          value: "Bearer token123"
 ```
 
 # 3. Report
