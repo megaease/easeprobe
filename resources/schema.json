@@ -584,6 +584,14 @@
           "type": "array",
           "title": "RingCentral Notification",
           "description": "RingCentral Notification Configuration"
+        },
+        "http": {
+          "items": {
+            "$ref": "#/$defs/notify_http_NotifyConfig"
+          },
+          "type": "array",
+          "title": "HTTP Notification",
+          "description": "HTTP Notification Configuration"
         }
       },
       "additionalProperties": false,
@@ -890,6 +898,77 @@
         "username",
         "password",
         "to"
+      ]
+    },
+    "notify_http_Header": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Header Name",
+          "description": "The name of the header to send"
+        },
+        "value": {
+          "type": "string",
+          "title": "Header Value",
+          "description": "The value of the header to send"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "notify_http_NotifyConfig": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Notification Name",
+          "description": "The name of the notification"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "title": "Notification Channels",
+          "description": "The channels of the notification"
+        },
+        "dry": {
+          "type": "boolean",
+          "title": "Dry Run",
+          "description": "If true the notification will not send the message"
+        },
+        "timeout": {
+          "type": "integer",
+          "title": "Timeout",
+          "description": "The timeout of the notification"
+        },
+        "retry": {
+          "$ref": "#/$defs/global_Retry",
+          "title": "Retry",
+          "description": "The retry of the notification"
+        },
+        "url": {
+          "type": "string",
+          "title": "HTTP URL",
+          "description": "The HTTP endpoint to send notifications"
+        },
+        "success_status": {
+          "type": "integer",
+          "title": "Success Status",
+          "description": "The success status code of the HTTP request"
+        },
+        "headers": {
+          "items": {
+            "$ref": "#/$defs/notify_http_Header"
+          },
+          "type": "array",
+          "title": "HTTP Headers",
+          "description": "Custom headers for the HTTP request"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name"
       ]
     },
     "notify_lark_NotifyConfig": {
