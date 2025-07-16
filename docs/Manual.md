@@ -125,6 +125,7 @@ settings:
   probe:
     timeout: 30s # the time out for all probes, default is 30 seconds
     interval: 1m # probe every minute for all probes, default is 60 seconds
+    jitter: false # jitter the interval in the range of (interval * 0.5, interval * 1.5) when jitter is true
     failure: 2 # number of consecutive failed probes needed to determine the status down, default: 1
     success: 1 # number of consecutive successful probes needed to determine the status up, default: 1
 ```

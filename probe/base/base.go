@@ -28,12 +28,17 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/exp/rand"
 	"golang.org/x/net/proxy"
 
 	"github.com/megaease/easeprobe/global"
 	"github.com/megaease/easeprobe/metric"
 	"github.com/megaease/easeprobe/probe"
 )
+
+func init() {
+	rand.Seed(uint64(time.Now().UnixMicro()))
+}
 
 // Probe Simple Status
 const (
@@ -52,6 +57,7 @@ type DefaultProbe struct {
 	ProbeChannels                        []string          `yaml:"channels" json:"channels,omitempty" jsonschema:"title=Probe Channels,description=the channels of probe message need to send to"`
 	ProbeTimeout                         time.Duration     `yaml:"timeout,omitempty" json:"timeout,omitempty" jsonschema:"type=string,format=duration,title=Probe Timeout,description=the timeout of probe"`
 	ProbeTimeInterval                    time.Duration     `yaml:"interval,omitempty" json:"interval,omitempty" jsonschema:"type=string,format=duration,title=Probe Interval,description=the interval of probe"`
+	ProbeJitter                          bool              `yaml:"jitter,omitempty" json:"jitter,omitempty" jsonschema:"type=bool,format=bool,title=Probe Jitter,description=to jitter the probe interval within a range of 50% longer or shorter"`
 	Labels                               prometheus.Labels `yaml:"labels,omitempty" json:"labels,omitempty" jsonschema:"title=Probe LabelMap,description=the labels of probe"`
 	global.StatusChangeThresholdSettings `yaml:",inline" json:",inline"`
 	global.NotificationStrategySettings  `yaml:"alert" json:"alert" jsonschema:"title=Probe Alert,description=the alert strategy of probe"`
@@ -94,7 +100,17 @@ func (d *DefaultProbe) Timeout() time.Duration {
 
 // Interval get the probe interval
 func (d *DefaultProbe) Interval() time.Duration {
-	return d.ProbeTimeInterval
+	if !d.ProbeJitter {
+		return d.ProbeTimeInterval
+	}
+
+	jitter := rand.Int63n(int64(d.ProbeTimeInterval / 2))
+	sign := rand.Int31n(2)
+	if sign == 1 {
+		return d.ProbeTimeInterval + time.Duration(jitter)
+	} else {
+		return d.ProbeTimeInterval - time.Duration(jitter)
+	}
 }
 
 // Result get the probe result
@@ -153,6 +169,7 @@ func (d *DefaultProbe) Config(gConf global.ProbeSettings,
 
 	d.ProbeTimeout = gConf.NormalizeTimeOut(d.ProbeTimeout)
 	d.ProbeTimeInterval = gConf.NormalizeInterval(d.ProbeTimeInterval)
+	d.ProbeJitter = gConf.Jitter
 	d.StatusChangeThresholdSettings = gConf.NormalizeThreshold(d.StatusChangeThresholdSettings)
 	d.NotificationStrategySettings = gConf.NormalizeNotificationStrategy(d.NotificationStrategySettings)
 

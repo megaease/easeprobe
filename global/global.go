@@ -62,6 +62,8 @@ const (
 	DefaultTimeZone = "UTC"
 	// DefaultProbeInterval is 1 minutes
 	DefaultProbeInterval = time.Second * 60
+	// DefaultProbeJitter is false, for backward compatibility
+	DefaultProbeJitter = false
 	// DefaultTimeOut is 30 seconds
 	DefaultTimeOut = time.Second * 30
 	// DefaultChannelName  is the default wide channel name
