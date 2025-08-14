@@ -16,7 +16,7 @@ require (
 	github.com/go-chi/chi/v5 v5.2.2
 	github.com/go-co-op/gocron v1.37.0
 	github.com/go-redis/redis/v8 v8.11.5
-	github.com/go-sql-driver/mysql v1.9.2
+	github.com/go-sql-driver/mysql v1.9.3
 	github.com/go-zookeeper/zk v1.0.4
 	github.com/gorilla/websocket v1.5.3
 	github.com/prometheus-community/pro-bing v0.7.0
