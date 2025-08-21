@@ -780,7 +780,7 @@ client:
     password: "pass"
     data: # Optional, check the specific column value in the table
       #  Usage: "database:table:column:primary_key:value" : "expected_value"
-      #         transfer to : "SELECT column FROM database.table WHERE primary_key = value"
+      #         translates into : "SELECT column FROM database.table WHERE primary_key = value"
       #         the `value` for `primary_key` must be int
       "test:product:name:id:1" : "EaseProbe" # select name from test.product where id = 1
       "test:employee:age:id:2" : 45          # select age from test.employee where id = 2
@@ -843,7 +843,7 @@ client:
     password: "pass"
     data: # Optional, check the specific column value in the table
       #  Usage: "database:table:column:primary_key:value" : "expected_value"
-      #         transfer to : "SELECT column FROM table WHERE primary_key = value"
+      #         translates into : "SELECT column FROM table WHERE primary_key = value"
       #         the `value` for `primary_key` must be int
       "test:product:name:id:1" : "EaseProbe" # select name from product where id = 1
       "test:employee:age:id:2" : 45          # select age from employee where id = 2
@@ -1712,7 +1712,7 @@ client:
     password: "pass"
     data: # Optional, check the specific column value in the table
       #  Usage: "database:table:column:primary_key:value" : "expected_value"
-      #         transfer to : "SELECT column FROM database.table WHERE primary_key = value"
+      #         translates into : "SELECT column FROM database.table WHERE primary_key = value"
       #         the `value` for `primary_key` must be int
       "test:product:name:id:1" : "EaseProbe" # select name from test.product where id = 1
       "test:employee:age:id:2" : 45          # select age from test.employee where id = 2
@@ -1755,7 +1755,7 @@ client:
     password: "pass"
     data: # Optional, check the specific column value in the table
       #  Usage: "database:table:column:primary_key:value" : "expected_value"
-      #         transfer to : "SELECT column FROM table WHERE primary_key = value"
+      #         translates into : "SELECT column FROM table WHERE primary_key = value"
       #         the `value` for `primary_key` must be int
       "test:product:name:id:1" : "EaseProbe" # select name from product where id = 1
       "test:employee:age:id:2" : 45          # select age from employee where id = 2
