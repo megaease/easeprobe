@@ -144,7 +144,7 @@ func TestMySQLPasswordEncoding(t *testing.T) {
 		},
 		{
 			name:     "Password with dollar sign",
-			username: "root", 
+			username: "root",
 			password: "AB10$CCC123",
 			expected: "root:AB10%24CCC123@tcp(localhost:3306)/?timeout=0s",
 		},
@@ -187,7 +187,7 @@ func TestMySQLIssue673(t *testing.T) {
 		Username:   "root",
 		Password:   "AB10$CCC123", // Password with dollar sign from the issue
 		Data: map[string]string{
-			"test:product:name:id:1":  "EaseProbe",
+			"test:product:name:id:1": "EaseProbe",
 			"test:employee:age:id:2": "45",
 		},
 	}
@@ -195,11 +195,11 @@ func TestMySQLIssue673(t *testing.T) {
 	my, err := New(conf)
 	assert.Nil(t, err)
 	assert.NotNil(t, my)
-	
+
 	// Verify the connection string has URL-encoded password
 	expectedConnStr := "root:AB10%24CCC123@tcp(localhost:3306)/?timeout=0s"
 	assert.Equal(t, expectedConnStr, my.ConnStr)
-	
+
 	// Verify that the MySQL client was created successfully
 	assert.Equal(t, "MySQL", my.Kind())
 	assert.Equal(t, conf.Username, my.Username)
