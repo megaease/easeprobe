@@ -1483,11 +1483,19 @@ EaseProbe supports multiple configuration files, with the use of the command lin
 easeprobe -f /path/to/conf
 ```
 
-
 The configuration file should be versioned, the version should be aligned with the EaseProbe binary version.
 
 ```yaml
 version: v1.5.0
+```
+
+The configuration file supports substitution of environment variables. Strings containing `${VARNAME}` or `$VARNAME` will be substituted by the environmanet variable with the same name. If you want to include an actual `$` sign into a string you need to escape it with an extra `$`. 
+
+So for example if your probe name is `$Special Website$` you will have to write it like `$$Special Website$$`.
+
+```yaml
+http:
+  - name: "$$Special Website$$"
 ```
 
 You can find the full configuration template [here](../resources/config.yaml)
