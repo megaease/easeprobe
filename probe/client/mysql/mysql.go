@@ -22,6 +22,7 @@ import (
 	"crypto/tls"
 	"database/sql"
 	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -47,11 +48,16 @@ func New(opt conf.Options) (*MySQL, error) {
 
 	var conn string
 	if len(opt.Password) > 0 {
+		// URL encode username and password to handle special characters
+		escapedUsername := url.QueryEscape(opt.Username)
+		escapedPassword := url.QueryEscape(opt.Password)
 		conn = fmt.Sprintf("%s:%s@tcp(%s)/?timeout=%s",
-			opt.Username, opt.Password, opt.Host, opt.Timeout().Round(time.Second))
+			escapedUsername, escapedPassword, opt.Host, opt.Timeout().Round(time.Second))
 	} else {
+		// URL encode username even when password is empty
+		escapedUsername := url.QueryEscape(opt.Username)
 		conn = fmt.Sprintf("%s@tcp(%s)/?timeout=%s",
-			opt.Username, opt.Host, opt.Timeout().Round(time.Second))
+			escapedUsername, opt.Host, opt.Timeout().Round(time.Second))
 	}
 
 	tls, err := opt.TLS.Config()

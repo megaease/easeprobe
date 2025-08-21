@@ -128,6 +128,85 @@ func TestMySQL(t *testing.T) {
 	monkey.UnpatchAll()
 }
 
+func TestMySQLPasswordEncoding(t *testing.T) {
+	// Test case for issue #673: passwords with special characters should be URL encoded
+	testCases := []struct {
+		name     string
+		username string
+		password string
+		expected string
+	}{
+		{
+			name:     "Simple password",
+			username: "root",
+			password: "password123",
+			expected: "root:password123@tcp(localhost:3306)/?timeout=0s",
+		},
+		{
+			name:     "Password with dollar sign",
+			username: "root", 
+			password: "AB10$CCC123",
+			expected: "root:AB10%24CCC123@tcp(localhost:3306)/?timeout=0s",
+		},
+		{
+			name:     "Password with special characters",
+			username: "user@domain",
+			password: "pass@word#123!",
+			expected: "user%40domain:pass%40word%23123%21@tcp(localhost:3306)/?timeout=0s",
+		},
+		{
+			name:     "Empty password",
+			username: "root",
+			password: "",
+			expected: "root@tcp(localhost:3306)/?timeout=0s",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			conf := conf.Options{
+				Host:       "localhost:3306",
+				DriverType: conf.MySQL,
+				Username:   tc.username,
+				Password:   tc.password,
+			}
+
+			my, err := New(conf)
+			assert.Nil(t, err)
+			assert.Equal(t, tc.expected, my.ConnStr)
+		})
+	}
+}
+
+func TestMySQLIssue673(t *testing.T) {
+	// Specific test case for issue #673: MySQL Native Client password parser error
+	// This tests the exact scenario described in the GitHub issue
+	conf := conf.Options{
+		Host:       "localhost:3306",
+		DriverType: conf.MySQL,
+		Username:   "root",
+		Password:   "AB10$CCC123", // Password with dollar sign from the issue
+		Data: map[string]string{
+			"test:product:name:id:1":  "EaseProbe",
+			"test:employee:age:id:2": "45",
+		},
+	}
+
+	my, err := New(conf)
+	assert.Nil(t, err)
+	assert.NotNil(t, my)
+	
+	// Verify the connection string has URL-encoded password
+	expectedConnStr := "root:AB10%24CCC123@tcp(localhost:3306)/?timeout=0s"
+	assert.Equal(t, expectedConnStr, my.ConnStr)
+	
+	// Verify that the MySQL client was created successfully
+	assert.Equal(t, "MySQL", my.Kind())
+	assert.Equal(t, conf.Username, my.Username)
+	assert.Equal(t, conf.Password, my.Password)
+	assert.Equal(t, conf.Host, my.Host)
+}
+
 func TestData(t *testing.T) {
 	monkey.Patch(sql.Open, func(driverName, dataSourceName string) (*sql.DB, error) {
 		return &sql.DB{}, nil
