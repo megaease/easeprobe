@@ -1489,13 +1489,11 @@ The configuration file should be versioned, the version should be aligned with t
 version: v1.5.0
 ```
 
-The configuration file supports substitution of environment variables. Strings containing `${VARNAME}` or `$VARNAME` will be substituted by the environmanet variable with the same name. If you want to include an actual `$` sign into a string you need to escape it with an extra `$`. 
+The configuration file supports substitution of environment variables. Strings containing `${VARNAME}` or `$VARNAME` will be substituted by the environmanet variable with the same name. If you want to include an actual `$` sign into a string you can do so by setting an environment variable and use it in place of your actual value. 
 
-So for example if your probe name is `$Special Website$` you will have to write it like `$$Special Website$$`.
-
-```yaml
-http:
-  - name: "$$Special Website$$"
+So for example if you want to include the password string `abc$123` you can set an environment variable `MY_SECURE_PASSWORD='abc$123'` and then use the variable in place of the password into your yaml
+```
+password: ${MY_SECURE_PASSWORD}
 ```
 
 You can find the full configuration template [here](../resources/config.yaml)
