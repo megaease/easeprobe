@@ -780,7 +780,7 @@ client:
     password: "pass"
     data: # Optional, check the specific column value in the table
       #  Usage: "database:table:column:primary_key:value" : "expected_value"
-      #         transfer to : "SELECT column FROM database.table WHERE primary_key = value"
+      #         translates into : "SELECT column FROM database.table WHERE primary_key = value"
       #         the `value` for `primary_key` must be int
       "test:product:name:id:1" : "EaseProbe" # select name from test.product where id = 1
       "test:employee:age:id:2" : 45          # select age from test.employee where id = 2
@@ -843,7 +843,7 @@ client:
     password: "pass"
     data: # Optional, check the specific column value in the table
       #  Usage: "database:table:column:primary_key:value" : "expected_value"
-      #         transfer to : "SELECT column FROM table WHERE primary_key = value"
+      #         translates into : "SELECT column FROM table WHERE primary_key = value"
       #         the `value` for `primary_key` must be int
       "test:product:name:id:1" : "EaseProbe" # select name from product where id = 1
       "test:employee:age:id:2" : 45          # select age from employee where id = 2
@@ -1483,11 +1483,17 @@ EaseProbe supports multiple configuration files, with the use of the command lin
 easeprobe -f /path/to/conf
 ```
 
-
 The configuration file should be versioned, the version should be aligned with the EaseProbe binary version.
 
 ```yaml
 version: v1.5.0
+```
+
+The configuration file supports substitution of environment variables. Strings containing `${VARNAME}` or `$VARNAME` will be substituted by the environmanet variable with the same name. If you want to include an actual `$` sign into a string you can do so by setting an environment variable and use it in place of your actual value. 
+
+So for example if you want to include the password string `abc$123` you can set an environment variable `MY_SECURE_PASSWORD='abc$123'` and then use the variable in place of the password into your yaml
+```
+password: ${MY_SECURE_PASSWORD}
 ```
 
 You can find the full configuration template [here](../resources/config.yaml)
@@ -1712,7 +1718,7 @@ client:
     password: "pass"
     data: # Optional, check the specific column value in the table
       #  Usage: "database:table:column:primary_key:value" : "expected_value"
-      #         transfer to : "SELECT column FROM database.table WHERE primary_key = value"
+      #         translates into : "SELECT column FROM database.table WHERE primary_key = value"
       #         the `value` for `primary_key` must be int
       "test:product:name:id:1" : "EaseProbe" # select name from test.product where id = 1
       "test:employee:age:id:2" : 45          # select age from test.employee where id = 2
@@ -1755,7 +1761,7 @@ client:
     password: "pass"
     data: # Optional, check the specific column value in the table
       #  Usage: "database:table:column:primary_key:value" : "expected_value"
-      #         transfer to : "SELECT column FROM table WHERE primary_key = value"
+      #         translates into : "SELECT column FROM table WHERE primary_key = value"
       #         the `value` for `primary_key` must be int
       "test:product:name:id:1" : "EaseProbe" # select name from product where id = 1
       "test:employee:age:id:2" : 45          # select age from employee where id = 2
