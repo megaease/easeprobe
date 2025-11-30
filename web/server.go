@@ -101,7 +101,7 @@ func getFilter(req *http.Request) (*report.SLAFilter, error) {
 	filter.PageSize = getNum(req.URL.Query().Get("sz"), global.DefaultPageSize, toInt)
 
 	if err := filter.Check(); err != nil {
-		log.Errorf(err.Error())
+		log.Errorf("%s", err.Error())
 		return nil, err
 	}
 	return filter, nil
