@@ -14,7 +14,7 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - name: Checkout Source Code
-          uses: actions/checkout@v5
+          uses: actions/checkout@v6
           with:
             token: ${{ secrets.MEGAEASE_BOT }}
 
