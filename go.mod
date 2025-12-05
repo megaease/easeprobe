@@ -11,7 +11,7 @@ require (
 	github.com/antchfx/xmlquery v1.5.0
 	github.com/aws/aws-sdk-go v1.55.8
 	github.com/bradfitz/gomemcache v0.0.0-20220106215444-fb4bf637b56d
-	github.com/bytedance/mockey v1.2.14
+	github.com/bytedance/mockey v1.3.2
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/go-chi/chi/v5 v5.2.3
 	github.com/go-co-op/gocron v1.37.0
