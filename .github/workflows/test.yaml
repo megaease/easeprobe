@@ -32,7 +32,7 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v6
       - name: Setup Go Environment
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
         id: go
