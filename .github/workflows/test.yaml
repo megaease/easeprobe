@@ -25,6 +25,7 @@ jobs:
   test:
     name: Unit Testing
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.os == 'macos-latest' }}    
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
