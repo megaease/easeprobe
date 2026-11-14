@@ -1,6 +1,6 @@
 module github.com/megaease/easeprobe
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/Knetic/govaluate v3.0.0+incompatible
@@ -67,8 +67,8 @@ require (
 	github.com/smartystreets/goconvey v1.7.2 // indirect
 	github.com/yuin/gopher-lua v1.1.1 // indirect
 	github.com/zclconf/go-cty v1.17.0 // indirect
-	go.opentelemetry.io/otel v1.41.0 // indirect
-	go.opentelemetry.io/otel/trace v1.41.0 // indirect
+	go.opentelemetry.io/otel v1.47.0 // indirect
+	go.opentelemetry.io/otel/trace v1.47.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
